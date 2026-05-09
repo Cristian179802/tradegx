@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "dashboard": "Panou de Control",
+    "trades": "Tranzacții",
+    "journal": "Jurnal",
+    "analytics": "Analiză",
+    "calculator": "Calculator",
+    "charts": "Grafice",
+    "market": "Piață",
+    "calendar": "Calendar",
+    "community": "Comunitate",
+    "settings": "Setări"
+  },
+  "auth": {
+    "login": "Autentificare",
+    "register": "Înregistrare",
+    "logout": "Deconectare",
+    "email": "Email",
+    "password": "Parolă",
+    "confirmPassword": "Confirmă parola",
+    "firstName": "Prenume",
+    "lastName": "Nume",
+    "forgotPassword": "Ai uitat parola?",
+    "resetPassword": "Resetează parola",
+    "verifyEmail": "Verifică emailul",
+    "signIn": "Conectare",
+    "createAccount": "Creează cont",
+    "trialBadge": "14 zile PRO gratuit — fără card"
+  },
+  "settings": {
+    "title": "Setări",
+    "profile": "Profil",
+    "tradingRules": "Reguli Trading",
+    "appearance": "Aspect",
+    "notifications": "Notificări",
+    "accounts": "Conturi",
+    "apiKeys": "Chei API",
+    "privacy": "Confidențialitate",
+    "language": "Limbă",
+    "currency": "Monedă",
+    "theme": "Temă",
+    "timezone": "Fus orar",
+    "save": "Salvează",
+    "saved": "Salvat"
+  },
+  "trade": {
+    "buy": "Cumpărare",
+    "sell": "Vânzare",
+    "profit": "Profit",
+    "loss": "Pierdere",
+    "pips": "pips",
+    "lots": "loturi",
+    "entry": "Intrare",
+    "exit": "Ieșire",
+    "sl": "Stop Loss",
+    "tp": "Take Profit",
+    "rr": "R:R",
+    "open": "Deschis",
+    "closed": "Închis",
+    "cancelled": "Anulat"
+  },
+  "accountType": {
+    "DEMO": "Demo",
+    "CHALLENGE": "Challenge",
+    "LIVE": "Live"
+  },
+  "errors": {
+    "generic": "A apărut o eroare. Încearcă din nou.",
+    "unauthorized": "Nu ești autorizat.",
+    "notFound": "Nu a fost găsit.",
+    "serverError": "Eroare server."
+  }
+}

@@ -1,0 +1,357 @@
+"use client";
+
+import * as React from "react";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+  Cell,
+} from "recharts";
+import { TrendingUp, TrendingDown, Trophy, AlertTriangle, Target, BarChart3 } from "lucide-react";
+import { cn, formatCurrency } from "@/lib/utils";
+
+interface Summary {
+  totalTrades: number;
+  winRate: number;
+  totalPnl: number;
+  profitFactor: number | null;
+  avgWin: number;
+  avgLoss: number;
+  bestTrade: number;
+  worstTrade: number;
+  avgRR: number;
+  maxDrawdown: number;
+}
+
+interface AnalyticsData {
+  empty: boolean;
+  currency?: string;
+  summary?: Summary;
+  equityCurve?: { date: string | null; balance: number; pnl: number }[];
+  monthlyPnl?: { month: string; pnl: number }[];
+  winRateByDay?: { day: string; winRate: number; total: number }[];
+  winRateByInstrument?: { instrument: string; winRate: number; total: number; pnl: number }[];
+  setupPerformance?: { setup: string; winRate: number; total: number; pnl: number; avgPnl: number }[];
+  pnlDistribution?: { range: string; count: number; positive: boolean }[];
+}
+
+const SETUP_LABELS: Record<string, string> = {
+  ORDER_BLOCK: "OB",
+  FAIR_VALUE_GAP: "FVG",
+  LIQUIDITY_SWEEP: "Sweep",
+  BOS: "BOS",
+  CHOCH: "CHoCH",
+  BREAKER: "Breaker",
+  MITIGATION: "Mitig.",
+  REJECTION: "Reject.",
+  TREND_FOLLOW: "Trend",
+  SCALP: "Scalp",
+  OTHER: "Altul",
+};
+
+function StatCard({
+  label,
+  value,
+  sub,
+  positive,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  positive?: boolean;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs text-zinc-500">{label}</p>
+        <Icon className="h-4 w-4 text-zinc-600" />
+      </div>
+      <p
+        className={cn(
+          "text-xl font-bold num",
+          positive === true
+            ? "text-emerald-400"
+            : positive === false
+            ? "text-rose-400"
+            : "text-zinc-100"
+        )}
+      >
+        {value}
+      </p>
+      {sub && <p className="text-xs text-zinc-600 mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
+const darkTooltipStyle = {
+  contentStyle: {
+    background: "#18181b",
+    border: "1px solid #27272a",
+    borderRadius: "8px",
+    color: "#e4e4e7",
+    fontSize: "12px",
+  },
+  cursor: { stroke: "#3f3f46", strokeWidth: 1 },
+};
+
+export function AnalyticsClient({ data }: { data: AnalyticsData }) {
+  if (data.empty) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <BarChart3 className="h-12 w-12 text-zinc-700 mb-4" />
+        <p className="text-zinc-400 font-medium">Nicio tranzacție închisă încă</p>
+        <p className="text-zinc-600 text-sm mt-1">
+          Adaugă și închide tranzacții pentru a vedea analiza performanței.
+        </p>
+      </div>
+    );
+  }
+
+  const { summary, equityCurve, monthlyPnl, winRateByDay, winRateByInstrument, setupPerformance, pnlDistribution, currency = "USD" } = data;
+  if (!summary) return null;
+
+  const fmt = (v: number) => formatCurrency(v, currency);
+
+  return (
+    <div className="space-y-6">
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <StatCard
+          label="Win Rate"
+          value={`${summary.winRate}%`}
+          sub={`${summary.totalTrades} trades`}
+          positive={summary.winRate >= 50}
+          icon={Target}
+        />
+        <StatCard
+          label="P&L Net"
+          value={fmt(summary.totalPnl)}
+          positive={summary.totalPnl >= 0}
+          icon={summary.totalPnl >= 0 ? TrendingUp : TrendingDown}
+        />
+        <StatCard
+          label="Profit Factor"
+          value={summary.profitFactor !== null ? String(summary.profitFactor) : "—"}
+          positive={summary.profitFactor !== null ? summary.profitFactor >= 1 : undefined}
+          sub={summary.profitFactor !== null ? (summary.profitFactor >= 1.5 ? "excelent" : summary.profitFactor >= 1 ? "bun" : "slab") : undefined}
+          icon={BarChart3}
+        />
+        <StatCard
+          label="Avg Win / Avg Loss"
+          value={`${fmt(summary.avgWin)} / ${fmt(summary.avgLoss)}`}
+          sub={`RR mediu: ${summary.avgRR}x`}
+          icon={Trophy}
+        />
+        <StatCard
+          label="Max Drawdown"
+          value={`${summary.maxDrawdown.toFixed(1)}%`}
+          positive={summary.maxDrawdown < 10}
+          sub={`Cel mai rău trade: ${fmt(summary.worstTrade)}`}
+          icon={AlertTriangle}
+        />
+      </div>
+
+      {/* Equity curve */}
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+        <h2 className="text-sm font-semibold text-zinc-300 mb-4">Curbă de capitaluri</h2>
+        <ResponsiveContainer width="100%" height={220}>
+          <AreaChart data={equityCurve} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+            <XAxis
+              dataKey="date"
+              tick={{ fill: "#71717a", fontSize: 11 }}
+              tickLine={false}
+              axisLine={false}
+              interval="preserveStartEnd"
+            />
+            <YAxis
+              tick={{ fill: "#71717a", fontSize: 11 }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(v) => `${v.toLocaleString()}`}
+              width={70}
+            />
+            <Tooltip
+              {...darkTooltipStyle}
+              formatter={(val: number) => [fmt(val), "Sold"]}
+            />
+            <ReferenceLine y={Number(equityCurve?.[0]?.balance ?? 0)} stroke="#3f3f46" strokeDasharray="4 2" />
+            <Area
+              type="monotone"
+              dataKey="balance"
+              stroke="#6366f1"
+              strokeWidth={2}
+              fill="url(#equityGradient)"
+              dot={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Monthly P&L + Win rate by day */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+          <h2 className="text-sm font-semibold text-zinc-300 mb-4">P&L lunar</h2>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={monthlyPnl} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+              <XAxis dataKey="month" tick={{ fill: "#71717a", fontSize: 11 }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: "#71717a", fontSize: 11 }} tickLine={false} axisLine={false} width={60} tickFormatter={(v) => `${v}`} />
+              <Tooltip
+                {...darkTooltipStyle}
+                formatter={(val: number) => [fmt(val), "P&L"]}
+              />
+              <ReferenceLine y={0} stroke="#3f3f46" />
+              <Bar dataKey="pnl" radius={[4, 4, 0, 0]}>
+                {monthlyPnl?.map((entry, i) => (
+                  <Cell key={i} fill={entry.pnl >= 0 ? "#10b981" : "#f43f5e"} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+          <h2 className="text-sm font-semibold text-zinc-300 mb-4">Rată câștig pe zi</h2>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={winRateByDay} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+              <XAxis dataKey="day" tick={{ fill: "#71717a", fontSize: 11 }} tickLine={false} axisLine={false} />
+              <YAxis domain={[0, 100]} tick={{ fill: "#71717a", fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} width={40} />
+              <Tooltip
+                {...darkTooltipStyle}
+                formatter={(val: number, _: string, props: { payload?: { total?: number } }) => [
+                  `${val}% (${props.payload?.total ?? 0} trades)`,
+                  "Win Rate",
+                ]}
+              />
+              <ReferenceLine y={50} stroke="#3f3f46" strokeDasharray="4 2" />
+              <Bar dataKey="winRate" radius={[4, 4, 0, 0]}>
+                {winRateByDay?.map((entry, i) => (
+                  <Cell key={i} fill={entry.winRate >= 50 ? "#10b981" : "#f43f5e"} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* P&L distribution + Instrument performance */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+          <h2 className="text-sm font-semibold text-zinc-300 mb-4">Distribuție P&L</h2>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={pnlDistribution} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+              <XAxis dataKey="range" tick={{ fill: "#71717a", fontSize: 10 }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: "#71717a", fontSize: 11 }} tickLine={false} axisLine={false} width={30} />
+              <Tooltip
+                {...darkTooltipStyle}
+                formatter={(val: number) => [val, "Trades"]}
+              />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                {pnlDistribution?.map((entry, i) => (
+                  <Cell key={i} fill={entry.positive ? "#10b981" : "#f43f5e"} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+          <h2 className="text-sm font-semibold text-zinc-300 mb-4">Performanță pe instrument</h2>
+          <div className="space-y-2 mt-1">
+            {winRateByInstrument?.map((item) => (
+              <div key={item.instrument} className="flex items-center gap-3">
+                <span className="text-xs text-zinc-400 w-20 shrink-0">{item.instrument}</span>
+                <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className={cn(
+                      "h-full rounded-full",
+                      item.winRate >= 50 ? "bg-emerald-500" : "bg-rose-500"
+                    )}
+                    style={{ width: `${item.winRate}%` }}
+                  />
+                </div>
+                <span className="text-xs text-zinc-400 num w-10 text-right">{item.winRate}%</span>
+                <span
+                  className={cn(
+                    "text-xs num w-20 text-right",
+                    item.pnl >= 0 ? "text-emerald-400" : "text-rose-400"
+                  )}
+                >
+                  {item.pnl >= 0 ? "+" : ""}{formatCurrency(item.pnl, currency)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Setup performance table */}
+      {setupPerformance && setupPerformance.length > 0 && (
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+          <div className="p-5 border-b border-zinc-800">
+            <h2 className="text-sm font-semibold text-zinc-300">Performanță pe setup</h2>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-zinc-800">
+                {["Setup", "Trades", "Win Rate", "P&L Total", "Avg P&L"].map((h) => (
+                  <th key={h} className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {setupPerformance.map((s) => (
+                <tr key={s.setup} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                  <td className="px-4 py-3 text-zinc-200 text-xs font-medium">
+                    {SETUP_LABELS[s.setup] ?? s.setup}
+                  </td>
+                  <td className="px-4 py-3 text-zinc-400 num text-xs">{s.total}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={cn(
+                        "text-xs num font-medium",
+                        s.winRate >= 50 ? "text-emerald-400" : "text-rose-400"
+                      )}
+                    >
+                      {s.winRate}%
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={cn("text-xs num", s.pnl >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                      {s.pnl >= 0 ? "+" : ""}{formatCurrency(s.pnl, currency)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={cn("text-xs num", s.avgPnl >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                      {s.avgPnl >= 0 ? "+" : ""}{formatCurrency(s.avgPnl, currency)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}

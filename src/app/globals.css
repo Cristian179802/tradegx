@@ -1,0 +1,165 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 7%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 238.7 83.5% 66.7%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4.8% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 4.8% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 60.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 238.7 83.5% 66.7%;
+    --radius: 0.5rem;
+
+    /* Trading semantic colors */
+    --bull: 160 84.1% 39.4%;
+    --bear: 347 77% 50%;
+    --warn: 38 92% 50%;
+  }
+
+  /* Light theme */
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 238.7 83.5% 66.7%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 238.7 83.5% 66.7%;
+  }
+
+  /* AMOLED theme (pure black) */
+  .amoled {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 238.7 83.5% 66.7%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 8%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 60.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 10%;
+    --input: 0 0% 10%;
+    --ring: 238.7 83.5% 66.7%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Inter", system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Light mode body overrides */
+  .light body {
+    @apply bg-white;
+  }
+
+  /* AMOLED body override */
+  .amoled body {
+    background: #000000;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-600;
+  }
+}
+
+@layer utilities {
+  /* Number display utility */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+  }
+
+  /* Profit / loss color utilities */
+  .text-profit {
+    @apply text-emerald-500;
+  }
+  .text-loss {
+    @apply text-rose-500;
+  }
+
+  /* Grid background for hero */
+  .hero-grid-bg {
+    background-image: linear-gradient(
+        rgba(255, 255, 255, 0.03) 1px,
+        transparent 1px
+      ),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* Glow utilities */
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
+  }
+  .glow-bull {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+  }
+  .glow-bear {
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.25);
+  }
+
+  /* Shimmer loading */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+}

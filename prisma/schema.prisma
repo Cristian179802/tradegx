@@ -1,0 +1,713 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  USER
+  ADMIN
+  COACH
+}
+
+enum AccountType {
+  DEMO
+  CHALLENGE
+  LIVE
+}
+
+enum TradeDirection {
+  BUY
+  SELL
+}
+
+enum TradeStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum InstrumentType {
+  FOREX
+  CRYPTO
+  METALS
+  INDICES
+  COMMODITIES
+  STOCKS
+  CFD
+}
+
+enum SetupType {
+  ORDER_BLOCK
+  FAIR_VALUE_GAP
+  LIQUIDITY_SWEEP
+  BOS
+  CHOCH
+  BREAKER
+  MITIGATION
+  REJECTION
+  TREND_FOLLOW
+  SCALP
+  OTHER
+}
+
+enum Killzone {
+  ASIAN
+  LONDON
+  NEW_YORK
+  LONDON_CLOSE
+}
+
+enum Timeframe {
+  M1
+  M5
+  M15
+  M30
+  H1
+  H4
+  D1
+  W1
+  MN1
+}
+
+enum SessionType {
+  ASIAN
+  LONDON
+  NEW_YORK
+  OVERLAP
+}
+
+enum BrokerSource {
+  MT4
+  MT5
+  CTRADER
+  TRADINGVIEW
+  MANUAL
+  METAAPI
+}
+
+enum EmotionalState {
+  CALM
+  CONFIDENT
+  ANXIOUS
+  FEARFUL
+  GREEDY
+  REVENGE
+  FOMO
+  NEUTRAL
+}
+
+enum MistakeType {
+  LATE_ENTRY
+  EARLY_EXIT
+  WRONG_SIZE
+  NO_SL
+  MOVED_SL
+  REVENGE_TRADE
+  OVERTRADING
+  IGNORED_RULES
+  FOMO_ENTRY
+  OTHER
+}
+
+enum AlertType {
+  OVERTRADING
+  REVENGE_TRADING
+  FOMO
+  RISK_EXCEEDED
+  DAILY_LOSS_LIMIT
+  WINNING_STREAK_WARNING
+  NEWS_IMPACT
+  KILLZONE_END
+  FRIDAY_TRADING
+  MONDAY_RESTRICTION
+  DAILY_REVIEW
+  WEEKLY_REVIEW
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum EventImpact {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Language {
+  RO
+  EN
+  ES
+  DE
+  FR
+  IT
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+  RON
+  CHF
+  JPY
+}
+
+enum Theme {
+  DARK
+  LIGHT
+  AMOLED
+}
+
+enum ScreenshotType {
+  ENTRY
+  EXIT
+  ANALYSIS
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+}
+
+enum SubStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum BacktestStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+// ============================================================
+// NEXTAUTH MODELS
+// ============================================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  id         String    @id @default(cuid())
+  identifier String
+  token      String    @unique
+  type       TokenType @default(EMAIL_VERIFICATION)
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================================
+// USER
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  password      String?   @db.Text
+  role          Role      @default(USER)
+  image         String?
+
+  // Preferences
+  language Language @default(RO)
+  currency Currency @default(USD)
+  theme    Theme    @default(DARK)
+  timezone String   @default("Europe/Bucharest")
+
+  // Trading rules
+  noTradeDays     Int[]
+  maxTradesPerDay Int     @default(5)
+  defaultRiskPct  Decimal @default(1.00) @db.Decimal(5, 2)
+
+  // Prop firm / daily rules
+  maxDailyLossPct Decimal? @db.Decimal(5, 2)
+  maxDrawdownPct  Decimal? @db.Decimal(5, 2)
+
+  // No-trade hours
+  noTradeHoursStart String?
+  noTradeHoursEnd   String?
+
+  // 2FA
+  totpSecret  String?
+  totpEnabled Boolean @default(false)
+
+  // Notification preferences
+  notificationPrefs Json?
+
+  // Relations
+  accounts        Account[]
+  sessions        Session[]
+  tradingAccounts TradingAccount[]
+  subscription    Subscription?
+  alerts          Alert[]
+  watchlistItems  WatchlistItem[]
+  strategies      Strategy[]
+  posts              CommunityPost[]
+  comments           CommunityComment[]
+  communityReactions CommunityReaction[]
+  teamMemberships    TeamMember[]
+  journalEntries  JournalEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================
+// TRADING ACCOUNTS
+// ============================================================
+
+model TradingAccount {
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  type           AccountType
+  broker         String?
+  accountNumber  String?
+  currency       Currency    @default(USD)
+  balance        Decimal     @default(0) @db.Decimal(15, 2)
+  initialBalance Decimal     @default(0) @db.Decimal(15, 2)
+  leverage       Int         @default(100)
+  isActive       Boolean     @default(true)
+
+  // Prop firm limits
+  maxDailyLossPct Decimal? @db.Decimal(5, 2)
+  maxDrawdownPct  Decimal? @db.Decimal(5, 2)
+  profitTarget    Decimal? @db.Decimal(5, 2)
+
+  // Broker sync
+  metaApiId    String?
+  brokerSource BrokerSource?
+  lastSyncedAt DateTime?
+
+  trades Trade[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ============================================================
+// TRADES
+// ============================================================
+
+model Trade {
+  id        String         @id @default(cuid())
+  accountId String
+  account   TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  symbol         String
+  instrumentType InstrumentType
+  direction      TradeDirection
+
+  entryPrice Decimal  @db.Decimal(15, 5)
+  entryTime  DateTime
+  exitPrice  Decimal? @db.Decimal(15, 5)
+  exitTime   DateTime?
+
+  lotSize Decimal @db.Decimal(10, 2)
+
+  stopLoss   Decimal? @db.Decimal(15, 5)
+  takeProfit Decimal? @db.Decimal(15, 5)
+
+  pnlMoney   Decimal? @db.Decimal(15, 2)
+  pnlPips    Decimal? @db.Decimal(10, 1)
+  pnlPercent Decimal? @db.Decimal(8, 4)
+  commission Decimal  @default(0) @db.Decimal(10, 2)
+  swap       Decimal  @default(0) @db.Decimal(10, 2)
+
+  riskMoney       Decimal? @db.Decimal(10, 2)
+  riskPercent     Decimal? @db.Decimal(5, 2)
+  riskRewardRatio Decimal? @db.Decimal(6, 2)
+
+  setupType   SetupType?
+  killzone    Killzone?
+  timeframe   Timeframe?
+  sessionType SessionType?
+
+  status        TradeStatus  @default(OPEN)
+  brokerSource  BrokerSource?
+  brokerTradeId String?
+
+  tags            String[]
+  durationMinutes Int?
+
+  screenshots  TradeScreenshot[]
+  journalEntry JournalEntry?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([accountId])
+  @@index([entryTime])
+  @@index([symbol])
+  @@index([status])
+}
+
+// ============================================================
+// JOURNAL ENTRIES
+// ============================================================
+
+model JournalEntry {
+  id      String @id @default(cuid())
+  tradeId String @unique
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  preEmotionalState  EmotionalState?
+  preNotes           String?         @db.Text
+  preConfidence      Int?
+  postEmotionalState EmotionalState?
+  postNotes          String?         @db.Text
+  postMistakeTypes   MistakeType[]
+  postLessons        String?         @db.Text
+
+  aiAnalysis String?  @db.Text
+  aiScore    Decimal? @db.Decimal(3, 1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================
+// TRADE SCREENSHOTS
+// ============================================================
+
+model TradeScreenshot {
+  id        String         @id @default(cuid())
+  tradeId   String
+  trade     Trade          @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String?
+  timeframe Timeframe?
+  type      ScreenshotType @default(ENTRY)
+
+  createdAt DateTime @default(now())
+
+  @@index([tradeId])
+}
+
+// ============================================================
+// ALERTS
+// ============================================================
+
+model Alert {
+  id       String        @id @default(cuid())
+  userId   String
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type     AlertType
+  severity AlertSeverity @default(MEDIUM)
+  title    String
+  message  String        @db.Text
+  isRead   Boolean       @default(false)
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+// ============================================================
+// WATCHLIST
+// ============================================================
+
+model WatchlistItem {
+  id             String         @id @default(cuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol         String
+  instrumentType InstrumentType
+  groupName      String         @default("Default")
+  sortOrder      Int            @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, symbol])
+  @@index([userId])
+}
+
+// ============================================================
+// ECONOMIC CALENDAR
+// ============================================================
+
+model EconomicEvent {
+  id          String      @id @default(cuid())
+  title       String
+  country     String
+  currency    String
+  impact      EventImpact
+  eventTime   DateTime
+  forecast    String?
+  previous    String?
+  actual      String?
+  description String?     @db.Text
+  sourceId    String?     @unique
+
+  createdAt DateTime @default(now())
+
+  @@index([eventTime])
+  @@index([currency])
+}
+
+// ============================================================
+// COMMUNITY
+// ============================================================
+
+model CommunityPost {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId    String?
+  team      Team?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  title     String?
+  content   String  @db.Text
+  symbol    String?
+  imageUrls String[]
+  tags      String[]
+  upvotes   Int     @default(0)
+  isPinned  Boolean @default(false)
+
+  comments  CommunityComment[]
+  reactions CommunityReaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([createdAt])
+}
+
+model CommunityComment {
+  id      String        @id @default(cuid())
+  postId  String
+  post    CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content String        @db.Text
+  upvotes Int           @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+}
+
+model CommunityReaction {
+  id     String        @id @default(cuid())
+  postId String
+  post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji  String
+
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId, emoji])
+  @@index([postId])
+  @@index([userId])
+}
+
+// ============================================================
+// TEAMS
+// ============================================================
+
+model Team {
+  id          String  @id @default(cuid())
+  name        String
+  description String? @db.Text
+  isPublic    Boolean @default(false)
+  avatarUrl   String?
+  inviteCode  String? @unique
+
+  members TeamMember[]
+  posts   CommunityPost[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TeamMember {
+  id     String   @id @default(cuid())
+  teamId String
+  team   Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   TeamRole @default(MEMBER)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+// ============================================================
+// STRATEGY & BACKTESTING
+// ============================================================
+
+enum StrategyType {
+  EMA_CROSSOVER
+  SESSION_BREAKOUT
+  RSI_REVERSAL
+  TREND_FOLLOWING
+  CUSTOM
+}
+
+model Strategy {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?      @db.Text
+  type        StrategyType @default(EMA_CROSSOVER)
+  color       String?
+  rules       Json
+  isActive    Boolean      @default(true)
+
+  backtests Backtest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Backtest {
+  id         String         @id @default(cuid())
+  strategyId String
+  strategy   Strategy       @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  symbol     String
+  timeframe  Timeframe
+  startDate  DateTime
+  endDate    DateTime
+  status     BacktestStatus @default(PENDING)
+
+  // Results
+  totalTrades     Int?
+  winRate         Decimal? @db.Decimal(5, 2)
+  profitFactor    Decimal? @db.Decimal(8, 2)
+  maxDrawdown     Decimal? @db.Decimal(8, 4)
+  maxDrawdownPct  Decimal? @db.Decimal(8, 4)
+  sharpeRatio     Decimal? @db.Decimal(6, 2)
+  sortinoRatio    Decimal? @db.Decimal(6, 2)
+  netPnl          Decimal? @db.Decimal(15, 2)
+  expectancy      Decimal? @db.Decimal(8, 2)
+  avgRR           Decimal? @db.Decimal(6, 2)
+  totalBars       Int?
+  initialBalance  Decimal? @db.Decimal(15, 2)
+  finalBalance    Decimal? @db.Decimal(15, 2)
+  riskPerTrade    Decimal? @db.Decimal(5, 2)
+  commission      Decimal  @default(0) @db.Decimal(8, 4)
+  spread          Decimal  @default(0.00020) @db.Decimal(10, 5)
+  equityCurve     Json?
+  monthlyPnl      Json?
+  errorMessage    String?  @db.Text
+
+  trades BacktestTrade[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([strategyId])
+}
+
+model BacktestTrade {
+  id         String         @id @default(cuid())
+  backtestId String
+  backtest   Backtest       @relation(fields: [backtestId], references: [id], onDelete: Cascade)
+  symbol     String
+  direction  TradeDirection
+  entryPrice      Decimal   @db.Decimal(15, 5)
+  exitPrice       Decimal   @db.Decimal(15, 5)
+  entryTime       DateTime
+  exitTime        DateTime
+  lotSize         Decimal   @db.Decimal(10, 2)
+  stopLoss        Decimal?  @db.Decimal(15, 5)
+  takeProfit      Decimal?  @db.Decimal(15, 5)
+  pnl             Decimal   @db.Decimal(15, 2)
+  commission      Decimal   @default(0) @db.Decimal(8, 4)
+  riskRewardRatio Decimal?  @db.Decimal(6, 2)
+  exitReason      String?   // "TP" | "SL" | "EOD" | "SIGNAL"
+
+  createdAt DateTime @default(now())
+
+  @@index([backtestId])
+}
+
+// ============================================================
+// SUBSCRIPTION
+// ============================================================
+
+model Subscription {
+  id                 String           @id @default(cuid())
+  userId             String           @unique
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId   String?          @unique
+  stripeSubId        String?          @unique
+  plan               SubscriptionPlan @default(FREE)
+  status             SubStatus        @default(TRIALING)
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  trialEnd           DateTime?
+  cancelAtPeriodEnd  Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

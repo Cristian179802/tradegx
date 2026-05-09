@@ -1,0 +1,112 @@
+"use client";
+
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { profileSchema, type ProfileInput } from "@/lib/validations";
+
+export function ProfileTab({ initialName }: { initialName: string }) {
+  const { data: session, update } = useSession();
+  const { toast } = useToast();
+
+  const form = useForm<ProfileInput>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: initialName || session?.user?.name || "",
+      language: "RO",
+      currency: "USD",
+      theme: "DARK",
+      timezone: "Europe/Bucharest",
+    },
+  });
+
+  const isLoading = form.formState.isSubmitting;
+
+  async function onSubmit(data: ProfileInput) {
+    const res = await fetch("/api/user/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      toast({ title: "Eroare", description: "Nu s-a putut salva profilul.", variant: "destructive" });
+      return;
+    }
+
+    await update({ name: data.name });
+    toast({ title: "Salvat", description: "Profilul a fost actualizat." });
+  }
+
+  return (
+    <Card className="bg-zinc-900/50 border-zinc-800">
+      <CardHeader>
+        <CardTitle className="text-zinc-100 text-base">Informații personale</CardTitle>
+        <CardDescription className="text-zinc-500">
+          Actualizează numele și preferințele de afișare.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-zinc-300">Nume complet</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      className="bg-zinc-900 border-zinc-700 text-white focus:border-indigo-500"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-rose-400" />
+                </FormItem>
+              )}
+            />
+
+            <div className="space-y-1.5">
+              <label className="text-sm text-zinc-300">Email</label>
+              <Input
+                value={session?.user?.email ?? ""}
+                disabled
+                className="bg-zinc-950 border-zinc-800 text-zinc-500 cursor-not-allowed"
+              />
+              <p className="text-xs text-zinc-600">Emailul nu poate fi modificat.</p>
+            </div>
+
+            <div className="pt-2">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Salvează
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}

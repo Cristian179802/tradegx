@@ -1,0 +1,247 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+import { Check, Loader2, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+
+const LANGUAGES = [
+  { value: "RO", label: "Română" },
+  { value: "EN", label: "English" },
+  { value: "ES", label: "Español" },
+  { value: "DE", label: "Deutsch" },
+  { value: "FR", label: "Français" },
+  { value: "IT", label: "Italiano" },
+];
+
+const CURRENCIES = [
+  { value: "USD", label: "USD — Dolar american" },
+  { value: "EUR", label: "EUR — Euro" },
+  { value: "GBP", label: "GBP — Lira sterlină" },
+  { value: "RON", label: "RON — Leu românesc" },
+  { value: "CHF", label: "CHF — Franc elvețian" },
+  { value: "JPY", label: "JPY — Yen japonez" },
+];
+
+const THEMES = [
+  {
+    value: "DARK",
+    label: "Întunecat",
+    desc: "Tema implicită",
+    preview: "bg-zinc-950 border-zinc-800",
+    dot: "bg-zinc-700",
+  },
+  {
+    value: "LIGHT",
+    label: "Luminos",
+    desc: "Fundal deschis",
+    preview: "bg-zinc-100 border-zinc-300",
+    dot: "bg-zinc-300",
+  },
+  {
+    value: "AMOLED",
+    label: "AMOLED Negru",
+    desc: "Negru pur, OLED",
+    preview: "bg-black border-zinc-900",
+    dot: "bg-zinc-900",
+  },
+];
+
+const TIMEZONES = [
+  "Europe/Bucharest",
+  "Europe/London",
+  "Europe/Berlin",
+  "Europe/Paris",
+  "America/New_York",
+  "America/Chicago",
+  "America/Los_Angeles",
+  "Asia/Tokyo",
+  "Asia/Dubai",
+  "Australia/Sydney",
+];
+
+interface AppearanceTabProps {
+  initialLanguage?: string;
+  initialCurrency?: string;
+  initialTheme?: string;
+  initialTimezone?: string;
+}
+
+const THEME_MAP: Record<string, string> = { DARK: "dark", LIGHT: "light", AMOLED: "amoled" };
+const THEME_MAP_REVERSE: Record<string, string> = { dark: "DARK", light: "LIGHT", amoled: "AMOLED" };
+
+export function AppearanceTab({
+  initialLanguage = "RO",
+  initialCurrency = "USD",
+  initialTheme = "DARK",
+  initialTimezone = "Europe/Bucharest",
+}: AppearanceTabProps) {
+  const { toast } = useToast();
+  const { theme: activeTheme, setTheme: applyTheme } = useTheme();
+  const [language, setLanguage] = useState(initialLanguage);
+  const [currency, setCurrency] = useState(initialCurrency);
+  const [theme, setTheme] = useState(initialTheme);
+  const [timezone, setTimezone] = useState(initialTimezone);
+
+  // Sync next-themes with the DB-loaded initial theme on mount
+  useEffect(() => {
+    applyTheme(THEME_MAP[initialTheme] ?? "dark");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function handleThemeChange(newTheme: string) {
+    setTheme(newTheme);
+    applyTheme(THEME_MAP[newTheme] ?? "dark");
+  }
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleSave() {
+    setIsLoading(true);
+    try {
+      // Ensure we're using the currently active next-themes value mapped back to DB enum
+      const dbTheme = THEME_MAP_REVERSE[activeTheme ?? "dark"] ?? theme;
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language, currency, theme: dbTheme, timezone }),
+      });
+
+      if (!res.ok) throw new Error();
+      toast({ title: "Salvat", description: "Preferințele au fost actualizate." });
+    } catch {
+      toast({ title: "Eroare", description: "Nu s-a putut salva.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Language & Currency */}
+      <Card className="bg-zinc-900/50 border-zinc-800">
+        <CardHeader>
+          <CardTitle className="text-zinc-100 text-base">Limbă și monedă</CardTitle>
+          <CardDescription className="text-zinc-500">
+            Setează limba interfeței și moneda de afișare.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm text-zinc-300">Limbă</label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-700">
+                  {LANGUAGES.map((l) => (
+                    <SelectItem key={l.value} value={l.value} className="text-zinc-300 focus:text-white focus:bg-zinc-800">
+                      {l.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm text-zinc-300">Monedă afișare</label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-700">
+                  {CURRENCIES.map((c) => (
+                    <SelectItem key={c.value} value={c.value} className="text-zinc-300 focus:text-white focus:bg-zinc-800">
+                      {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className="text-sm text-zinc-300">Fus orar</label>
+              <Select value={timezone} onValueChange={setTimezone}>
+                <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-700">
+                  {TIMEZONES.map((tz) => (
+                    <SelectItem key={tz} value={tz} className="text-zinc-300 focus:text-white focus:bg-zinc-800">
+                      {tz}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Theme */}
+      <Card className="bg-zinc-900/50 border-zinc-800">
+        <CardHeader>
+          <CardTitle className="text-zinc-100 text-base">Temă</CardTitle>
+          <CardDescription className="text-zinc-500">
+            Alege aspectul vizual al aplicației.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {THEMES.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => handleThemeChange(t.value)}
+                className={cn(
+                  "relative rounded-xl border-2 p-4 text-left transition-all",
+                  theme === t.value
+                    ? "border-indigo-500 bg-indigo-500/5"
+                    : "border-zinc-800 hover:border-zinc-700"
+                )}
+              >
+                {theme === t.value && (
+                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center">
+                    <Check className="w-3 h-3 text-white" />
+                  </div>
+                )}
+                <div className={`w-full h-10 rounded-lg border mb-3 ${t.preview}`}>
+                  <div className="flex gap-1 p-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className={`h-2 rounded ${t.dot} opacity-60`} style={{ width: `${[30, 50, 20][i - 1]}%` }} />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm font-medium text-zinc-200">{t.label}</p>
+                <p className="text-xs text-zinc-500">{t.desc}</p>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Button
+        onClick={handleSave}
+        disabled={isLoading}
+        className="bg-indigo-600 hover:bg-indigo-500 text-white"
+      >
+        {isLoading ? (
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+        ) : (
+          <Save className="w-4 h-4 mr-2" />
+        )}
+        Salvează preferințele
+      </Button>
+    </div>
+  );
+}

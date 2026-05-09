@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "trades": "Trades",
+    "journal": "Journal",
+    "analytics": "Analytics",
+    "calculator": "Calculator",
+    "charts": "Charts",
+    "market": "Market",
+    "calendar": "Calendar",
+    "community": "Community",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset Password",
+    "verifyEmail": "Verify Email",
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "trialBadge": "14-day PRO trial — no credit card"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "tradingRules": "Trading Rules",
+    "appearance": "Appearance",
+    "notifications": "Notifications",
+    "accounts": "Accounts",
+    "apiKeys": "API Keys",
+    "privacy": "Privacy",
+    "language": "Language",
+    "currency": "Currency",
+    "theme": "Theme",
+    "timezone": "Timezone",
+    "save": "Save Changes",
+    "saved": "Saved"
+  },
+  "trade": {
+    "buy": "Buy",
+    "sell": "Sell",
+    "profit": "Profit",
+    "loss": "Loss",
+    "pips": "pips",
+    "lots": "lots",
+    "entry": "Entry",
+    "exit": "Exit",
+    "sl": "Stop Loss",
+    "tp": "Take Profit",
+    "rr": "R:R",
+    "open": "Open",
+    "closed": "Closed",
+    "cancelled": "Cancelled"
+  },
+  "accountType": {
+    "DEMO": "Demo",
+    "CHALLENGE": "Challenge",
+    "LIVE": "Live"
+  },
+  "errors": {
+    "generic": "An error occurred. Please try again.",
+    "unauthorized": "Unauthorized.",
+    "notFound": "Not found.",
+    "serverError": "Server error."
+  }
+}
