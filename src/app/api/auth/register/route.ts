@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { registerSchema } from "@/lib/validations";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/email";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+// Server-side schema — no confirmPassword (that's client-only)
+const serverRegisterSchema = z.object({
+  name: z.string().min(2, "Numele trebuie să aibă cel puțin 2 caractere").max(50),
+  email: z.string().email("Email invalid"),
+  password: z
+    .string()
+    .min(8, "Parola trebuie să aibă cel puțin 8 caractere")
+    .regex(/[A-Z]/, "Parola trebuie să conțină cel puțin o literă mare")
+    .regex(/[0-9]/, "Parola trebuie să conțină cel puțin o cifră"),
+});
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
@@ -18,7 +29,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const parsed = registerSchema.safeParse(body);
+    const parsed = serverRegisterSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
