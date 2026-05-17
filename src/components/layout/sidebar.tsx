@@ -12,6 +12,7 @@ import {
   BarChart3,
   LineChart,
   Globe,
+  CalendarDays,
   Users,
   Settings,
   TrendingUp,
@@ -78,6 +79,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/charts", label: "Grafice Live", icon: LineChart },
       { href: "/market", label: "Selector Piață", icon: Globe },
+      { href: "/calendar", label: "Calendar Economic", icon: CalendarDays },
     ],
   },
   {
