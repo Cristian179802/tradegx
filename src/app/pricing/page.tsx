@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   XCircle,
   TrendingUp,
   ArrowRight,
   HelpCircle,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +64,35 @@ const FAQ = [
 
 export default function PricingPage() {
   const [annual, setAnnual] = useState(false);
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  async function handleGetPro() {
+    if (!session) {
+      router.push("/register");
+      return;
+    }
+    setLoadingCheckout(true);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ period: annual ? "annual" : "monthly" }),
+      });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+      } else {
+        // Stripe not configured yet — redirect to register/dashboard
+        router.push(session ? "/settings?tab=billing" : "/register");
+      }
+    } catch {
+      router.push("/register");
+    } finally {
+      setLoadingCheckout(false);
+    }
+  }
 
   const monthlyPrice = 19;
   const annualMonthly = 12;
@@ -209,12 +241,16 @@ export default function PricingPage() {
                 </p>
               )}
             </div>
-            <Link href="/register">
-              <Button className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/25 mb-6">
-                Probă gratuită 14 zile
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
+            <Button
+              onClick={handleGetPro}
+              disabled={loadingCheckout}
+              className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/25 mb-6"
+            >
+              {loadingCheckout
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <>{session ? "Fă upgrade la PRO" : "Probă gratuită 14 zile"}<ArrowRight className="ml-2 w-4 h-4" /></>
+              }
+            </Button>
             <ul className="space-y-3 text-sm text-zinc-300">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />

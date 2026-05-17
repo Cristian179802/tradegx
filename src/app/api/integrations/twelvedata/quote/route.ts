@@ -16,26 +16,32 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Specifică cel puțin un simbol" }, { status: 400 });
   }
 
-  // Get user's TwelveData API key
-  const integration = await prisma.userIntegration.findUnique({
+  // 1. Try user's own TwelveData key first (higher rate limits)
+  // 2. Fall back to platform key (server-side env var)
+  let apiKey: string | null = null;
+
+  const userIntegration = await prisma.userIntegration.findUnique({
     where: { userId_service: { userId: session.user.id, service: "twelvedata" } },
   });
 
-  if (!integration?.isActive || !integration.apiKey) {
-    return NextResponse.json({ error: "TwelveData nu este conectat", code: "NOT_CONNECTED" }, { status: 400 });
+  if (userIntegration?.isActive && userIntegration.apiKey) {
+    apiKey = userIntegration.apiKey;
+  } else if (process.env.TWELVEDATA_API_KEY) {
+    apiKey = process.env.TWELVEDATA_API_KEY;
+  }
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "Date de piață indisponibile.", code: "NO_KEY" },
+      { status: 503 }
+    );
   }
 
   const tdSymbols = symbols.map(toTDSymbol);
 
-  const quotes = tdSymbols.length === 1
-    ? (() => {
-        // Return single quote as record
-        return getQuote(integration.apiKey!, tdSymbols[0]).then((q) =>
-          q ? { [symbols[0]]: q } : {}
-        );
-      })()
-    : getBatchQuotes(integration.apiKey, tdSymbols);
+  const result = tdSymbols.length === 1
+    ? await getQuote(apiKey, tdSymbols[0]).then((q) => (q ? { [symbols[0]]: q } : {}))
+    : await getBatchQuotes(apiKey, tdSymbols);
 
-  const result = await quotes;
   return NextResponse.json({ quotes: result });
 }
