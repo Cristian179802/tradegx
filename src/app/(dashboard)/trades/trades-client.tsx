@@ -71,21 +71,23 @@ export function TradesClient({ accounts }: TradesClientProps) {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Trade-uri</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {total > 0 ? `${total} trade-uri` : "Niciun trade"}
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Trade-uri</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">
+            {total > 0 ? (
+              <span><span className="text-zinc-300 font-semibold">{total}</span> tranzacții înregistrate</span>
+            ) : "Nicio tranzacție înregistrată"}
           </p>
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={() => setImportOpen(true)}
-            className="border-zinc-700 text-zinc-300 hover:text-zinc-100"
+            className="border-zinc-700/80 text-zinc-400 hover:text-zinc-100 hover:border-zinc-600 bg-zinc-800/50"
           >
             <Upload className="h-4 w-4 mr-2" />
             Import CSV
           </Button>
-          <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button asChild className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20">
             <Link href="/trades/new">
               <Plus className="h-4 w-4 mr-2" />
               Trade nou
@@ -101,7 +103,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input
               placeholder="Caută symbol..."
-              className="bg-zinc-900 border-zinc-800 text-zinc-100 pl-9 w-40"
+              className="bg-zinc-900/80 border-zinc-800/80 text-zinc-100 pl-9 w-40 focus:border-indigo-500/50"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
             />
@@ -112,7 +114,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
           value={accountId}
           onValueChange={(v) => { setAccountId(v); setPage(1); }}
         >
-          <SelectTrigger className="bg-zinc-900 border-zinc-800 text-zinc-300 w-44">
+          <SelectTrigger className="bg-zinc-900/80 border-zinc-800/80 text-zinc-300 w-44">
             <SelectValue placeholder="Toate conturile" />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
@@ -129,7 +131,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
           value={status}
           onValueChange={(v) => { setStatus(v); setPage(1); }}
         >
-          <SelectTrigger className="bg-zinc-900 border-zinc-800 text-zinc-300 w-36">
+          <SelectTrigger className="bg-zinc-900/80 border-zinc-800/80 text-zinc-300 w-36">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">

@@ -199,20 +199,23 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         {/* Section: Cont & Instrument */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-4">
-          <h3 className="text-sm font-medium text-zinc-300">Cont și instrument</h3>
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-1.5 h-4 rounded-full bg-indigo-500" />
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Cont și Instrument</h3>
+          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="accountId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Cont de trading</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Cont de trading</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                      <SelectTrigger className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 focus:border-indigo-500/50">
                         <SelectValue placeholder="Selectează contul" />
                       </SelectTrigger>
                     </FormControl>
@@ -234,11 +237,11 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="symbol"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Symbol</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Symbol</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Ex: EURUSD, XAUUSD"
-                      className="bg-zinc-800 border-zinc-700 text-zinc-100 uppercase"
+                      className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 uppercase focus:border-indigo-500/50"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                     />
@@ -253,10 +256,10 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="instrumentType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Tip instrument</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Tip instrument</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                      <SelectTrigger className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 focus:border-indigo-500/50">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
@@ -278,7 +281,7 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Status</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Status</FormLabel>
                   <Select
                     onValueChange={(v) => {
                       field.onChange(v);
@@ -287,7 +290,7 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                      <SelectTrigger className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 focus:border-indigo-500/50">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
@@ -309,7 +312,7 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
             name="direction"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">Direcție</FormLabel>
+                <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Direcție</FormLabel>
                 <div className="flex gap-2">
                   {(["BUY", "SELL"] as const).map((d) => (
                     <button
@@ -317,12 +320,12 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
                       type="button"
                       onClick={() => field.onChange(d)}
                       className={cn(
-                        "flex-1 rounded-md py-2 text-sm font-semibold transition-colors border",
+                        "flex-1 rounded-xl py-2.5 text-sm font-bold transition-all border",
                         direction === d && d === "BUY"
-                          ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
+                          ? "bg-emerald-500/15 border-emerald-500/50 text-emerald-300 shadow-lg shadow-emerald-500/10"
                           : direction === d && d === "SELL"
-                          ? "bg-rose-500/20 border-rose-500 text-rose-400"
-                          : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600"
+                          ? "bg-rose-500/15 border-rose-500/50 text-rose-300 shadow-lg shadow-rose-500/10"
+                          : "bg-zinc-800/60 border-zinc-700/80 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
                       )}
                     >
                       {d === "BUY" ? "BUY ▲" : "SELL ▼"}
@@ -336,21 +339,24 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
         </div>
 
         {/* Section: Preturi & timing */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-4">
-          <h3 className="text-sm font-medium text-zinc-300">Prețuri și timing</h3>
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-1.5 h-4 rounded-full bg-amber-500" />
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Prețuri și Timing</h3>
+          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="entryPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Preț intrare</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Preț intrare</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="any"
                       placeholder="1.08500"
-                      className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+                      className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 num focus:border-indigo-500/50"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value))}
                     />
@@ -365,11 +371,11 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="entryTime"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Data/Ora intrare</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Data/Ora intrare</FormLabel>
                   <FormControl>
                     <Input
                       type="datetime-local"
-                      className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                      className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 focus:border-indigo-500/50"
                       {...field}
                     />
                   </FormControl>
@@ -385,13 +391,13 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
                   name="exitPrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">Preț ieșire</FormLabel>
+                      <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Preț ieșire</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           step="any"
                           placeholder="1.09000"
-                          className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+                          className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 num focus:border-indigo-500/50"
                           value={field.value ?? ""}
                           onChange={(e) =>
                             field.onChange(
@@ -410,11 +416,11 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
                   name="exitTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">Data/Ora ieșire</FormLabel>
+                      <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Data/Ora ieșire</FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
-                          className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                          className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 focus:border-indigo-500/50"
                           value={field.value ?? ""}
                           onChange={(e) => field.onChange(e.target.value || null)}
                         />
@@ -429,21 +435,24 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
         </div>
 
         {/* Section: Risc & Lot */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-4">
-          <h3 className="text-sm font-medium text-zinc-300">Management risc</h3>
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-1.5 h-4 rounded-full bg-rose-500" />
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Management Risc</h3>
+          </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <FormField
               control={form.control}
               name="lotSize"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Volum (loturi)</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Volum (loturi)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
                       placeholder="0.10"
-                      className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+                      className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 num focus:border-indigo-500/50"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value))}
                     />
@@ -458,13 +467,13 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="stopLoss"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Stop Loss</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Stop Loss</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="any"
                       placeholder="Opțional"
-                      className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+                      className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 num focus:border-indigo-500/50"
                       value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(e.target.value ? parseFloat(e.target.value) : null)
@@ -481,13 +490,13 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="takeProfit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Take Profit</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Take Profit</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="any"
                       placeholder="Opțional"
-                      className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+                      className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 num focus:border-indigo-500/50"
                       value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(e.target.value ? parseFloat(e.target.value) : null)
@@ -505,13 +514,13 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
                 name="pnlMoney"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-zinc-400">P&L ($)</FormLabel>
+                    <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">P&L ($)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         step="0.01"
                         placeholder="Ex: 125.50"
-                        className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+                        className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 num focus:border-indigo-500/50"
                         value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(e.target.value ? parseFloat(e.target.value) : null)
@@ -529,12 +538,12 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="commission"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Comision ($)</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Comision ($)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
-                      className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+                      className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 num focus:border-indigo-500/50"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
@@ -549,12 +558,12 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="swap"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Swap ($)</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Swap ($)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
-                      className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+                      className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 num focus:border-indigo-500/50"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
@@ -567,21 +576,24 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
         </div>
 
         {/* Section: Setup & Journal */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-4">
-          <h3 className="text-sm font-medium text-zinc-300">Setup și jurnal</h3>
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-1.5 h-4 rounded-full bg-violet-500" />
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Setup și Jurnal</h3>
+          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <FormField
               control={form.control}
               name="setupType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Tip setup</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Tip setup</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value ?? undefined}
                   >
                     <FormControl>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                      <SelectTrigger className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 focus:border-indigo-500/50">
                         <SelectValue placeholder="Selectează" />
                       </SelectTrigger>
                     </FormControl>
@@ -603,13 +615,13 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="killzone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Killzone</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Killzone</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value ?? undefined}
                   >
                     <FormControl>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                      <SelectTrigger className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 focus:border-indigo-500/50">
                         <SelectValue placeholder="Selectează" />
                       </SelectTrigger>
                     </FormControl>
@@ -631,13 +643,13 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
               name="timeframe"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Timeframe</FormLabel>
+                  <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Timeframe</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value ?? undefined}
                   >
                     <FormControl>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                      <SelectTrigger className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 focus:border-indigo-500/50">
                         <SelectValue placeholder="Selectează" />
                       </SelectTrigger>
                     </FormControl>
@@ -660,7 +672,7 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
             name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">Note pre-trade</FormLabel>
+                <FormLabel className="text-zinc-400 text-xs font-semibold uppercase tracking-wide">Note pre-trade</FormLabel>
                 <FormControl>
                   <textarea
                     rows={3}
@@ -676,19 +688,19 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
           />
         </div>
 
-        <div className="flex gap-3 justify-end">
+        <div className="flex gap-3 justify-end pt-1">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="border-zinc-700 text-zinc-300"
+            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100"
           >
             Anulează
           </Button>
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25 px-6"
           >
             {isSubmitting ? "Se salvează..." : isEdit ? "Actualizează trade" : "Salvează trade"}
           </Button>

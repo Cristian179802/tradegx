@@ -39,16 +39,16 @@ export function DataTable<T>({
   className,
 }: DataTableProps<T>) {
   return (
-    <div className={cn("w-full overflow-auto rounded-md border border-zinc-800", className)}>
+    <div className={cn("w-full overflow-auto rounded-2xl border border-zinc-800/80 bg-zinc-900/60", className)}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-zinc-800 bg-zinc-900/50">
+          <tr className="border-b border-zinc-800/80 bg-zinc-900/80">
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={cn(
-                  "px-4 py-3 text-left font-medium text-zinc-400 whitespace-nowrap",
-                  col.sortable && "cursor-pointer select-none hover:text-zinc-200",
+                  "px-4 py-3 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap",
+                  col.sortable && "cursor-pointer select-none hover:text-zinc-300",
                   col.headerClassName
                 )}
                 onClick={() => col.sortable && onSort?.(col.key)}
@@ -98,8 +98,8 @@ export function DataTable<T>({
               <tr
                 key={keyFn(row)}
                 className={cn(
-                  "border-b border-zinc-800/50 transition-colors",
-                  onRowClick && "cursor-pointer hover:bg-zinc-800/40"
+                  "border-b border-zinc-800/40 transition-all duration-100",
+                  onRowClick && "cursor-pointer hover:bg-zinc-800/60"
                 )}
                 onClick={() => onRowClick?.(row)}
               >

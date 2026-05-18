@@ -52,20 +52,18 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
       header: "Symbol",
       sortable: true,
       cell: (row) => (
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "text-xs font-bold px-1.5 py-0.5 rounded",
-              row.direction === "BUY"
-                ? "bg-emerald-500/20 text-emerald-400"
-                : "bg-rose-500/20 text-rose-400"
-            )}
-          >
-            {row.direction === "BUY" ? "▲" : "▼"}
+        <div className="flex items-center gap-2.5">
+          <span className={cn(
+            "text-[10px] font-bold px-2 py-0.5 rounded-lg border",
+            row.direction === "BUY"
+              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
+              : "bg-rose-500/10 text-rose-400 border-rose-500/25"
+          )}>
+            {row.direction}
           </span>
-          <span className="font-medium text-zinc-100">{row.symbol}</span>
+          <span className="font-bold text-zinc-100">{row.symbol}</span>
           {row.timeframe && (
-            <span className="text-xs text-zinc-500">{row.timeframe}</span>
+            <span className="text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">{row.timeframe}</span>
           )}
         </div>
       ),

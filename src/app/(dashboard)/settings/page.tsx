@@ -68,12 +68,12 @@ export default async function SettingsPage() {
       />
 
       <Tabs defaultValue="profile" className="space-y-5">
-        <TabsList className="bg-zinc-900 border border-zinc-800 p-1 h-auto flex-wrap gap-1 rounded-xl">
+        <TabsList className="bg-zinc-900/80 border border-zinc-800/80 p-1 h-auto flex-wrap gap-1 rounded-2xl backdrop-blur-sm">
           {TABS.map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white text-zinc-400 text-sm rounded-lg px-3 py-1.5 transition-all"
+              className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-zinc-500 hover:text-zinc-300 text-sm rounded-xl px-3.5 py-1.5 transition-all font-medium"
             >
               {tab.label}
             </TabsTrigger>

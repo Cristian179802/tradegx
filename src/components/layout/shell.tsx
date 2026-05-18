@@ -24,9 +24,9 @@ export function PageHeader({ title, description, children, className }: PageHead
   return (
     <div className={cn("flex items-start justify-between gap-4", className)}>
       <div>
-        <h1 className="text-xl font-bold text-zinc-100">{title}</h1>
+        <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{title}</h1>
         {description && (
-          <p className="text-sm text-zinc-400 mt-1 leading-relaxed">{description}</p>
+          <p className="text-sm text-zinc-500 mt-0.5 leading-relaxed">{description}</p>
         )}
       </div>
       {children && (

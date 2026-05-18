@@ -116,21 +116,14 @@ function StatCard({
   sub?: string;
   positive?: boolean;
 }) {
+  const accentBg = positive === true ? "kpi-profit border-emerald-500/20" : positive === false ? "kpi-loss border-rose-500/20" : "border-zinc-800";
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-      <p className="text-xs text-zinc-500 font-medium mb-1">{label}</p>
-      <p
-        className={`text-xl font-bold num ${
-          positive === true
-            ? "text-emerald-400"
-            : positive === false
-            ? "text-rose-400"
-            : "text-zinc-100"
-        }`}
-      >
+    <div className={`bg-zinc-900/80 border rounded-2xl p-4 ${accentBg}`}>
+      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider mb-2">{label}</p>
+      <p className={`text-2xl font-black num tracking-tight ${positive === true ? "text-emerald-400" : positive === false ? "text-rose-400" : "text-zinc-100"}`}>
         {value}
       </p>
-      {sub && <p className="text-[11px] text-zinc-600 mt-0.5">{sub}</p>}
+      {sub && <p className="text-[11px] text-zinc-500 mt-1">{sub}</p>}
     </div>
   );
 }
@@ -143,10 +136,10 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
   const hasJournal = !!trade.journal;
 
   return (
-    <div className="border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition-colors">
+    <div className="border border-zinc-800/80 rounded-2xl overflow-hidden hover:border-zinc-700 transition-all duration-200 bg-zinc-900/80">
       {/* Main Row */}
       <div
-        className="flex items-center gap-3 px-4 py-3 bg-zinc-900 cursor-pointer"
+        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-800/30 transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
         {/* Direction */}

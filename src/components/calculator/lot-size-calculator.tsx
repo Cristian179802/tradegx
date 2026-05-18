@@ -92,14 +92,17 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
     };
   }, [balance, riskPct, riskMoney, riskMode, stopLossPips, symbol, customPipValue]);
 
+  const riskPctNum = parseFloat(riskPct) || 0;
+  const riskColor = riskPctNum <= 1 ? "emerald" : riskPctNum <= 2 ? "amber" : "rose";
+
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-5 max-w-2xl">
 
       {/* Inputs */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-5 space-y-4">
-        <h3 className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5 space-y-4">
+        <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
           <Calculator className="h-4 w-4 text-indigo-400" />
-          Parametri
+          Parametri calcul
         </h3>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -109,7 +112,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               Cont trading
             </label>
             <Select value={accountId} onValueChange={setAccountId}>
-              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+              <SelectTrigger className="bg-zinc-800/80 border-zinc-700 text-zinc-100">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-zinc-800 border-zinc-700">
@@ -138,7 +141,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
 
           {/* Risk mode toggle */}
           <div className="col-span-full">
-            <label className="text-xs font-medium text-zinc-400 block mb-1">Mod risc</label>
+            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block mb-2">Mod risc</label>
             <div className="flex gap-2 mb-3">
               {(["percent", "money"] as const).map((m) => (
                 <button
@@ -146,16 +149,32 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
                   type="button"
                   onClick={() => setRiskMode(m)}
                   className={cn(
-                    "flex-1 py-2 text-sm rounded-md border transition-colors",
+                    "flex-1 py-2.5 text-sm rounded-xl border font-semibold transition-all",
                     riskMode === m
-                      ? "bg-indigo-500/20 border-indigo-500 text-indigo-400"
-                      : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600"
+                      ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
+                      : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
                   )}
                 >
-                  {m === "percent" ? "Procent (%)" : "Sumă ($)"}
+                  {m === "percent" ? "Procent (%)" : "Sumă fixă ($)"}
                 </button>
               ))}
             </div>
+            {/* Quick presets */}
+            {riskMode === "percent" && (
+              <div className="flex gap-1.5 mb-3">
+                {[0.5, 1, 1.5, 2, 3].map((v) => (
+                  <button key={v} type="button"
+                    onClick={() => setRiskPct(String(v))}
+                    className={cn("flex-1 py-1.5 text-xs rounded-lg border font-bold transition-all",
+                      riskPct === String(v)
+                        ? "bg-indigo-500/20 border-indigo-500/50 text-indigo-300"
+                        : "bg-zinc-800/50 border-zinc-700/50 text-zinc-600 hover:border-zinc-600 hover:text-zinc-400"
+                    )}>
+                    {v}%
+                  </button>
+                ))}
+              </div>
+            )}
 
             {riskMode === "percent" ? (
               <div className="relative">
@@ -224,41 +243,57 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
 
       {/* Result */}
       {result ? (
-        <div className="rounded-lg border border-indigo-500/30 bg-indigo-500/5 p-5">
-          <div className="flex items-center gap-2 mb-4">
+        <div className="rounded-2xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/8 to-violet-500/5 p-6">
+          <div className="flex items-center gap-2 mb-5">
             <TrendingUp className="h-4 w-4 text-indigo-400" />
-            <h3 className="text-sm font-semibold text-indigo-300">Rezultat</h3>
+            <h3 className="text-sm font-bold text-indigo-300 uppercase tracking-wider">Rezultat calcul</h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <div className="text-center">
-              <p className="text-xs text-zinc-500 mb-1">Volum (loturi)</p>
-              <p className="text-3xl font-bold text-white num">
-                {result.lotSize.toFixed(2)}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-zinc-500 mb-1">Risc ($)</p>
-              <p className="text-2xl font-semibold text-rose-400 num">
+          {/* Main result */}
+          <div className="text-center mb-6 py-4 bg-zinc-900/50 rounded-xl border border-zinc-800">
+            <p className="text-xs text-zinc-600 uppercase tracking-wider mb-1">Volum recomandat</p>
+            <p className="text-5xl font-black text-white num tracking-tight">
+              {result.lotSize.toFixed(2)}
+            </p>
+            <p className="text-sm text-zinc-500 mt-1">loturi standard</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className={cn("rounded-xl p-4 border text-center",
+              riskColor === "emerald" ? "bg-emerald-500/8 border-emerald-500/20"
+              : riskColor === "amber" ? "bg-amber-500/8 border-amber-500/20"
+              : "bg-rose-500/8 border-rose-500/20")}>
+              <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Risc $</p>
+              <p className={cn("text-xl font-black num",
+                riskColor === "emerald" ? "text-emerald-400"
+                : riskColor === "amber" ? "text-amber-400"
+                : "text-rose-400")}>
                 ${result.riskAmount.toFixed(2)}
               </p>
             </div>
-            <div className="text-center col-span-2 sm:col-span-1">
-              <p className="text-xs text-zinc-500 mb-1">Risc (%)</p>
-              <p className="text-2xl font-semibold text-amber-400 num">
+            <div className={cn("rounded-xl p-4 border text-center",
+              riskColor === "emerald" ? "bg-emerald-500/8 border-emerald-500/20"
+              : riskColor === "amber" ? "bg-amber-500/8 border-amber-500/20"
+              : "bg-rose-500/8 border-rose-500/20")}>
+              <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Risc %</p>
+              <p className={cn("text-xl font-black num",
+                riskColor === "emerald" ? "text-emerald-400"
+                : riskColor === "amber" ? "text-amber-400"
+                : "text-rose-400")}>
                 {result.riskPercent.toFixed(2)}%
               </p>
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-indigo-500/20 text-xs text-zinc-500 text-center">
-            Formula: {result.riskAmount.toFixed(2)}$ ÷ ({stopLossPips} pips × {result.pipValue.toFixed(2)}$/pip) = {result.lotSize.toFixed(2)} loturi
+          <div className="mt-4 pt-4 border-t border-indigo-500/15 text-[11px] text-zinc-600 text-center font-mono">
+            {result.riskAmount.toFixed(2)}$ ÷ ({stopLossPips}p × {result.pipValue.toFixed(2)}$/lot) = <span className="text-indigo-400 font-bold">{result.lotSize.toFixed(2)} loturi</span>
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/30 p-8 text-center">
-          <Calculator className="h-8 w-8 text-zinc-600 mx-auto mb-2" />
-          <p className="text-sm text-zinc-500">Introdu parametrii pentru a calcula volumul</p>
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-10 text-center">
+          <Calculator className="h-10 w-10 text-zinc-700 mx-auto mb-3" />
+          <p className="text-sm text-zinc-500 font-medium">Introdu parametrii pentru a calcula volumul</p>
+          <p className="text-xs text-zinc-700 mt-1">Stop loss pips + risc → volum optim</p>
         </div>
       )}
     </div>
