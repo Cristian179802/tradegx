@@ -165,7 +165,7 @@ export default function CalendarPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Calendar Economic</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Calendar Economic</h1>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs text-zinc-600">Sursă:</span>
             <Badge className={cn(
@@ -193,7 +193,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Week navigation */}
-      <div className="flex items-center justify-between bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3">
+      <div className="flex items-center justify-between bg-zinc-900/80 border border-zinc-800/80 rounded-2xl px-4 py-3">
         <Button variant="ghost" size="sm"
           onClick={() => setWeek(weekOrder[Math.max(0, weekIdx - 1)])}
           disabled={weekIdx === 0}
@@ -210,7 +210,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 space-y-3">
+      <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-4 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-zinc-500 font-medium w-14 shrink-0">Monedă</span>
           <button onClick={() => setSelCurr([])}
@@ -250,7 +250,7 @@ export default function CalendarPage() {
       {loading ? (
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 space-y-3">
+            <div key={i} className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-4 space-y-3">
               <div className="h-4 w-40 bg-zinc-800 rounded animate-pulse" />
               {[...Array(5)].map((_, j) => <div key={j} className="h-9 bg-zinc-800/50 rounded-lg animate-pulse" />)}
             </div>
@@ -262,7 +262,7 @@ export default function CalendarPage() {
           <Button size="sm" variant="outline" className="mt-3 border-red-500/30 text-red-400" onClick={loadEvents}>Încearcă din nou</Button>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-12 text-center">
+        <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-12 text-center">
           <p className="text-zinc-500">Niciun eveniment pentru filtrele selectate.</p>
         </div>
       ) : (
@@ -280,7 +280,7 @@ export default function CalendarPage() {
             const dayMed  = dayEvents.filter(e => e.impact === "Medium").length;
 
             return (
-              <div key={dayKey} className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
+              <div key={dayKey} className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl overflow-hidden">
                 {/* Day header */}
                 <div className={cn("px-5 py-3 border-b border-zinc-800 flex items-center gap-3 flex-wrap", isToday ? "bg-indigo-500/10" : "bg-zinc-900/30")}>
                   <div className="flex items-center gap-2">

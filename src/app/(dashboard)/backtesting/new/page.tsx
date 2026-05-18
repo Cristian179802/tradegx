@@ -878,7 +878,7 @@ export default function NewStrategyPage() {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-zinc-100">
+          <h1 className="text-xl font-black text-zinc-100">
             {existingStrategyId ? "Rulează Backtest" : "Strategie Nouă"}
           </h1>
           <p className="text-sm text-zinc-500">
@@ -971,7 +971,7 @@ export default function NewStrategyPage() {
             })}
           </div>
           <div className="flex justify-end">
-            <Button onClick={() => setStep(2)} className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
+            <Button onClick={() => setStep(2)} className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white gap-2">
               Continuă <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
@@ -983,7 +983,7 @@ export default function NewStrategyPage() {
         <div className={cn(isCustom ? "space-y-5" : "grid md:grid-cols-2 gap-6")}>
           {isCustom ? (
             <>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+              <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5">
                 <div className="flex items-center gap-2 pb-3 mb-4 border-b border-zinc-800">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ec489920" }}>
                     <Wand2 className="h-4 w-4" style={{ color: "#ec4899" }} />
@@ -997,7 +997,7 @@ export default function NewStrategyPage() {
                 />
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex gap-6">
+              <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5 flex gap-6">
                 <div className="flex-1 space-y-4">
                   <div>
                     <label className="text-xs text-zinc-400 block mb-1">Nume strategie *</label>
@@ -1020,7 +1020,7 @@ export default function NewStrategyPage() {
             </>
           ) : (
             <>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
+              <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5 space-y-5">
                 <div className="flex items-center gap-2 pb-3 border-b border-zinc-800">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${selectedStratDef.color}20` }}>
                     <selectedStratDef.icon className="h-4 w-4" style={{ color: selectedStratDef.color }} />
@@ -1039,7 +1039,7 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="space-y-4">
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
+                <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5 space-y-4">
                   <h3 className="text-sm font-semibold text-zinc-300">Salvează strategia</h3>
                   <div>
                     <label className="text-xs text-zinc-400 block mb-1">Nume strategie *</label>
@@ -1058,7 +1058,7 @@ export default function NewStrategyPage() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-4">
                   <p className="text-xs text-zinc-500 mb-3 font-medium">PREVIEW STRATEGIE</p>
                   <div className="flex items-center gap-2.5">
                     <div className="w-3 h-3 rounded-full" style={{ background: selectedColor }} />
@@ -1081,7 +1081,7 @@ export default function NewStrategyPage() {
               <ArrowLeft className="h-4 w-4" /> Înapoi
             </Button>
             <Button onClick={saveAndContinue} disabled={isSaving || !strategyName.trim()}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white gap-2">
               {isSaving ? "Se salvează..." : <>Salvează & Continuă <ArrowRight className="h-4 w-4" /></>}
             </Button>
           </div>
@@ -1090,7 +1090,7 @@ export default function NewStrategyPage() {
 
       {/* STEP 3 — Run Config */}
       {step === 3 && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6">
+        <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-6 space-y-6">
           <h2 className="text-base font-semibold text-zinc-200 pb-3 border-b border-zinc-800">
             Configurare Backtest
           </h2>

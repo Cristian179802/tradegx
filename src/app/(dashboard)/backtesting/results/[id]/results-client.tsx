@@ -150,14 +150,22 @@ function KpiCard({
   const col = accent ?? "zinc";
   return (
     <div className={cn(
-      "rounded-xl border border-zinc-800 bg-zinc-900 p-4",
+      "rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-4 transition-all duration-200",
       glow && `shadow-lg ${glowMap[col]}`
     )}>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">{label}</p>
-        <Icon className={cn("h-3.5 w-3.5", colorMap[col])} />
+        <p className="text-[11px] font-bold text-zinc-600 uppercase tracking-wide">{label}</p>
+        <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center",
+          col === "green" ? "bg-emerald-500/15"
+          : col === "red" ? "bg-rose-500/15"
+          : col === "indigo" ? "bg-indigo-500/15"
+          : col === "amber" ? "bg-amber-500/15"
+          : "bg-zinc-800"
+        )}>
+          <Icon className={cn("h-3 w-3", colorMap[col])} />
+        </div>
       </div>
-      <p className={cn("text-2xl font-bold num", colorMap[col])}>{value}</p>
+      <p className={cn("text-2xl font-black num tracking-tight", colorMap[col])}>{value}</p>
       {sub && <p className="text-[11px] text-zinc-600 mt-0.5 num">{sub}</p>}
     </div>
   );
@@ -403,7 +411,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
       {/* ── Charts Row ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Equity Curve — spans 2 cols */}
-        <div className="lg:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="lg:col-span-2 rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-zinc-300">Curbă de capital</h3>
             <div className="flex items-center gap-3 text-xs text-zinc-500">
@@ -445,7 +453,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
         </div>
 
         {/* Win/Loss Donut */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <h3 className="text-sm font-semibold text-zinc-300 mb-4">Distribuție trade-uri</h3>
           {totalTrades > 0 ? (
             <>
@@ -497,7 +505,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
       {/* Monthly P&L + Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Monthly P&L */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <h3 className="text-sm font-semibold text-zinc-300 mb-4">P&L lunar</h3>
           {backtest.monthlyPnl && backtest.monthlyPnl.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
@@ -523,7 +531,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
         </div>
 
         {/* P&L Distribution */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <h3 className="text-sm font-semibold text-zinc-300 mb-4">Distribuție P&L</h3>
           {pnlDistribution.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
@@ -552,7 +560,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
       </div>
 
       {/* ── Config Summary ── */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-4">
         <h3 className="text-sm font-semibold text-zinc-400 mb-3">Parametri simulare</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {[
@@ -574,7 +582,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
       </div>
 
       {/* ── Trades Table ── */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden">
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
           <h3 className="text-sm font-semibold text-zinc-300">
             Trade-uri ({backtest.trades.length})
