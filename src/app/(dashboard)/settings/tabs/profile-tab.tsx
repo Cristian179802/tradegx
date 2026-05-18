@@ -53,7 +53,7 @@ export function ProfileTab({ initialName }: { initialName: string }) {
   }
 
   return (
-    <Card className="bg-zinc-900/50 border-zinc-800">
+    <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
       <CardHeader>
         <CardTitle className="text-zinc-100 text-base">Informații personale</CardTitle>
         <CardDescription className="text-zinc-500">

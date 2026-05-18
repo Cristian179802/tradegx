@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -37,7 +37,7 @@ export function PrivacyTab() {
       a.download = `TradeGX-data-${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast({ title: "Export complet", description: "Datele tale au fost descărcate." });
+      toast({ title: "Export complet", description: "Datele tale au fost descarcate." });
     } catch {
       toast({ title: "Eroare", description: "Nu s-a putut exporta.", variant: "destructive" });
     } finally {
@@ -55,7 +55,7 @@ export function PrivacyTab() {
       await signOut({ redirect: false });
       router.push("/?deleted=true");
     } catch {
-      toast({ title: "Eroare", description: "Nu s-a putut șterge contul.", variant: "destructive" });
+      toast({ title: "Eroare", description: "Nu s-a putut ?terge contul.", variant: "destructive" });
       setIsDeleting(false);
     }
   }
@@ -63,11 +63,11 @@ export function PrivacyTab() {
   return (
     <div className="space-y-4">
       {/* GDPR Export */}
-      <Card className="bg-zinc-900/50 border-zinc-800">
+      <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
         <CardHeader>
           <CardTitle className="text-zinc-100 text-base">Export date (GDPR)</CardTitle>
           <CardDescription className="text-zinc-500">
-            Descarcă toate datele tale conform GDPR. Include tranzacții, jurnal, setări și contul.
+            Descarca toate datele tale conform GDPR. Include tranzac?ii, jurnal, setari ?i contul.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -82,10 +82,10 @@ export function PrivacyTab() {
             ) : (
               <Download className="w-4 h-4 mr-2" />
             )}
-            Descarcă datele mele
+            Descarca datele mele
           </Button>
           <p className="text-xs text-zinc-600 mt-3">
-            Fișierul JSON va conține toate datele asociate contului tău.
+            Fi?ierul JSON va con?ine toate datele asociate contului tau.
           </p>
         </CardContent>
       </Card>
@@ -95,18 +95,18 @@ export function PrivacyTab() {
         <CardHeader>
           <CardTitle className="text-rose-400 text-base flex items-center gap-2">
             <AlertTriangle className="w-4 h-4" />
-            Zona periculoasă
+            Zona periculoasa
           </CardTitle>
           <CardDescription className="text-zinc-500">
-            Aceste acțiuni sunt ireversibile. Procedează cu atenție.
+            Aceste ac?iuni sunt ireversibile. Procedeaza cu aten?ie.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-zinc-200">Ștergere cont</p>
+              <p className="text-sm font-medium text-zinc-200">?tergere cont</p>
               <p className="text-xs text-zinc-500 mt-1">
-                Șterge permanent contul tău și toate datele asociate. Nu se poate recupera.
+                ?terge permanent contul tau ?i toate datele asociate. Nu se poate recupera.
               </p>
             </div>
             <Button
@@ -115,7 +115,7 @@ export function PrivacyTab() {
               className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/50 shrink-0"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Șterge cont
+              ?terge cont
             </Button>
           </div>
         </CardContent>
@@ -127,11 +127,11 @@ export function PrivacyTab() {
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-400" />
-              Confirmare ștergere cont
+              Confirmare ?tergere cont
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
-              Aceasta va șterge permanent contul tău, toate tranzacțiile, jurnalul și datele asociate.
-              <strong className="text-white block mt-2">Această acțiune nu poate fi anulată.</strong>
+              Aceasta va ?terge permanent contul tau, toate tranzac?iile, jurnalul ?i datele asociate.
+              <strong className="text-white block mt-2">Aceasta ac?iune nu poate fi anulata.</strong>
             </DialogDescription>
           </DialogHeader>
 
@@ -153,7 +153,7 @@ export function PrivacyTab() {
               onClick={() => setShowDeleteDialog(false)}
               className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
             >
-              Anulează
+              Anuleaza
             </Button>
             <Button
               onClick={handleDeleteAccount}
@@ -165,7 +165,7 @@ export function PrivacyTab() {
               ) : (
                 <Trash2 className="w-4 h-4 mr-2" />
               )}
-              Șterge permanent
+              ?terge permanent
             </Button>
           </DialogFooter>
         </DialogContent>

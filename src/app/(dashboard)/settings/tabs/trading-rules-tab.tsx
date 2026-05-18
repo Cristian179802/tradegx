@@ -88,7 +88,7 @@ export function TradingRulesTab({
 
   return (
     <div className="space-y-4">
-      <Card className="bg-zinc-900/50 border-zinc-800">
+      <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
         <CardHeader>
           <CardTitle className="text-zinc-100 text-base">Limite de risc</CardTitle>
           <CardDescription className="text-zinc-500">

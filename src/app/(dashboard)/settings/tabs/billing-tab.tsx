@@ -81,7 +81,7 @@ export function BillingTab({
   return (
     <div className="space-y-6 max-w-2xl">
       {/* Current plan */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-zinc-400" />
@@ -130,9 +130,9 @@ export function BillingTab({
 
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Monthly */}
-            <div className="rounded-xl border border-zinc-700 bg-zinc-900/50 p-5">
-              <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Lunar</p>
-              <p className="text-3xl font-bold text-zinc-100 mb-4">$19 <span className="text-sm font-normal text-zinc-500">/lună</span></p>
+            <div className="rounded-2xl border border-zinc-700/80 bg-zinc-900/80 p-5">
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Lunar</p>
+              <p className="text-3xl font-black text-zinc-100 mb-4">$19 <span className="text-sm font-normal text-zinc-500">/lună</span></p>
               <ul className="space-y-1.5 mb-5">
                 {PRO_FEATURES.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-xs text-zinc-400">
@@ -140,16 +140,16 @@ export function BillingTab({
                   </li>
                 ))}
               </ul>
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" size="sm" onClick={() => startCheckout("monthly")} disabled={loadingMonthly || stripeReady === false}>
+              <Button className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20" size="sm" onClick={() => startCheckout("monthly")} disabled={loadingMonthly || stripeReady === false}>
                 {loadingMonthly && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Alege lunar
               </Button>
             </div>
 
             {/* Annual */}
-            <div className="rounded-xl border border-indigo-500/40 bg-indigo-500/5 p-5 relative">
-              <span className="absolute -top-2.5 left-4 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">37% REDUCERE</span>
-              <p className="text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-1">Anual</p>
-              <p className="text-3xl font-bold text-zinc-100 mb-1">$12 <span className="text-sm font-normal text-zinc-500">/lună</span></p>
+            <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-500/8 to-violet-500/5 p-5 relative">
+              <span className="absolute -top-2.5 left-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-lg shadow-indigo-500/20">37% REDUCERE</span>
+              <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">Anual</p>
+              <p className="text-3xl font-black text-zinc-100 mb-1">$12 <span className="text-sm font-normal text-zinc-500">/lună</span></p>
               <p className="text-xs text-zinc-500 mb-4">$144/an · economisești $84</p>
               <ul className="space-y-1.5 mb-5">
                 {PRO_FEATURES.map((f) => (
@@ -158,7 +158,7 @@ export function BillingTab({
                   </li>
                 ))}
               </ul>
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" size="sm" onClick={() => startCheckout("annual")} disabled={loadingAnnual || stripeReady === false}>
+              <Button className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25" size="sm" onClick={() => startCheckout("annual")} disabled={loadingAnnual || stripeReady === false}>
                 {loadingAnnual && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Alege anual
               </Button>
             </div>

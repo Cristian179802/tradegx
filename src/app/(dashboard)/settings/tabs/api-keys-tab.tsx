@@ -617,7 +617,7 @@ export function ApiKeysTab() {
   const availableCount = INTEGRATIONS.filter((i) => i.available).length;
 
   return (
-    <Card className="bg-zinc-900/50 border-zinc-800">
+    <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
       <CardHeader>
         <CardTitle className="text-zinc-100 text-base flex items-center gap-2">
           <Key className="w-4 h-4 text-zinc-400" />

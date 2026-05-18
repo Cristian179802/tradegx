@@ -128,7 +128,7 @@ export function AppearanceTab({
   return (
     <div className="space-y-4">
       {/* Language & Currency */}
-      <Card className="bg-zinc-900/50 border-zinc-800">
+      <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
         <CardHeader>
           <CardTitle className="text-zinc-100 text-base">Limbă și monedă</CardTitle>
           <CardDescription className="text-zinc-500">
@@ -189,7 +189,7 @@ export function AppearanceTab({
       </Card>
 
       {/* Theme */}
-      <Card className="bg-zinc-900/50 border-zinc-800">
+      <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
         <CardHeader>
           <CardTitle className="text-zinc-100 text-base">Temă</CardTitle>
           <CardDescription className="text-zinc-500">
