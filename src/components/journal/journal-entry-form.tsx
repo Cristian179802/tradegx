@@ -221,7 +221,7 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
                       onChange={(e) => field.onChange(parseInt(e.target.value))}
                     />
                   </FormControl>
-                  <ConfidenceBar value={confidence} />
+                  <ConfidenceBar value={confidence ?? null} />
                   <FormMessage />
                 </FormItem>
               )}

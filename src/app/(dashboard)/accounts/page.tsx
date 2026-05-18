@@ -64,6 +64,7 @@ export default async function AccountsPage() {
       maxDailyLossPct: a.maxDailyLossPct?.toString() ?? null,
       maxDrawdownPct: a.maxDrawdownPct?.toString() ?? null,
       tradePnl: tradePnl.toFixed(2),
+      lastSyncedAt: a.lastSyncedAt?.toISOString() ?? null,
     };
   });
 
