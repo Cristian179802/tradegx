@@ -101,7 +101,7 @@ export function NotificationDropdown() {
 
       <DropdownMenuContent
         align="end"
-        className="w-80 bg-zinc-900 border-zinc-800 p-0"
+        className="w-80 bg-zinc-900/95 border-zinc-800/80 backdrop-blur-xl p-0 shadow-2xl shadow-black/40"
         sideOffset={8}
       >
         {/* Header */}
@@ -131,8 +131,10 @@ export function NotificationDropdown() {
             <div className="py-8 text-center text-zinc-600 text-xs">Se încarcă...</div>
           ) : alerts.length === 0 ? (
             <div className="py-10 text-center">
-              <Zap className="h-8 w-8 text-zinc-700 mx-auto mb-2" />
-              <p className="text-sm text-zinc-500">Nicio notificare</p>
+              <div className="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center mx-auto mb-3">
+                <Zap className="h-5 w-5 text-zinc-600" />
+              </div>
+              <p className="text-sm font-semibold text-zinc-500">Nicio notificare</p>
               <p className="text-xs text-zinc-600 mt-0.5">Vei fi alertat când apar probleme</p>
             </div>
           ) : (

@@ -85,7 +85,7 @@ export function BillingTab({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-zinc-400" />
-            <h2 className="text-sm font-semibold text-zinc-300">Abonamentul curent</h2>
+            <h2 className="text-sm font-bold text-zinc-200">Abonamentul curent</h2>
           </div>
           <Badge className={cn("text-xs border", isPro ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" : "bg-zinc-800 text-zinc-400 border-zinc-700")}>
             {isPro ? "PRO" : "FREE"}

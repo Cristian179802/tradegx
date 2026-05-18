@@ -413,7 +413,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
         {/* Equity Curve — spans 2 cols */}
         <div className="lg:col-span-2 rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-zinc-300">Curbă de capital</h3>
+            <h3 className="text-sm font-bold text-zinc-200">Curbă de capital</h3>
             <div className="flex items-center gap-3 text-xs text-zinc-500">
               <span className="num">${initBal.toFixed(0)} → ${(finalBal ?? initBal).toFixed(0)}</span>
             </div>
@@ -584,7 +584,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
       {/* ── Trades Table ── */}
       <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-          <h3 className="text-sm font-semibold text-zinc-300">
+          <h3 className="text-sm font-bold text-zinc-200">
             Trade-uri ({backtest.trades.length})
           </h3>
           {totalPages > 1 && (

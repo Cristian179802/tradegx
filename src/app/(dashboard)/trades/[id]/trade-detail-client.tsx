@@ -450,7 +450,7 @@ export function TradeDetailClient({ trade }: { trade: Trade }) {
           <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
             <div className="flex items-center gap-2 mb-4">
               <Camera className="h-4 w-4 text-indigo-400" />
-              <h2 className="text-sm font-semibold text-zinc-300">Screenshot-uri</h2>
+              <h2 className="text-sm font-bold text-zinc-200">Screenshot-uri</h2>
             </div>
             <ScreenshotGallery tradeId={trade.id} initial={trade.screenshots} />
           </div>
@@ -531,7 +531,7 @@ export function TradeDetailClient({ trade }: { trade: Trade }) {
           <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
             <div className="flex items-center gap-2 mb-4">
               <BookOpen className="h-4 w-4 text-indigo-400" />
-              <h2 className="text-sm font-semibold text-zinc-300">Jurnal</h2>
+              <h2 className="text-sm font-bold text-zinc-200">Jurnal</h2>
             </div>
             <JournalEntryForm
               key={journalKey}

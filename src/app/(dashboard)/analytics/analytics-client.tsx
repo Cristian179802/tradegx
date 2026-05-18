@@ -177,7 +177,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
 
       {/* Equity curve */}
       <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-        <h2 className="text-sm font-semibold text-zinc-300 mb-4">Curbă de capitaluri</h2>
+        <h2 className="text-sm font-bold text-zinc-200 mb-4">Curbă de capitaluri</h2>
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={equityCurve} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
@@ -221,7 +221,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       {/* Monthly P&L + Win rate by day */}
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-          <h2 className="text-sm font-semibold text-zinc-300 mb-4">P&L lunar</h2>
+          <h2 className="text-sm font-bold text-zinc-200 mb-4">P&L lunar</h2>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={monthlyPnl} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -242,7 +242,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
         </div>
 
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-          <h2 className="text-sm font-semibold text-zinc-300 mb-4">Rată câștig pe zi</h2>
+          <h2 className="text-sm font-bold text-zinc-200 mb-4">Rată câștig pe zi</h2>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={winRateByDay} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -269,7 +269,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       {/* P&L distribution + Instrument performance */}
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-          <h2 className="text-sm font-semibold text-zinc-300 mb-4">Distribuție P&L</h2>
+          <h2 className="text-sm font-bold text-zinc-200 mb-4">Distribuție P&L</h2>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={pnlDistribution} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -289,7 +289,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
         </div>
 
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-          <h2 className="text-sm font-semibold text-zinc-300 mb-4">Performanță pe instrument</h2>
+          <h2 className="text-sm font-bold text-zinc-200 mb-4">Performanță pe instrument</h2>
           <div className="space-y-2 mt-1">
             {winRateByInstrument?.map((item) => (
               <div key={item.instrument} className="flex items-center gap-3">
@@ -322,7 +322,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       {setupPerformance && setupPerformance.length > 0 && (
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden">
           <div className="p-5 border-b border-zinc-800">
-            <h2 className="text-sm font-semibold text-zinc-300">Performanță pe setup</h2>
+            <h2 className="text-sm font-bold text-zinc-200">Performanță pe setup</h2>
           </div>
           <table className="w-full text-sm">
             <thead>

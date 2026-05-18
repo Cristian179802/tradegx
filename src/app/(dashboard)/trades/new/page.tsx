@@ -25,7 +25,7 @@ export default async function NewTradePage() {
   return (
     <div className="max-w-3xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-zinc-100">Trade nou</h1>
+        <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Trade nou</h1>
         <p className="text-sm text-zinc-500 mt-1">Jurnalizează un trade manual</p>
       </div>
       <TradeForm accounts={serializedAccounts} />

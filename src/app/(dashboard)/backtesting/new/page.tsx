@@ -1040,7 +1040,7 @@ export default function NewStrategyPage() {
 
               <div className="space-y-4">
                 <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5 space-y-4">
-                  <h3 className="text-sm font-semibold text-zinc-300">Salvează strategia</h3>
+                  <h3 className="text-sm font-bold text-zinc-200">Salvează strategia</h3>
                   <div>
                     <label className="text-xs text-zinc-400 block mb-1">Nume strategie *</label>
                     <input type="text" value={strategyName} onChange={(e) => setStrategyName(e.target.value)}

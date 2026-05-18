@@ -49,7 +49,7 @@ export function Section({ title, description, children, className }: SectionProp
       {(title || description) && (
         <div>
           {title && (
-            <h2 className="text-base font-semibold text-zinc-200">{title}</h2>
+            <h2 className="text-base font-bold text-zinc-100">{title}</h2>
           )}
           {description && (
             <p className="text-sm text-zinc-500 mt-0.5">{description}</p>
