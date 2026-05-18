@@ -20,13 +20,13 @@ export default async function ChartsPage({
     <div className="flex flex-col h-full space-y-4" style={{ height: "calc(100vh - 120px)" }}>
       <div className="flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Grafice Live</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Grafice Live</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {activeSymbol} — Grafic avansat TradingView în timp real
           </p>
         </div>
       </div>
-      <div className="flex-1 rounded-xl overflow-hidden border border-zinc-800 min-h-0">
+      <div className="flex-1 rounded-2xl overflow-hidden border border-zinc-800/80 min-h-0 shadow-xl shadow-black/20">
         <TradingViewChart symbol={activeSymbol} />
       </div>
     </div>

@@ -243,3 +243,62 @@
 .delay-300  { animation-delay: 300ms; }
 .delay-400  { animation-delay: 400ms; }
 .delay-500  { animation-delay: 500ms; }
+
+/* ── Hide scrollbar ──────────────────────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Dialog / Modal ──────────────────────────────────────────────────────── */
+[data-radix-popper-content-wrapper] { z-index: 9999 !important; }
+
+/* ── Input focus glow ────────────────────────────────────────────────────── */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}
+
+/* ── Selection color ─────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: #e4e4e7;
+}
+
+/* ── Smooth font rendering ───────────────────────────────────────────────── */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Table zebra striping ────────────────────────────────────────────────── */
+.table-zebra tr:nth-child(even) {
+  background: rgba(39, 39, 42, 0.3);
+}
+
+/* ── Ticker tape animation ───────────────────────────────────────────────── */
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-ticker { animation: ticker 30s linear infinite; }
+
+/* ── Gradient border animated ────────────────────────────────────────────── */
+@keyframes gradient-border-spin {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animated-border {
+  background: linear-gradient(-45deg, #6366f1, #8b5cf6, #3b82f6, #6366f1);
+  background-size: 400% 400%;
+  animation: gradient-border-spin 4s ease infinite;
+}
+
+/* ── Profit/Loss row tinting ─────────────────────────────────────────────── */
+.row-profit { background: rgba(16,185,129,0.03); }
+.row-loss   { background: rgba(244,63,94,0.03); }
+
+/* ── Number formatting ───────────────────────────────────────────────────── */
+.font-mono-num {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1;
+}
