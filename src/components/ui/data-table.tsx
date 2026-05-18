@@ -39,7 +39,7 @@ export function DataTable<T>({
   className,
 }: DataTableProps<T>) {
   return (
-    <div className={cn("w-full overflow-auto rounded-2xl border border-zinc-800/80 bg-zinc-900/60", className)}>
+    <div className={cn("w-full overflow-auto rounded-2xl border border-zinc-800/60 bg-zinc-900/80", className)}>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-zinc-800/80 bg-zinc-900/80">
@@ -98,7 +98,7 @@ export function DataTable<T>({
               <tr
                 key={keyFn(row)}
                 className={cn(
-                  "border-b border-zinc-800/40 transition-all duration-100",
+                  "border-b border-zinc-800/40 transition-all duration-100 cyber-row",
                   onRowClick && "cursor-pointer hover:bg-zinc-800/60"
                 )}
                 onClick={() => onRowClick?.(row)}

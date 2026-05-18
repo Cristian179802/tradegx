@@ -29,14 +29,14 @@ export default async function CalculatorPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100">Calculator loturi</h1>
+        <h1 className="text-2xl font-black tracking-tight neon-amber">Calculator loturi</h1>
         <p className="text-sm text-zinc-500 mt-1">
           Calculează volumul optim în funcție de risc și stop loss
         </p>
       </div>
 
       {accounts.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-zinc-800 p-12 text-center">
+        <div className="rounded-lg border border-dashed border-zinc-800 p-12 text-center cyber-card">
           <p className="text-zinc-500 text-sm">
             Adaugă un cont de trading pentru a folosi calculatorul.
           </p>

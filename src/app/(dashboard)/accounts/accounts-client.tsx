@@ -43,14 +43,14 @@ const TYPE_CFG: Record<string, { label: string; color: string; border: string; b
 
 const CARD_BORDER: Record<string, string> = {
   DEMO:      "border-zinc-800 hover:border-zinc-700",
-  CHALLENGE: "border-amber-500/15 hover:border-amber-500/35",
-  LIVE:      "border-emerald-500/15 hover:border-emerald-500/35",
+  CHALLENGE: "border-amber-500/20 hover:border-amber-500/50",
+  LIVE:      "border-emerald-500/20 hover:border-emerald-500/50",
 };
 
 const CARD_GLOW: Record<string, string> = {
-  DEMO:      "",
-  CHALLENGE: "hover:shadow-amber-500/5 hover:shadow-lg",
-  LIVE:      "hover:shadow-emerald-500/5 hover:shadow-lg",
+  DEMO:      "hover:shadow-zinc-700/20 hover:shadow-lg",
+  CHALLENGE: "hover:shadow-amber-500/20 hover:shadow-xl",
+  LIVE:      "hover:shadow-emerald-500/20 hover:shadow-xl",
 };
 
 export function AccountsClient({ initialAccounts }: { initialAccounts: Account[] }) {
@@ -112,7 +112,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Conturi de trading</h1>
+          <h1 className="text-2xl font-black tracking-tight neon-indigo">Conturi de trading</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {accounts.length > 0
               ? `${accounts.length} cont${accounts.length !== 1 ? "uri" : ""} conectat${accounts.length !== 1 ? "e" : ""}`
@@ -162,17 +162,17 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
               <div
                 key={account.id}
                 className={cn(
-                  "relative rounded-2xl border bg-zinc-900/80 p-5 space-y-4 transition-all duration-200 overflow-hidden group",
+                  "relative rounded-2xl border bg-zinc-900/80 p-5 space-y-4 transition-all duration-300 overflow-hidden group card-3d",
                   CARD_BORDER[account.type],
                   CARD_GLOW[account.type]
                 )}
               >
                 {/* Top glow for LIVE accounts */}
                 {account.type === "LIVE" && (
-                  <div className="absolute -top-8 -right-8 w-24 h-24 bg-emerald-500/8 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/12 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 )}
                 {account.type === "CHALLENGE" && (
-                  <div className="absolute -top-8 -right-8 w-24 h-24 bg-amber-500/8 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/12 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 )}
 
                 {/* Header */}
@@ -207,7 +207,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
                       {isProfit
                         ? <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         : <ArrowDownRight className="w-3.5 h-3.5 text-rose-400 shrink-0" />}
-                      <p className={cn("text-base font-black num truncate", isProfit ? "text-emerald-400" : "text-rose-400")}>
+                      <p className={cn("text-base font-black num truncate", isProfit ? "text-emerald-400 neon-emerald" : "text-rose-400 neon-rose")}>
                         {isProfit ? "+" : ""}{formatCurrency(pnl, account.currency)}
                       </p>
                     </div>
@@ -278,7 +278,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
           {/* Add account card */}
           <button
             onClick={() => { setEditingAccount(null); setDialogOpen(true); }}
-            className="rounded-2xl border-2 border-dashed border-zinc-800 bg-transparent hover:border-indigo-500/40 hover:bg-indigo-500/4 transition-all duration-200 p-5 flex flex-col items-center justify-center gap-3 min-h-[200px] group"
+            className="rounded-2xl border-2 border-dashed border-zinc-800 bg-transparent hover:border-indigo-500/50 hover:bg-indigo-500/5 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 p-5 flex flex-col items-center justify-center gap-3 min-h-[200px] group"
           >
             <div className="w-12 h-12 rounded-2xl border border-zinc-800 group-hover:border-indigo-500/30 bg-zinc-900 group-hover:bg-indigo-500/10 flex items-center justify-center transition-all">
               <Plus className="w-5 h-5 text-zinc-600 group-hover:text-indigo-400 transition-colors" />

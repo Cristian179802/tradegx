@@ -120,7 +120,7 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
             <span
               className={cn(
                 "num font-medium",
-                pnl >= 0 ? "text-emerald-400" : "text-rose-400"
+                pnl >= 0 ? "text-emerald-400 neon-emerald" : "text-rose-400 neon-rose"
               )}
             >
               {pnl >= 0 ? "+" : ""}

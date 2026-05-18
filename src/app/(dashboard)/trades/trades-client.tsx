@@ -71,7 +71,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Trade-uri</h1>
+          <h1 className="text-2xl font-black tracking-tight neon-violet">Trade-uri</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {total > 0 ? (
               <span><span className="text-zinc-300 font-semibold">{total}</span> tranzacții înregistrate</span>
@@ -82,12 +82,12 @@ export function TradesClient({ accounts }: TradesClientProps) {
           <Button
             variant="outline"
             onClick={() => setImportOpen(true)}
-            className="border-zinc-700/80 text-zinc-400 hover:text-zinc-100 hover:border-zinc-600 bg-zinc-800/50"
+            className="border-indigo-500/30 text-indigo-300 hover:text-white hover:border-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-all"
           >
             <Upload className="h-4 w-4 mr-2" />
             Import CSV
           </Button>
-          <Button asChild className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20">
+          <Button asChild className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all">
             <Link href="/trades/new">
               <Plus className="h-4 w-4 mr-2" />
               Trade nou
@@ -97,7 +97,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/60">
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />

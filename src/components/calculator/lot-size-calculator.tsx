@@ -133,7 +133,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
             <label className="text-xs font-medium text-zinc-400 block mb-1">Symbol</label>
             <Input
               placeholder="EURUSD"
-              className="bg-zinc-800 border-zinc-700 text-zinc-100 uppercase"
+              className="bg-zinc-800 border-zinc-700 text-zinc-100 uppercase input-cyber"
               value={symbol}
               onChange={(e) => setSymbol(e.target.value.toUpperCase())}
             />
@@ -182,7 +182,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
                   type="number"
                   step="0.1"
                   placeholder="1"
-                  className="bg-zinc-800 border-zinc-700 text-zinc-100 num pr-8"
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100 num pr-8 input-cyber"
                   value={riskPct}
                   onChange={(e) => setRiskPct(e.target.value)}
                 />
@@ -194,7 +194,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
                   type="number"
                   step="0.01"
                   placeholder="250"
-                  className="bg-zinc-800 border-zinc-700 text-zinc-100 num pr-8"
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100 num pr-8 input-cyber"
                   value={riskMoney}
                   onChange={(e) => setRiskMoney(e.target.value)}
                 />
@@ -210,7 +210,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               type="number"
               step="0.1"
               placeholder="20"
-              className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+              className="bg-zinc-800 border-zinc-700 text-zinc-100 num input-cyber"
               value={stopLossPips}
               onChange={(e) => setStopLossPips(e.target.value)}
             />
@@ -233,7 +233,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               type="number"
               step="0.01"
               placeholder={String(getPipValue(symbol))}
-              className="bg-zinc-800 border-zinc-700 text-zinc-100 num"
+              className="bg-zinc-800 border-zinc-700 text-zinc-100 num input-cyber"
               value={customPipValue}
               onChange={(e) => setCustomPipValue(e.target.value)}
             />
@@ -243,7 +243,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
 
       {/* Result */}
       {result ? (
-        <div className="rounded-2xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/8 to-violet-500/5 p-6">
+        <div className="rounded-2xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/8 to-violet-500/5 p-6 cyber-card">
           <div className="flex items-center gap-2 mb-5">
             <TrendingUp className="h-4 w-4 text-indigo-400" />
             <h3 className="text-sm font-bold text-indigo-300 uppercase tracking-wider">Rezultat calcul</h3>
@@ -265,9 +265,9 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               : "bg-rose-500/8 border-rose-500/20")}>
               <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Risc $</p>
               <p className={cn("text-xl font-black num",
-                riskColor === "emerald" ? "text-emerald-400"
-                : riskColor === "amber" ? "text-amber-400"
-                : "text-rose-400")}>
+                riskColor === "emerald" ? "text-emerald-400 neon-emerald"
+                : riskColor === "amber" ? "text-amber-400 neon-amber"
+                : "text-rose-400 neon-rose")}>
                 ${result.riskAmount.toFixed(2)}
               </p>
             </div>
@@ -277,9 +277,9 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               : "bg-rose-500/8 border-rose-500/20")}>
               <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Risc %</p>
               <p className={cn("text-xl font-black num",
-                riskColor === "emerald" ? "text-emerald-400"
-                : riskColor === "amber" ? "text-amber-400"
-                : "text-rose-400")}>
+                riskColor === "emerald" ? "text-emerald-400 neon-emerald"
+                : riskColor === "amber" ? "text-amber-400 neon-amber"
+                : "text-rose-400 neon-rose")}>
                 {result.riskPercent.toFixed(2)}%
               </p>
             </div>
