@@ -183,7 +183,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
     <div className="grid gap-6 lg:grid-cols-2">
       {/* ── Watchlist ── */}
       <div className="space-y-4">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
               <Globe className="h-4 w-4 text-indigo-400" />
@@ -236,7 +236,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
         </div>
 
         {/* Custom add */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-4">
           <button
             className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 w-full"
             onClick={() => setShowCustom((v) => !v)}
@@ -280,7 +280,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
       </div>
 
       {/* ── Simboluri populare ── */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden flex flex-col">
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden flex flex-col">
         <div className="px-5 py-4 border-b border-zinc-800 space-y-3">
           <h2 className="text-sm font-semibold text-zinc-300">Simboluri disponibile</h2>
           {/* Search */}

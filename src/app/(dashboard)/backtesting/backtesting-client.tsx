@@ -84,7 +84,7 @@ export function BacktestingClient({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Backtesting</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Backtesting</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             Testează strategii pe date istorice reale — Yahoo Finance live data
           </p>
@@ -117,7 +117,7 @@ export function BacktestingClient({
               const lastBt = s.backtests[0];
               const pnl = lastBt?.netPnl ? parseFloat(lastBt.netPnl) : null;
               return (
-                <div key={s.id} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 hover:border-zinc-700 transition-colors group">
+                <div key={s.id} className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-4 hover:border-zinc-700 transition-colors group">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div

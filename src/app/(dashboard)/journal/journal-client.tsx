@@ -391,7 +391,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Jurnal de Trading</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Jurnal de Trading</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             Analizează-ți tranzacțiile, emoțiile și lecțiile învățate.
           </p>

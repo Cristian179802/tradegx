@@ -74,7 +74,7 @@ export function AccountsTab() {
         <Button
           size="sm"
           onClick={() => { setEditingAccount(null); setDialogOpen(true); }}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
         >
           <Plus className="h-3.5 w-3.5 mr-1.5" />
           Adaugă

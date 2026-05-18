@@ -275,7 +275,7 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
             <Button
               onClick={handleImport}
               disabled={isLoading || !csvContent || !!fileError}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
             >
               {isLoading ? "Se importă..." : "Importă"}
             </Button>
