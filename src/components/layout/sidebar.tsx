@@ -7,9 +7,9 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard, BookOpen, Calculator, BarChart3, LineChart, Globe,
-  CalendarDays, Users, Settings, TrendingUp, ChevronLeft, ChevronRight,
-  LogOut, ChevronDown, Plus, Zap, User, NotebookPen, FlaskConical,
-  Brain, BellRing, PanelLeftClose, PanelLeftOpen,
+  CalendarDays, Users, Settings, TrendingUp, LogOut, ChevronDown,
+  Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
+  PanelLeftClose, PanelLeftOpen, Sparkles, Activity,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   proOnly?: boolean;
   badge?: string;
+  color?: string;
 }
 
 interface NavGroup {
@@ -39,43 +40,63 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Trading",
     items: [
-      { href: "/dashboard",    label: "Panou de Control", icon: LayoutDashboard },
-      { href: "/trades",       label: "Tranzacții",        icon: BookOpen },
-      { href: "/journal",      label: "Jurnal",            icon: NotebookPen },
-      { href: "/calculator",   label: "Calculator Lot",    icon: Calculator },
-      { href: "/accounts",     label: "Conturi",           icon: TrendingUp },
-      { href: "/analytics",    label: "Analiză",           icon: BarChart3 },
-      { href: "/backtesting",  label: "Backtesting",       icon: FlaskConical },
+      { href: "/dashboard",    label: "Panou de Control", icon: LayoutDashboard, color: "indigo" },
+      { href: "/trades",       label: "Tranzacții",        icon: BookOpen,        color: "violet" },
+      { href: "/journal",      label: "Jurnal",            icon: NotebookPen,     color: "emerald" },
+      { href: "/calculator",   label: "Calculator Lot",    icon: Calculator,      color: "amber" },
+      { href: "/accounts",     label: "Conturi",           icon: TrendingUp,      color: "sky" },
+      { href: "/analytics",    label: "Analiză",           icon: BarChart3,       color: "violet" },
+      { href: "/backtesting",  label: "Backtesting",       icon: FlaskConical,    color: "rose" },
     ],
   },
   {
     label: "AI",
     items: [
-      { href: "/ai-assistant", label: "AI Assistant", icon: Brain },
-      { href: "/alerts",       label: "Alerte AI",    icon: BellRing },
+      { href: "/ai-assistant", label: "AI Assistant", icon: Brain,    color: "violet" },
+      { href: "/alerts",       label: "Alerte AI",    icon: BellRing, color: "amber" },
     ],
   },
   {
     label: "Piețe",
     items: [
-      { href: "/charts",   label: "Grafice Live",      icon: LineChart },
-      { href: "/market",   label: "Selector Piață",    icon: Globe },
-      { href: "/calendar", label: "Calendar Economic", icon: CalendarDays },
+      { href: "/charts",   label: "Grafice Live",      icon: LineChart,    color: "emerald" },
+      { href: "/market",   label: "Selector Piață",    icon: Globe,        color: "sky" },
+      { href: "/calendar", label: "Calendar Economic", icon: CalendarDays, color: "amber" },
     ],
   },
   {
     label: "Comunitate",
     items: [
-      { href: "/community", label: "Comunitate", icon: Users, proOnly: true },
+      { href: "/community", label: "Comunitate", icon: Users, proOnly: true, color: "indigo" },
     ],
   },
   {
     label: "Cont",
     items: [
-      { href: "/settings", label: "Setări", icon: Settings },
+      { href: "/settings", label: "Setări", icon: Settings, color: "zinc" },
     ],
   },
 ];
+
+const COLOR_MAP: Record<string, { active: string; icon: string; glow: string }> = {
+  indigo:  { active: "bg-indigo-500/10 border-indigo-500/25",  icon: "text-indigo-400",  glow: "shadow-[0_0_8px_rgba(99,102,241,0.6)]"  },
+  violet:  { active: "bg-violet-500/10 border-violet-500/25",  icon: "text-violet-400",  glow: "shadow-[0_0_8px_rgba(139,92,246,0.6)]"  },
+  emerald: { active: "bg-emerald-500/10 border-emerald-500/25",icon: "text-emerald-400", glow: "shadow-[0_0_8px_rgba(52,211,153,0.6)]"  },
+  amber:   { active: "bg-amber-500/10 border-amber-500/25",    icon: "text-amber-400",   glow: "shadow-[0_0_8px_rgba(245,158,11,0.6)]"  },
+  sky:     { active: "bg-sky-500/10 border-sky-500/25",        icon: "text-sky-400",     glow: "shadow-[0_0_8px_rgba(14,165,233,0.6)]"  },
+  rose:    { active: "bg-rose-500/10 border-rose-500/25",      icon: "text-rose-400",    glow: "shadow-[0_0_8px_rgba(244,63,94,0.6)]"   },
+  zinc:    { active: "bg-zinc-800/80 border-zinc-700/60",      icon: "text-zinc-300",    glow: "shadow-[0_0_6px_rgba(161,161,170,0.4)]" },
+};
+
+const INDICATOR_MAP: Record<string, string> = {
+  indigo:  "bg-indigo-400 shadow-[0_0_6px_2px_rgba(99,102,241,0.7)]",
+  violet:  "bg-violet-400 shadow-[0_0_6px_2px_rgba(139,92,246,0.7)]",
+  emerald: "bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.7)]",
+  amber:   "bg-amber-400 shadow-[0_0_6px_2px_rgba(245,158,11,0.7)]",
+  sky:     "bg-sky-400 shadow-[0_0_6px_2px_rgba(14,165,233,0.7)]",
+  rose:    "bg-rose-400 shadow-[0_0_6px_2px_rgba(244,63,94,0.7)]",
+  zinc:    "bg-zinc-400 shadow-[0_0_6px_2px_rgba(161,161,170,0.5)]",
+};
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -84,8 +105,8 @@ export function Sidebar() {
   const isPro = session?.user?.plan === "PRO" || session?.user?.isTrialing;
 
   const userInitials = session?.user?.name
-    ? session.user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
-    : "AT";
+    ? session.user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "TG";
 
   return (
     <motion.aside
@@ -94,35 +115,56 @@ export function Sidebar() {
       transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="relative flex-shrink-0 h-screen bg-zinc-950 border-r border-zinc-800/50 flex flex-col overflow-hidden"
     >
-      {/* Subtle top glow */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+      {/* Top neon line */}
+      <div className="absolute top-0 left-0 right-0 h-px neon-line-indigo" />
+
+      {/* Ambient background glow */}
+      <div className="absolute top-0 left-0 right-0 h-64 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% -20%, rgba(99,102,241,0.08) 0%, transparent 70%)" }}
+      />
 
       {/* Logo */}
       <Link
         href="/dashboard"
-        className="flex items-center gap-2.5 px-3 py-2 h-14 border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors overflow-hidden group"
+        className="relative flex items-center gap-2.5 px-3 py-2 h-14 border-b border-zinc-800/50 hover:bg-zinc-900/40 transition-colors overflow-hidden group"
       >
-        <div className="shrink-0 w-9 h-9 relative flex items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 group-hover:border-indigo-500/30 transition-colors overflow-hidden">
-          <Image src="/logo.jpg" alt="TradeGX" width={36} height={36}
-            className="object-contain" style={{ mixBlendMode: "screen" }} priority />
+        {/* Logo icon */}
+        <div className="shrink-0 w-9 h-9 relative flex items-center justify-center rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800/80 group-hover:border-indigo-500/40 transition-all duration-300 overflow-hidden">
+          {/* Inner glow on hover */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 to-violet-500/0 group-hover:from-indigo-500/10 group-hover:to-violet-500/5 transition-all duration-300 rounded-xl" />
+          <Image
+            src="/logo.jpg"
+            alt="TradeGx"
+            width={36}
+            height={36}
+            className="object-contain relative z-10"
+            style={{ mixBlendMode: "screen" }}
+            priority
+          />
         </div>
+
         <AnimatePresence>
           {!sidebarCollapsed && (
-            <motion.span
+            <motion.div
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -8 }}
               transition={{ duration: 0.15 }}
-              className="font-black text-white tracking-tight whitespace-nowrap overflow-hidden text-[15px]"
+              className="flex flex-col overflow-hidden"
             >
-              Trade<span className="gradient-text-indigo">GX</span>
-            </motion.span>
+              <span className="font-black text-white tracking-tight whitespace-nowrap text-[15px] leading-tight">
+                Trade<span className="gradient-text-indigo">Gx</span>
+              </span>
+              <span className="text-[9px] font-bold text-zinc-600 tracking-[0.1em] uppercase whitespace-nowrap">
+                Pro Trading Journal
+              </span>
+            </motion.div>
           )}
         </AnimatePresence>
       </Link>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-2">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-2 scrollbar-hide">
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="mb-0.5">
             <AnimatePresence>
@@ -143,33 +185,43 @@ export function Sidebar() {
               const Icon = item.icon;
               const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
               const locked = item.proOnly && !isPro;
+              const colorKey = item.color ?? "indigo";
+              const colors = COLOR_MAP[colorKey] ?? COLOR_MAP.indigo;
+              const indicatorClass = INDICATOR_MAP[colorKey] ?? INDICATOR_MAP.indigo;
 
               return (
                 <Link
                   key={item.href}
                   href={locked ? "/pricing" : item.href}
                   className={cn(
-                    "relative flex items-center gap-3 mx-2 px-2.5 py-2 rounded-xl text-sm transition-all duration-200 group",
+                    "relative flex items-center gap-3 mx-2 px-2.5 py-[7px] rounded-xl text-sm transition-all duration-200 group",
                     isActive
-                      ? "bg-indigo-500/10 border border-indigo-500/20 text-white shadow-sm"
-                      : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/70 border border-transparent",
-                    locked && "opacity-50"
+                      ? cn("border text-white shadow-sm", colors.active)
+                      : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/60 border border-transparent",
+                    locked && "opacity-40 cursor-not-allowed"
                   )}
                 >
-                  {/* Active indicator */}
+                  {/* Neon active indicator */}
                   {isActive && (
                     <motion.div
-                      layoutId="nav-active"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-indigo-400 rounded-full shadow-[0_0_6px_2px_rgba(99,102,241,0.5)]"
+                      layoutId="nav-active-bar"
+                      className={cn(
+                        "absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full",
+                        indicatorClass
+                      )}
                       transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                     />
                   )}
 
+                  {/* Icon */}
                   <Icon className={cn(
-                    "w-[17px] h-[17px] shrink-0 transition-colors",
-                    isActive ? "text-indigo-400" : "text-zinc-600 group-hover:text-zinc-300"
+                    "w-[17px] h-[17px] shrink-0 transition-all duration-200",
+                    isActive
+                      ? cn(colors.icon)
+                      : "text-zinc-600 group-hover:text-zinc-300"
                   )} />
 
+                  {/* Label */}
                   <AnimatePresence>
                     {!sidebarCollapsed && (
                       <motion.span
@@ -185,7 +237,7 @@ export function Sidebar() {
                   </AnimatePresence>
 
                   {!sidebarCollapsed && item.proOnly && !isPro && (
-                    <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] px-1.5 py-0 h-4">
+                    <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] px-1.5 py-0 h-4 font-bold">
                       PRO
                     </Badge>
                   )}
@@ -198,31 +250,40 @@ export function Sidebar() {
 
       {/* Bottom section */}
       <div className="border-t border-zinc-800/50 p-2.5 space-y-1.5">
-        {/* Trial banner */}
-        {!sidebarCollapsed && session?.user?.isTrialing && (
-          <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-indigo-500/10 to-violet-500/5 border border-indigo-500/20 rounded-xl p-2.5 mb-1"
-          >
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <Zap className="w-3 h-3 text-indigo-400" />
-              <span className="text-indigo-300 text-[11px] font-bold">Probă PRO activă</span>
-            </div>
-            <p className="text-zinc-600 text-[10px] leading-relaxed">
-              Actualizează pentru acces nelimitat.
-            </p>
-          </motion.div>
-        )}
+        {/* Trial / PRO banner */}
+        <AnimatePresence>
+          {!sidebarCollapsed && session?.user?.isTrialing && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              className="relative overflow-hidden bg-gradient-to-br from-indigo-500/12 via-violet-500/8 to-transparent border border-indigo-500/25 rounded-xl p-2.5 mb-1"
+            >
+              {/* Animated top line */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent" />
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Sparkles className="w-3 h-3 text-indigo-400" />
+                <span className="text-indigo-300 text-[11px] font-bold">Probă PRO activă</span>
+              </div>
+              <p className="text-zinc-500 text-[10px] leading-relaxed">
+                Actualizează pentru acces nelimitat la toate funcțiile.
+              </p>
+              <Link href="/pricing" className="mt-1.5 flex items-center gap-1 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
+                <Zap className="w-2.5 h-2.5" />
+                Upgrade acum
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="w-full flex items-center gap-2 px-2 py-2 h-auto hover:bg-zinc-900 rounded-xl text-left"
+              className="w-full flex items-center gap-2 px-2 py-2 h-auto hover:bg-zinc-900/80 rounded-xl text-left transition-all duration-200 group"
             >
-              <Avatar className="w-7 h-7 shrink-0 ring-1 ring-indigo-500/30">
+              <Avatar className="w-7 h-7 shrink-0 ring-1 ring-indigo-500/30 group-hover:ring-indigo-500/50 transition-all">
                 <AvatarImage src={session?.user?.image ?? ""} />
                 <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-violet-700 text-white text-[10px] font-bold">
                   {userInitials}
@@ -240,31 +301,40 @@ export function Sidebar() {
                     <p className="text-[12px] font-semibold text-zinc-200 truncate leading-tight">
                       {session?.user?.name ?? "Trader"}
                     </p>
-                    <p className="text-[10px] text-zinc-600 truncate">
-                      {session?.user?.email}
-                    </p>
+                    <div className="flex items-center gap-1">
+                      {isPro && (
+                        <span className="text-[9px] font-black text-indigo-400 tracking-wide">PRO</span>
+                      )}
+                      <p className="text-[10px] text-zinc-600 truncate">
+                        {session?.user?.email}
+                      </p>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
               {!sidebarCollapsed && (
-                <ChevronDown className="w-3 h-3 text-zinc-700 shrink-0" />
+                <ChevronDown className="w-3 h-3 text-zinc-700 shrink-0 group-hover:text-zinc-500 transition-colors" />
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" side="top" className="w-52 bg-zinc-900 border-zinc-800 shadow-xl">
+          <DropdownMenuContent
+            align="end"
+            side="top"
+            className="w-52 bg-zinc-900/95 border-zinc-800/80 shadow-2xl shadow-black/40 backdrop-blur-xl rounded-xl"
+          >
             <DropdownMenuItem asChild>
               <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
                 <User className="w-4 h-4 text-zinc-400" />
-                <span className="text-zinc-300">Profil</span>
+                <span className="text-zinc-300">Profil & Setări</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/settings/accounts" className="flex items-center gap-2 cursor-pointer">
-                <Plus className="w-4 h-4 text-zinc-400" />
-                <span className="text-zinc-300">Cont nou</span>
+              <Link href="/accounts" className="flex items-center gap-2 cursor-pointer">
+                <Activity className="w-4 h-4 text-zinc-400" />
+                <span className="text-zinc-300">Conturi Trading</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-zinc-800" />
+            <DropdownMenuSeparator className="bg-zinc-800/80" />
             <DropdownMenuItem
               onClick={() => signOut({ callbackUrl: "/" })}
               className="flex items-center gap-2 cursor-pointer text-rose-400 focus:text-rose-300 focus:bg-rose-500/10"
@@ -278,7 +348,8 @@ export function Sidebar() {
         {/* Collapse toggle */}
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="w-full flex items-center justify-center h-7 text-zinc-700 hover:text-zinc-400 hover:bg-zinc-900 rounded-xl transition-colors"
+          className="w-full flex items-center justify-center h-7 text-zinc-700 hover:text-zinc-400 hover:bg-zinc-900/60 rounded-xl transition-all duration-200"
+          title={sidebarCollapsed ? "Extinde bara laterală" : "Restrânge bara laterală"}
         >
           {sidebarCollapsed
             ? <PanelLeftOpen className="w-3.5 h-3.5" />

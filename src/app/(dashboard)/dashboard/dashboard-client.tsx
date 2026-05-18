@@ -115,11 +115,36 @@ interface KPICardProps {
 }
 
 const ACCENT_MAP = {
-  emerald: { bg: "kpi-profit", border: "border-emerald-500/20 hover:border-emerald-500/40", icon: "text-emerald-400", glow: "group-hover:glow-bull", value: "text-emerald-400" },
-  rose:    { bg: "kpi-loss",   border: "border-rose-500/20 hover:border-rose-500/40",     icon: "text-rose-400",    glow: "group-hover:glow-bear", value: "text-rose-400" },
-  indigo:  { bg: "kpi-accent", border: "border-indigo-500/20 hover:border-indigo-500/40", icon: "text-indigo-400",  glow: "group-hover:glow-accent", value: "text-indigo-300" },
-  amber:   { bg: "kpi-amber",  border: "border-amber-500/20 hover:border-amber-500/40",   icon: "text-amber-400",   glow: "group-hover:glow-amber", value: "text-amber-400" },
-  violet:  { bg: "kpi-accent", border: "border-violet-500/20 hover:border-violet-500/40", icon: "text-violet-400",  glow: "", value: "text-violet-300" },
+  emerald: {
+    bg: "kpi-profit", border: "border-emerald-500/20 hover:border-emerald-500/40",
+    icon: "text-emerald-400", value: "text-emerald-400",
+    iconBg: "bg-emerald-500/12 border-emerald-500/20",
+    glow: "bg-emerald-500/15", topLine: "via-emerald-500/40",
+  },
+  rose: {
+    bg: "kpi-loss", border: "border-rose-500/20 hover:border-rose-500/40",
+    icon: "text-rose-400", value: "text-rose-400",
+    iconBg: "bg-rose-500/12 border-rose-500/20",
+    glow: "bg-rose-500/15", topLine: "via-rose-500/40",
+  },
+  indigo: {
+    bg: "kpi-accent", border: "border-indigo-500/20 hover:border-indigo-500/40",
+    icon: "text-indigo-400", value: "text-indigo-300",
+    iconBg: "bg-indigo-500/12 border-indigo-500/20",
+    glow: "bg-indigo-500/15", topLine: "via-indigo-500/40",
+  },
+  amber: {
+    bg: "kpi-amber", border: "border-amber-500/20 hover:border-amber-500/40",
+    icon: "text-amber-400", value: "text-amber-400",
+    iconBg: "bg-amber-500/12 border-amber-500/20",
+    glow: "bg-amber-500/15", topLine: "via-amber-500/40",
+  },
+  violet: {
+    bg: "kpi-violet", border: "border-violet-500/20 hover:border-violet-500/40",
+    icon: "text-violet-400", value: "text-violet-300",
+    iconBg: "bg-violet-500/12 border-violet-500/20",
+    glow: "bg-violet-500/15", topLine: "via-violet-500/40",
+  },
 };
 
 function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, accent = "indigo", delay = 0 }: KPICardProps) {
@@ -127,14 +152,17 @@ function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, 
   return (
     <div
       className={cn(
-        "relative rounded-2xl border bg-zinc-900/80 p-4 overflow-hidden transition-all duration-300 group cursor-default animate-fade-in-up",
+        "relative rounded-2xl border bg-zinc-900/80 p-4 overflow-hidden transition-all duration-300 group cursor-default animate-fade-in-up premium-card",
         a.bg, a.border
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
+      {/* Top neon accent line */}
+      <div className={cn("absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500", a.topLine)} />
+
       {/* Top row */}
       <div className="flex items-center justify-between mb-3">
-        <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center", `bg-${accent === 'emerald' ? 'emerald' : accent === 'rose' ? 'rose' : accent === 'amber' ? 'amber' : 'indigo'}-500/15`)}>
+        <div className={cn("w-8 h-8 rounded-xl border flex items-center justify-center transition-transform duration-300 group-hover:scale-110", a.iconBg)}>
           <Icon className={cn("w-4 h-4", a.icon)} />
         </div>
         {sparkData && sparkData.length > 1 && (
@@ -143,32 +171,32 @@ function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, 
       </div>
 
       {/* Value */}
-      <p className={cn("text-2xl font-black num tracking-tight", a.value)}>
+      <p className={cn("text-[22px] font-black num tracking-tight leading-none mb-1", a.value)}>
         {value}
       </p>
 
       {/* Sub + trend */}
-      <div className="flex items-center justify-between mt-1">
-        <p className="text-[11px] text-zinc-500">{sub}</p>
+      <div className="flex items-center justify-between mt-1.5">
+        <p className="text-[11px] text-zinc-500 truncate flex-1">{sub}</p>
         {trend && trend !== "neutral" && (
-          <span className={cn("flex items-center gap-0.5 text-[10px] font-semibold",
-            trend === "up" ? "text-emerald-400" : "text-rose-400")}>
-            {trend === "up"
-              ? <ArrowUpRight className="w-3 h-3" />
-              : <ArrowDownRight className="w-3 h-3" />}
+          <span className={cn(
+            "flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ml-1",
+            trend === "up"
+              ? "text-emerald-400 bg-emerald-500/10"
+              : "text-rose-400 bg-rose-500/10"
+          )}>
+            {trend === "up" ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
           </span>
         )}
       </div>
 
       {/* Bottom label */}
-      <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-wider mt-2">{label}</p>
+      <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-2">{label}</p>
 
-      {/* Subtle corner glow */}
-      <div className={cn("absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500",
-        accent === "emerald" ? "bg-emerald-500/15"
-        : accent === "rose" ? "bg-rose-500/15"
-        : accent === "amber" ? "bg-amber-500/15"
-        : "bg-indigo-500/15"
+      {/* Corner glow */}
+      <div className={cn(
+        "absolute -top-8 -right-8 w-24 h-24 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+        a.glow
       )} />
     </div>
   );
@@ -330,21 +358,27 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between animate-fade-in-up">
         <div>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="live-dot-indigo" />
+            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.12em]">
+              Live
+            </span>
+          </div>
           <h1 className="text-2xl font-black text-zinc-100 tracking-tight">
-            {greetingRo(userName)} <span className="wave">👋</span>
+            {greetingRo(userName)} <span className="inline-block animate-[wave_2s_ease-in-out_infinite]">👋</span>
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            Performanța ta de trading, live.
+            Performanța ta de trading, în timp real.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2">
-            <CalendarDays className="w-3.5 h-3.5" />
-            <span className="capitalize">{todayRo()}</span>
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 bg-zinc-900/80 border border-zinc-800/60 rounded-xl px-3 py-2">
+            <CalendarDays className="w-3.5 h-3.5 text-zinc-500" />
+            <span className="capitalize text-zinc-400 font-medium">{todayRo()}</span>
           </div>
-          <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2">
+          <div className="flex items-center gap-2 bg-zinc-900/80 border border-zinc-800/60 rounded-xl px-3 py-2">
             <span className="live-dot" />
-            <span className="font-mono text-xs text-zinc-400 num">{currentTime}</span>
+            <span className="font-mono text-xs text-zinc-300 num tracking-wider">{currentTime}</span>
           </div>
         </div>
       </div>
@@ -411,14 +445,17 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 animate-fade-in-up delay-200">
 
         {/* Live TradingView Chart */}
-        <div className="lg:col-span-3 bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden" style={{ minHeight: 360 }}>
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/60">
-            <div className="flex items-center gap-2">
-              <BarChart2 className="w-4 h-4 text-indigo-400" />
-              <span className="text-sm font-semibold text-zinc-200">Grafic Live</span>
+        <div className="lg:col-span-3 bg-zinc-900/80 border border-zinc-800/70 rounded-2xl overflow-hidden premium-card" style={{ minHeight: 360 }}>
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/60 bg-zinc-900/60">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-indigo-500/12 border border-indigo-500/20 flex items-center justify-center">
+                <BarChart2 className="w-3.5 h-3.5 text-indigo-400" />
+              </div>
+              <span className="text-sm font-bold text-zinc-200">Grafic Live</span>
+              <span className="live-dot" />
             </div>
-            <Link href="/charts" className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
-              Full screen <ArrowRight className="w-3 h-3" />
+            <Link href="/charts" className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors font-semibold">
+              Ecran complet <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           <div className="p-1">
@@ -427,10 +464,12 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         </div>
 
         {/* Performance Breakdown */}
-        <div className="lg:col-span-1 bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 flex flex-col">
-          <div className="flex items-center gap-2 mb-4">
-            <Award className="w-4 h-4 text-indigo-400" />
-            <h2 className="text-sm font-semibold text-zinc-200">Performanță</h2>
+        <div className="lg:col-span-1 bg-zinc-900/80 border border-zinc-800/70 rounded-2xl p-5 flex flex-col premium-card">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-7 h-7 rounded-lg bg-violet-500/12 border border-violet-500/20 flex items-center justify-center">
+              <Award className="w-3.5 h-3.5 text-violet-400" />
+            </div>
+            <h2 className="text-sm font-bold text-zinc-200">Performanță</h2>
           </div>
 
           {/* Ring */}
@@ -461,11 +500,13 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       </div>
 
       {/* ── Equity Curve ───────────────────────────────────────────────────── */}
-      <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 animate-fade-in-up delay-300">
+      <div className="bg-zinc-900/80 border border-zinc-800/70 rounded-2xl p-5 animate-fade-in-up delay-300 premium-card">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-semibold text-zinc-200">Curbă Equity</h2>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/12 border border-emerald-500/20 flex items-center justify-center">
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+            </div>
+            <h2 className="text-sm font-bold text-zinc-200">Curbă Equity</h2>
           </div>
           {equityCurve.length > 1 && (
             <div className="flex items-center gap-1.5">
@@ -489,11 +530,13 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         <MarketSessions />
 
         {/* Pair Performance */}
-        <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5">
+        <div className="bg-zinc-900/80 border border-zinc-800/70 rounded-2xl p-5 premium-card">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400" />
-              <h2 className="text-sm font-semibold text-zinc-200">Top Perechi</h2>
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/12 border border-amber-500/20 flex items-center justify-center">
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+              </div>
+              <h2 className="text-sm font-bold text-zinc-200">Top Perechi</h2>
             </div>
             <Link href="/analytics" className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
               Toate <ChevronRight className="w-3 h-3" />
@@ -532,11 +575,13 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         </div>
 
         {/* Recent Trades */}
-        <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5">
+        <div className="bg-zinc-900/80 border border-zinc-800/70 rounded-2xl p-5 premium-card">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-zinc-500" />
-              <h2 className="text-sm font-semibold text-zinc-200">Tranzacții Recente</h2>
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center">
+                <Clock className="w-3.5 h-3.5 text-zinc-400" />
+              </div>
+              <h2 className="text-sm font-bold text-zinc-200">Tranzacții Recente</h2>
             </div>
             <Link href="/trades" className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
               Toate <ChevronRight className="w-3 h-3" />
