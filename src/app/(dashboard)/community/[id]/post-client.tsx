@@ -469,7 +469,7 @@ export function PostClient({
             onClick={submitComment}
             disabled={submitting || !comment.trim()}
             size="sm"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
+            className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white disabled:opacity-50 shadow-lg shadow-indigo-500/20"
           >
             {submitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />

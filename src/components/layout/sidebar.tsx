@@ -149,10 +149,10 @@ export function Sidebar() {
                   key={item.href}
                   href={locked ? "/pricing" : item.href}
                   className={cn(
-                    "relative flex items-center gap-3 mx-2 px-2.5 py-2 rounded-xl text-sm transition-all duration-150 group",
+                    "relative flex items-center gap-3 mx-2 px-2.5 py-2 rounded-xl text-sm transition-all duration-200 group",
                     isActive
-                      ? "bg-zinc-800/80 text-white"
-                      : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/70",
+                      ? "bg-indigo-500/10 border border-indigo-500/20 text-white shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/70 border border-transparent",
                     locked && "opacity-50"
                   )}
                 >
@@ -160,7 +160,7 @@ export function Sidebar() {
                   {isActive && (
                     <motion.div
                       layoutId="nav-active"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-indigo-400 rounded-full"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-indigo-400 rounded-full shadow-[0_0_6px_2px_rgba(99,102,241,0.5)]"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                     />
                   )}
@@ -222,7 +222,7 @@ export function Sidebar() {
               variant="ghost"
               className="w-full flex items-center gap-2 px-2 py-2 h-auto hover:bg-zinc-900 rounded-xl text-left"
             >
-              <Avatar className="w-7 h-7 shrink-0 ring-1 ring-zinc-700">
+              <Avatar className="w-7 h-7 shrink-0 ring-1 ring-indigo-500/30">
                 <AvatarImage src={session?.user?.image ?? ""} />
                 <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-violet-700 text-white text-[10px] font-bold">
                   {userInitials}

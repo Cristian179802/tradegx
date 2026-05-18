@@ -283,7 +283,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
           <Button asChild variant="outline" className="border-zinc-700 text-zinc-400">
             <Link href="/backtesting"><ArrowLeft className="h-4 w-4 mr-1.5" />Înapoi</Link>
           </Button>
-          <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button asChild className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20">
             <Link href={`/backtesting/new?strategyId=${backtest.strategy.id}`}>Încearcă din nou</Link>
           </Button>
         </div>

@@ -185,10 +185,12 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
       <div className="space-y-4">
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
-              <Globe className="h-4 w-4 text-indigo-400" />
+            <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
+                <Globe className="h-3.5 w-3.5 text-indigo-400" />
+              </div>
               Watchlist-ul meu
-              <Badge className="bg-zinc-800 text-zinc-400 border-0 text-xs">{items.length}</Badge>
+              <span className="text-[10px] font-semibold text-zinc-500 bg-zinc-800 border border-zinc-700 px-1.5 py-0.5 rounded-full">{items.length}</span>
             </h2>
             <span className="text-[11px] text-zinc-600">Click pe simbol → grafic</span>
           </div>
@@ -264,7 +266,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
               </select>
               <Button
                 size="sm"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shrink-0 shadow-md shadow-indigo-500/20"
                 onClick={() => {
                   if (customSymbol.trim()) {
                     addSymbol(customSymbol.trim(), customType, null);
@@ -282,7 +284,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
       {/* ── Simboluri populare ── */}
       <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden flex flex-col">
         <div className="px-5 py-4 border-b border-zinc-800 space-y-3">
-          <h2 className="text-sm font-semibold text-zinc-300">Simboluri disponibile</h2>
+          <h2 className="text-sm font-bold text-zinc-200">Simboluri disponibile</h2>
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
@@ -300,10 +302,10 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                 key={cat}
                 onClick={() => setCategory(cat)}
                 className={cn(
-                  "text-[11px] px-2.5 py-1 rounded-md border transition-colors",
+                  "text-[11px] px-2.5 py-1 rounded-xl border transition-all duration-150",
                   category === cat
-                    ? "bg-indigo-600 border-indigo-500 text-white"
-                    : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
+                    ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300 font-semibold"
+                    : "border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
                 )}
               >
                 {cat}

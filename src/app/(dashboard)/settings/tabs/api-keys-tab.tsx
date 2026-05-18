@@ -292,7 +292,7 @@ function MetaApiPanel() {
               size="sm"
               onClick={() => handleSync(acc.id)}
               disabled={syncing[acc.id] || !linking[acc.id]}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs"
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs shadow-md shadow-indigo-500/20"
             >
               {syncing[acc.id] ? (
                 <><Loader2 className="w-3 h-3 mr-1.5 animate-spin" />Se sincronizează...</>
@@ -516,7 +516,7 @@ function IntegrationCard({
               size="sm"
               onClick={handleSave}
               disabled={saving || !allFilled}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white"
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
             >
               {saving ? (
                 <><Loader2 className="w-3 h-3 mr-1.5 animate-spin" />Se verifică...</>

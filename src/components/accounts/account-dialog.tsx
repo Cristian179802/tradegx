@@ -678,7 +678,7 @@ function StepCSV({
       )}
 
       <Button onClick={handleImport} disabled={!file || loading}
-        className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold h-10">
+        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold h-10 shadow-lg shadow-indigo-500/20">
         {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se procesează...</> : <><Upload className="w-4 h-4 mr-2" />Importă tranzacțiile</>}
       </Button>
     </div>
@@ -860,7 +860,7 @@ function StepForm({
               className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">Anulează</Button>
           )}
           <Button type="submit" disabled={isSubmitting}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white">
+            className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20">
             {isSubmitting
               ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Se salvează...</>
               : isEdit ? "Salvează modificările" : "Creează cont"}

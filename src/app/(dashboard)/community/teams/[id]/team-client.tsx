@@ -328,7 +328,7 @@ export function TeamClient({ team: initial, currentUserId }: { team: Team; curre
             {/* Actions */}
             <div className="flex items-center gap-2 shrink-0">
               {!team.isMember && (
-                <Button onClick={joinTeam} disabled={joining} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                <Button onClick={joinTeam} disabled={joining} size="sm" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20">
                   {joining ? <Loader2 className="h-4 w-4 animate-spin" /> : <><UserPlus className="h-3.5 w-3.5 mr-1.5" />Alătură-te</>}
                 </Button>
               )}

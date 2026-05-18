@@ -63,7 +63,7 @@ function VerifyEmailContent() {
           </p>
           <div className="flex gap-3 justify-center">
             <Link href="/register">
-              <Button className="bg-indigo-600 hover:bg-indigo-500 text-white">
+              <Button className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20">
                 Înregistrare
               </Button>
             </Link>

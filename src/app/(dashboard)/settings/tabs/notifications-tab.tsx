@@ -157,7 +157,7 @@ export function NotificationsTab() {
       <Button
         onClick={handleSave}
         disabled={isLoading}
-        className="bg-indigo-600 hover:bg-indigo-500 text-white"
+        className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
       >
         {isLoading ? (
           <Loader2 className="w-4 h-4 animate-spin mr-2" />

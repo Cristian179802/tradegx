@@ -210,10 +210,10 @@ export function TradingRulesTab({
                         type="button"
                         onClick={() => toggleDay(day.value)}
                         className={cn(
-                          "w-10 h-10 rounded-lg text-sm font-medium transition-all border",
+                          "w-11 h-11 rounded-xl text-sm font-bold transition-all border",
                           isBlocked
-                            ? "bg-rose-500/10 border-rose-500/30 text-rose-400"
-                            : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
+                            ? "bg-rose-500/12 border-rose-500/35 text-rose-400 shadow-sm shadow-rose-500/10"
+                            : "bg-zinc-900/80 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-200"
                         )}
                       >
                         {day.label}
@@ -279,7 +279,7 @@ export function TradingRulesTab({
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />

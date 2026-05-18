@@ -42,9 +42,14 @@ export function Topbar() {
 
       {/* Left: breadcrumb-style title */}
       <div className="flex items-center gap-2">
-        <span className="text-zinc-600 text-xs hidden sm:block">TradeGX</span>
+        <span className="text-zinc-600 text-xs hidden sm:block font-medium">TradeGX</span>
         <ChevronRight className="w-3 h-3 text-zinc-700 hidden sm:block" />
-        <h1 className="text-sm font-semibold text-zinc-200 tracking-tight">{page.title}</h1>
+        <div className="flex items-center gap-1.5">
+          {page.icon && (
+            <span className="text-sm leading-none">{page.icon}</span>
+          )}
+          <h1 className="text-sm font-bold text-zinc-100 tracking-tight">{page.title}</h1>
+        </div>
       </div>
 
       {/* Center: account switcher */}

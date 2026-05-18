@@ -89,7 +89,7 @@ export function BacktestingClient({
             Testează strategii pe date istorice reale — Yahoo Finance live data
           </p>
         </div>
-        <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
+        <Button asChild className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20 gap-2">
           <Link href="/backtesting/new">
             <Plus className="h-4 w-4" />
             Strategie nouă
@@ -165,7 +165,7 @@ export function BacktestingClient({
                     <p className="text-xs text-zinc-600 mb-3">Niciun backtest rulat</p>
                   )}
 
-                  <Button asChild size="sm" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8 text-xs">
+                  <Button asChild size="sm" className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white gap-1.5 h-8 text-xs shadow-md shadow-indigo-500/20">
                     <Link href={`/backtesting/new?strategyId=${s.id}`}>
                       <Play className="h-3 w-3" />
                       Rulează Backtest
