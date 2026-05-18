@@ -68,11 +68,13 @@ export function Topbar() {
   return (
     <div className="shrink-0">
       {/* ── Live market ticker strip ────────────────────────────────────── */}
-      <div className="h-7 border-b border-zinc-800/40 bg-zinc-950/80 overflow-hidden flex items-center">
+      <div className="h-8 border-b border-indigo-500/10 overflow-hidden flex items-center"
+        style={{ background: "linear-gradient(90deg, rgba(99,102,241,0.06) 0%, rgba(9,9,11,0.95) 30%, rgba(9,9,11,0.95) 70%, rgba(139,92,246,0.04) 100%)" }}>
         {/* Left label */}
-        <div className="shrink-0 flex items-center gap-1.5 px-3 border-r border-zinc-800/50 h-full bg-zinc-950/60">
+        <div className="shrink-0 flex items-center gap-1.5 px-3 border-r border-indigo-500/20 h-full"
+          style={{ background: "rgba(99,102,241,0.08)" }}>
           <span className="live-dot-indigo" />
-          <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest whitespace-nowrap">
+          <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest whitespace-nowrap">
             Live
           </span>
         </div>
@@ -89,7 +91,8 @@ export function Topbar() {
       </div>
 
       {/* ── Main topbar ─────────────────────────────────────────────────── */}
-      <header className="relative h-12 border-b border-zinc-800/50 bg-zinc-950/90 backdrop-blur-xl flex items-center justify-between px-5">
+      <header className="relative h-12 border-b border-zinc-800/60 backdrop-blur-xl flex items-center justify-between px-5"
+        style={{ background: "linear-gradient(90deg, rgba(13,13,18,0.98) 0%, rgba(9,9,11,0.98) 100%)" }}>
         {/* Bottom glow */}
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-700/40 to-transparent" />
 

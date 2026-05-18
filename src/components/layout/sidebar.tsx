@@ -78,24 +78,24 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-const COLOR_MAP: Record<string, { active: string; icon: string; glow: string }> = {
-  indigo:  { active: "bg-indigo-500/10 border-indigo-500/25",  icon: "text-indigo-400",  glow: "shadow-[0_0_8px_rgba(99,102,241,0.6)]"  },
-  violet:  { active: "bg-violet-500/10 border-violet-500/25",  icon: "text-violet-400",  glow: "shadow-[0_0_8px_rgba(139,92,246,0.6)]"  },
-  emerald: { active: "bg-emerald-500/10 border-emerald-500/25",icon: "text-emerald-400", glow: "shadow-[0_0_8px_rgba(52,211,153,0.6)]"  },
-  amber:   { active: "bg-amber-500/10 border-amber-500/25",    icon: "text-amber-400",   glow: "shadow-[0_0_8px_rgba(245,158,11,0.6)]"  },
-  sky:     { active: "bg-sky-500/10 border-sky-500/25",        icon: "text-sky-400",     glow: "shadow-[0_0_8px_rgba(14,165,233,0.6)]"  },
-  rose:    { active: "bg-rose-500/10 border-rose-500/25",      icon: "text-rose-400",    glow: "shadow-[0_0_8px_rgba(244,63,94,0.6)]"   },
-  zinc:    { active: "bg-zinc-800/80 border-zinc-700/60",      icon: "text-zinc-300",    glow: "shadow-[0_0_6px_rgba(161,161,170,0.4)]" },
+const COLOR_MAP: Record<string, { active: string; icon: string }> = {
+  indigo:  { active: "bg-indigo-500/20 border-indigo-400/50",  icon: "text-indigo-300"  },
+  violet:  { active: "bg-violet-500/20 border-violet-400/50",  icon: "text-violet-300"  },
+  emerald: { active: "bg-emerald-500/20 border-emerald-400/50",icon: "text-emerald-300" },
+  amber:   { active: "bg-amber-500/20 border-amber-400/50",    icon: "text-amber-300"   },
+  sky:     { active: "bg-sky-500/20 border-sky-400/50",        icon: "text-sky-300"     },
+  rose:    { active: "bg-rose-500/20 border-rose-400/50",      icon: "text-rose-300"    },
+  zinc:    { active: "bg-zinc-700/60 border-zinc-500/50",      icon: "text-zinc-200"    },
 };
 
 const INDICATOR_MAP: Record<string, string> = {
-  indigo:  "bg-indigo-400 shadow-[0_0_6px_2px_rgba(99,102,241,0.7)]",
-  violet:  "bg-violet-400 shadow-[0_0_6px_2px_rgba(139,92,246,0.7)]",
-  emerald: "bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.7)]",
-  amber:   "bg-amber-400 shadow-[0_0_6px_2px_rgba(245,158,11,0.7)]",
-  sky:     "bg-sky-400 shadow-[0_0_6px_2px_rgba(14,165,233,0.7)]",
-  rose:    "bg-rose-400 shadow-[0_0_6px_2px_rgba(244,63,94,0.7)]",
-  zinc:    "bg-zinc-400 shadow-[0_0_6px_2px_rgba(161,161,170,0.5)]",
+  indigo:  "bg-indigo-400 shadow-[0_0_10px_3px_rgba(99,102,241,0.9),0_0_20px_6px_rgba(99,102,241,0.4)]",
+  violet:  "bg-violet-400 shadow-[0_0_10px_3px_rgba(139,92,246,0.9),0_0_20px_6px_rgba(139,92,246,0.4)]",
+  emerald: "bg-emerald-400 shadow-[0_0_10px_3px_rgba(52,211,153,0.9),0_0_20px_6px_rgba(52,211,153,0.4)]",
+  amber:   "bg-amber-400 shadow-[0_0_10px_3px_rgba(245,158,11,0.9),0_0_20px_6px_rgba(245,158,11,0.4)]",
+  sky:     "bg-sky-400 shadow-[0_0_10px_3px_rgba(14,165,233,0.9),0_0_20px_6px_rgba(14,165,233,0.4)]",
+  rose:    "bg-rose-400 shadow-[0_0_10px_3px_rgba(244,63,94,0.9),0_0_20px_6px_rgba(244,63,94,0.4)]",
+  zinc:    "bg-zinc-400 shadow-[0_0_8px_2px_rgba(161,161,170,0.7)]",
 };
 
 export function Sidebar() {
@@ -113,7 +113,8 @@ export function Sidebar() {
       initial={false}
       animate={{ width: sidebarCollapsed ? 64 : 240 }}
       transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="relative flex-shrink-0 h-screen bg-zinc-950 border-r border-zinc-800/50 flex flex-col overflow-hidden"
+      className="relative flex-shrink-0 h-screen border-r border-zinc-800/60 flex flex-col overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #0d0d12 0%, #09090b 100%)" }}
     >
       {/* Top neon line */}
       <div className="absolute top-0 left-0 right-0 h-px neon-line-indigo" />
@@ -196,8 +197,8 @@ export function Sidebar() {
                   className={cn(
                     "relative flex items-center gap-3 mx-2 px-2.5 py-[7px] rounded-xl text-sm transition-all duration-200 group",
                     isActive
-                      ? cn("border text-white shadow-sm", colors.active)
-                      : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/60 border border-transparent",
+                      ? cn("border text-white font-semibold", colors.active)
+                      : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/40",
                     locked && "opacity-40 cursor-not-allowed"
                   )}
                 >

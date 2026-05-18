@@ -116,34 +116,49 @@ interface KPICardProps {
 
 const ACCENT_MAP = {
   emerald: {
-    bg: "kpi-profit", border: "border-emerald-500/20 hover:border-emerald-500/40",
-    icon: "text-emerald-400", value: "text-emerald-400",
-    iconBg: "bg-emerald-500/12 border-emerald-500/20",
-    glow: "bg-emerald-500/15", topLine: "via-emerald-500/40",
+    card: "border-emerald-500/30 hover:border-emerald-400/60",
+    leftBar: "bg-emerald-400",
+    leftBarShadow: "shadow-[2px_0_12px_rgba(52,211,153,0.7)]",
+    topGrad: "from-emerald-500/12 to-transparent",
+    icon: "text-emerald-300", iconBg: "bg-emerald-500/20 border-emerald-400/30",
+    value: "text-emerald-300",
+    cornerGlow: "bg-emerald-500/20",
   },
   rose: {
-    bg: "kpi-loss", border: "border-rose-500/20 hover:border-rose-500/40",
-    icon: "text-rose-400", value: "text-rose-400",
-    iconBg: "bg-rose-500/12 border-rose-500/20",
-    glow: "bg-rose-500/15", topLine: "via-rose-500/40",
+    card: "border-rose-500/30 hover:border-rose-400/60",
+    leftBar: "bg-rose-400",
+    leftBarShadow: "shadow-[2px_0_12px_rgba(244,63,94,0.7)]",
+    topGrad: "from-rose-500/12 to-transparent",
+    icon: "text-rose-300", iconBg: "bg-rose-500/20 border-rose-400/30",
+    value: "text-rose-300",
+    cornerGlow: "bg-rose-500/20",
   },
   indigo: {
-    bg: "kpi-accent", border: "border-indigo-500/20 hover:border-indigo-500/40",
-    icon: "text-indigo-400", value: "text-indigo-300",
-    iconBg: "bg-indigo-500/12 border-indigo-500/20",
-    glow: "bg-indigo-500/15", topLine: "via-indigo-500/40",
+    card: "border-indigo-500/30 hover:border-indigo-400/60",
+    leftBar: "bg-indigo-400",
+    leftBarShadow: "shadow-[2px_0_12px_rgba(99,102,241,0.7)]",
+    topGrad: "from-indigo-500/12 to-transparent",
+    icon: "text-indigo-300", iconBg: "bg-indigo-500/20 border-indigo-400/30",
+    value: "text-indigo-200",
+    cornerGlow: "bg-indigo-500/20",
   },
   amber: {
-    bg: "kpi-amber", border: "border-amber-500/20 hover:border-amber-500/40",
-    icon: "text-amber-400", value: "text-amber-400",
-    iconBg: "bg-amber-500/12 border-amber-500/20",
-    glow: "bg-amber-500/15", topLine: "via-amber-500/40",
+    card: "border-amber-500/30 hover:border-amber-400/60",
+    leftBar: "bg-amber-400",
+    leftBarShadow: "shadow-[2px_0_12px_rgba(245,158,11,0.7)]",
+    topGrad: "from-amber-500/12 to-transparent",
+    icon: "text-amber-300", iconBg: "bg-amber-500/20 border-amber-400/30",
+    value: "text-amber-300",
+    cornerGlow: "bg-amber-500/20",
   },
   violet: {
-    bg: "kpi-violet", border: "border-violet-500/20 hover:border-violet-500/40",
-    icon: "text-violet-400", value: "text-violet-300",
-    iconBg: "bg-violet-500/12 border-violet-500/20",
-    glow: "bg-violet-500/15", topLine: "via-violet-500/40",
+    card: "border-violet-500/30 hover:border-violet-400/60",
+    leftBar: "bg-violet-400",
+    leftBarShadow: "shadow-[2px_0_12px_rgba(139,92,246,0.7)]",
+    topGrad: "from-violet-500/12 to-transparent",
+    icon: "text-violet-300", iconBg: "bg-violet-500/20 border-violet-400/30",
+    value: "text-violet-200",
+    cornerGlow: "bg-violet-500/20",
   },
 };
 
@@ -152,51 +167,59 @@ function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, 
   return (
     <div
       className={cn(
-        "relative rounded-2xl border bg-zinc-900/80 p-4 overflow-hidden transition-all duration-300 group cursor-default animate-fade-in-up premium-card",
-        a.bg, a.border
+        "relative rounded-2xl border overflow-hidden transition-all duration-300 group cursor-default animate-fade-in-up",
+        a.card
       )}
-      style={{ animationDelay: `${delay}ms` }}
+      style={{
+        animationDelay: `${delay}ms`,
+        background: "linear-gradient(135deg, rgba(24,24,28,0.97) 0%, rgba(15,15,18,0.99) 100%)",
+      }}
     >
-      {/* Top neon accent line */}
-      <div className={cn("absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500", a.topLine)} />
+      {/* Colored left accent bar with glow */}
+      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl", a.leftBar, a.leftBarShadow)} />
 
-      {/* Top row */}
-      <div className="flex items-center justify-between mb-3">
-        <div className={cn("w-8 h-8 rounded-xl border flex items-center justify-center transition-transform duration-300 group-hover:scale-110", a.iconBg)}>
-          <Icon className={cn("w-4 h-4", a.icon)} />
+      {/* Top color gradient wash */}
+      <div className={cn("absolute top-0 left-0 right-0 h-16 bg-gradient-to-b", a.topGrad)} />
+
+      <div className="relative pl-5 pr-4 pt-4 pb-3">
+        {/* Top row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className={cn("w-8 h-8 rounded-xl border flex items-center justify-center", a.iconBg)}>
+            <Icon className={cn("w-4 h-4", a.icon)} />
+          </div>
+          {sparkData && sparkData.length > 1 && (
+            <Sparkline data={sparkData} color={sparkColor ?? "#6366f1"} width={60} height={22} filled />
+          )}
         </div>
-        {sparkData && sparkData.length > 1 && (
-          <Sparkline data={sparkData} color={sparkColor ?? "#6366f1"} width={64} height={24} filled />
-        )}
+
+        {/* Value */}
+        <p className={cn("text-[22px] font-black num tracking-tight leading-none mb-1", a.value)}>
+          {value}
+        </p>
+
+        {/* Sub + trend */}
+        <div className="flex items-center justify-between mt-1.5">
+          <p className="text-[11px] text-zinc-500 truncate flex-1">{sub}</p>
+          {trend && trend !== "neutral" && (
+            <span className={cn(
+              "flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ml-1",
+              trend === "up"
+                ? "text-emerald-400 bg-emerald-500/15 border border-emerald-500/25"
+                : "text-rose-400 bg-rose-500/15 border border-rose-500/25"
+            )}>
+              {trend === "up" ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+            </span>
+          )}
+        </div>
+
+        {/* Bottom label */}
+        <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-2">{label}</p>
       </div>
 
-      {/* Value */}
-      <p className={cn("text-[22px] font-black num tracking-tight leading-none mb-1", a.value)}>
-        {value}
-      </p>
-
-      {/* Sub + trend */}
-      <div className="flex items-center justify-between mt-1.5">
-        <p className="text-[11px] text-zinc-500 truncate flex-1">{sub}</p>
-        {trend && trend !== "neutral" && (
-          <span className={cn(
-            "flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ml-1",
-            trend === "up"
-              ? "text-emerald-400 bg-emerald-500/10"
-              : "text-rose-400 bg-rose-500/10"
-          )}>
-            {trend === "up" ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-          </span>
-        )}
-      </div>
-
-      {/* Bottom label */}
-      <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-2">{label}</p>
-
-      {/* Corner glow */}
+      {/* Corner glow on hover */}
       <div className={cn(
-        "absolute -top-8 -right-8 w-24 h-24 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500",
-        a.glow
+        "absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500",
+        a.cornerGlow
       )} />
     </div>
   );
