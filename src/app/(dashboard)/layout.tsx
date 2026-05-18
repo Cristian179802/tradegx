@@ -18,10 +18,8 @@ export default async function DashboardLayout({
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Topbar />
         <main
-          className="flex-1 overflow-y-auto"
-          style={{
-            background: "radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.04) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(139,92,246,0.03) 0%, transparent 50%), #09090b",
-          }}
+          className="flex-1 overflow-y-auto mesh-bg"
+          style={{ background: "#09090b" }}
         >
           <div className="p-5 md:p-6 max-w-[1600px]">{children}</div>
         </main>

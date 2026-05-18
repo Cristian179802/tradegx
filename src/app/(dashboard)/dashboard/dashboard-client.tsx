@@ -193,7 +193,10 @@ function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, 
         </div>
 
         {/* Value */}
-        <p className={cn("text-[22px] font-black num tracking-tight leading-none mb-1", a.value)}>
+        <p className={cn(
+          "text-[22px] font-black num tracking-tight leading-none mb-1 animate-number-glow",
+          a.value
+        )}>
           {value}
         </p>
 
@@ -376,7 +379,13 @@ export function DashboardClient({ data }: { data: DashboardData }) {
   const maxPairPnl = Math.max(...pairPerformance.map(p => Math.abs(p.pnl)), 1);
 
   return (
-    <div className="space-y-5 pb-4">
+    <div className="space-y-5 pb-4 relative">
+      {/* Ambient orbs */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
+        <div className="orb orb-indigo absolute w-[600px] h-[600px] -top-40 -left-40 opacity-40" style={{ animationDelay: '0s' }} />
+        <div className="orb orb-violet absolute w-[500px] h-[500px] top-1/2 -right-32 opacity-30" style={{ animationDelay: '2s' }} />
+        <div className="orb orb-indigo absolute w-[400px] h-[400px] bottom-0 left-1/3 opacity-20" style={{ animationDelay: '4s' }} />
+      </div>
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between animate-fade-in-up">

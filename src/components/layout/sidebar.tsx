@@ -195,9 +195,9 @@ export function Sidebar() {
                   key={item.href}
                   href={locked ? "/pricing" : item.href}
                   className={cn(
-                    "relative flex items-center gap-3 mx-2 px-2.5 py-[7px] rounded-xl text-sm transition-all duration-200 group",
+                    "relative flex items-center gap-3 mx-2 px-2.5 py-[7px] rounded-xl text-sm transition-all duration-200 group cyber-scan",
                     isActive
-                      ? cn("border text-white font-semibold", colors.active)
+                      ? cn("nav-item-active text-white font-semibold", colors.icon)
                       : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/40",
                     locked && "opacity-40 cursor-not-allowed"
                   )}
