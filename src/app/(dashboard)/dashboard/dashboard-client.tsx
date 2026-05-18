@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  ArrowRight, CalendarDays, TrendingUp, TrendingDown,
+  Activity, Target, BarChart2, Zap, ChevronRight, Award,
+  ArrowUpRight, ArrowDownRight, Clock, Flame,
+} from "lucide-react";
 import { LiveChart } from "@/components/dashboard/live-chart";
 import { MarketSessions } from "@/components/dashboard/market-sessions";
+import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,68 +28,51 @@ interface DashboardData {
   avgLoss: number;
   currency: string;
   recentTrades: Array<{
-    id: string;
-    symbol: string;
-    direction: string;
-    lotSize: number;
-    pnlMoney: number | null;
-    pnlPips: number | null;
-    entryTime: string;
+    id: string; symbol: string; direction: string;
+    lotSize: number; pnlMoney: number | null; pnlPips: number | null; entryTime: string;
   }>;
   pairPerformance: Array<{ symbol: string; pnl: number; trades: number }>;
   equityCurve: Array<{ date: string; balance: number }>;
   sparklines: {
-    pnl: number[];
-    winRate: number[];
-    profitFactor: number[];
-    drawdown: number[];
-    trades: number[];
+    pnl: number[]; winRate: number[]; profitFactor: number[]; drawdown: number[]; trades: number[];
   };
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Utilities ────────────────────────────────────────────────────────────────
 
 function fmt(value: number, currency: string) {
   const abs = Math.abs(value);
   const sign = value >= 0 ? "+" : "-";
-  if (abs >= 1000) {
-    return `${sign}${(abs / 1000).toFixed(1)}k ${currency}`;
-  }
+  if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(2)}M ${currency}`;
+  if (abs >= 1000) return `${sign}${(abs / 1000).toFixed(1)}k ${currency}`;
   return `${sign}${abs.toFixed(2)} ${currency}`;
 }
 
-function fmtTime(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleString("ro-RO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
-}
-
-function todayRo() {
-  return new Date().toLocaleDateString("ro-RO", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+function fmtShort(value: number) {
+  const abs = Math.abs(value);
+  const sign = value >= 0 ? "+" : "-";
+  if (abs >= 1000) return `${sign}${(abs / 1000).toFixed(1)}k`;
+  return `${sign}${abs.toFixed(2)}`;
 }
 
 function greetingRo(name: string) {
   const h = new Date().getHours();
   const salut = h < 12 ? "Bună dimineața" : h < 18 ? "Bună ziua" : "Bună seara";
-  return `${salut}, ${name}! 👋`;
+  return `${salut}, ${name}`;
 }
 
-// ─── Sparkline ────────────────────────────────────────────────────────────────
+function todayRo() {
+  return new Date().toLocaleDateString("ro-RO", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
+}
+
+// ─── Animated Sparkline ───────────────────────────────────────────────────────
 
 function Sparkline({
-  data,
-  color = "#10b981",
-  width = 80,
-  height = 28,
+  data, color = "#10b981", width = 72, height = 28, filled = false,
 }: {
-  data: number[];
-  color?: string;
-  width?: number;
-  height?: number;
+  data: number[]; color?: string; width?: number; height?: number; filled?: boolean;
 }) {
   if (data.length < 2) return <div style={{ width, height }} />;
   const min = Math.min(...data);
@@ -93,123 +82,178 @@ function Sparkline({
     (i / (data.length - 1)) * width,
     height - ((v - min) / range) * (height - 2) - 1,
   ]);
-  const path = points
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`)
-    .join(" ");
+  const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+  const areaPath = path + ` L ${width} ${height} L 0 ${height} Z`;
+  const gradId = `sg-${color.replace("#", "")}`;
+
   return (
     <svg width={width} height={height} className="overflow-visible">
-      <path
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {filled && <path d={areaPath} fill={`url(#${gradId})`} />}
+      <path d={path} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-// ─── Equity Curve ─────────────────────────────────────────────────────────────
+// ─── KPI Card ─────────────────────────────────────────────────────────────────
 
-function EquityChart({ data }: { data: { date: string; balance: number }[] }) {
-  const W = 560;
-  const H = 160;
-  const PAD = { top: 16, right: 16, bottom: 28, left: 56 };
-  const chartW = W - PAD.left - PAD.right;
-  const chartH = H - PAD.top - PAD.bottom;
+interface KPICardProps {
+  label: string;
+  value: string;
+  sub?: string;
+  trend?: "up" | "down" | "neutral";
+  sparkData?: number[];
+  sparkColor?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  accent?: "emerald" | "rose" | "indigo" | "amber" | "violet";
+  delay?: number;
+}
 
+const ACCENT_MAP = {
+  emerald: { bg: "kpi-profit", border: "border-emerald-500/20 hover:border-emerald-500/40", icon: "text-emerald-400", glow: "group-hover:glow-bull", value: "text-emerald-400" },
+  rose:    { bg: "kpi-loss",   border: "border-rose-500/20 hover:border-rose-500/40",     icon: "text-rose-400",    glow: "group-hover:glow-bear", value: "text-rose-400" },
+  indigo:  { bg: "kpi-accent", border: "border-indigo-500/20 hover:border-indigo-500/40", icon: "text-indigo-400",  glow: "group-hover:glow-accent", value: "text-indigo-300" },
+  amber:   { bg: "kpi-amber",  border: "border-amber-500/20 hover:border-amber-500/40",   icon: "text-amber-400",   glow: "group-hover:glow-amber", value: "text-amber-400" },
+  violet:  { bg: "kpi-accent", border: "border-violet-500/20 hover:border-violet-500/40", icon: "text-violet-400",  glow: "", value: "text-violet-300" },
+};
+
+function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, accent = "indigo", delay = 0 }: KPICardProps) {
+  const a = ACCENT_MAP[accent];
+  return (
+    <div
+      className={cn(
+        "relative rounded-2xl border bg-zinc-900/80 p-4 overflow-hidden transition-all duration-300 group cursor-default animate-fade-in-up",
+        a.bg, a.border
+      )}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {/* Top row */}
+      <div className="flex items-center justify-between mb-3">
+        <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center", `bg-${accent === 'emerald' ? 'emerald' : accent === 'rose' ? 'rose' : accent === 'amber' ? 'amber' : 'indigo'}-500/15`)}>
+          <Icon className={cn("w-4 h-4", a.icon)} />
+        </div>
+        {sparkData && sparkData.length > 1 && (
+          <Sparkline data={sparkData} color={sparkColor ?? "#6366f1"} width={64} height={24} filled />
+        )}
+      </div>
+
+      {/* Value */}
+      <p className={cn("text-2xl font-black num tracking-tight", a.value)}>
+        {value}
+      </p>
+
+      {/* Sub + trend */}
+      <div className="flex items-center justify-between mt-1">
+        <p className="text-[11px] text-zinc-500">{sub}</p>
+        {trend && trend !== "neutral" && (
+          <span className={cn("flex items-center gap-0.5 text-[10px] font-semibold",
+            trend === "up" ? "text-emerald-400" : "text-rose-400")}>
+            {trend === "up"
+              ? <ArrowUpRight className="w-3 h-3" />
+              : <ArrowDownRight className="w-3 h-3" />}
+          </span>
+        )}
+      </div>
+
+      {/* Bottom label */}
+      <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-wider mt-2">{label}</p>
+
+      {/* Subtle corner glow */}
+      <div className={cn("absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+        accent === "emerald" ? "bg-emerald-500/15"
+        : accent === "rose" ? "bg-rose-500/15"
+        : accent === "amber" ? "bg-amber-500/15"
+        : "bg-indigo-500/15"
+      )} />
+    </div>
+  );
+}
+
+// ─── Premium Equity Chart ─────────────────────────────────────────────────────
+
+function EquityChart({ data, currency }: { data: { date: string; balance: number }[]; currency: string }) {
   if (data.length < 2) {
     return (
-      <div className="flex items-center justify-center h-40 text-zinc-600 text-sm">
-        Date insuficiente pentru grafic
+      <div className="flex flex-col items-center justify-center h-44 gap-3">
+        <Activity className="w-8 h-8 text-zinc-700" />
+        <p className="text-sm text-zinc-600">Adaugă tranzacții pentru a vedea curba equity</p>
       </div>
     );
   }
 
-  const values = data.map((d) => d.balance);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
+  const W = 600; const H = 180;
+  const PAD = { top: 20, right: 16, bottom: 32, left: 60 };
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top - PAD.bottom;
+  const values = data.map(d => d.balance);
+  const minV = Math.min(...values);
+  const maxV = Math.max(...values);
+  const range = maxV - minV || 1;
+  const toX = (i: number) => PAD.left + (i / (data.length - 1)) * cW;
+  const toY = (v: number) => PAD.top + cH - ((v - minV) / range) * cH;
+  const isProfit = values[values.length - 1] >= values[0];
 
-  const toX = (i: number) => PAD.left + (i / (data.length - 1)) * chartW;
-  const toY = (v: number) => PAD.top + chartH - ((v - min) / range) * chartH;
+  const pts = data.map((d, i) => [toX(i), toY(d.balance)] as [number, number]);
+  const linePath = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+  const areaPath = linePath + ` L ${toX(data.length - 1)} ${PAD.top + cH} L ${PAD.left} ${PAD.top + cH} Z`;
 
-  const linePath = data
-    .map((d, i) => `${i === 0 ? "M" : "L"} ${toX(i).toFixed(1)} ${toY(d.balance).toFixed(1)}`)
-    .join(" ");
+  const lineColor = isProfit ? "#34d399" : "#f87171";
+  const gradStart = isProfit ? "rgba(52,211,153,0.25)" : "rgba(248,113,113,0.25)";
 
-  const areaPath =
-    linePath +
-    ` L ${toX(data.length - 1).toFixed(1)} ${(PAD.top + chartH).toFixed(1)} L ${PAD.left.toFixed(1)} ${(PAD.top + chartH).toFixed(1)} Z`;
-
-  // X-axis labels — show up to 5 evenly spaced
-  const xLabels: { i: number; label: string }[] = [];
   const step = Math.max(1, Math.floor((data.length - 1) / 4));
+  const xLabels: { i: number; label: string }[] = [];
   for (let i = 0; i < data.length; i += step) {
-    const d = new Date(data[i].date);
-    xLabels.push({
-      i,
-      label: d.toLocaleDateString("ro-RO", { day: "2-digit", month: "short" }),
-    });
+    xLabels.push({ i, label: new Date(data[i].date).toLocaleDateString("ro-RO", { day: "2-digit", month: "short" }) });
   }
-
-  // Y-axis labels — 4 ticks
-  const yTicks = Array.from({ length: 4 }, (_, k) => min + (range / 3) * k);
+  const yTicks = Array.from({ length: 4 }, (_, k) => minV + (range / 3) * k);
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
       <defs>
         <linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#6366f1" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+          <stop offset="0%" stopColor={lineColor} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={lineColor} stopOpacity="0" />
         </linearGradient>
+        <filter id="eqGlow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+          <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
       </defs>
 
       {/* Grid lines */}
       {yTicks.map((tick, k) => (
-        <line
-          key={k}
-          x1={PAD.left}
-          y1={toY(tick)}
-          x2={W - PAD.right}
-          y2={toY(tick)}
-          stroke="#27272a"
-          strokeWidth="1"
-        />
+        <line key={k} x1={PAD.left} y1={toY(tick)} x2={W - PAD.right} y2={toY(tick)}
+          stroke="#27272a" strokeWidth="1" strokeDasharray="3,4" />
       ))}
 
-      {/* Area fill */}
+      {/* Area */}
       <path d={areaPath} fill="url(#eqGrad)" />
 
-      {/* Line */}
-      <path d={linePath} fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Glow line (thicker, blurred) */}
+      <path d={linePath} fill="none" stroke={lineColor} strokeWidth="4" strokeOpacity="0.2" filter="url(#eqGlow)" />
 
-      {/* Y-axis labels */}
+      {/* Main line */}
+      <path d={linePath} fill="none" stroke={lineColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+      {/* Last point dot */}
+      <circle cx={pts[pts.length - 1][0]} cy={pts[pts.length - 1][1]} r="4" fill={lineColor} />
+      <circle cx={pts[pts.length - 1][0]} cy={pts[pts.length - 1][1]} r="7" fill={lineColor} fillOpacity="0.15" />
+
+      {/* Y labels */}
       {yTicks.map((tick, k) => (
-        <text
-          key={k}
-          x={PAD.left - 6}
-          y={toY(tick) + 4}
-          textAnchor="end"
-          fill="#71717a"
-          fontSize="9"
-          fontFamily="monospace"
-        >
+        <text key={k} x={PAD.left - 6} y={toY(tick) + 4} textAnchor="end" fill="#52525b" fontSize="9" fontFamily="monospace">
           {tick >= 1000 ? `${(tick / 1000).toFixed(0)}k` : tick.toFixed(0)}
         </text>
       ))}
 
-      {/* X-axis labels */}
+      {/* X labels */}
       {xLabels.map(({ i, label }) => (
-        <text
-          key={i}
-          x={toX(i)}
-          y={H - 4}
-          textAnchor="middle"
-          fill="#52525b"
-          fontSize="9"
-        >
+        <text key={i} x={toX(i)} y={H - 4} textAnchor="middle" fill="#52525b" fontSize="9">
           {label}
         </text>
       ))}
@@ -217,63 +261,47 @@ function EquityChart({ data }: { data: { date: string; balance: number }[] }) {
   );
 }
 
-// ─── Donut Chart ──────────────────────────────────────────────────────────────
+// ─── Win/Loss Ring ────────────────────────────────────────────────────────────
 
-function DonutChart({ wins, losses }: { wins: number; losses: number }) {
+function WinLossRing({ wins, losses, winRate }: { wins: number; losses: number; winRate: number | null }) {
   const total = wins + losses;
-  if (total === 0) {
-    return (
-      <div className="flex items-center justify-center w-24 h-24 rounded-full border-4 border-zinc-800">
-        <span className="text-zinc-600 text-xs">—</span>
-      </div>
-    );
-  }
-
-  const R = 38;
-  const CX = 48;
-  const CY = 48;
+  const R = 42; const CX = 52; const CY = 52; const SW = 8;
   const circumference = 2 * Math.PI * R;
-  const winFrac = wins / total;
+  const winFrac = total > 0 ? wins / total : 0;
   const winDash = winFrac * circumference;
 
   return (
-    <svg width="96" height="96" viewBox="0 0 96 96">
-      {/* Background ring */}
-      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#27272a" strokeWidth="10" />
-      {/* Loss arc (base) */}
-      <circle
-        cx={CX}
-        cy={CY}
-        r={R}
-        fill="none"
-        stroke="#f43f5e"
-        strokeWidth="10"
-        strokeDasharray={circumference}
-        strokeDashoffset={0}
-        strokeLinecap="butt"
-        transform={`rotate(-90 ${CX} ${CY})`}
-      />
-      {/* Win arc */}
-      <circle
-        cx={CX}
-        cy={CY}
-        r={R}
-        fill="none"
-        stroke="#34d399"
-        strokeWidth="10"
-        strokeDasharray={`${winDash} ${circumference - winDash}`}
-        strokeDashoffset={0}
-        strokeLinecap="butt"
-        transform={`rotate(-90 ${CX} ${CY})`}
-      />
-      {/* Center text */}
-      <text x={CX} y={CY - 4} textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">
-        {total}
-      </text>
-      <text x={CX} y={CY + 10} textAnchor="middle" fill="#71717a" fontSize="8">
-        trades
-      </text>
-    </svg>
+    <div className="flex flex-col items-center">
+      <div className="relative">
+        <svg width="104" height="104" viewBox="0 0 104 104">
+          {/* Track */}
+          <circle cx={CX} cy={CY} r={R} fill="none" stroke="#27272a" strokeWidth={SW} />
+          {/* Loss arc */}
+          {total > 0 && (
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#f87171" strokeWidth={SW}
+              strokeDasharray={circumference} strokeDashoffset={0} transform={`rotate(-90 ${CX} ${CY})`} strokeLinecap="round" />
+          )}
+          {/* Win arc */}
+          {total > 0 && (
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#34d399" strokeWidth={SW}
+              strokeDasharray={`${winDash - 2} ${circumference - winDash + 2}`}
+              strokeDashoffset={0} transform={`rotate(-90 ${CX} ${CY})`} strokeLinecap="round" />
+          )}
+          {/* Center */}
+          <text x={CX} y={CY - 5} textAnchor="middle" fill="white" fontSize="15" fontWeight="800" fontFamily="'JetBrains Mono', monospace">
+            {total === 0 ? "—" : winRate !== null ? `${winRate.toFixed(0)}%` : "—"}
+          </text>
+          <text x={CX} y={CY + 10} textAnchor="middle" fill="#71717a" fontSize="8" fontFamily="sans-serif">
+            {total === 0 ? "no trades" : "win rate"}
+          </text>
+        </svg>
+      </div>
+      <div className="flex gap-3 mt-1">
+        <span className="text-xs text-emerald-400 font-semibold">{wins}W</span>
+        <span className="text-zinc-700">/</span>
+        <span className="text-xs text-rose-400 font-semibold">{losses}L</span>
+      </div>
+    </div>
   );
 }
 
@@ -281,203 +309,220 @@ function DonutChart({ wins, losses }: { wins: number; losses: number }) {
 
 export function DashboardClient({ data }: { data: DashboardData }) {
   const {
-    userName,
-    totalTrades,
-    netPnl,
-    winRate,
-    profitFactor,
-    maxDrawdown,
-    wins,
-    losses,
-    bestTrade,
-    worstTrade,
-    avgWin,
-    avgLoss,
-    currency,
-    recentTrades,
-    pairPerformance,
-    equityCurve,
-    sparklines,
+    userName, totalTrades, netPnl, winRate, profitFactor, maxDrawdown,
+    wins, losses, bestTrade, worstTrade, avgWin, avgLoss, currency,
+    recentTrades, pairPerformance, equityCurve, sparklines,
   } = data;
 
-  const maxPairPnl = Math.max(...pairPerformance.map((p) => Math.abs(p.pnl)), 1);
+  const [currentTime, setCurrentTime] = useState("");
+  useEffect(() => {
+    const tick = () => setCurrentTime(new Date().toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
 
-  const kpiCards = [
-    {
-      label: "Profit Net",
-      value: fmt(netPnl, currency),
-      positive: netPnl >= 0,
-      sparkData: sparklines.pnl,
-      sparkColor: netPnl >= 0 ? "#34d399" : "#f43f5e",
-      sub: totalTrades > 0 ? `din ${totalTrades} trades` : "nicio tranzacție",
-    },
-    {
-      label: "Win Rate",
-      value: winRate !== null ? `${winRate.toFixed(1)}%` : "—",
-      positive: winRate !== null ? winRate >= 50 : undefined,
-      sparkData: sparklines.winRate,
-      sparkColor: "#818cf8",
-      sub: totalTrades > 0 ? `${wins}W / ${losses}L` : "nicio tranzacție",
-    },
-    {
-      label: "Profit Factor",
-      value: profitFactor !== null ? profitFactor.toFixed(2) : "—",
-      positive: profitFactor !== null ? profitFactor >= 1 : undefined,
-      sparkData: sparklines.profitFactor,
-      sparkColor: "#f59e0b",
-      sub: profitFactor !== null ? (profitFactor >= 1.5 ? "excelent" : profitFactor >= 1 ? "pozitiv" : "negativ") : "—",
-    },
-    {
-      label: "Max Drawdown",
-      value: maxDrawdown !== null ? `${maxDrawdown.toFixed(1)}%` : "—",
-      positive: maxDrawdown !== null ? maxDrawdown < 10 : undefined,
-      sparkData: sparklines.drawdown,
-      sparkColor: "#f43f5e",
-      sub: maxDrawdown !== null ? (maxDrawdown < 5 ? "excelent" : maxDrawdown < 15 ? "acceptabil" : "ridicat") : "—",
-    },
-    {
-      label: "Tranzacții",
-      value: totalTrades === 0 ? "—" : String(totalTrades),
-      positive: totalTrades > 0 ? true : undefined,
-      sparkData: sparklines.trades,
-      sparkColor: "#6366f1",
-      sub: `${wins} câștigate`,
-    },
-  ];
+  const maxPairPnl = Math.max(...pairPerformance.map(p => Math.abs(p.pnl)), 1);
 
   return (
-    <div className="space-y-6">
-      {/* Greeting */}
-      <div className="flex items-start justify-between">
+    <div className="space-y-5 pb-4">
+
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <div className="flex items-start justify-between animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">{greetingRo(userName)}</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">
+            {greetingRo(userName)} <span className="wave">👋</span>
+          </h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            Privire de ansamblu asupra performanței tale de trading.
+            Performanța ta de trading, live.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">
-          <CalendarDays className="w-4 h-4 text-zinc-600" />
-          <span className="capitalize">{todayRo()}</span>
-        </div>
-      </div>
-
-      {/* KPI Row */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        {kpiCards.map((card) => (
-          <div
-            key={card.label}
-            className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 transition-colors"
-          >
-            <div className="flex items-start justify-between mb-2">
-              <p className="text-xs text-zinc-500 font-medium">{card.label}</p>
-              <Sparkline data={card.sparkData} color={card.sparkColor} width={56} height={24} />
-            </div>
-            <p
-              className={`text-xl font-bold num ${
-                card.positive === true
-                  ? "text-emerald-400"
-                  : card.positive === false
-                  ? "text-rose-400"
-                  : "text-zinc-100"
-              }`}
-            >
-              {card.value}
-            </p>
-            <p className="text-[11px] text-zinc-600 mt-0.5">{card.sub}</p>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2">
+            <CalendarDays className="w-3.5 h-3.5" />
+            <span className="capitalize">{todayRo()}</span>
           </div>
-        ))}
+          <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2">
+            <span className="live-dot" />
+            <span className="font-mono text-xs text-zinc-400 num">{currentTime}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Middle Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        {/* Live Chart — 3 cols */}
-        <div className="lg:col-span-3 bg-zinc-900 border border-zinc-800 rounded-xl p-5" style={{ minHeight: 360 }}>
-          <LiveChart />
+      {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <KPICard
+          label="Profit Net"
+          value={totalTrades > 0 ? fmt(netPnl, currency) : "—"}
+          sub={totalTrades > 0 ? `din ${totalTrades} trades` : "nicio tranzacție"}
+          trend={netPnl > 0 ? "up" : netPnl < 0 ? "down" : "neutral"}
+          sparkData={sparklines.pnl}
+          sparkColor={netPnl >= 0 ? "#34d399" : "#f87171"}
+          icon={netPnl >= 0 ? TrendingUp : TrendingDown}
+          accent={netPnl >= 0 ? "emerald" : "rose"}
+          delay={0}
+        />
+        <KPICard
+          label="Win Rate"
+          value={winRate !== null ? `${winRate.toFixed(1)}%` : "—"}
+          sub={totalTrades > 0 ? `${wins}W / ${losses}L` : "—"}
+          trend={winRate !== null ? (winRate >= 50 ? "up" : "down") : "neutral"}
+          sparkData={sparklines.winRate}
+          sparkColor="#818cf8"
+          icon={Target}
+          accent="indigo"
+          delay={60}
+        />
+        <KPICard
+          label="Profit Factor"
+          value={profitFactor !== null ? profitFactor.toFixed(2) : "—"}
+          sub={profitFactor !== null ? (profitFactor >= 1.5 ? "excelent ✨" : profitFactor >= 1 ? "pozitiv" : "negativ") : "—"}
+          trend={profitFactor !== null ? (profitFactor >= 1 ? "up" : "down") : "neutral"}
+          sparkData={sparklines.profitFactor}
+          sparkColor="#f59e0b"
+          icon={Flame}
+          accent="amber"
+          delay={120}
+        />
+        <KPICard
+          label="Max Drawdown"
+          value={maxDrawdown !== null ? `${maxDrawdown.toFixed(1)}%` : "—"}
+          sub={maxDrawdown !== null ? (maxDrawdown < 5 ? "excelent" : maxDrawdown < 15 ? "acceptabil" : "ridicat ⚠️") : "—"}
+          trend={maxDrawdown !== null ? (maxDrawdown < 10 ? "up" : "down") : "neutral"}
+          sparkData={sparklines.drawdown}
+          sparkColor="#f87171"
+          icon={Activity}
+          accent="rose"
+          delay={180}
+        />
+        <KPICard
+          label="Tranzacții"
+          value={totalTrades === 0 ? "0" : String(totalTrades)}
+          sub={wins > 0 ? `${wins} câștigate` : "—"}
+          sparkData={sparklines.trades}
+          sparkColor="#a78bfa"
+          icon={BarChart2}
+          accent="violet"
+          delay={240}
+        />
+      </div>
+
+      {/* ── Middle Row: Chart + Breakdown ──────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 animate-fade-in-up delay-200">
+
+        {/* Live TradingView Chart */}
+        <div className="lg:col-span-3 bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden" style={{ minHeight: 360 }}>
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/60">
+            <div className="flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-indigo-400" />
+              <span className="text-sm font-semibold text-zinc-200">Grafic Live</span>
+            </div>
+            <Link href="/charts" className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
+              Full screen <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="p-1">
+            <LiveChart />
+          </div>
         </div>
 
-        {/* Performance Breakdown — 1 col */}
-        <div className="lg:col-span-1 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-zinc-200 mb-4">Performanță</h2>
+        {/* Performance Breakdown */}
+        <div className="lg:col-span-1 bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+            <Award className="w-4 h-4 text-indigo-400" />
+            <h2 className="text-sm font-semibold text-zinc-200">Performanță</h2>
+          </div>
+
+          {/* Ring */}
           <div className="flex justify-center mb-4">
-            <DonutChart wins={wins} losses={losses} />
+            <WinLossRing wins={wins} losses={losses} winRate={winRate} />
           </div>
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Câștiguri</span>
-              <span className="text-emerald-400 font-medium">{wins}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Pierderi</span>
-              <span className="text-rose-400 font-medium">{losses}</span>
-            </div>
-            <div className="h-px bg-zinc-800 my-1" />
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Cel mai bun</span>
-              <span className="text-emerald-400 font-medium num">+{bestTrade.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Cel mai rău</span>
-              <span className="text-rose-400 font-medium num">{worstTrade.toFixed(2)}</span>
-            </div>
-            <div className="h-px bg-zinc-800 my-1" />
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Avg câștig</span>
-              <span className="text-zinc-300 num">{avgWin.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Avg pierdere</span>
-              <span className="text-zinc-300 num">{avgLoss.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
 
+          {/* Stats */}
+          <div className="space-y-2 flex-1">
+            {[
+              { label: "Cel mai bun trade", value: fmtShort(bestTrade), color: "text-emerald-400" },
+              { label: "Cel mai slab", value: fmtShort(worstTrade), color: "text-rose-400" },
+              { label: "Avg câștig", value: `+${avgWin.toFixed(2)}`, color: "text-emerald-400" },
+              { label: "Avg pierdere", value: `-${Math.abs(avgLoss).toFixed(2)}`, color: "text-rose-400" },
+            ].map((row) => (
+              <div key={row.label} className="flex items-center justify-between py-1.5 border-b border-zinc-800/50 last:border-0">
+                <span className="text-[11px] text-zinc-500">{row.label}</span>
+                <span className={cn("text-xs font-bold num", row.color)}>{row.value}</span>
+              </div>
+            ))}
+          </div>
+
+          <Link href="/analytics"
+            className="mt-4 flex items-center justify-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 bg-indigo-500/8 hover:bg-indigo-500/15 border border-indigo-500/20 rounded-xl py-2.5 transition-all">
+            Analiză completă <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
 
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* ── Equity Curve ───────────────────────────────────────────────────── */}
+      <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 animate-fade-in-up delay-300">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <h2 className="text-sm font-semibold text-zinc-200">Curbă Equity</h2>
+          </div>
+          {equityCurve.length > 1 && (
+            <div className="flex items-center gap-1.5">
+              <span className={cn("text-xs font-bold num",
+                equityCurve[equityCurve.length - 1]?.balance >= equityCurve[0]?.balance
+                  ? "text-emerald-400" : "text-rose-400")}>
+                {equityCurve.length > 0 && equityCurve[equityCurve.length - 1]
+                  ? new Intl.NumberFormat("ro-RO", { minimumFractionDigits: 2 }).format(equityCurve[equityCurve.length - 1].balance) + ` ${currency}`
+                  : "—"}
+              </span>
+            </div>
+          )}
+        </div>
+        <EquityChart data={equityCurve} currency={currency} />
+      </div>
+
+      {/* ── Bottom Row ─────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in-up delay-400">
+
         {/* Market Sessions */}
         <MarketSessions />
 
         {/* Pair Performance */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+        <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-zinc-200">Performanță pe Pereche</h2>
-            <Link href="/analytics" className="text-[10px] text-indigo-400 hover:text-indigo-300">
-              Detalii →
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-amber-400" />
+              <h2 className="text-sm font-semibold text-zinc-200">Top Perechi</h2>
+            </div>
+            <Link href="/analytics" className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              Toate <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
           {pairPerformance.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-zinc-600 text-sm">
-              Nicio tranzacție înregistrată
+            <div className="flex flex-col items-center justify-center h-32 gap-2">
+              <BarChart2 className="w-7 h-7 text-zinc-700" />
+              <p className="text-sm text-zinc-600">Nicio tranzacție înregistrată</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {pairPerformance.map((pair) => {
+              {pairPerformance.slice(0, 6).map((pair) => {
                 const barWidth = (Math.abs(pair.pnl) / maxPairPnl) * 100;
-                const positive = pair.pnl >= 0;
+                const pos = pair.pnl >= 0;
                 return (
                   <div key={pair.symbol}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-semibold text-zinc-300">{pair.symbol}</span>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-bold text-zinc-300">{pair.symbol}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-zinc-600">{pair.trades} trades</span>
-                        <span
-                          className={`text-xs font-semibold num ${
-                            positive ? "text-emerald-400" : "text-rose-400"
-                          }`}
-                        >
-                          {positive ? "+" : ""}
-                          {pair.pnl.toFixed(2)}
+                        <span className="text-[10px] text-zinc-600">{pair.trades}t</span>
+                        <span className={cn("text-xs font-bold num", pos ? "text-emerald-400" : "text-rose-400")}>
+                          {pos ? "+" : ""}{pair.pnl.toFixed(2)}
                         </span>
                       </div>
                     </div>
                     <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${
-                          positive ? "bg-emerald-500" : "bg-rose-500"
-                        }`}
-                        style={{ width: `${barWidth}%` }}
-                      />
+                      <div className={cn("h-full rounded-full transition-all duration-700", pos ? "bg-gradient-to-r from-emerald-600 to-emerald-400" : "bg-gradient-to-r from-rose-600 to-rose-400")}
+                        style={{ width: `${barWidth}%` }} />
                     </div>
                   </div>
                 );
@@ -487,63 +532,45 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         </div>
 
         {/* Recent Trades */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+        <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-zinc-200">Tranzacții Recente</h2>
-            <Link href="/trades" className="text-[10px] text-indigo-400 hover:text-indigo-300">
-              Vezi toate →
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-zinc-500" />
+              <h2 className="text-sm font-semibold text-zinc-200">Tranzacții Recente</h2>
+            </div>
+            <Link href="/trades" className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              Toate <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
           {recentTrades.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-zinc-600 text-sm">
-              Nicio tranzacție înregistrată
+            <div className="flex flex-col items-center justify-center h-32 gap-2">
+              <Activity className="w-7 h-7 text-zinc-700" />
+              <p className="text-sm text-zinc-600">Nicio tranzacție înregistrată</p>
+              <Link href="/trades/new" className="text-xs text-indigo-400 hover:text-indigo-300 mt-1">
+                Adaugă prima tranzacție →
+              </Link>
             </div>
           ) : (
-            <div className="space-y-1">
-              {recentTrades.slice(0, 6).map((trade) => {
-                const positive = (trade.pnlMoney ?? 0) >= 0;
+            <div className="space-y-0.5">
+              {recentTrades.slice(0, 7).map((trade) => {
+                const pos = (trade.pnlMoney ?? 0) >= 0;
                 return (
-                  <Link
-                    key={trade.id}
-                    href={`/trades/${trade.id}`}
-                    className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-zinc-800/60 transition-colors group"
-                  >
-                    {/* Direction badge */}
-                    <span
-                      className={`text-[10px] font-bold w-8 text-center py-0.5 rounded ${
-                        trade.direction === "BUY"
-                          ? "bg-emerald-500/10 text-emerald-400"
-                          : "bg-rose-500/10 text-rose-400"
-                      }`}
-                    >
+                  <Link key={trade.id} href={`/trades/${trade.id}`}
+                    className="flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-zinc-800/60 transition-all group">
+                    <span className={cn(
+                      "text-[10px] font-bold w-9 text-center py-1 rounded-lg",
+                      trade.direction === "BUY"
+                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                    )}>
                       {trade.direction === "BUY" ? "BUY" : "SELL"}
                     </span>
-
-                    {/* Symbol */}
-                    <span className="text-xs font-semibold text-zinc-300 w-16 truncate">
-                      {trade.symbol}
+                    <span className="text-xs font-bold text-zinc-300 w-14 truncate">{trade.symbol}</span>
+                    <span className="text-[10px] text-zinc-600 w-8 num">{trade.lotSize.toFixed(2)}</span>
+                    <span className="flex-1 text-[10px] text-zinc-600 num text-right">
+                      {trade.pnlPips !== null ? `${trade.pnlPips >= 0 ? "+" : ""}${trade.pnlPips.toFixed(0)}p` : ""}
                     </span>
-
-                    {/* Lots */}
-                    <span className="text-[11px] text-zinc-600 w-10 num">{trade.lotSize.toFixed(2)}</span>
-
-                    {/* Pips */}
-                    <span
-                      className={`text-[11px] num flex-1 ${
-                        (trade.pnlPips ?? 0) >= 0 ? "text-zinc-500" : "text-zinc-600"
-                      }`}
-                    >
-                      {trade.pnlPips !== null
-                        ? `${trade.pnlPips >= 0 ? "+" : ""}${trade.pnlPips.toFixed(1)}p`
-                        : "—"}
-                    </span>
-
-                    {/* PnL */}
-                    <span
-                      className={`text-xs font-semibold num ml-auto ${
-                        positive ? "text-emerald-400" : "text-rose-400"
-                      }`}
-                    >
+                    <span className={cn("text-xs font-bold num ml-auto", pos ? "text-emerald-400" : "text-rose-400")}>
                       {trade.pnlMoney !== null
                         ? `${trade.pnlMoney >= 0 ? "+" : ""}${trade.pnlMoney.toFixed(2)}`
                         : "—"}
@@ -554,6 +581,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             </div>
           )}
         </div>
+
       </div>
     </div>
   );

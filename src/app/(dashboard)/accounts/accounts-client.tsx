@@ -8,13 +8,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { Plus, Pencil, Trash2, TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Plus, Pencil, Trash2, TrendingUp, TrendingDown, BarChart3,
+  RefreshCw, Wifi, WifiOff, ArrowUpRight, ArrowDownRight,
+  Activity, Shield, Zap,
+} from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 
 interface Account {
@@ -29,20 +29,28 @@ interface Account {
   leverage: number;
   maxDailyLossPct: string | number | null;
   maxDrawdownPct: string | number | null;
+  metaApiId?: string | null;
+  lastSyncedAt?: string | null;
   _count: { trades: number };
-  tradePnl?: string | number; // pre-computed from actual trade sums
+  tradePnl?: string | number;
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  DEMO: "bg-zinc-700/50 text-zinc-400 border-zinc-600",
-  CHALLENGE: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  LIVE: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+const TYPE_CFG: Record<string, { label: string; color: string; border: string; bg: string; dot: string }> = {
+  DEMO:      { label: "Demo",      color: "text-zinc-400",   border: "border-zinc-600/60",     bg: "bg-zinc-700/30",        dot: "bg-zinc-500" },
+  CHALLENGE: { label: "Challenge", color: "text-amber-400",  border: "border-amber-500/30",    bg: "bg-amber-500/10",       dot: "bg-amber-400" },
+  LIVE:      { label: "Live",      color: "text-emerald-400",border: "border-emerald-500/30",  bg: "bg-emerald-500/10",     dot: "bg-emerald-400" },
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  DEMO: "Demo",
-  CHALLENGE: "Challenge",
-  LIVE: "Live",
+const CARD_BORDER: Record<string, string> = {
+  DEMO:      "border-zinc-800 hover:border-zinc-700",
+  CHALLENGE: "border-amber-500/15 hover:border-amber-500/35",
+  LIVE:      "border-emerald-500/15 hover:border-emerald-500/35",
+};
+
+const CARD_GLOW: Record<string, string> = {
+  DEMO:      "",
+  CHALLENGE: "hover:shadow-amber-500/5 hover:shadow-lg",
+  LIVE:      "hover:shadow-emerald-500/5 hover:shadow-lg",
 };
 
 export function AccountsClient({ initialAccounts }: { initialAccounts: Account[] }) {
@@ -53,6 +61,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
   const [editingAccount, setEditingAccount] = React.useState<Account | null>(null);
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [syncingId, setSyncingId] = React.useState<string | null>(null);
 
   async function refresh() {
     const res = await fetch("/api/accounts");
@@ -66,7 +75,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
     const res = await fetch(`/api/accounts/${deletingId}`, { method: "DELETE" });
     if (res.ok) {
       toast({ title: "Cont șters" });
-      setAccounts((prev) => prev.filter((a) => a.id !== deletingId));
+      setAccounts(prev => prev.filter(a => a.id !== deletingId));
       router.refresh();
     } else {
       toast({ title: "Eroare", description: "Nu s-a putut șterge contul", variant: "destructive" });
@@ -75,36 +84,66 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
     setDeletingId(null);
   }
 
+  async function handleSync(account: Account) {
+    if (!account.metaApiId) return;
+    setSyncingId(account.id);
+    try {
+      const res = await fetch("/api/integrations/metaapi/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tradingAccountId: account.id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast({ title: `✅ Sincronizat!`, description: `${data.imported ?? 0} tranzacții noi importate.` });
+        refresh();
+      } else {
+        toast({ title: "Eroare sincronizare", description: data.error, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Eroare de rețea", variant: "destructive" });
+    } finally {
+      setSyncingId(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Conturi de trading</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Gestionează conturile tale DEMO, Challenge și Live
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Conturi de trading</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">
+            {accounts.length > 0
+              ? `${accounts.length} cont${accounts.length !== 1 ? "uri" : ""} conectat${accounts.length !== 1 ? "e" : ""}`
+              : "Gestionează conturile tale DEMO, Challenge și Live"}
           </p>
         </div>
         <Button
           onClick={() => { setEditingAccount(null); setDialogOpen(true); }}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
         >
           <Plus className="h-4 w-4 mr-2" />
           Adaugă cont
         </Button>
       </div>
 
+      {/* Empty state */}
       {accounts.length === 0 ? (
-        <div className="text-center py-16 rounded-lg border border-dashed border-zinc-800">
-          <BarChart3 className="h-10 w-10 text-zinc-700 mx-auto mb-3" />
-          <h3 className="text-zinc-400 font-medium mb-1">Niciun cont adăugat</h3>
-          <p className="text-zinc-600 text-sm mb-4">Adaugă primul tău cont de trading</p>
+        <div className="text-center py-20 rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/30">
+          <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+            <BarChart3 className="h-7 w-7 text-zinc-600" />
+          </div>
+          <h3 className="text-zinc-300 font-semibold mb-1">Niciun cont adăugat</h3>
+          <p className="text-zinc-600 text-sm mb-6 max-w-xs mx-auto">
+            Conectează direct contul MT4/MT5 sau importă un fișier CSV pentru a începe.
+          </p>
           <Button
             onClick={() => { setEditingAccount(null); setDialogOpen(true); }}
-            variant="outline"
-            className="border-zinc-700 text-zinc-400"
+            className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Adaugă cont
+            Adaugă primul cont
           </Button>
         </div>
       ) : (
@@ -112,91 +151,121 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
           {accounts.map((account) => {
             const balance = Number(account.balance);
             const initial = Number(account.initialBalance);
-            // Use pre-computed trade P&L if available (more accurate for imported trades),
-            // fall back to balance delta
-            const pnl = account.tradePnl !== undefined
-              ? Number(account.tradePnl)
-              : balance - initial;
+            const pnl = account.tradePnl !== undefined ? Number(account.tradePnl) : balance - initial;
             const pnlPct = initial > 0 ? (pnl / initial) * 100 : 0;
             const isProfit = pnl >= 0;
+            const cfg = TYPE_CFG[account.type] ?? TYPE_CFG.DEMO;
+            const isSyncing = syncingId === account.id;
+            const hasMetaApi = !!account.metaApiId;
 
             return (
               <div
                 key={account.id}
-                className="rounded-lg border border-zinc-800 bg-zinc-900 p-5 space-y-4 hover:border-zinc-700 transition-colors"
+                className={cn(
+                  "relative rounded-2xl border bg-zinc-900/80 p-5 space-y-4 transition-all duration-200 overflow-hidden group",
+                  CARD_BORDER[account.type],
+                  CARD_GLOW[account.type]
+                )}
               >
+                {/* Top glow for LIVE accounts */}
+                {account.type === "LIVE" && (
+                  <div className="absolute -top-8 -right-8 w-24 h-24 bg-emerald-500/8 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+                {account.type === "CHALLENGE" && (
+                  <div className="absolute -top-8 -right-8 w-24 h-24 bg-amber-500/8 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+
+                {/* Header */}
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-zinc-100">{account.name}</h3>
-                    {account.broker && (
-                      <p className="text-xs text-zinc-500 mt-0.5">{account.broker}</p>
-                    )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", cfg.dot)} />
+                      <h3 className="font-bold text-zinc-100 truncate text-[15px]">{account.name}</h3>
+                    </div>
+                    <p className="text-[11px] text-zinc-600 pl-3.5">
+                      {account.broker && `${account.broker}`}
+                      {account.accountNumber && ` · #${account.accountNumber}`}
+                      {account.leverage ? ` · 1:${account.leverage}` : ""}
+                    </p>
                   </div>
-                  <span
-                    className={cn(
-                      "text-xs px-2 py-0.5 rounded border",
-                      TYPE_COLORS[account.type]
-                    )}
-                  >
-                    {TYPE_LABELS[account.type]}
+                  <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-lg border shrink-0 ml-2", cfg.color, cfg.border, cfg.bg)}>
+                    {cfg.label}
                   </span>
                 </div>
 
+                {/* Balance + P&L */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs text-zinc-500 mb-0.5">Balanță</p>
-                    <p className="text-lg font-bold text-zinc-100 num">
+                  <div className="bg-zinc-800/40 rounded-xl p-3">
+                    <p className="text-[10px] text-zinc-600 mb-1 uppercase tracking-wider">Balanță</p>
+                    <p className="text-base font-black text-zinc-100 num truncate">
                       {formatCurrency(balance, account.currency)}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-zinc-500 mb-0.5">P&L total</p>
+                  <div className={cn("rounded-xl p-3", isProfit ? "bg-emerald-500/6" : "bg-rose-500/6")}>
+                    <p className="text-[10px] text-zinc-600 mb-1 uppercase tracking-wider">P&L Total</p>
                     <div className="flex items-center gap-1">
-                      {isProfit ? (
-                        <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                      ) : (
-                        <TrendingDown className="h-3.5 w-3.5 text-rose-400" />
-                      )}
-                      <p
-                        className={cn(
-                          "text-base font-semibold num",
-                          isProfit ? "text-emerald-400" : "text-rose-400"
-                        )}
-                      >
-                        {isProfit ? "+" : ""}
-                        {formatCurrency(pnl, account.currency)}
+                      {isProfit
+                        ? <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        : <ArrowDownRight className="w-3.5 h-3.5 text-rose-400 shrink-0" />}
+                      <p className={cn("text-base font-black num truncate", isProfit ? "text-emerald-400" : "text-rose-400")}>
+                        {isProfit ? "+" : ""}{formatCurrency(pnl, account.currency)}
                       </p>
                     </div>
-                    <p
-                      className={cn(
-                        "text-xs num",
-                        isProfit ? "text-emerald-500/70" : "text-rose-500/70"
-                      )}
-                    >
-                      {isProfit ? "+" : ""}
-                      {pnlPct.toFixed(2)}%
+                    <p className={cn("text-[10px] num", isProfit ? "text-emerald-500/60" : "text-rose-500/60")}>
+                      {isProfit ? "+" : ""}{pnlPct.toFixed(2)}%
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-zinc-600 pt-2 border-t border-zinc-800">
-                  <div className="flex gap-3">
-                    <span>{account._count.trades} trade-uri</span>
-                    {account.leverage && <span>1:{account.leverage}</span>}
+                {/* Prop firm rules if challenge */}
+                {account.type === "CHALLENGE" && (account.maxDailyLossPct || account.maxDrawdownPct) && (
+                  <div className="flex gap-2 text-[10px]">
+                    {account.maxDailyLossPct && (
+                      <div className="flex items-center gap-1 bg-amber-500/8 border border-amber-500/15 rounded-lg px-2 py-1">
+                        <Shield className="w-2.5 h-2.5 text-amber-400" />
+                        <span className="text-amber-400">DD zilnic: {Number(account.maxDailyLossPct)}%</span>
+                      </div>
+                    )}
                     {account.maxDrawdownPct && (
-                      <span>Max DD: {Number(account.maxDrawdownPct)}%</span>
+                      <div className="flex items-center gap-1 bg-amber-500/8 border border-amber-500/15 rounded-lg px-2 py-1">
+                        <Activity className="w-2.5 h-2.5 text-amber-400" />
+                        <span className="text-amber-400">Max DD: {Number(account.maxDrawdownPct)}%</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-zinc-600">{account._count.trades} trades</span>
+                    {hasMetaApi && (
+                      <div className="flex items-center gap-1">
+                        <Wifi className="w-2.5 h-2.5 text-indigo-400" />
+                        <span className="text-[10px] text-indigo-500">Live sync</span>
+                      </div>
                     )}
                   </div>
                   <div className="flex gap-1">
+                    {hasMetaApi && (
+                      <button
+                        onClick={() => handleSync(account)}
+                        disabled={isSyncing}
+                        className="p-1.5 rounded-lg hover:bg-indigo-500/10 text-zinc-600 hover:text-indigo-400 transition-colors"
+                        title="Sincronizează tranzacții"
+                      >
+                        <RefreshCw className={cn("h-3.5 w-3.5", isSyncing && "animate-spin")} />
+                      </button>
+                    )}
                     <button
                       onClick={() => { setEditingAccount(account); setDialogOpen(true); }}
-                      className="p-1.5 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-600 hover:text-zinc-300 transition-colors"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => setDeletingId(account.id)}
-                      className="p-1.5 rounded hover:bg-rose-500/10 text-zinc-500 hover:text-rose-400 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-rose-500/10 text-zinc-600 hover:text-rose-400 transition-colors"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -205,6 +274,22 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
               </div>
             );
           })}
+
+          {/* Add account card */}
+          <button
+            onClick={() => { setEditingAccount(null); setDialogOpen(true); }}
+            className="rounded-2xl border-2 border-dashed border-zinc-800 bg-transparent hover:border-indigo-500/40 hover:bg-indigo-500/4 transition-all duration-200 p-5 flex flex-col items-center justify-center gap-3 min-h-[200px] group"
+          >
+            <div className="w-12 h-12 rounded-2xl border border-zinc-800 group-hover:border-indigo-500/30 bg-zinc-900 group-hover:bg-indigo-500/10 flex items-center justify-center transition-all">
+              <Plus className="w-5 h-5 text-zinc-600 group-hover:text-indigo-400 transition-colors" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                Adaugă cont
+              </p>
+              <p className="text-[11px] text-zinc-700 mt-0.5">MT4 / MT5 / CSV / Manual</p>
+            </div>
+          </button>
         </div>
       )}
 
@@ -217,28 +302,21 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
 
       {/* Delete confirmation */}
       <Dialog open={!!deletingId} onOpenChange={(v) => !v && setDeletingId(null)}>
-        <DialogContent className="bg-zinc-900 border-zinc-800">
+        <DialogContent className="bg-zinc-950 border-zinc-800 shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-zinc-100">Șterge cont</DialogTitle>
           </DialogHeader>
-          <p className="text-zinc-400 text-sm">
-            Ești sigur că vrei să ștergi acest cont? Toate trade-urile asociate vor fi șterse
-            permanent.
+          <p className="text-zinc-400 text-sm leading-relaxed">
+            Ești sigur că vrei să ștergi acest cont? Toate tranzacțiile asociate vor fi șterse
+            permanent și nu pot fi recuperate.
           </p>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeletingId(null)}
-              className="border-zinc-700 text-zinc-300"
-            >
+            <Button variant="outline" onClick={() => setDeletingId(null)} className="border-zinc-700 text-zinc-300">
               Anulează
             </Button>
-            <Button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-rose-600 hover:bg-rose-700 text-white"
-            >
-              {isDeleting ? "Se șterge..." : "Șterge"}
+            <Button onClick={handleDelete} disabled={isDeleting}
+              className="bg-rose-600 hover:bg-rose-500 text-white">
+              {isDeleting ? "Se șterge..." : "Șterge definitiv"}
             </Button>
           </DialogFooter>
         </DialogContent>

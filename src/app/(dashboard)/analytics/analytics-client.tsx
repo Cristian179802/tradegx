@@ -69,15 +69,28 @@ function StatCard({
   positive?: boolean;
   icon: React.ComponentType<{ className?: string }>;
 }) {
+  const accentColor = positive === true ? "emerald" : positive === false ? "rose" : "indigo";
+  const bgMap: Record<string, string> = {
+    emerald: "kpi-profit border-emerald-500/20 hover:border-emerald-500/35",
+    rose:    "kpi-loss border-rose-500/20 hover:border-rose-500/35",
+    indigo:  "kpi-accent border-indigo-500/20 hover:border-indigo-500/35",
+  };
+  const iconMap: Record<string, string> = {
+    emerald: "text-emerald-400 bg-emerald-500/15",
+    rose:    "text-rose-400 bg-rose-500/15",
+    indigo:  "text-indigo-400 bg-indigo-500/15",
+  };
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs text-zinc-500">{label}</p>
-        <Icon className="h-4 w-4 text-zinc-600" />
+    <div className={cn("rounded-2xl border bg-zinc-900/80 p-4 transition-all duration-200 group", bgMap[accentColor])}>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">{label}</p>
+        <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center", iconMap[accentColor])}>
+          <Icon className="h-3.5 w-3.5" />
+        </div>
       </div>
       <p
         className={cn(
-          "text-xl font-bold num",
+          "text-2xl font-black num tracking-tight",
           positive === true
             ? "text-emerald-400"
             : positive === false
@@ -87,20 +100,22 @@ function StatCard({
       >
         {value}
       </p>
-      {sub && <p className="text-xs text-zinc-600 mt-0.5">{sub}</p>}
+      {sub && <p className="text-[11px] text-zinc-500 mt-1">{sub}</p>}
     </div>
   );
 }
 
 const darkTooltipStyle = {
   contentStyle: {
-    background: "#18181b",
-    border: "1px solid #27272a",
-    borderRadius: "8px",
+    background: "rgba(9,9,11,0.95)",
+    border: "1px solid rgba(63,63,70,0.6)",
+    borderRadius: "12px",
     color: "#e4e4e7",
     fontSize: "12px",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+    backdropFilter: "blur(12px)",
   },
-  cursor: { stroke: "#3f3f46", strokeWidth: 1 },
+  cursor: { stroke: "#3f3f46", strokeWidth: 1, strokeDasharray: "4 2" },
 };
 
 export function AnalyticsClient({ data }: { data: AnalyticsData }) {
@@ -161,7 +176,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       </div>
 
       {/* Equity curve */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
         <h2 className="text-sm font-semibold text-zinc-300 mb-4">Curbă de capitaluri</h2>
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={equityCurve} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
@@ -205,7 +220,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
 
       {/* Monthly P&L + Win rate by day */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <h2 className="text-sm font-semibold text-zinc-300 mb-4">P&L lunar</h2>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={monthlyPnl} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
@@ -226,7 +241,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <h2 className="text-sm font-semibold text-zinc-300 mb-4">Rată câștig pe zi</h2>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={winRateByDay} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
@@ -253,7 +268,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
 
       {/* P&L distribution + Instrument performance */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <h2 className="text-sm font-semibold text-zinc-300 mb-4">Distribuție P&L</h2>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={pnlDistribution} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
@@ -273,7 +288,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <h2 className="text-sm font-semibold text-zinc-300 mb-4">Performanță pe instrument</h2>
           <div className="space-y-2 mt-1">
             {winRateByInstrument?.map((item) => (
@@ -305,7 +320,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
 
       {/* Setup performance table */}
       {setupPerformance && setupPerformance.length > 0 && (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden">
           <div className="p-5 border-b border-zinc-800">
             <h2 className="text-sm font-semibold text-zinc-300">Performanță pe setup</h2>
           </div>
