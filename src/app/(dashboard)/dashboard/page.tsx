@@ -195,6 +195,7 @@ export default async function DashboardPage() {
           pnlMoney: t.pnlMoney !== null ? Number(t.pnlMoney) : null,
           pnlPips: t.pnlPips !== null ? Number(t.pnlPips) : null,
           entryTime: new Date(t.entryTime).toISOString(),
+          exitTime: t.exitTime ? new Date(t.exitTime).toISOString() : null,
         })),
         pairPerformance,
         equityCurve,

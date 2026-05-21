@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shell, PageHeader } from "@/components/layout/shell";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -61,19 +60,27 @@ export default async function SettingsPage() {
   const isTrialing = session.user.isTrialing ?? false;
 
   return (
-    <Shell>
-      <PageHeader
-        title="Setări"
-        description="Gestionează contul, regulile de trading și preferințele tale."
-      />
+    <div className="flex flex-col gap-6 pb-8 relative">
+      {/* Ambient orbs */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
+        <div className="orb orb-indigo absolute w-[500px] h-[500px] -top-40 -right-20 opacity-25" />
+        <div className="orb orb-violet absolute w-[400px] h-[400px] bottom-20 -left-20 opacity-20" />
+      </div>
 
-      <Tabs defaultValue="profile" className="space-y-5">
+      <div className="flex items-start justify-between gap-4 relative">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight neon-indigo">Setări</h1>
+          <p className="text-sm text-zinc-500 mt-0.5 leading-relaxed">Gestionează contul, regulile de trading și preferințele tale.</p>
+        </div>
+      </div>
+
+      <Tabs defaultValue="profile" className="space-y-5 relative">
         <TabsList className="bg-zinc-900/80 border border-zinc-800/80 p-1 h-auto flex-wrap gap-1 rounded-2xl backdrop-blur-sm">
           {TABS.map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-zinc-500 hover:text-zinc-300 text-sm rounded-xl px-3.5 py-1.5 transition-all font-medium"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/30 text-zinc-500 hover:text-zinc-300 text-sm rounded-xl px-3.5 py-1.5 transition-all font-medium"
             >
               {tab.label}
             </TabsTrigger>
@@ -115,6 +122,6 @@ export default async function SettingsPage() {
         <TabsContent value="api-keys"><ApiKeysTab /></TabsContent>
         <TabsContent value="privacy"><PrivacyTab /></TabsContent>
       </Tabs>
-    </Shell>
+    </div>
   );
 }

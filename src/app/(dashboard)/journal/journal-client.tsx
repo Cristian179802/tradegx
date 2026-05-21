@@ -533,12 +533,17 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
 
       {/* Trades List */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3">
-          <BookOpen className="w-10 h-10 text-zinc-700" />
-          <p className="text-zinc-500 text-sm">Nicio tranzacție găsită cu filtrele selectate.</p>
+        <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center mx-auto">
+            <BookOpen className="w-6 h-6 text-zinc-500" />
+          </div>
+          <div>
+            <p className="text-zinc-300 font-semibold">Nicio tranzacție găsită</p>
+            <p className="text-zinc-500 text-sm mt-1">Încearcă să schimbi filtrele sau adaugă tranzacții noi.</p>
+          </div>
           <button
             onClick={() => { setSearch(""); setDirFilter("ALL"); setResultFilter("ALL"); setJournaledFilter("ALL"); }}
-            className="text-xs text-indigo-400 hover:text-indigo-300"
+            className="text-sm text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/20"
           >
             Resetează filtrele
           </button>
