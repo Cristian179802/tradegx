@@ -81,22 +81,22 @@ function StatCard({
     indigo:  "text-indigo-400 bg-indigo-500/15",
   };
   return (
-    <div className={cn("rounded-2xl border bg-zinc-900/80 p-4 transition-all duration-200 group card-3d", bgMap[accentColor])}>
-      <div className="flex items-center justify-between mb-3">
+    <div className={cn("rounded-xl border bg-zinc-900/80 p-3 transition-all duration-200 group card-3d", bgMap[accentColor])}>
+      <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">{label}</p>
-        <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center", iconMap[accentColor])}>
-          <Icon className="h-3.5 w-3.5" />
+        <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center", iconMap[accentColor])}>
+          <Icon className="h-3 w-3" />
         </div>
       </div>
       <p
         className={cn(
-          "text-2xl font-black num tracking-tight animate-number-glow",
+          "text-lg font-black num tracking-tight animate-number-glow",
           positive === true ? "text-emerald-400 neon-emerald" : positive === false ? "text-rose-400 neon-rose" : "text-zinc-100"
         )}
       >
         {value}
       </p>
-      {sub && <p className="text-[11px] text-zinc-500 mt-1">{sub}</p>}
+      {sub && <p className="text-[10px] text-zinc-500 mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -172,9 +172,9 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       </div>
 
       {/* Equity curve */}
-      <div className="rounded-2xl border border-indigo-500/20 bg-zinc-900/80 p-5 cyber-card">
-        <h2 className="text-sm font-bold text-zinc-200 mb-4 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />Curbă de capitaluri</h2>
-        <ResponsiveContainer width="100%" height={220}>
+      <div className="rounded-xl border border-indigo-500/20 bg-zinc-900/80 p-4 cyber-card">
+        <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />Curbă de capitaluri</h2>
+        <ResponsiveContainer width="100%" height={150}>
           <AreaChart data={equityCurve} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
@@ -216,9 +216,9 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
 
       {/* Monthly P&L + Win rate by day */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-violet-500/20 bg-zinc-900/80 p-5 relative overflow-hidden">
-          <h2 className="text-sm font-bold text-zinc-200 mb-4 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />P&L lunar</h2>
-          <ResponsiveContainer width="100%" height={200}>
+        <div className="rounded-xl border border-violet-500/20 bg-zinc-900/80 p-4 relative overflow-hidden">
+          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />P&L lunar</h2>
+          <ResponsiveContainer width="100%" height={140}>
             <BarChart data={monthlyPnl} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
               <XAxis dataKey="month" tick={{ fill: "#71717a", fontSize: 11 }} tickLine={false} axisLine={false} />
@@ -237,9 +237,9 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-2xl border border-emerald-500/20 bg-zinc-900/80 p-5 relative overflow-hidden">
-          <h2 className="text-sm font-bold text-zinc-200 mb-4 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />Rată câștig pe zi</h2>
-          <ResponsiveContainer width="100%" height={200}>
+        <div className="rounded-xl border border-emerald-500/20 bg-zinc-900/80 p-4 relative overflow-hidden">
+          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />Rată câștig pe zi</h2>
+          <ResponsiveContainer width="100%" height={140}>
             <BarChart data={winRateByDay} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
               <XAxis dataKey="day" tick={{ fill: "#71717a", fontSize: 11 }} tickLine={false} axisLine={false} />
@@ -264,9 +264,9 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
 
       {/* P&L distribution + Instrument performance */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-amber-500/20 bg-zinc-900/80 p-5">
-          <h2 className="text-sm font-bold text-zinc-200 mb-4 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />Distribuție P&L</h2>
-          <ResponsiveContainer width="100%" height={200}>
+        <div className="rounded-xl border border-amber-500/20 bg-zinc-900/80 p-4">
+          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />Distribuție P&L</h2>
+          <ResponsiveContainer width="100%" height={140}>
             <BarChart data={pnlDistribution} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
               <XAxis dataKey="range" tick={{ fill: "#71717a", fontSize: 10 }} tickLine={false} axisLine={false} />
@@ -284,8 +284,8 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-2xl border border-rose-500/20 bg-zinc-900/80 p-5">
-          <h2 className="text-sm font-bold text-zinc-200 mb-4 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />Performanță pe instrument</h2>
+        <div className="rounded-xl border border-rose-500/20 bg-zinc-900/80 p-4">
+          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />Performanță pe instrument</h2>
           <div className="space-y-2 mt-1">
             {winRateByInstrument?.map((item) => (
               <div key={item.instrument} className="flex items-center gap-3">
@@ -316,8 +316,8 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
 
       {/* Setup performance table */}
       {setupPerformance && setupPerformance.length > 0 && (
-        <div className="rounded-2xl border border-zinc-700/60 bg-zinc-900/80 overflow-hidden relative">
-          <div className="p-5 border-b border-zinc-800">
+        <div className="rounded-xl border border-zinc-700/60 bg-zinc-900/80 overflow-hidden relative">
+          <div className="p-4 border-b border-zinc-800">
             <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />Performanță pe setup</h2>
           </div>
           <table className="w-full text-sm">
