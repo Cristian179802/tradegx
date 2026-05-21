@@ -32,7 +32,6 @@ interface DashboardData {
     lotSize: number; pnlMoney: number | null; pnlPips: number | null; entryTime: string; exitTime: string | null;
   }>;
   pairPerformance: Array<{ symbol: string; pnl: number; trades: number }>;
-  equityCurve: Array<{ date: string; balance: number }>;
   sparklines: {
     pnl: number[]; winRate: number[]; profitFactor: number[]; drawdown: number[]; trades: number[];
   };
@@ -228,93 +227,6 @@ function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, 
   );
 }
 
-// ─── Premium Equity Chart ─────────────────────────────────────────────────────
-
-function EquityChart({ data, currency }: { data: { date: string; balance: number }[]; currency: string }) {
-  if (data.length < 2) {
-    return (
-      <div className="flex flex-col items-center justify-center h-44 gap-3">
-        <Activity className="w-8 h-8 text-zinc-700" />
-        <p className="text-sm text-zinc-600">Adaugă tranzacții pentru a vedea curba equity</p>
-      </div>
-    );
-  }
-
-  const W = 600; const H = 180;
-  const PAD = { top: 20, right: 16, bottom: 32, left: 60 };
-  const cW = W - PAD.left - PAD.right;
-  const cH = H - PAD.top - PAD.bottom;
-  const values = data.map(d => d.balance);
-  const minV = Math.min(...values);
-  const maxV = Math.max(...values);
-  const range = maxV - minV || 1;
-  const toX = (i: number) => PAD.left + (i / (data.length - 1)) * cW;
-  const toY = (v: number) => PAD.top + cH - ((v - minV) / range) * cH;
-  const isProfit = values[values.length - 1] >= values[0];
-
-  const pts = data.map((d, i) => [toX(i), toY(d.balance)] as [number, number]);
-  const linePath = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
-  const areaPath = linePath + ` L ${toX(data.length - 1)} ${PAD.top + cH} L ${PAD.left} ${PAD.top + cH} Z`;
-
-  const lineColor = isProfit ? "#34d399" : "#f87171";
-  const gradStart = isProfit ? "rgba(52,211,153,0.25)" : "rgba(248,113,113,0.25)";
-
-  const step = Math.max(1, Math.floor((data.length - 1) / 4));
-  const xLabels: { i: number; label: string }[] = [];
-  for (let i = 0; i < data.length; i += step) {
-    xLabels.push({ i, label: new Date(data[i].date).toLocaleDateString("ro-RO", { day: "2-digit", month: "short" }) });
-  }
-  const yTicks = Array.from({ length: 4 }, (_, k) => minV + (range / 3) * k);
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
-      <defs>
-        <linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={lineColor} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={lineColor} stopOpacity="0" />
-        </linearGradient>
-        <filter id="eqGlow">
-          <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-          <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-      </defs>
-
-      {/* Grid lines */}
-      {yTicks.map((tick, k) => (
-        <line key={k} x1={PAD.left} y1={toY(tick)} x2={W - PAD.right} y2={toY(tick)}
-          stroke="#27272a" strokeWidth="1" strokeDasharray="3,4" />
-      ))}
-
-      {/* Area */}
-      <path d={areaPath} fill="url(#eqGrad)" />
-
-      {/* Glow line (thicker, blurred) */}
-      <path d={linePath} fill="none" stroke={lineColor} strokeWidth="4" strokeOpacity="0.2" filter="url(#eqGlow)" />
-
-      {/* Main line */}
-      <path d={linePath} fill="none" stroke={lineColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-
-      {/* Last point dot */}
-      <circle cx={pts[pts.length - 1][0]} cy={pts[pts.length - 1][1]} r="4" fill={lineColor} />
-      <circle cx={pts[pts.length - 1][0]} cy={pts[pts.length - 1][1]} r="7" fill={lineColor} fillOpacity="0.15" />
-
-      {/* Y labels */}
-      {yTicks.map((tick, k) => (
-        <text key={k} x={PAD.left - 6} y={toY(tick) + 4} textAnchor="end" fill="#52525b" fontSize="9" fontFamily="monospace">
-          {tick >= 1000 ? `${(tick / 1000).toFixed(0)}k` : tick.toFixed(0)}
-        </text>
-      ))}
-
-      {/* X labels */}
-      {xLabels.map(({ i, label }) => (
-        <text key={i} x={toX(i)} y={H - 4} textAnchor="middle" fill="#52525b" fontSize="9">
-          {label}
-        </text>
-      ))}
-    </svg>
-  );
-}
-
 // ─── Win/Loss Ring ────────────────────────────────────────────────────────────
 
 function WinLossRing({ wins, losses, winRate }: { wins: number; losses: number; winRate: number | null }) {
@@ -365,7 +277,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
   const {
     userName, totalTrades, netPnl, winRate, profitFactor, maxDrawdown,
     wins, losses, bestTrade, worstTrade, avgWin, avgLoss, currency,
-    recentTrades, pairPerformance, equityCurve, sparklines,
+    recentTrades, pairPerformance, sparklines,
   } = data;
 
   const [currentTime, setCurrentTime] = useState("");
@@ -612,30 +524,6 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             Analiză completă <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-      </div>
-
-      {/* ── Equity Curve ───────────────────────────────────────────────────── */}
-      <div className="bg-zinc-900/80 border border-zinc-800/70 rounded-2xl p-5 animate-fade-in-up delay-300 premium-card">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/12 border border-emerald-500/20 flex items-center justify-center">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-            </div>
-            <h2 className="text-sm font-bold text-zinc-200">Curbă Equity</h2>
-          </div>
-          {equityCurve.length > 1 && (
-            <div className="flex items-center gap-1.5">
-              <span className={cn("text-xs font-bold num",
-                equityCurve[equityCurve.length - 1]?.balance >= equityCurve[0]?.balance
-                  ? "text-emerald-400" : "text-rose-400")}>
-                {equityCurve.length > 0 && equityCurve[equityCurve.length - 1]
-                  ? new Intl.NumberFormat("ro-RO", { minimumFractionDigits: 2 }).format(equityCurve[equityCurve.length - 1].balance) + ` ${currency}`
-                  : "—"}
-              </span>
-            </div>
-          )}
-        </div>
-        <EquityChart data={equityCurve} currency={currency} />
       </div>
 
       {/* ── Bottom Row ─────────────────────────────────────────────────────── */}

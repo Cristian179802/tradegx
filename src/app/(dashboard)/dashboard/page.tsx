@@ -134,21 +134,6 @@ export default async function DashboardPage() {
     const day = new Date(dateSource).toISOString().slice(0, 10);
     dailyMap.set(day, (dailyMap.get(day) ?? 0) + Number(t.pnlMoney ?? 0));
   }
-  let runningBal = initialBalance;
-  const equityCurve = Array.from(dailyMap.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, pnl]) => {
-      runningBal += pnl;
-      return { date, balance: parseFloat(runningBal.toFixed(2)) };
-    });
-
-  // Ensure at least 2 points for chart
-  if (equityCurve.length === 0) {
-    const today = now.toISOString().slice(0, 10);
-    equityCurve.push({ date: today, balance: initialBalance });
-    equityCurve.push({ date: today, balance: initialBalance });
-  }
-
   // Sparkline data — last 7 daily pnl snapshots (reuse dailyMap)
   const sortedDays = Array.from(dailyMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
@@ -198,7 +183,6 @@ export default async function DashboardPage() {
           exitTime: t.exitTime ? new Date(t.exitTime).toISOString() : null,
         })),
         pairPerformance,
-        equityCurve,
         sparklines,
       }}
     />
