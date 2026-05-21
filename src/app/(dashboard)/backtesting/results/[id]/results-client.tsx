@@ -125,6 +125,7 @@ function KpiCard({
   accent,
   icon: Icon,
   glow,
+  neon,
 }: {
   label: string;
   value: string;
@@ -132,6 +133,7 @@ function KpiCard({
   accent?: "green" | "red" | "indigo" | "amber" | "zinc";
   icon: React.ComponentType<{ className?: string }>;
   glow?: boolean;
+  neon?: "emerald" | "rose" | "amber" | "violet";
 }) {
   const colorMap = {
     green:  "text-emerald-400",
@@ -150,7 +152,7 @@ function KpiCard({
   const col = accent ?? "zinc";
   return (
     <div className={cn(
-      "rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-4 transition-all duration-200",
+      "card-3d rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-4 transition-all duration-200",
       glow && `shadow-lg ${glowMap[col]}`
     )}>
       <div className="flex items-center justify-between mb-2">
@@ -165,7 +167,7 @@ function KpiCard({
           <Icon className={cn("h-3 w-3", colorMap[col])} />
         </div>
       </div>
-      <p className={cn("text-2xl font-black num tracking-tight", colorMap[col])}>{value}</p>
+      <p className={cn("text-2xl font-black num tracking-tight", colorMap[col], neon === "emerald" && "neon-emerald", neon === "rose" && "neon-rose", neon === "amber" && "neon-amber", neon === "violet" && "neon-violet")}>{value}</p>
       {sub && <p className="text-[11px] text-zinc-600 mt-0.5 num">{sub}</p>}
     </div>
   );
@@ -306,6 +308,45 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
 
   return (
     <div className="space-y-6 pb-10">
+      {/* ── Performance Summary Banner ── */}
+      {netPnl !== null && (
+        <div className={cn(
+          "rounded-2xl border px-5 py-3 bg-gradient-to-r to-transparent flex items-center gap-3",
+          netPnl >= 0
+            ? "from-emerald-500/10 border-emerald-500/20"
+            : "from-rose-500/10 border-rose-500/20"
+        )}>
+          <div className={cn(
+            "w-8 h-8 rounded-xl flex items-center justify-center",
+            netPnl >= 0 ? "bg-emerald-500/15" : "bg-rose-500/15"
+          )}>
+            {netPnl >= 0
+              ? <TrendingUp className="h-4 w-4 text-emerald-400" />
+              : <TrendingDown className="h-4 w-4 text-rose-400" />}
+          </div>
+          <div>
+            <p className={cn("text-sm font-bold", netPnl >= 0 ? "text-emerald-300" : "text-rose-300")}>
+              {netPnl >= 0 ? "Strategie profitabilă" : "Strategie în pierdere"}
+            </p>
+            <p className="text-xs text-zinc-500">
+              {netPnl >= 0
+                ? `Returnul total a fost ${pnlPct !== null ? `+${pnlPct.toFixed(2)}%` : "pozitiv"} față de balanța inițială`
+                : `Strategia a generat ${pnlPct !== null ? `${pnlPct.toFixed(2)}%` : "o pierdere"} față de balanța inițială`}
+            </p>
+          </div>
+          <div className="ml-auto text-right">
+            <p className={cn("text-xl font-black num", netPnl >= 0 ? "neon-emerald" : "neon-rose")}>
+              {netPnl >= 0 ? "+" : ""}{netPnl.toFixed(2)}$
+            </p>
+            {pnlPct !== null && (
+              <p className={cn("text-xs num", netPnl >= 0 ? "text-emerald-500" : "text-rose-500")}>
+                {pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(2)}%
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
@@ -317,7 +358,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
             style={{ background: backtest.strategy.color ?? "#6366f1" }}
           />
           <div>
-            <h1 className="text-xl font-bold text-zinc-100">{backtest.strategy.name}</h1>
+            <h1 className={cn("text-xl font-bold neon-violet")}>{backtest.strategy.name}</h1>
             <p className="text-xs text-zinc-500">
               {STRATEGY_TYPE_LABELS[backtest.strategy.type] ?? backtest.strategy.type}
               {" · "}{backtest.symbol} {backtest.timeframe}
@@ -357,6 +398,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
           accent={netPnl !== null && netPnl >= 0 ? "green" : "red"}
           icon={netPnl !== null && netPnl >= 0 ? TrendingUp : TrendingDown}
           glow
+          neon={netPnl !== null ? (netPnl >= 0 ? "emerald" : "rose") : undefined}
         />
         <KpiCard
           label="Win Rate"
@@ -364,6 +406,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
           sub={`${winners}W / ${losers}L`}
           accent={winRate !== null && winRate >= 50 ? "green" : "amber"}
           icon={Target}
+          neon={winRate !== null && winRate >= 50 ? "emerald" : undefined}
         />
         <KpiCard
           label="Profit Factor"
@@ -371,6 +414,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
           sub={pf !== null ? (pf >= 1.5 ? "Excelent" : pf >= 1 ? "Bun" : "Slab") : undefined}
           accent={pf !== null && pf >= 1 ? "green" : "red"}
           icon={Award}
+          neon={pf !== null && pf >= 1.5 ? "amber" : undefined}
         />
         <KpiCard
           label="Max Drawdown"
@@ -411,7 +455,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
       {/* ── Charts Row ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Equity Curve — spans 2 cols */}
-        <div className="lg:col-span-2 rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
+        <div className="lg:col-span-2 cyber-card rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-200">Curbă de capital</h3>
             <div className="flex items-center gap-3 text-xs text-zinc-500">
@@ -629,7 +673,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
                   const netTrade = pnl - comm;
                   const tradeNum = page * TRADES_PER_PAGE + i + 1;
                   return (
-                    <tr key={t.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                    <tr key={t.id} className="cyber-row border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
                       <td className="px-3 py-2.5 text-zinc-600 num">{tradeNum}</td>
                       <td className="px-3 py-2.5">
                         <span className={cn(

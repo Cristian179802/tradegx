@@ -108,11 +108,11 @@ const ALERT_CONFIG: Record<keyof AlertSettings, {
   },
 };
 
-const SEVERITY_CONFIG: Record<string, { label: string; cls: string; dot: string }> = {
+const SEVERITY_CONFIG: Record<string, { label: string; cls: string; dot: string; glow?: string }> = {
   LOW:      { label: "Scăzut",  cls: "text-zinc-400 bg-zinc-800/80 border-zinc-700",           dot: "bg-zinc-500" },
-  MEDIUM:   { label: "Mediu",   cls: "text-amber-400 bg-amber-500/10 border-amber-500/25",     dot: "bg-amber-400" },
-  HIGH:     { label: "Ridicat", cls: "text-rose-400 bg-rose-500/10 border-rose-500/25",        dot: "bg-rose-400" },
-  CRITICAL: { label: "Critic",  cls: "text-red-300 bg-red-500/15 border-red-500/30",           dot: "bg-red-400" },
+  MEDIUM:   { label: "Mediu",   cls: "text-amber-400 bg-amber-500/10 border-amber-500/25",     dot: "bg-amber-400", glow: "shadow-[0_0_8px_rgba(245,158,11,0.4)]" },
+  HIGH:     { label: "Ridicat", cls: "text-rose-400 bg-rose-500/10 border-rose-500/25",        dot: "bg-rose-400",  glow: "shadow-[0_0_8px_rgba(244,63,94,0.4)]" },
+  CRITICAL: { label: "Critic",  cls: "text-red-300 bg-red-500/15 border-red-500/30",           dot: "bg-red-400",   glow: "shadow-[0_0_12px_rgba(239,68,68,0.6)]" },
 };
 
 function fmtTime(iso: string) {
@@ -148,9 +148,20 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
   const [settings, setSettings] = useState<AlertSettings>(initialSettings);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
+  const [localAlerts, setLocalAlerts] = useState(alerts);
+  const [markingAll, setMarkingAll] = useState(false);
 
-  const unread = alerts.filter((a) => !a.isRead).length;
+  const unread = localAlerts.filter((a) => !a.isRead).length;
   const activeCount = Object.values(settings).filter(Boolean).length;
+
+  async function handleMarkAllRead() {
+    setMarkingAll(true);
+    try {
+      await fetch("/api/alerts", { method: "PATCH" });
+      setLocalAlerts((prev) => prev.map((a) => ({ ...a, isRead: true })));
+    } catch { /* silent */ }
+    setMarkingAll(false);
+  }
 
   function handleToggle(key: keyof AlertSettings, value: boolean) {
     setSettings((prev) => ({ ...prev, [key]: value }));
@@ -177,7 +188,7 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Alerte AI</h1>
+          <h1 className="text-2xl font-black neon-amber tracking-tight">Alerte AI</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             Protecție inteligentă împotriva greșelilor de trading.
           </p>
@@ -217,7 +228,7 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
         {[
           { label: "Alerte active", value: `${activeCount}/${Object.keys(settings).length}`, color: "text-emerald-400", bg: "bg-emerald-500/8 border-emerald-500/15" },
           { label: "Necitite", value: unread, color: unread > 0 ? "text-rose-400" : "text-zinc-400", bg: unread > 0 ? "bg-rose-500/8 border-rose-500/15" : "bg-zinc-800/40 border-zinc-700/40" },
-          { label: "Total primite", value: alerts.length, color: "text-zinc-300", bg: "bg-zinc-800/40 border-zinc-700/40" },
+          { label: "Total primite", value: localAlerts.length, color: "text-zinc-300", bg: "bg-zinc-800/40 border-zinc-700/40" },
         ].map(({ label, value, color, bg }) => (
           <div key={label} className={cn("rounded-xl border p-3.5 text-center", bg)}>
             <p className={cn("text-xl font-black", color)}>{value}</p>
@@ -244,7 +255,7 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
               <div
                 key={key}
                 className={cn(
-                  "flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200",
+                  "card-3d flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200",
                   enabled
                     ? `bg-zinc-900/80 ${config.borderActive}`
                     : "bg-zinc-900/40 border-zinc-800/50 opacity-60"
@@ -311,11 +322,23 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
 
           {/* Recent alerts */}
           <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">
-              Alerte Recente
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                Alerte Recente
+              </h3>
+              {unread > 0 && (
+                <button
+                  onClick={handleMarkAllRead}
+                  disabled={markingAll}
+                  className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-all disabled:opacity-50"
+                >
+                  <CheckCircle2 className="w-3 h-3" />
+                  {markingAll ? "..." : "Marchează toate ca citite"}
+                </button>
+              )}
+            </div>
 
-            {alerts.length === 0 ? (
+            {localAlerts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-500/8 border border-emerald-500/15 flex items-center justify-center">
                   <CheckCircle2 className="w-6 h-6 text-emerald-500/60" />
@@ -327,10 +350,11 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
               </div>
             ) : (
               <div className="space-y-2">
-                {alerts.slice(0, 8).map((alert) => {
+                {localAlerts.slice(0, 8).map((alert) => {
                   const config = ALERT_CONFIG[alert.type as keyof AlertSettings];
                   const Icon = config?.icon ?? BellRing;
                   const sev = SEVERITY_CONFIG[alert.severity] ?? SEVERITY_CONFIG.LOW;
+                  const isCritical = alert.severity === "CRITICAL";
 
                   return (
                     <div
@@ -339,14 +363,20 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
                         "flex gap-3 p-3 rounded-xl border transition-all",
                         alert.isRead
                           ? "bg-zinc-900/30 border-zinc-800/40"
-                          : "bg-zinc-800/50 border-zinc-700/60"
+                          : "bg-zinc-800/50 border-zinc-700/60",
+                        isCritical && !alert.isRead && "border-red-500/30"
                       )}
                     >
-                      <div className={cn(
-                        "w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 mt-0.5",
-                        config?.bg ?? "bg-zinc-800 border-zinc-700"
-                      )}>
-                        <Icon className={cn("w-3.5 h-3.5", config?.color ?? "text-zinc-400")} />
+                      <div className="relative shrink-0 mt-0.5">
+                        {isCritical && !alert.isRead && (
+                          <span className="absolute inset-0 rounded-lg bg-red-500/30 animate-ping" />
+                        )}
+                        <div className={cn(
+                          "relative w-7 h-7 rounded-lg border flex items-center justify-center",
+                          config?.bg ?? "bg-zinc-800 border-zinc-700"
+                        )}>
+                          <Icon className={cn("w-3.5 h-3.5", config?.color ?? "text-zinc-400")} />
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-0.5">
@@ -358,7 +388,8 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
                           </p>
                           <span className={cn(
                             "text-[9px] font-bold border rounded-full px-1.5 py-0.5 flex items-center gap-1 shrink-0",
-                            sev.cls
+                            sev.cls,
+                            sev.glow
                           )}>
                             <span className={cn("w-1 h-1 rounded-full", sev.dot)} />
                             {sev.label}

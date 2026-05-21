@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Globe, Search, ChevronDown, LineChart } from "lucide-react";
+import { Plus, Trash2, Globe, Search, ChevronDown, LineChart, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
@@ -183,7 +183,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
     <div className="grid gap-6 lg:grid-cols-2">
       {/* ── Watchlist ── */}
       <div className="space-y-4">
-        <div className="rounded-2xl border border-indigo-500/15 bg-zinc-900/80 overflow-hidden">
+        <div className="card-3d rounded-2xl border border-indigo-500/15 bg-zinc-900/80 overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
             <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
@@ -196,8 +196,14 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
           </div>
 
           {items.length === 0 ? (
-            <div className="py-12 text-center text-zinc-500 text-sm">
-              Niciun simbol adăugat. Alege din lista de mai jos.
+            <div className="py-14 flex flex-col items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                <Globe className="h-6 w-6 text-indigo-400/60" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-zinc-400">Watchlist gol</p>
+                <p className="text-xs text-zinc-600 mt-1">Adaugă simboluri din lista din dreapta pentru a le urmări</p>
+              </div>
             </div>
           ) : (
             <div className="divide-y divide-zinc-800/50">
@@ -209,7 +215,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                   {groupItems.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between px-5 py-3 hover:bg-zinc-800/40 transition-colors cursor-pointer group"
+                      className="flex items-center justify-between px-5 py-3 hover:bg-indigo-500/5 transition-colors cursor-pointer group border-b border-transparent hover:border-b-indigo-500/10"
                       onClick={() => openChart(item.symbol)}
                     >
                       <div className="flex items-center gap-3">
@@ -282,15 +288,16 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
       </div>
 
       {/* ── Simboluri populare ── */}
-      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden flex flex-col">
+      <div className="card-3d rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden flex flex-col">
         <div className="px-5 py-4 border-b border-zinc-800 space-y-3">
           <h2 className="text-sm font-bold text-zinc-200">Simboluri disponibile</h2>
           {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
+          <div className="relative group">
+            <div className="absolute inset-0 rounded-xl bg-indigo-500/0 group-focus-within:bg-indigo-500/5 transition-all duration-200 pointer-events-none rounded-lg" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
             <input
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg pl-8 pr-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-indigo-500"
-              placeholder="Caută simbol..."
+              className="w-full bg-zinc-800/80 border border-zinc-700 rounded-lg pl-8 pr-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/60 focus:shadow-[0_0_0_1px_rgba(99,102,241,0.2)] transition-all"
+              placeholder="Caută simbol... (ex: EURUSD, BTCUSD)"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -317,7 +324,15 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
         {/* Scrollable list */}
         <div className="overflow-y-auto divide-y divide-zinc-800/50" style={{ maxHeight: "520px" }}>
           {filteredPopular.length === 0 ? (
-            <div className="py-10 text-center text-zinc-500 text-sm">Niciun rezultat</div>
+            <div className="py-14 flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                <Search className="h-5 w-5 text-zinc-600" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-zinc-500">Niciun rezultat</p>
+                <p className="text-xs text-zinc-700 mt-1">Încearcă alt termen de căutare</p>
+              </div>
+            </div>
           ) : (
             filteredPopular.map((p) => {
               const inList = symbolSet.has(p.symbol);

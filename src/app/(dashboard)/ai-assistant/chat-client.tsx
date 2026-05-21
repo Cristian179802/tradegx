@@ -162,8 +162,8 @@ function MessageBubble({ msg, onCopy, onRegenerate }: {
         <div className={cn(
           "rounded-2xl px-4 py-3 relative",
           isAI
-            ? "bg-zinc-800/80 border border-zinc-700/50 rounded-tl-sm shadow-sm"
-            : "bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-tr-sm shadow-md shadow-indigo-500/20"
+            ? "bg-zinc-800/80 border border-zinc-700/60 rounded-tl-sm shadow-sm"
+            : "bg-indigo-500/15 border border-indigo-500/20 text-white rounded-tr-sm shadow-md shadow-indigo-500/10"
         )}>
           {isAI ? (
             <>
@@ -173,7 +173,7 @@ function MessageBubble({ msg, onCopy, onRegenerate }: {
               )}
             </>
           ) : (
-            <p className="text-sm text-white leading-relaxed">{msg.content}</p>
+            <p className="text-sm text-zinc-100 leading-relaxed">{msg.content}</p>
           )}
         </div>
 
@@ -381,8 +381,9 @@ function WelcomeScreen({ stats, onPrompt, onModeSelect }: {
               key={p}
               onClick={() => onPrompt(p)}
               className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-zinc-900 border transition-all text-left group",
-                `border-zinc-800 hover:border-${activeModeData.color}-500/30 hover:bg-${activeModeData.color}-500/5`
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-zinc-900/80 border transition-all text-left group",
+                `border-indigo-500/20 hover:border-indigo-500/50 hover:bg-indigo-500/5`,
+                "shadow-[0_0_0_0_rgba(99,102,241,0)] hover:shadow-[0_0_8px_rgba(99,102,241,0.2)]"
               )}
             >
               <Sparkles className={cn("w-3.5 h-3.5 shrink-0", `text-${activeModeData.color}-500`)} />
@@ -608,15 +609,17 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-3.5 border-b border-violet-500/20 bg-zinc-900/90 backdrop-blur-sm shrink-0" style={{ background: "linear-gradient(90deg, rgba(139,92,246,0.06) 0%, rgba(9,9,11,0.95) 100%)" }}>
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg shadow-violet-500/30" style={{ boxShadow: "0 0 16px rgba(139,92,246,0.4)" }}>
-            <Brain className="w-4.5 h-4.5 text-white" />
+            <Brain className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold gradient-text-cyber">TradeGX AI Coach</p>
+            <p className="text-sm font-bold gradient-text-cyber">🤖 TradeGx AI</p>
             <p className="text-[10px] text-zinc-500">
               {isStreaming ? (
-                <span className="text-violet-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse inline-block" />
-                  Generează răspuns...
+                <span className="text-violet-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce inline-block" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce inline-block" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce inline-block" style={{ animationDelay: "300ms" }} />
+                  <span className="ml-1">Generează răspuns...</span>
                 </span>
               ) : "Online · Claude Opus"}
             </p>

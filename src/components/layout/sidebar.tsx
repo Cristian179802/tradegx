@@ -21,6 +21,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/stores/auth.store";
+import { AlertsBadge } from "./alerts-badge";
 
 interface NavItem {
   href: string;
@@ -242,6 +243,9 @@ export function Sidebar() {
                     <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] px-1.5 py-0 h-4 font-bold">
                       PRO
                     </Badge>
+                  )}
+                  {!sidebarCollapsed && item.href === "/alerts" && (
+                    <AlertsBadge />
                   )}
                 </Link>
               );
