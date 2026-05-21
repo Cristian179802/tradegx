@@ -115,7 +115,7 @@ export function Sidebar() {
       initial={false}
       animate={{ width: sidebarCollapsed ? 64 : 240 }}
       transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="relative flex-shrink-0 h-screen border-r border-zinc-800/60 flex flex-col overflow-hidden"
+      className="relative flex-shrink-0 h-screen border-r border-zinc-800/60 flex flex-col overflow-visible"
       style={{ background: "linear-gradient(180deg, #0d0d12 0%, #09090b 100%)" }}
     >
       {/* Top neon line */}
@@ -125,6 +125,25 @@ export function Sidebar() {
       <div className="absolute top-0 left-0 right-0 h-64 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 50% -20%, rgba(99,102,241,0.08) 0%, transparent 70%)" }}
       />
+
+      {/* ── Floating edge collapse/expand handle ── */}
+      <motion.button
+        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        title={sidebarCollapsed ? "Extinde bara laterală" : "Restrânge bara laterală"}
+        className="absolute top-1/2 -translate-y-1/2 -right-3 z-50 flex items-center justify-center w-6 h-12 rounded-r-xl border border-l-0 border-zinc-700/60 bg-zinc-900 hover:bg-zinc-800 hover:border-indigo-500/50 text-zinc-600 hover:text-indigo-400 transition-all duration-200 shadow-lg group"
+        style={{ boxShadow: "2px 0 16px rgba(0,0,0,0.5)" }}
+        whileHover={{ x: 2, scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <motion.div
+          animate={{ rotate: sidebarCollapsed ? 0 : 180 }}
+          transition={{ duration: 0.22 }}
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M3 2L7 5L3 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </motion.div>
+      </motion.button>
 
       {/* Logo */}
       <Link
@@ -351,17 +370,6 @@ export function Sidebar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Collapse toggle */}
-        <button
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="w-full flex items-center justify-center h-7 text-zinc-700 hover:text-zinc-400 hover:bg-zinc-900/60 rounded-xl transition-all duration-200"
-          title={sidebarCollapsed ? "Extinde bara laterală" : "Restrânge bara laterală"}
-        >
-          {sidebarCollapsed
-            ? <PanelLeftOpen className="w-3.5 h-3.5" />
-            : <PanelLeftClose className="w-3.5 h-3.5" />
-          }
-        </button>
       </div>
     </motion.aside>
   );
