@@ -878,7 +878,7 @@ export default function NewStrategyPage() {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div>
-          <h1 className="text-xl font-black text-zinc-100">
+          <h1 className="text-xl font-black gradient-text-cyber">
             {existingStrategyId ? "Rulează Backtest" : "Strategie Nouă"}
           </h1>
           <p className="text-sm text-zinc-500">
@@ -894,7 +894,7 @@ export default function NewStrategyPage() {
             <React.Fragment key={s}>
               <div className={cn(
                 "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold transition-colors",
-                step > s ? "bg-indigo-600 text-white" : step === s ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40" : "bg-zinc-800 text-zinc-600"
+                step > s ? "bg-indigo-600 text-white" : step === s ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.4)]" : "bg-zinc-800 text-zinc-600"
               )}>
                 {step > s ? <Check className="h-4 w-4" /> : s}
               </div>
@@ -917,7 +917,7 @@ export default function NewStrategyPage() {
                   key={st.id}
                   onClick={() => selectType(st.id)}
                   className={cn(
-                    "text-left p-5 rounded-xl border transition-all",
+                    "text-left p-5 rounded-xl border transition-all duration-300",
                     isCustomCard && "md:col-span-2",
                     isSelected
                       ? "border-indigo-500/60 bg-indigo-500/5 ring-1 ring-indigo-500/30"

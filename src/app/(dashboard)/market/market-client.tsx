@@ -183,7 +183,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
     <div className="grid gap-6 lg:grid-cols-2">
       {/* ── Watchlist ── */}
       <div className="space-y-4">
-        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden">
+        <div className="rounded-2xl border border-indigo-500/15 bg-zinc-900/80 overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
             <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
@@ -214,7 +214,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                     >
                       <div className="flex items-center gap-3">
                         <LineChart className="h-3.5 w-3.5 text-zinc-600 group-hover:text-indigo-400 transition-colors" />
-                        <span className="text-sm font-semibold text-zinc-100 group-hover:text-indigo-300 transition-colors">
+                        <span className="text-sm font-semibold text-zinc-100 group-hover:text-indigo-300 transition-colors neon-on-hover">
                           {item.symbol}
                         </span>
                         <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded border", INSTR_COLORS[item.instrumentType] ?? INSTR_COLORS.CFD)}>

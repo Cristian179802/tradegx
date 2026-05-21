@@ -84,7 +84,7 @@ export function BacktestingClient({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Backtesting</h1>
+          <h1 className="text-2xl font-black tracking-tight neon-violet">Backtesting</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             Testează strategii pe date istorice reale — Yahoo Finance live data
           </p>
@@ -117,7 +117,7 @@ export function BacktestingClient({
               const lastBt = s.backtests[0];
               const pnl = lastBt?.netPnl ? parseFloat(lastBt.netPnl) : null;
               return (
-                <div key={s.id} className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-4 hover:border-zinc-700 transition-colors group">
+                <div key={s.id} className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-4 hover:border-violet-500/40 transition-all duration-300 group card-3d">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
@@ -165,7 +165,7 @@ export function BacktestingClient({
                     <p className="text-xs text-zinc-600 mb-3">Niciun backtest rulat</p>
                   )}
 
-                  <Button asChild size="sm" className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white gap-1.5 h-8 text-xs shadow-md shadow-indigo-500/20">
+                  <Button asChild size="sm" className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white gap-1.5 h-8 text-xs shadow-lg shadow-indigo-500/25">
                     <Link href={`/backtesting/new?strategyId=${s.id}`}>
                       <Play className="h-3 w-3" />
                       Rulează Backtest
@@ -202,7 +202,7 @@ export function BacktestingClient({
 
                 return (
                   <Link key={b.id} href={`/backtesting/results/${b.id}`}
-                    className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-900 p-3.5 hover:border-indigo-500/40 hover:bg-zinc-800/50 transition-colors group"
+                    className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-900 p-3.5 hover:border-indigo-500/40 hover:bg-zinc-800/50 transition-colors group cyber-row"
                   >
                     {/* Strategy color dot + name */}
                     <div className="flex items-center gap-2 w-36 shrink-0">
@@ -320,7 +320,7 @@ export function BacktestingClient({
               ? (stat.icon as unknown as React.ComponentType<{ className?: string }>)
               : (stat.icon as React.ComponentType<{ className?: string }>);
             return (
-              <div key={stat.label} className="bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+              <div key={stat.label} className="bg-zinc-900/80 border border-zinc-800/60 rounded-xl p-3 card-3d">
                 <div className="flex items-center gap-2 mb-1">
                   <Icon className={cn("h-3.5 w-3.5", stat.color)} />
                   <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wide">{stat.label}</span>

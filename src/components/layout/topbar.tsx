@@ -39,6 +39,7 @@ const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: 
   "/settings":     { title: "Setări",             icon: "⚙️", description: "Personalizează TradeGx" },
   "/ai-assistant": { title: "AI Trading Coach",   icon: "🤖", description: "Analiză inteligentă AI" },
   "/alerts":       { title: "Alerte AI",          icon: "🔔", description: "Monitorizare risc în timp real" },
+  "/risk-manager": { title: "Risk Manager",        icon: "🛡️", description: "Monitorizare risc în timp real" },
 };
 
 function TickerItem({ symbol, price, change, up }: typeof MARKET_TICKERS[0]) {

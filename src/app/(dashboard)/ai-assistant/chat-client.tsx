@@ -606,12 +606,12 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
       <div className="flex-1 min-w-0 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-zinc-800 bg-zinc-900/90 backdrop-blur-sm shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg shadow-violet-500/25">
+        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-violet-500/20 bg-zinc-900/90 backdrop-blur-sm shrink-0" style={{ background: "linear-gradient(90deg, rgba(139,92,246,0.06) 0%, rgba(9,9,11,0.95) 100%)" }}>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg shadow-violet-500/30" style={{ boxShadow: "0 0 16px rgba(139,92,246,0.4)" }}>
             <Brain className="w-4.5 h-4.5 text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold text-zinc-100">TradeGX AI Coach</p>
+            <p className="text-sm font-bold gradient-text-cyber">TradeGX AI Coach</p>
             <p className="text-[10px] text-zinc-500">
               {isStreaming ? (
                 <span className="text-violet-400 flex items-center gap-1">
@@ -722,7 +722,7 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
               className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all",
                 input.trim() && !isStreaming
-                  ? "bg-gradient-to-br from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:scale-105"
+                  ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-105"
                   : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
               )}
             >

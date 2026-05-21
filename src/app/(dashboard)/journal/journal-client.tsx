@@ -117,10 +117,11 @@ function StatCard({
   positive?: boolean;
 }) {
   const accentBg = positive === true ? "kpi-profit border-emerald-500/20" : positive === false ? "kpi-loss border-rose-500/20" : "border-zinc-800";
+  const valueClass = positive === true ? "text-emerald-400 neon-emerald" : positive === false ? "text-rose-400 neon-rose" : "text-zinc-100";
   return (
-    <div className={`bg-zinc-900/80 border rounded-2xl p-4 ${accentBg}`}>
+    <div className={`bg-zinc-900/80 border rounded-2xl p-4 card-3d ${accentBg}`}>
       <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider mb-2">{label}</p>
-      <p className={`text-2xl font-black num tracking-tight ${positive === true ? "text-emerald-400" : positive === false ? "text-rose-400" : "text-zinc-100"}`}>
+      <p className={`text-2xl font-black num tracking-tight ${valueClass}`}>
         {value}
       </p>
       {sub && <p className="text-[11px] text-zinc-500 mt-1">{sub}</p>}
@@ -136,7 +137,7 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
   const hasJournal = !!trade.journal;
 
   return (
-    <div className="border border-zinc-800/80 rounded-2xl overflow-hidden hover:border-zinc-700 transition-all duration-200 bg-zinc-900/80">
+    <div className="border border-zinc-800/80 rounded-2xl overflow-hidden hover:border-zinc-700 transition-all duration-200 bg-zinc-900/80 card-3d">
       {/* Main Row */}
       <div
         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-800/30 transition-colors"
@@ -391,7 +392,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Jurnal de Trading</h1>
+          <h1 className="text-2xl font-black tracking-tight neon-emerald">Jurnal de Trading</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             Analizează-ți tranzacțiile, emoțiile și lecțiile învățate.
           </p>
