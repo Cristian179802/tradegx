@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ArrowRight, CalendarDays, TrendingUp, TrendingDown,
   Activity, Target, BarChart2, Zap, ChevronRight, Award,
@@ -29,7 +29,7 @@ interface DashboardData {
   currency: string;
   recentTrades: Array<{
     id: string; symbol: string; direction: string;
-    lotSize: number; pnlMoney: number | null; pnlPips: number | null; entryTime: string;
+    lotSize: number; pnlMoney: number | null; pnlPips: number | null; entryTime: string; exitTime: string | null;
   }>;
   pairPerformance: Array<{ symbol: string; pnl: number; trades: number }>;
   equityCurve: Array<{ date: string; balance: number }>;
@@ -378,6 +378,37 @@ export function DashboardClient({ data }: { data: DashboardData }) {
 
   const maxPairPnl = Math.max(...pairPerformance.map(p => Math.abs(p.pnl)), 1);
 
+  // Calculate trading streak
+  const streak = useMemo(() => {
+    if (!recentTrades?.length) return 0;
+    const tradeDays = new Set(
+      recentTrades
+        .filter((t) => t.exitTime)
+        .map((t) => new Date(t.exitTime!).toDateString())
+    );
+    let count = 0;
+    const today = new Date();
+    for (let i = 0; i <= 30; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      if (tradeDays.has(d.toDateString())) count++;
+      else if (i > 0) break;
+    }
+    return count;
+  }, [recentTrades]);
+
+  // Week stats
+  const weekStats = useMemo(() => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const weekTrades = recentTrades.filter(
+      (t) => new Date(t.entryTime).getTime() >= oneWeekAgo.getTime()
+    );
+    const weekWins = weekTrades.filter((t) => (t.pnlMoney ?? 0) > 0).length;
+    const weekRate = weekTrades.length > 0 ? (weekWins / weekTrades.length) * 100 : null;
+    return { count: weekTrades.length, winRate: weekRate };
+  }, [recentTrades]);
+
   return (
     <div className="space-y-5 pb-4 relative">
       {/* Ambient orbs */}
@@ -471,6 +502,58 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           accent="violet"
           delay={240}
         />
+      </div>
+
+      {/* ── Streak Row ─────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-3 gap-3 animate-fade-in-up delay-100">
+        {/* Streak */}
+        <div className="relative rounded-2xl border border-amber-500/25 overflow-hidden bg-zinc-900/80 px-5 py-4 flex items-center gap-4 hover:border-amber-400/50 transition-all group cursor-default"
+          style={{ background: "linear-gradient(135deg, rgba(24,24,28,0.97) 0%, rgba(15,15,18,0.99) 100%)" }}>
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl bg-amber-400 shadow-[2px_0_12px_rgba(245,158,11,0.7)]" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-amber-500/10 to-transparent" />
+          <div className="relative w-10 h-10 rounded-xl border border-amber-400/30 bg-amber-500/20 flex items-center justify-center text-xl shrink-0">
+            🔥
+          </div>
+          <div className="relative">
+            <p className="text-[22px] font-black num tracking-tight text-amber-300 leading-none">
+              {streak}<span className="text-sm font-bold text-amber-500/70 ml-1">zile</span>
+            </p>
+            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">Streak Consistență</p>
+          </div>
+          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 bg-amber-500/20" />
+        </div>
+
+        {/* Trades this week */}
+        <div className="relative rounded-2xl border border-violet-500/25 overflow-hidden bg-zinc-900/80 px-5 py-4 flex items-center gap-4 hover:border-violet-400/50 transition-all group cursor-default"
+          style={{ background: "linear-gradient(135deg, rgba(24,24,28,0.97) 0%, rgba(15,15,18,0.99) 100%)" }}>
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl bg-violet-400 shadow-[2px_0_12px_rgba(139,92,246,0.7)]" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-violet-500/10 to-transparent" />
+          <div className="relative w-10 h-10 rounded-xl border border-violet-400/30 bg-violet-500/20 flex items-center justify-center shrink-0">
+            <BarChart2 className="w-5 h-5 text-violet-300" />
+          </div>
+          <div className="relative">
+            <p className="text-[22px] font-black num tracking-tight text-violet-200 leading-none">{weekStats.count}</p>
+            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">Trades săptămâna asta</p>
+          </div>
+          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 bg-violet-500/20" />
+        </div>
+
+        {/* Win rate this week */}
+        <div className="relative rounded-2xl border border-indigo-500/25 overflow-hidden bg-zinc-900/80 px-5 py-4 flex items-center gap-4 hover:border-indigo-400/50 transition-all group cursor-default"
+          style={{ background: "linear-gradient(135deg, rgba(24,24,28,0.97) 0%, rgba(15,15,18,0.99) 100%)" }}>
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl bg-indigo-400 shadow-[2px_0_12px_rgba(99,102,241,0.7)]" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-indigo-500/10 to-transparent" />
+          <div className="relative w-10 h-10 rounded-xl border border-indigo-400/30 bg-indigo-500/20 flex items-center justify-center shrink-0">
+            <Target className="w-5 h-5 text-indigo-300" />
+          </div>
+          <div className="relative">
+            <p className="text-[22px] font-black num tracking-tight text-indigo-200 leading-none">
+              {weekStats.winRate !== null ? `${weekStats.winRate.toFixed(0)}%` : "—"}
+            </p>
+            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">Win Rate săptămânal</p>
+          </div>
+          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 bg-indigo-500/20" />
+        </div>
       </div>
 
       {/* ── Middle Row: Chart + Breakdown ──────────────────────────────────── */}
@@ -620,11 +703,17 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             </Link>
           </div>
           {recentTrades.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 gap-2">
-              <Activity className="w-7 h-7 text-zinc-700" />
-              <p className="text-sm text-zinc-600">Nicio tranzacție înregistrată</p>
-              <Link href="/trades/new" className="text-xs text-indigo-400 hover:text-indigo-300 mt-1">
-                Adaugă prima tranzacție →
+            <div className="flex flex-col items-center justify-center h-40 gap-3 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center mx-auto">
+                <Activity className="w-5 h-5 text-zinc-500" />
+              </div>
+              <div>
+                <p className="text-zinc-300 font-semibold text-sm">Nicio tranzacție înregistrată</p>
+                <p className="text-zinc-500 text-xs mt-0.5">Adaugă primul tău trade pentru a-ți urmări progresul.</p>
+              </div>
+              <Link href="/trades/new"
+                className="text-xs text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-4 py-2 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/20">
+                Adaugă tranzacție
               </Link>
             </div>
           ) : (
@@ -659,6 +748,20 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           )}
         </div>
 
+      </div>
+
+      {/* Today's key events hint */}
+      <div className="rounded-2xl border border-amber-500/15 bg-zinc-900/80 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-6 h-6 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+            <span className="text-xs">📅</span>
+          </div>
+          <h3 className="text-sm font-bold text-zinc-200">Calendar azi</h3>
+          <a href="/calendar" className="ml-auto text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors">Vezi tot →</a>
+        </div>
+        <p className="text-xs text-zinc-500">
+          Verifică <a href="/calendar" className="text-amber-400 hover:text-amber-300 transition-colors font-medium">calendarul economic</a> pentru evenimentele de impact înalt de astăzi.
+        </p>
       </div>
     </div>
   );

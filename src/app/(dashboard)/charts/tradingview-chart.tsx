@@ -36,7 +36,7 @@ function toTVSymbol(symbol: string): string {
   return `FX:${symbol}`;
 }
 
-export function TradingViewChart({ symbol = "EURUSD" }: { symbol?: string }) {
+export function TradingViewChart({ symbol = "EURUSD", interval }: { symbol?: string; interval?: string }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const tvSymbol = toTVSymbol(symbol);
 
@@ -51,7 +51,7 @@ export function TradingViewChart({ symbol = "EURUSD" }: { symbol?: string }) {
     script.innerHTML = JSON.stringify({
       autosize: true,
       symbol: tvSymbol,
-      interval: "H1",
+      interval: interval ?? "60",
       timezone: "Europe/Bucharest",
       theme: "dark",
       style: "1",
@@ -71,7 +71,7 @@ export function TradingViewChart({ symbol = "EURUSD" }: { symbol?: string }) {
     return () => {
       if (containerRef.current) containerRef.current.innerHTML = "";
     };
-  }, [tvSymbol]);
+  }, [tvSymbol, interval]);
 
   return (
     <div className="tradingview-widget-container h-full w-full" ref={containerRef}>
