@@ -404,15 +404,39 @@ function calcDIPlusMinus(
 // ─── Pip value & lot sizing ────────────────────────────────────────────────────
 
 function pipSize(symbol: string): number {
-  return symbol.includes("JPY") ? 0.01 : 0.0001;
+  // Gold/Silver/Metals: pip = $0.01
+  if (symbol === "XAUUSD" || symbol === "XAGUSD" || symbol === "XPTUSD") return 0.01;
+  // Indices (US30, NAS100, SP500, etc.): pip = 1 point
+  if (["US30","NAS100","SP500","US2000","GER40","UK100"].some(s => symbol.includes(s))) return 1.0;
+  // Crypto: pip = $0.01
+  if (symbol.includes("BTC") || symbol.includes("ETH") || symbol.includes("BNB") || symbol.includes("SOL") || symbol.includes("XRP")) return 0.01;
+  // Oil/Commodities: pip = $0.01
+  if (symbol === "CRUDE" || symbol === "BRENT" || symbol === "NATGAS") return 0.01;
+  // JPY pairs
+  if (symbol.includes("JPY")) return 0.01;
+  // Standard forex
+  return 0.0001;
 }
 
 function pipValue(symbol: string): number {
-  // USD value of 1 pip for 1 standard lot (100,000 units)
-  // For pairs where USD is quote: $10/pip
-  // For pairs where USD is base (USDXXX): approximately $10/price
-  // Simplified: use $10/pip for most pairs
-  return symbol.includes("JPY") ? 1000 : 10;
+  // USD value of 1 pip for 1 standard lot
+  // Gold: 100 oz lot, $0.01 pip → $1/pip
+  if (symbol === "XAUUSD") return 1;
+  // Silver: 5000 oz lot, $0.001 pip → $5/pip
+  if (symbol === "XAGUSD") return 5;
+  // Platinum: 50 oz lot
+  if (symbol === "XPTUSD") return 0.5;
+  // Indices: ~$5 per pip per mini-lot (use $5 for simplicity at 0.01 lot level)
+  if (["US30","NAS100","SP500","US2000"].some(s => symbol.includes(s))) return 5;
+  // Crypto: very variable, use $1/pip as conservative estimate
+  if (symbol.includes("BTC") || symbol.includes("ETH")) return 1;
+  if (symbol.includes("BNB") || symbol.includes("SOL") || symbol.includes("XRP")) return 1;
+  // Oil: 1000 barrels per lot, $0.01 pip → $10/pip
+  if (symbol === "CRUDE" || symbol === "BRENT") return 10;
+  // JPY pairs
+  if (symbol.includes("JPY")) return 1000;
+  // Standard forex: $10/pip
+  return 10;
 }
 
 function calcLotSize(
@@ -454,71 +478,126 @@ function emaCrossSignal(
   slowEma: number[],
   trendEma: number[],
   atr: number[],
-  rules: EmaCrossoverRules
+  rules: EmaCrossoverRules,
+  rsi: number[],
+  macdHist: number[]
 ): Signal {
   if (i < 1 || isNaN(fastEma[i]) || isNaN(slowEma[i]) || isNaN(atr[i])) return null;
 
   const crossedUp   = fastEma[i] > slowEma[i] && fastEma[i - 1] <= slowEma[i - 1];
   const crossedDown = fastEma[i] < slowEma[i] && fastEma[i - 1] >= slowEma[i - 1];
 
-  const trendOk = rules.trendPeriod <= 0 || !isNaN(trendEma[i]);
-  const bullTrend = !trendOk || candles[i].close > trendEma[i];
-  const bearTrend = !trendOk || candles[i].close < trendEma[i];
+  // Trend filter: disabled when trendPeriod <= 0
+  const bullTrend = rules.trendPeriod <= 0 || (!isNaN(trendEma[i]) && candles[i].close > trendEma[i]);
+  const bearTrend = rules.trendPeriod <= 0 || (!isNaN(trendEma[i]) && candles[i].close < trendEma[i]);
+
+  // RSI filter: disabled when rsiFilter <= 0
+  const rsiOk_buy  = rules.rsiFilter <= 0 || isNaN(rsi[i]) || rsi[i] < rules.rsiFilter;
+  const rsiOk_sell = rules.rsiFilter <= 0 || isNaN(rsi[i]) || rsi[i] > (100 - rules.rsiFilter);
+
+  // MACD confirm filter
+  const macdOk_buy  = !rules.macdConfirm || (!isNaN(macdHist[i]) && macdHist[i] > 0);
+  const macdOk_sell = !rules.macdConfirm || (!isNaN(macdHist[i]) && macdHist[i] < 0);
 
   const sl = atr[i] * rules.slMultiplier;
-  if (crossedUp && bullTrend) {
+  if (crossedUp && bullTrend && rsiOk_buy && macdOk_buy) {
     const entry = candles[i].close;
     return { direction: "BUY", sl: entry - sl, tp: entry + sl * rules.rrRatio };
   }
-  if (crossedDown && bearTrend) {
+  if (crossedDown && bearTrend && rsiOk_sell && macdOk_sell) {
     const entry = candles[i].close;
     return { direction: "SELL", sl: entry + sl, tp: entry - sl * rules.rrRatio };
   }
   return null;
 }
 
+// Per-session state for breakout tracking (keyed by session type)
+interface SessionState {
+  sesHigh: number;
+  sesLow: number;
+  sessionEndIdx: number;   // bar index where session ended
+  firedThisSession: boolean;
+}
+
 function sessionBreakoutSignal(
   i: number,
   candles: Candle[],
   atr: number[],
-  rules: SessionBreakoutRules
+  rules: SessionBreakoutRules,
+  rsi: number[],
+  sessionState: Map<string, SessionState>,
+  symbol: string
 ): Signal {
   if (isNaN(atr[i])) return null;
-  const sess = SESSION_HOURS[rules.session];
+
+  const sessKey = rules.session === "ALL" ? "LONDON" : rules.session;
+  const sessDef = SESSION_HOURS[sessKey];
   const h = utcHour(candles[i].time);
 
-  // Fire at the FIRST bar after session close
-  if (h !== sess.end) return null;
+  // ── Update session state: scan backwards to find the most recent completed session
+  // We detect when the current hour is OUTSIDE the session but previous bar was INSIDE
+  const prevH = i > 0 ? utcHour(candles[i - 1].time) : -1;
+  const wasInSession = prevH >= sessDef.start && prevH < sessDef.end;
+  const nowOutSession = h < sessDef.start || h >= sessDef.end;
 
-  // Find session high and low
-  let sesHigh = -Infinity, sesLow = Infinity;
-  for (let j = i - 1; j >= 0; j--) {
-    const jh = utcHour(candles[j].time);
-    if (jh < sess.start) break;
-    if (jh >= sess.start && jh < sess.end) {
-      sesHigh = Math.max(sesHigh, candles[j].high);
-      sesLow = Math.min(sesLow, candles[j].low);
+  if (wasInSession && nowOutSession) {
+    // Session just ended — collect session high/low from bars within the session
+    let sesHigh = -Infinity;
+    let sesLow = Infinity;
+    for (let j = i - 1; j >= 0; j--) {
+      const jh = utcHour(candles[j].time);
+      if (jh >= sessDef.start && jh < sessDef.end) {
+        sesHigh = Math.max(sesHigh, candles[j].high);
+        sesLow  = Math.min(sesLow,  candles[j].low);
+      } else if (jh < sessDef.start) {
+        break; // went past session start
+      }
+    }
+    if (isFinite(sesHigh) && isFinite(sesLow) && sesHigh > sesLow) {
+      sessionState.set(sessKey, {
+        sesHigh, sesLow,
+        sessionEndIdx: i - 1,
+        firedThisSession: false,
+      });
     }
   }
-  if (!isFinite(sesHigh) || !isFinite(sesLow)) return null;
 
-  const range = sesHigh - sesLow;
-  if (range <= 0) return null;
+  const state = sessionState.get(sessKey);
+  if (!state || state.firedThisSession) return null;
 
-  // Bias: if current close is above session midpoint → buy break of high
-  const midpoint = (sesHigh + sesLow) / 2;
+  // Only watch N=8 bars after the session ended
+  const barsSinceEnd = i - state.sessionEndIdx;
+  if (barsSinceEnd <= 0 || barsSinceEnd > 8) return null;
 
-  if (candles[i].close > midpoint) {
-    const entry = candles[i].close;
-    const slDist = entry - sesLow;          // distance from entry to SL
-    if (slDist <= 0) return null;
-    return { direction: "BUY", sl: sesLow, tp: entry + slDist * rules.rrRatio };
-  } else {
-    const entry = candles[i].close;
-    const slDist = sesHigh - entry;         // distance from entry to SL
-    if (slDist <= 0) return null;
-    return { direction: "SELL", sl: sesHigh, tp: entry - slDist * rules.rrRatio };
+  const { sesHigh, sesLow } = state;
+
+  // minRangePips check using correct pipSize for the symbol
+  if (rules.minRangePips > 0) {
+    const rangeInPips = (sesHigh - sesLow) / pipSize(symbol);
+    if (rangeInPips < rules.minRangePips) return null;
   }
+
+  const sl = atr[i] * rules.slMultiplier;
+
+  // BUY: close breaks ABOVE session high
+  if (candles[i].close > sesHigh) {
+    // RSI momentum filter for BUY: RSI must be > (100 - rsiFilter) i.e. showing upward momentum
+    if (rules.rsiFilter > 0 && !isNaN(rsi[i]) && rsi[i] <= (100 - rules.rsiFilter)) return null;
+    const entry = candles[i].close;
+    state.firedThisSession = true;
+    return { direction: "BUY", sl: entry - sl, tp: entry + sl * rules.rrRatio };
+  }
+
+  // SELL: close breaks BELOW session low
+  if (candles[i].close < sesLow) {
+    // RSI momentum filter for SELL: RSI must be < rsiFilter
+    if (rules.rsiFilter > 0 && !isNaN(rsi[i]) && rsi[i] >= rules.rsiFilter) return null;
+    const entry = candles[i].close;
+    state.firedThisSession = true;
+    return { direction: "SELL", sl: entry + sl, tp: entry - sl * rules.rrRatio };
+  }
+
+  return null;
 }
 
 function rsiReversalSignal(
@@ -527,7 +606,10 @@ function rsiReversalSignal(
   rsi: number[],
   emaFilter: number[],
   atr: number[],
-  rules: RsiReversalRules
+  rules: RsiReversalRules,
+  stochK: number[],
+  bollLower: number[],
+  bollUpper: number[]
 ): Signal {
   if (i < 1 || isNaN(rsi[i]) || isNaN(rsi[i - 1]) || isNaN(atr[i])) return null;
 
@@ -537,7 +619,11 @@ function rsiReversalSignal(
   // RSI crosses back above oversold → BUY
   if (rsi[i] > rules.oversold && rsi[i - 1] <= rules.oversold) {
     const bullFilter = !useEma || candles[i].close > emaFilter[i];
-    if (bullFilter) {
+    // Stochastic confirm: stochK must also be below stochOversold
+    const stochOk = !rules.stochConfirm || isNaN(stochK[i]) || stochK[i] < rules.stochOversold;
+    // Bollinger filter: price must be below lower band
+    const bollOk = !rules.bollFilter || isNaN(bollLower[i]) || candles[i].close < bollLower[i];
+    if (bullFilter && stochOk && bollOk) {
       const entry = candles[i].close;
       return { direction: "BUY", sl: entry - sl, tp: entry + sl * rules.rrRatio };
     }
@@ -545,7 +631,11 @@ function rsiReversalSignal(
   // RSI crosses back below overbought → SELL
   if (rsi[i] < rules.overbought && rsi[i - 1] >= rules.overbought) {
     const bearFilter = !useEma || candles[i].close < emaFilter[i];
-    if (bearFilter) {
+    // Stochastic confirm: stochK must also be above stochOverbought
+    const stochOk = !rules.stochConfirm || isNaN(stochK[i]) || stochK[i] > rules.stochOverbought;
+    // Bollinger filter: price must be above upper band
+    const bollOk = !rules.bollFilter || isNaN(bollUpper[i]) || candles[i].close > bollUpper[i];
+    if (bearFilter && stochOk && bollOk) {
       const entry = candles[i].close;
       return { direction: "SELL", sl: entry + sl, tp: entry - sl * rules.rrRatio };
     }
@@ -559,33 +649,57 @@ function trendFollowingSignal(
   ema: number[],
   adx: number[],
   atr: number[],
-  rules: TrendFollowingRules
+  rules: TrendFollowingRules,
+  diPlus: number[],
+  diMinus: number[],
+  macdHist: number[],
+  slowEma: number[]
 ): Signal {
   if (isNaN(ema[i]) || isNaN(adx[i]) || isNaN(atr[i])) return null;
   if (adx[i] < rules.adxThreshold) return null; // Not trending
 
   const sl = atr[i] * rules.slMultiplier;
 
-  // Bullish: price above EMA, last N bars were pulling back (below entry candle's close)
-  if (candles[i].close > ema[i]) {
-    // Check pullback: prev `pullbackBars` bars all below current close and touching EMA area
+  // DI cross filter
+  const diOk_buy  = !rules.requireDiCross || isNaN(diPlus[i])  || diPlus[i] > diMinus[i];
+  const diOk_sell = !rules.requireDiCross || isNaN(diMinus[i]) || diMinus[i] > diPlus[i];
+
+  // MACD histogram filter
+  const macdOk_buy  = !rules.macdFilter || isNaN(macdHist[i]) || macdHist[i] > 0;
+  const macdOk_sell = !rules.macdFilter || isNaN(macdHist[i]) || macdHist[i] < 0;
+
+  // Slow EMA confluence (disabled when emaSlow <= 0)
+  const slowEmaOk_buy  = rules.emaSlow <= 0 || isNaN(slowEma[i]) || candles[i].close > slowEma[i];
+  const slowEmaOk_sell = rules.emaSlow <= 0 || isNaN(slowEma[i]) || candles[i].close < slowEma[i];
+
+  // Bullish: price above EMA
+  if (candles[i].close > ema[i] && diOk_buy && macdOk_buy && slowEmaOk_buy) {
+    // Improved pullback detection: at least one of the last pullbackBars had its LOW
+    // within 1 ATR of the EMA value at that bar, AND current bar is a bullish close
     let wasPullback = false;
     for (let j = i - 1; j >= Math.max(0, i - rules.pullbackBars); j--) {
-      if (candles[j].low <= ema[j] * 1.001) { wasPullback = true; break; }
+      if (!isNaN(ema[j]) && !isNaN(atr[j]) && Math.abs(candles[j].low - ema[j]) < atr[j]) {
+        wasPullback = true;
+        break;
+      }
     }
-    if (wasPullback && candles[i].close > candles[i - 1].close) {
+    if (wasPullback && candles[i].close > candles[i].open) {
       const entry = candles[i].close;
       return { direction: "BUY", sl: entry - sl, tp: entry + sl * rules.rrRatio };
     }
   }
 
   // Bearish: price below EMA
-  if (candles[i].close < ema[i]) {
+  if (candles[i].close < ema[i] && diOk_sell && macdOk_sell && slowEmaOk_sell) {
+    // Improved pullback: at least one bar's HIGH was within 1 ATR of EMA, AND bearish close
     let wasPullback = false;
     for (let j = i - 1; j >= Math.max(0, i - rules.pullbackBars); j--) {
-      if (candles[j].high >= ema[j] * 0.999) { wasPullback = true; break; }
+      if (!isNaN(ema[j]) && !isNaN(atr[j]) && Math.abs(candles[j].high - ema[j]) < atr[j]) {
+        wasPullback = true;
+        break;
+      }
     }
-    if (wasPullback && candles[i].close < candles[i - 1].close) {
+    if (wasPullback && candles[i].close < candles[i].open) {
       const entry = candles[i].close;
       return { direction: "SELL", sl: entry + sl, tp: entry - sl * rules.rrRatio };
     }
@@ -764,12 +878,29 @@ export function runBacktest(candles: Candle[], config: BacktestConfig): Backtest
   const lows   = candles.map((c) => c.low);
   const atr14  = calcATR(highs, lows, closes, 14);
 
-  let fastEmaArr: number[] = [];
-  let slowEmaArr: number[] = [];
-  let trendEmaArr: number[] = [];
-  let rsiArr: number[] = [];
+  let fastEmaArr:   number[] = [];
+  let slowEmaArr:   number[] = [];
+  let trendEmaArr:  number[] = [];
+  let rsiArr:       number[] = [];
   let emaFilterArr: number[] = [];
-  let adxArr: number[] = [];
+  let adxArr:       number[] = [];
+  // EMA_CROSSOVER extras
+  let emaCrossRsiArr:    number[] = [];
+  let emaCrossMacdHist:  number[] = [];
+  // RSI_REVERSAL extras
+  let rsiRevStochK:   number[] = [];
+  let rsiRevBollLow:  number[] = [];
+  let rsiRevBollUp:   number[] = [];
+  // TREND_FOLLOWING extras
+  let tfDiPlus:    number[] = [];
+  let tfDiMinus:   number[] = [];
+  let tfMacdHist:  number[] = [];
+  let tfSlowEma:   number[] = [];
+  // SESSION_BREAKOUT state
+  const sessionState = new Map<string, SessionState>();
+  // SESSION_BREAKOUT rsi
+  let sessRsiArr: number[] = [];
+
   const customCache = new Map<string, number[]>();
   let warmup = 50;
 
@@ -778,19 +909,66 @@ export function runBacktest(candles: Candle[], config: BacktestConfig): Backtest
     fastEmaArr  = calcEMA(closes, r.fastPeriod);
     slowEmaArr  = calcEMA(closes, r.slowPeriod);
     trendEmaArr = r.trendPeriod > 0 ? calcEMA(closes, r.trendPeriod) : closes.map(() => NaN);
-    warmup = Math.max(r.slowPeriod, r.trendPeriod > 0 ? r.trendPeriod : 0) + 5;
+    // RSI for rsiFilter
+    if (r.rsiFilter > 0) {
+      emaCrossRsiArr = calcRSI(closes, r.rsiPeriod > 0 ? r.rsiPeriod : 14);
+    }
+    // MACD for macdConfirm
+    if (r.macdConfirm) {
+      const { hist } = calcMACD(closes, 12, 26, 9);
+      emaCrossMacdHist = hist;
+    }
+    const macdWarmup = r.macdConfirm ? 26 + 9 + 5 : 0;
+    warmup = Math.max(r.slowPeriod, r.trendPeriod > 0 ? r.trendPeriod : 0, macdWarmup) + 5;
   } else if (strategyType === "RSI_REVERSAL") {
     const r = rules as RsiReversalRules;
     rsiArr       = calcRSI(closes, r.rsiPeriod);
     emaFilterArr = r.emaFilter > 0 ? calcEMA(closes, r.emaFilter) : closes.map(() => NaN);
-    warmup = Math.max(r.rsiPeriod + 5, r.emaFilter > 0 ? r.emaFilter + 5 : 0);
+    // Stochastic confirm
+    if (r.stochConfirm) {
+      const { k } = calcStochastic(highs, lows, closes, r.stochK > 0 ? r.stochK : 14, r.stochD > 0 ? r.stochD : 3);
+      rsiRevStochK = k;
+    }
+    // Bollinger filter
+    if (r.bollFilter) {
+      const { upper, lower } = calcBollinger(closes, r.bollPeriod > 0 ? r.bollPeriod : 20);
+      rsiRevBollLow = lower;
+      rsiRevBollUp  = upper;
+    }
+    const bollWarmup = r.bollFilter ? (r.bollPeriod > 0 ? r.bollPeriod : 20) : 0;
+    const stochWarmup = r.stochConfirm ? (r.stochK > 0 ? r.stochK : 14) : 0;
+    warmup = Math.max(r.rsiPeriod + 5, r.emaFilter > 0 ? r.emaFilter + 5 : 0, bollWarmup + 5, stochWarmup + 5);
   } else if (strategyType === "TREND_FOLLOWING") {
     const r = rules as TrendFollowingRules;
     fastEmaArr = calcEMA(closes, r.emaPeriod);
     adxArr     = calcADX(highs, lows, closes, r.adxPeriod);
-    warmup = Math.max(r.emaPeriod, r.adxPeriod * 2) + 10;
+    // DI+ / DI- for requireDiCross
+    if (r.requireDiCross) {
+      const { diPlus, diMinus } = calcDIPlusMinus(highs, lows, closes, r.adxPeriod);
+      tfDiPlus  = diPlus;
+      tfDiMinus = diMinus;
+    }
+    // MACD filter
+    if (r.macdFilter) {
+      const fast = r.macdFast > 0 ? r.macdFast : 12;
+      const slow = r.macdSlow > 0 ? r.macdSlow : 26;
+      const sig  = r.macdSignal > 0 ? r.macdSignal : 9;
+      const { hist } = calcMACD(closes, fast, slow, sig);
+      tfMacdHist = hist;
+    }
+    // Slow EMA confluence
+    if (r.emaSlow > 0) {
+      tfSlowEma = calcEMA(closes, r.emaSlow);
+    }
+    const macdWarmup = r.macdFilter ? ((r.macdSlow > 0 ? r.macdSlow : 26) + (r.macdSignal > 0 ? r.macdSignal : 9) + 5) : 0;
+    const slowEmaWarmup = r.emaSlow > 0 ? r.emaSlow : 0;
+    warmup = Math.max(r.emaPeriod, r.adxPeriod * 2, macdWarmup, slowEmaWarmup) + 10;
   } else if (strategyType === "SESSION_BREAKOUT") {
-    warmup = 20;
+    const r = rules as SessionBreakoutRules;
+    if (r.rsiFilter > 0) {
+      sessRsiArr = calcRSI(closes, 14);
+    }
+    warmup = 24; // need at least one full session worth of bars
   } else if (strategyType === "CUSTOM") {
     const r = rules as CustomRules;
     const allConds = [...(r.entryLong ?? []), ...(r.entryShort ?? [])];
@@ -887,13 +1065,13 @@ export function runBacktest(candles: Candle[], config: BacktestConfig): Backtest
     // Generate signal
     let signal: Signal = null;
     if (strategyType === "EMA_CROSSOVER") {
-      signal = emaCrossSignal(i, candles, fastEmaArr, slowEmaArr, trendEmaArr, atr14, rules as EmaCrossoverRules);
+      signal = emaCrossSignal(i, candles, fastEmaArr, slowEmaArr, trendEmaArr, atr14, rules as EmaCrossoverRules, emaCrossRsiArr, emaCrossMacdHist);
     } else if (strategyType === "SESSION_BREAKOUT") {
-      signal = sessionBreakoutSignal(i, candles, atr14, rules as SessionBreakoutRules);
+      signal = sessionBreakoutSignal(i, candles, atr14, rules as SessionBreakoutRules, sessRsiArr, sessionState, symbol);
     } else if (strategyType === "RSI_REVERSAL") {
-      signal = rsiReversalSignal(i, candles, rsiArr, emaFilterArr, atr14, rules as RsiReversalRules);
+      signal = rsiReversalSignal(i, candles, rsiArr, emaFilterArr, atr14, rules as RsiReversalRules, rsiRevStochK, rsiRevBollLow, rsiRevBollUp);
     } else if (strategyType === "TREND_FOLLOWING") {
-      signal = trendFollowingSignal(i, candles, fastEmaArr, adxArr, atr14, rules as TrendFollowingRules);
+      signal = trendFollowingSignal(i, candles, fastEmaArr, adxArr, atr14, rules as TrendFollowingRules, tfDiPlus, tfDiMinus, tfMacdHist, tfSlowEma);
     } else if (strategyType === "CUSTOM") {
       signal = customSignal(i, candles, atr14, rules as CustomRules, customCache);
     }
