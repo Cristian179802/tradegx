@@ -20,16 +20,16 @@ import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import {
   Loader2, ChevronLeft, CheckCircle2, AlertCircle,
-  Upload, FileText, X, Wifi, WifiOff, Eye, EyeOff,
-  Shield, Zap, Server, Hash, Lock, User2, ChevronRight,
-  Copy, Check, Download, Terminal, RefreshCw, Plug,
+  Upload, FileText, X,
+  User2, ChevronRight,
+  Copy, Check, Download, Terminal, Plug,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ConnectionMethod = "ea" | "direct" | "csv" | "manual";
+type ConnectionMethod = "ea" | "csv" | "manual";
 type Platform = "mt4" | "mt5" | "ctrader";
-type Step = "method" | "ea-form" | "ea-code" | "direct" | "csv" | "form";
+type Step = "method" | "ea-form" | "ea-code" | "csv" | "form";
 type AccountTyp = "DEMO" | "CHALLENGE" | "LIVE";
 
 interface AccountDialogProps {
@@ -53,13 +53,6 @@ const ACCOUNT_TYPES = [
   { value: "LIVE",      label: "Live",      color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/40" },
 ] as const;
 
-const POPULAR_SERVERS = [
-  "ICMarkets-Live", "ICMarkets-Demo", "FTMO-Server", "FTMO-Demo",
-  "Pepperstone-Live", "Pepperstone-Demo", "Exness-Real", "Exness-Demo",
-  "XM.COM-Real", "XM.COM-Demo3", "FusionMarkets-Live", "FusionMarkets-Demo",
-  "MyFundedFX-Live", "GoatFundedTrader-Live", "E8-Live", "FundingPips-Live",
-  "Eightcap-Live", "BlackBull-Live", "ThinkMarkets-Live", "Vantage-Live",
-];
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
@@ -83,20 +76,14 @@ function CopyButton({ text, label = "Copiază" }: { text: string; label?: string
 
 // ─── Step: Choose Method ──────────────────────────────────────────────────────
 
-function StepMethod({
-  onSelect,
-  metaApiAvailable,
-}: {
-  onSelect: (m: ConnectionMethod) => void;
-  metaApiAvailable: boolean | null;
-}) {
+function StepMethod({ onSelect }: { onSelect: (m: ConnectionMethod) => void }) {
   return (
     <div className="space-y-3">
       <p className="text-sm text-zinc-400 mb-5">
         Alege cum vrei să conectezi contul de trading:
       </p>
 
-      {/* ── EA / Direct sync — PRIMARY ────────────────────────────────── */}
+      {/* ── EA Sync — PRIMARY ────────────────────────────────────────── */}
       <button
         onClick={() => onSelect("ea")}
         className="w-full flex items-center gap-4 p-4 rounded-xl border border-indigo-500/40 bg-gradient-to-r from-indigo-500/8 to-violet-500/5 hover:border-indigo-400/70 hover:from-indigo-500/15 hover:to-violet-500/10 transition-all text-left group relative overflow-hidden"
@@ -116,36 +103,12 @@ function StepMethod({
             </Badge>
           </div>
           <p className="text-xs text-zinc-500">
-            Instalezi un Expert Advisor (EA) în MT4/MT5 — tranzacțiile se sincronizează automat, în timp real.
-            Funcționează cu orice broker.
+            Instalezi un fișier mic în MT4/MT5 — tranzacțiile se sincronizează automat, în timp real,
+            cu orice broker.
           </p>
         </div>
         <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-indigo-400 transition-colors shrink-0" />
       </button>
-
-      {/* ── MetaAPI — when available ──────────────────────────────────── */}
-      {metaApiAvailable === true && (
-        <button
-          onClick={() => onSelect("direct")}
-          className="w-full flex items-center gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-left group"
-        >
-          <div className="w-11 h-11 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-            <Wifi className="w-5 h-5 text-zinc-500" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-sm font-bold text-zinc-300">MetaAPI — login + parolă</span>
-              <Badge className="bg-zinc-700/60 border border-zinc-700 text-zinc-400 text-[10px] px-1.5 py-0">
-                Premium
-              </Badge>
-            </div>
-            <p className="text-xs text-zinc-500">
-              Introdu login-ul și parola de investitor — fără instalare EA.
-            </p>
-          </div>
-          <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
-        </button>
-      )}
 
       {/* ── CSV import ───────────────────────────────────────────────── */}
       <button
@@ -156,11 +119,9 @@ function StepMethod({
           <Upload className="w-5 h-5 text-zinc-500" />
         </div>
         <div className="flex-1">
-          <div className="mb-0.5">
-            <span className="text-sm font-bold text-zinc-300">Import CSV / HTML</span>
-          </div>
-          <p className="text-xs text-zinc-500">
-            Exportă istoricul din MT4/MT5/cTrader și importă fișierul o singură dată.
+          <span className="text-sm font-bold text-zinc-300">Import CSV / HTML</span>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Exportă istoricul din MT4/MT5/cTrader și importă fișierul.
           </p>
         </div>
         <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
@@ -495,261 +456,6 @@ function StepEACode({
   );
 }
 
-// ─── Step: Direct Connect (MetaAPI) ──────────────────────────────────────────
-
-function StepDirect({
-  onBack,
-  onSuccess,
-  onClose,
-  onSwitchToEA,
-}: {
-  onBack: () => void;
-  onSuccess: () => void;
-  onClose: () => void;
-  onSwitchToEA: () => void;
-}) {
-  const { toast } = useToast();
-  const [platform, setPlatform] = React.useState<Platform>("mt5");
-  const [accountType, setAccountType] = React.useState<AccountTyp>("LIVE");
-  const [login, setLogin] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [server, setServer] = React.useState("");
-  const [accountName, setAccountName] = React.useState("");
-  const [currency, setCurrency] = React.useState("USD");
-  const [maxDailyLoss, setMaxDailyLoss] = React.useState("");
-  const [maxDrawdown, setMaxDrawdown] = React.useState("");
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [serverSuggestions, setServerSuggestions] = React.useState<string[]>([]);
-  const [loading, setLoading] = React.useState(false);
-  const [connectStep, setConnectStep] = React.useState(0);
-  const [error, setError] = React.useState("");
-  const [success, setSuccess] = React.useState<{ imported: number; message: string } | null>(null);
-  const [leverage, setLeverage] = React.useState("100");
-
-  const CONNECT_STEPS = [
-    "Verificare date...",
-    "Se conectează la broker...",
-    "Sincronizare tranzacții...",
-    "Salvare cont...",
-  ];
-
-  function filterServers(val: string) {
-    setServer(val);
-    if (val.length > 1) {
-      setServerSuggestions(POPULAR_SERVERS.filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 5));
-    } else setServerSuggestions([]);
-  }
-
-  async function handleConnect() {
-    if (!login || !password || !server) {
-      setError("Login, parolă și server sunt obligatorii.");
-      return;
-    }
-    setError("");
-    setLoading(true);
-    setConnectStep(0);
-
-    const stepInterval = setInterval(() => {
-      setConnectStep(p => Math.min(p + 1, CONNECT_STEPS.length - 1));
-    }, 1800);
-
-    try {
-      const res = await fetch("/api/integrations/metaapi/provision", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          login, password, server, platform,
-          name: accountName || `${platform.toUpperCase()} ${server.split("-")[0]} ${login}`,
-          accountType, currency,
-          leverage: parseInt(leverage),
-          maxDailyLossPct: maxDailyLoss ? parseFloat(maxDailyLoss) : undefined,
-          maxDrawdownPct:  maxDrawdown  ? parseFloat(maxDrawdown)  : undefined,
-        }),
-      });
-      clearInterval(stepInterval);
-      const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Eroare la conectarea contului."); setLoading(false); return; }
-      setConnectStep(CONNECT_STEPS.length - 1);
-      setSuccess({ imported: data.imported ?? 0, message: data.message });
-      setTimeout(() => { onSuccess(); onClose(); }, 2500);
-    } catch {
-      clearInterval(stepInterval);
-      setError("Eroare de rețea. Încearcă din nou.");
-      setLoading(false);
-    }
-  }
-
-  if (success) {
-    return (
-      <div className="flex flex-col items-center justify-center py-10 gap-5">
-        <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10 text-emerald-400" />
-          </div>
-          <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-white" />
-          </div>
-        </div>
-        <div className="text-center space-y-1.5">
-          <p className="text-lg font-bold text-zinc-100">Cont conectat cu succes!</p>
-          {success.imported > 0 && (
-            <p className="text-sm text-emerald-400 font-semibold">
-              {success.imported} tranzacții importate din ultimele 90 de zile
-            </p>
-          )}
-          <p className="text-xs text-zinc-500 max-w-xs leading-relaxed">{success.message}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-10 gap-6">
-        <div className="relative">
-          <div className="w-20 h-20 rounded-full border-2 border-indigo-500/30 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full border-2 border-t-indigo-500 border-r-indigo-500/50 border-b-transparent border-l-transparent animate-spin" />
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Wifi className="w-7 h-7 text-indigo-400" />
-          </div>
-        </div>
-        <div className="w-full max-w-xs space-y-2.5">
-          {CONNECT_STEPS.map((step, i) => (
-            <div key={i} className={cn("flex items-center gap-3 transition-all duration-500",
-              i < connectStep ? "opacity-40" : i === connectStep ? "opacity-100" : "opacity-20")}>
-              <div className={cn("w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all",
-                i < connectStep ? "bg-emerald-500/20 border-emerald-500/50"
-                  : i === connectStep ? "border-indigo-500 bg-indigo-500/20"
-                  : "border-zinc-700")}>
-                {i < connectStep ? <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                  : i === connectStep ? <Loader2 className="w-3 h-3 text-indigo-400 animate-spin" /> : null}
-              </div>
-              <span className={cn("text-sm", i <= connectStep ? "text-zinc-300" : "text-zinc-600")}>{step}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-5">
-      <button onClick={onBack}
-        className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
-        <ChevronLeft className="w-4 h-4" />Înapoi
-      </button>
-
-      <div className="flex items-start gap-2.5 bg-indigo-500/8 border border-indigo-500/20 rounded-xl px-3.5 py-3">
-        <Shield className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-        <div>
-          <p className="text-xs font-semibold text-indigo-300 mb-0.5">Conexiune securizată prin MetaAPI</p>
-          <p className="text-[11px] text-zinc-500 leading-relaxed">
-            Folosim <strong className="text-zinc-400">parola de investitor (read-only)</strong> — nu poate plasa tranzacții.
-          </p>
-        </div>
-      </div>
-
-      <div>
-        <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Platformă</label>
-        <div className="grid grid-cols-3 gap-2">
-          {(["mt4", "mt5", "ctrader"] as Platform[]).map((p) => (
-            <button key={p} onClick={() => setPlatform(p)}
-              className={cn("py-2.5 rounded-xl border text-sm font-bold transition-all",
-                platform === p ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
-                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
-              {p === "mt4" ? "MT4" : p === "mt5" ? "MT5" : "cTrader"}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Tip cont</label>
-        <div className="grid grid-cols-3 gap-2">
-          {ACCOUNT_TYPES.map((t) => (
-            <button key={t.value} onClick={() => setAccountType(t.value)}
-              className={cn("py-2.5 rounded-xl border text-sm font-semibold transition-all",
-                accountType === t.value ? `${t.bg} ${t.color}`
-                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <div className="space-y-1.5">
-          <label className="text-sm text-zinc-300 flex items-center gap-1.5">
-            <Hash className="w-3.5 h-3.5 text-zinc-500" />Număr cont (Login)
-          </label>
-          <Input placeholder="Ex: 12345678" value={login}
-            onChange={(e) => setLogin(e.target.value)}
-            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 font-mono" />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-sm text-zinc-300 flex items-center gap-1.5">
-            <Lock className="w-3.5 h-3.5 text-zinc-500" />Parolă investitor (read-only)
-          </label>
-          <div className="relative">
-            <Input type={showPassword ? "text" : "password"}
-              placeholder="Parola de investor/read-only" value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 pr-10" />
-            <button type="button" onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
-        <div className="space-y-1.5 relative">
-          <label className="text-sm text-zinc-300 flex items-center gap-1.5">
-            <Server className="w-3.5 h-3.5 text-zinc-500" />Server broker
-          </label>
-          <Input placeholder="Ex: ICMarkets-Live, FTMO-Server"
-            value={server} onChange={(e) => filterServers(e.target.value)}
-            onBlur={() => setTimeout(() => setServerSuggestions([]), 200)}
-            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
-          {serverSuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-zinc-800 border border-zinc-700 rounded-xl shadow-xl overflow-hidden">
-              {serverSuggestions.map((s) => (
-                <button key={s} type="button"
-                  className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700 transition-colors"
-                  onClick={() => { setServer(s); setServerSuggestions([]); }}>
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {error && (
-        <div className="space-y-2">
-          <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <p className="text-sm text-rose-300">{error}</p>
-          </div>
-          <button onClick={onSwitchToEA}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs transition-all">
-            <Plug className="w-3.5 h-3.5" />
-            Folosește conectare prin EA în schimb
-          </button>
-        </div>
-      )}
-
-      <Button onClick={handleConnect} disabled={!login || !password || !server || loading}
-        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/20 h-11">
-        <Wifi className="w-4 h-4 mr-2" />Conectează contul
-      </Button>
-
-      <p className="text-center text-[11px] text-zinc-600">
-        Nu ai parola de investitor? În MT5: Setări → Schimbă parolă → Parola investitor
-      </p>
-    </div>
-  );
-}
-
 // ─── Step: CSV Import ─────────────────────────────────────────────────────────
 
 function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess: () => void; onClose: () => void; }) {
@@ -1071,18 +777,7 @@ function StepForm({ prefill, isEdit, onBack, onClose, onSuccess }: {
 export function AccountDialog({ open, onClose, onSuccess, account }: AccountDialogProps) {
   const isEdit = !!account;
   const [step, setStep] = React.useState<Step>(isEdit ? "form" : "method");
-  const [metaApiAvailable, setMetaApiAvailable] = React.useState<boolean | null>(null);
   const [eaAccountId, setEaAccountId] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (open && !isEdit) {
-      setMetaApiAvailable(null);
-      fetch("/api/integrations/metaapi/status")
-        .then((r) => r.json())
-        .then((d) => setMetaApiAvailable(d.available === true))
-        .catch(() => setMetaApiAvailable(false));
-    }
-  }, [open, isEdit]);
 
   React.useEffect(() => {
     if (open) {
@@ -1092,12 +787,11 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
   }, [open, isEdit]);
 
   const TITLES: Partial<Record<Step, string>> = {
-    method:   "Adaugă cont de trading",
-    "ea-form":  "Conectare MT4 / MT5 — Pas 1",
-    "ea-code":  "Instalează Expert Advisor",
-    direct:   "Conectare directă MetaAPI",
-    csv:      "Import fișier",
-    form:     isEdit ? "Editează cont" : "Cont manual",
+    method:    "Adaugă cont de trading",
+    "ea-form": "Conectare MT4 / MT5 — Detalii cont",
+    "ea-code": "Instalează Expert Advisor",
+    csv:       "Import fișier",
+    form:      isEdit ? "Editează cont" : "Cont manual",
   };
 
   return (
@@ -1109,12 +803,10 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
 
         {step === "method" && (
           <StepMethod
-            metaApiAvailable={metaApiAvailable}
             onSelect={(m) => {
-              if (m === "ea")     setStep("ea-form");
-              else if (m === "direct") setStep("direct");
-              else if (m === "csv")    setStep("csv");
-              else                     setStep("form");
+              if (m === "ea")  setStep("ea-form");
+              else if (m === "csv") setStep("csv");
+              else              setStep("form");
             }}
           />
         )}
@@ -1130,15 +822,6 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
           <StepEACode
             accountId={eaAccountId}
             onDone={() => { onSuccess(); onClose(); }}
-          />
-        )}
-
-        {step === "direct" && (
-          <StepDirect
-            onBack={() => setStep("method")}
-            onSuccess={onSuccess}
-            onClose={onClose}
-            onSwitchToEA={() => setStep("ea-form")}
           />
         )}
 
