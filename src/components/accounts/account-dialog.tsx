@@ -20,17 +20,16 @@ import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import {
   Loader2, ChevronLeft, CheckCircle2, AlertCircle,
-  Upload, FileText, X,
-  Wifi, WifiOff, Eye, EyeOff,
+  Upload, FileText, X, Wifi, WifiOff, Eye, EyeOff,
   Shield, Zap, Server, Hash, Lock, User2, ChevronRight,
-  Info,
+  Copy, Check, Download, Terminal, RefreshCw, Plug,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ConnectionMethod = "direct" | "csv" | "manual";
+type ConnectionMethod = "ea" | "direct" | "csv" | "manual";
 type Platform = "mt4" | "mt5" | "ctrader";
-type Step = "method" | "connect" | "csv" | "form";
+type Step = "method" | "ea-form" | "ea-code" | "direct" | "csv" | "form";
 type AccountTyp = "DEMO" | "CHALLENGE" | "LIVE";
 
 interface AccountDialogProps {
@@ -59,7 +58,28 @@ const POPULAR_SERVERS = [
   "Pepperstone-Live", "Pepperstone-Demo", "Exness-Real", "Exness-Demo",
   "XM.COM-Real", "XM.COM-Demo3", "FusionMarkets-Live", "FusionMarkets-Demo",
   "MyFundedFX-Live", "GoatFundedTrader-Live", "E8-Live", "FundingPips-Live",
+  "Eightcap-Live", "BlackBull-Live", "ThinkMarkets-Live", "Vantage-Live",
 ];
+
+// ─── Utility ──────────────────────────────────────────────────────────────────
+
+function CopyButton({ text, label = "Copiază" }: { text: string; label?: string }) {
+  const [copied, setCopied] = React.useState(false);
+  return (
+    <button
+      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+      className={cn(
+        "flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all",
+        copied
+          ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
+          : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600"
+      )}
+    >
+      {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+      {copied ? "Copiat!" : label}
+    </button>
+  );
+}
 
 // ─── Step: Choose Method ──────────────────────────────────────────────────────
 
@@ -70,76 +90,83 @@ function StepMethod({
   onSelect: (m: ConnectionMethod) => void;
   metaApiAvailable: boolean | null;
 }) {
-  const checking = metaApiAvailable === null;
-
   return (
     <div className="space-y-3">
-      <p className="text-sm text-zinc-400 mb-5">Cum vrei să conectezi contul de trading?</p>
+      <p className="text-sm text-zinc-400 mb-5">
+        Alege cum vrei să conectezi contul de trading:
+      </p>
 
-      {/* CSV import — PRIMARY (always works, no API key needed) */}
+      {/* ── EA / Direct sync — PRIMARY ────────────────────────────────── */}
       <button
-        onClick={() => onSelect("csv")}
+        onClick={() => onSelect("ea")}
         className="w-full flex items-center gap-4 p-4 rounded-xl border border-indigo-500/40 bg-gradient-to-r from-indigo-500/8 to-violet-500/5 hover:border-indigo-400/70 hover:from-indigo-500/15 hover:to-violet-500/10 transition-all text-left group relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0 relative">
-          <Upload className="w-5 h-5 text-indigo-400" />
+        <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
+          <Plug className="w-5 h-5 text-indigo-400" />
         </div>
         <div className="flex-1 relative">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-sm font-bold text-zinc-100">Import fișier MT4 / MT5 / cTrader</span>
+          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+            <span className="text-sm font-bold text-zinc-100">Conectare directă MT4 / MT5</span>
             <Badge className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] px-1.5 py-0">
               Recomandat
             </Badge>
+            <Badge className="bg-zinc-700/60 border border-zinc-700 text-zinc-400 text-[10px] px-1.5 py-0">
+              Gratuit
+            </Badge>
           </div>
           <p className="text-xs text-zinc-500">
-            Exportă istoricul din MT4/MT5/cTrader și încarcă fișierul CSV sau HTML. Nu necesită configurare.
+            Instalezi un Expert Advisor (EA) în MT4/MT5 — tranzacțiile se sincronizează automat, în timp real.
+            Funcționează cu orice broker.
           </p>
         </div>
         <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-indigo-400 transition-colors shrink-0" />
       </button>
 
-      {/* Direct connection — requires MetaAPI */}
+      {/* ── MetaAPI — when available ──────────────────────────────────── */}
+      {metaApiAvailable === true && (
+        <button
+          onClick={() => onSelect("direct")}
+          className="w-full flex items-center gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-left group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+            <Wifi className="w-5 h-5 text-zinc-500" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-sm font-bold text-zinc-300">MetaAPI — login + parolă</span>
+              <Badge className="bg-zinc-700/60 border border-zinc-700 text-zinc-400 text-[10px] px-1.5 py-0">
+                Premium
+              </Badge>
+            </div>
+            <p className="text-xs text-zinc-500">
+              Introdu login-ul și parola de investitor — fără instalare EA.
+            </p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
+        </button>
+      )}
+
+      {/* ── CSV import ───────────────────────────────────────────────── */}
       <button
-        onClick={() => metaApiAvailable ? onSelect("direct") : undefined}
-        disabled={!metaApiAvailable || checking}
-        className={cn(
-          "w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left group relative",
-          metaApiAvailable
-            ? "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 cursor-pointer"
-            : "border-zinc-800/50 bg-zinc-900/20 cursor-not-allowed opacity-60"
-        )}
+        onClick={() => onSelect("csv")}
+        className="w-full flex items-center gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-left group"
       >
         <div className="w-11 h-11 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-          {checking ? (
-            <Loader2 className="w-5 h-5 text-zinc-600 animate-spin" />
-          ) : metaApiAvailable ? (
-            <Wifi className="w-5 h-5 text-zinc-500" />
-          ) : (
-            <WifiOff className="w-5 h-5 text-zinc-600" />
-          )}
+          <Upload className="w-5 h-5 text-zinc-500" />
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-sm font-bold text-zinc-400">Conectare directă MT4/MT5</span>
-            {!checking && !metaApiAvailable && (
-              <Badge className="bg-zinc-700/50 border border-zinc-700 text-zinc-500 text-[10px] px-1.5 py-0">
-                Indisponibil
-              </Badge>
-            )}
+          <div className="mb-0.5">
+            <span className="text-sm font-bold text-zinc-300">Import CSV / HTML</span>
           </div>
-          <p className="text-xs text-zinc-600">
-            {checking
-              ? "Se verifică disponibilitatea..."
-              : metaApiAvailable
-              ? "Login + parolă investitor + server. Sincronizare automată."
-              : "Necesită configurare MetaAPI pe server. Folosește import CSV în locul său."}
+          <p className="text-xs text-zinc-500">
+            Exportă istoricul din MT4/MT5/cTrader și importă fișierul o singură dată.
           </p>
         </div>
-        <ChevronRight className="w-4 h-4 text-zinc-700 shrink-0" />
+        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
       </button>
 
-      {/* Manual */}
+      {/* ── Manual ───────────────────────────────────────────────────── */}
       <button
         onClick={() => onSelect("manual")}
         className="w-full flex items-center gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-left group"
@@ -148,10 +175,8 @@ function StepMethod({
           <User2 className="w-5 h-5 text-zinc-500" />
         </div>
         <div className="flex-1">
-          <div className="mb-0.5">
-            <span className="text-sm font-bold text-zinc-300">Manual</span>
-          </div>
-          <p className="text-xs text-zinc-500">Creează cont și adaugă tranzacțiile manual, una câte una.</p>
+          <span className="text-sm font-bold text-zinc-300">Manual</span>
+          <p className="text-xs text-zinc-500 mt-0.5">Creează cont și adaugă tranzacțiile manual.</p>
         </div>
         <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
       </button>
@@ -159,18 +184,329 @@ function StepMethod({
   );
 }
 
-// ─── Step: Direct Connect Form ────────────────────────────────────────────────
+// ─── Step: EA Setup — Part 1 (create account) ────────────────────────────────
 
-function StepConnect({
+function StepEAForm({
+  onBack,
+  onAccountCreated,
+}: {
+  onBack: () => void;
+  onAccountCreated: (accountId: string) => void;
+}) {
+  const { toast } = useToast();
+  const [name, setName]           = React.useState("");
+  const [broker, setBroker]       = React.useState("");
+  const [accountNumber, setAccNr] = React.useState("");
+  const [type, setType]           = React.useState<AccountTyp>("LIVE");
+  const [currency, setCurrency]   = React.useState("USD");
+  const [leverage, setLeverage]   = React.useState("100");
+  const [maxDailyLoss, setMDL]    = React.useState("");
+  const [maxDD, setMaxDD]         = React.useState("");
+  const [loading, setLoading]     = React.useState(false);
+  const [error, setError]         = React.useState("");
+
+  async function handleCreate() {
+    if (!name.trim()) { setError("Introduceți un nume pentru cont."); return; }
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          type,
+          broker: broker || "MT4/MT5",
+          accountNumber: accountNumber || "",
+          currency,
+          balance: 0,
+          leverage: parseInt(leverage),
+          maxDailyLossPct: maxDailyLoss ? parseFloat(maxDailyLoss) : undefined,
+          maxDrawdownPct:  maxDD        ? parseFloat(maxDD)        : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Eroare la creare cont."); return; }
+      toast({ title: "Cont creat! Generez codul EA..." });
+      onAccountCreated(data.id);
+    } catch {
+      setError("Eroare de rețea.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <button onClick={onBack}
+        className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
+        <ChevronLeft className="w-4 h-4" />Înapoi
+      </button>
+
+      {/* Explainer */}
+      <div className="flex items-start gap-3 bg-indigo-500/8 border border-indigo-500/20 rounded-xl p-3.5">
+        <Terminal className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-xs font-semibold text-indigo-300 mb-0.5">Cum funcționează EA Sync</p>
+          <p className="text-[11px] text-zinc-500 leading-relaxed">
+            Vei instala un fișier mic (Expert Advisor) în MT4/MT5. Acesta rulează în fundal și
+            trimite automat fiecare tranzacție închisă direct în Apex Trader — în timp real.
+            <strong className="text-zinc-400"> Nu necesită nicio configurare de server.</strong>
+          </p>
+        </div>
+      </div>
+
+      {/* Account type */}
+      <div>
+        <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">
+          Tip cont
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {ACCOUNT_TYPES.map((t) => (
+            <button key={t.value} onClick={() => setType(t.value)}
+              className={cn("py-2.5 rounded-xl border text-sm font-semibold transition-all",
+                type === t.value ? `${t.bg} ${t.color}`
+                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Fields */}
+      <div className="space-y-3">
+        <div className="space-y-1.5">
+          <label className="text-sm text-zinc-300">Nume cont <span className="text-zinc-600 text-xs">(ex: FTMO $100K)</span></label>
+          <Input placeholder={type === "CHALLENGE" ? "Ex: FTMO $25K" : type === "LIVE" ? "Ex: IC Markets Live" : "Ex: Cont Demo"}
+            value={name} onChange={(e) => setName(e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label className="text-sm text-zinc-300">Broker <span className="text-zinc-600 text-xs">(opțional)</span></label>
+            <Input placeholder="Ex: FTMO, ICMarkets" value={broker}
+              onChange={(e) => setBroker(e.target.value)}
+              className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm text-zinc-300">Nr. cont MT <span className="text-zinc-600 text-xs">(opțional)</span></label>
+            <Input placeholder="Ex: 12345678" value={accountNumber}
+              onChange={(e) => setAccNr(e.target.value)}
+              className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 font-mono" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm text-zinc-300">Monedă</label>
+            <select value={currency} onChange={(e) => setCurrency(e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm text-zinc-300">Levier</label>
+            <select value={leverage} onChange={(e) => setLeverage(e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              {[10, 20, 30, 50, 100, 200, 400, 500].map((l) => (
+                <option key={l} value={String(l)}>1:{l}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {type === "CHALLENGE" && (
+          <div className="border border-amber-500/20 bg-amber-500/5 rounded-xl p-3 space-y-3">
+            <p className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Reguli Prop Firm</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs text-zinc-400">Pierdere zilnică max (%)</label>
+                <Input type="number" step="0.1" placeholder="5" value={maxDailyLoss}
+                  onChange={(e) => setMDL(e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-zinc-400">Max drawdown (%)</label>
+                <Input type="number" step="0.1" placeholder="10" value={maxDD}
+                  onChange={(e) => setMaxDD(e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
+          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+          <p className="text-sm text-rose-300">{error}</p>
+        </div>
+      )}
+
+      <Button onClick={handleCreate} disabled={loading || !name.trim()}
+        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold h-11 shadow-lg shadow-indigo-500/20">
+        {loading
+          ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se creează contul...</>
+          : <>Continuă — generează codul EA <ChevronRight className="w-4 h-4 ml-1" /></>}
+      </Button>
+    </div>
+  );
+}
+
+// ─── Step: EA Setup — Part 2 (show code) ─────────────────────────────────────
+
+interface EAInfo {
+  token: string;
+  webhookUrl: string;
+  eaMQ4: string;
+  eaMQ5: string;
+  appDomain: string;
+}
+
+function StepEACode({
+  accountId,
+  onDone,
+}: {
+  accountId: string;
+  onDone: () => void;
+}) {
+  const [ea, setEa] = React.useState<EAInfo | null>(null);
+  const [platform, setPlatform] = React.useState<"mt4" | "mt5">("mt5");
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    setLoading(true);
+    fetch(`/api/accounts/${accountId}/ea`)
+      .then((r) => r.json())
+      .then((d) => { setEa(d); setLoading(false); })
+      .catch(() => { setError("Nu s-a putut genera codul EA."); setLoading(false); });
+  }, [accountId]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-3">
+        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+        <p className="text-sm text-zinc-400">Se generează codul EA...</p>
+      </div>
+    );
+  }
+
+  if (error || !ea) {
+    return (
+      <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl p-4">
+        <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+        <p className="text-sm text-rose-300">{error || "Eroare necunoscută."}</p>
+      </div>
+    );
+  }
+
+  const code = platform === "mt4" ? ea.eaMQ4 : ea.eaMQ5;
+  const ext  = platform === "mt4" ? "mq4" : "mq5";
+
+  function downloadEA() {
+    const blob = new Blob([code], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `ApexTrader_Sync.${ext}`;
+    a.click();
+  }
+
+  const steps = platform === "mt4" ? [
+    { title: "Deschide folderul MT4", detail: `File → Open Data Folder → MQL4 → Experts` },
+    { title: `Creează fișier nou`, detail: `Salvează codul de mai jos ca "ApexTrader_Sync.mq4"` },
+    { title: "Compilează și permite WebRequest", detail: `Tools → Options → Expert Advisors → Allow WebRequest → adaugă: ${ea.appDomain}` },
+    { title: "Atașează EA la orice chart", detail: "Drag & drop din Navigator → Experts → ApexTrader_Sync" },
+    { title: "Tranzacțiile se sincronizează automat! ✅", detail: "De fiecare dată când închizi o tranzacție, apare în Apex Trader." },
+  ] : [
+    { title: "Deschide folderul MT5", detail: `File → Open Data Folder → MQL5 → Experts` },
+    { title: `Creează fișier nou`, detail: `Salvează codul de mai jos ca "ApexTrader_Sync.mq5"` },
+    { title: "Compilează și permite WebRequest", detail: `Tools → Options → Expert Advisors → Allow WebRequest → adaugă: ${ea.appDomain}` },
+    { title: "Atașează EA la orice chart", detail: "Drag & drop din Navigator → Expert Advisors → ApexTrader_Sync" },
+    { title: "Tranzacțiile se sincronizează automat! ✅", detail: "De fiecare dată când închizi o tranzacție, apare în Apex Trader." },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {/* Platform switch */}
+      <div className="grid grid-cols-2 gap-2">
+        {(["mt4", "mt5"] as const).map((p) => (
+          <button key={p} onClick={() => setPlatform(p)}
+            className={cn("py-2.5 rounded-xl border text-sm font-bold transition-all",
+              platform === p
+                ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
+                : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
+            {p.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      {/* Steps */}
+      <div className="space-y-2">
+        {steps.map((s, i) => (
+          <div key={i} className="flex gap-3 items-start">
+            <span className={cn(
+              "w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5",
+              i === steps.length - 1
+                ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
+                : "bg-indigo-500/20 border border-indigo-500/30 text-indigo-300"
+            )}>
+              {i === steps.length - 1 ? "✓" : i + 1}
+            </span>
+            <div>
+              <p className={cn("text-xs font-semibold", i === steps.length - 1 ? "text-emerald-400" : "text-zinc-200")}>{s.title}</p>
+              <p className="text-[11px] text-zinc-500 mt-0.5">{s.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Code block */}
+      <div className="rounded-xl border border-zinc-700 overflow-hidden">
+        <div className="flex items-center justify-between bg-zinc-800 px-3 py-2 border-b border-zinc-700">
+          <span className="text-[11px] font-mono text-zinc-500">ApexTrader_Sync.{ext}</span>
+          <div className="flex gap-2">
+            <CopyButton text={code} label="Copiază codul" />
+            <button
+              onClick={downloadEA}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-all"
+            >
+              <Download className="w-3 h-3" />
+              Descarcă .{ext}
+            </button>
+          </div>
+        </div>
+        <div className="bg-zinc-900/80 overflow-y-auto max-h-40">
+          <pre className="text-[10px] text-zinc-400 p-3 font-mono leading-relaxed whitespace-pre-wrap">
+            {code.slice(0, 600)}
+            {code.length > 600 && "\n... (copiază sau descarcă fișierul complet)"}
+          </pre>
+        </div>
+      </div>
+
+      <Button onClick={onDone}
+        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold h-10">
+        <CheckCircle2 className="w-4 h-4 mr-2" />
+        Am instalat EA-ul — Deschide contul
+      </Button>
+
+      <p className="text-center text-[11px] text-zinc-600">
+        Tranzacțiile vor apărea după ce EA-ul detectează prima închidere de poziție.
+      </p>
+    </div>
+  );
+}
+
+// ─── Step: Direct Connect (MetaAPI) ──────────────────────────────────────────
+
+function StepDirect({
   onBack,
   onSuccess,
   onClose,
-  onSwitchToCSV,
+  onSwitchToEA,
 }: {
   onBack: () => void;
   onSuccess: () => void;
   onClose: () => void;
-  onSwitchToCSV: () => void;
+  onSwitchToEA: () => void;
 }) {
   const { toast } = useToast();
   const [platform, setPlatform] = React.useState<Platform>("mt5");
@@ -201,9 +537,7 @@ function StepConnect({
     setServer(val);
     if (val.length > 1) {
       setServerSuggestions(POPULAR_SERVERS.filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 5));
-    } else {
-      setServerSuggestions([]);
-    }
+    } else setServerSuggestions([]);
   }
 
   async function handleConnect() {
@@ -229,19 +563,12 @@ function StepConnect({
           accountType, currency,
           leverage: parseInt(leverage),
           maxDailyLossPct: maxDailyLoss ? parseFloat(maxDailyLoss) : undefined,
-          maxDrawdownPct: maxDrawdown ? parseFloat(maxDrawdown) : undefined,
+          maxDrawdownPct:  maxDrawdown  ? parseFloat(maxDrawdown)  : undefined,
         }),
       });
-
       clearInterval(stepInterval);
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? "Eroare la conectarea contului.");
-        setLoading(false);
-        return;
-      }
-
+      if (!res.ok) { setError(data.error ?? "Eroare la conectarea contului."); setLoading(false); return; }
       setConnectStep(CONNECT_STEPS.length - 1);
       setSuccess({ imported: data.imported ?? 0, message: data.message });
       setTimeout(() => { onSuccess(); onClose(); }, 2500);
@@ -289,36 +616,27 @@ function StepConnect({
         </div>
         <div className="w-full max-w-xs space-y-2.5">
           {CONNECT_STEPS.map((step, i) => (
-            <div key={i} className={cn(
-              "flex items-center gap-3 transition-all duration-500",
-              i < connectStep ? "opacity-40" : i === connectStep ? "opacity-100" : "opacity-20"
-            )}>
-              <div className={cn(
-                "w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all",
+            <div key={i} className={cn("flex items-center gap-3 transition-all duration-500",
+              i < connectStep ? "opacity-40" : i === connectStep ? "opacity-100" : "opacity-20")}>
+              <div className={cn("w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all",
                 i < connectStep ? "bg-emerald-500/20 border-emerald-500/50"
                   : i === connectStep ? "border-indigo-500 bg-indigo-500/20"
-                  : "border-zinc-700"
-              )}>
-                {i < connectStep
-                  ? <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                  : i === connectStep
-                  ? <Loader2 className="w-3 h-3 text-indigo-400 animate-spin" />
-                  : null}
+                  : "border-zinc-700")}>
+                {i < connectStep ? <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                  : i === connectStep ? <Loader2 className="w-3 h-3 text-indigo-400 animate-spin" /> : null}
               </div>
               <span className={cn("text-sm", i <= connectStep ? "text-zinc-300" : "text-zinc-600")}>{step}</span>
             </div>
           ))}
         </div>
-        <p className="text-xs text-zinc-600 text-center max-w-xs">
-          Prima conectare poate dura până la 30 secunde. Nu închide fereastra.
-        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-5">
-      <button onClick={onBack} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
+      <button onClick={onBack}
+        className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
         <ChevronLeft className="w-4 h-4" />Înapoi
       </button>
 
@@ -328,12 +646,10 @@ function StepConnect({
           <p className="text-xs font-semibold text-indigo-300 mb-0.5">Conexiune securizată prin MetaAPI</p>
           <p className="text-[11px] text-zinc-500 leading-relaxed">
             Folosim <strong className="text-zinc-400">parola de investitor (read-only)</strong> — nu poate plasa tranzacții.
-            Datele sunt criptate și nu sunt stocate direct pe serverele noastre.
           </p>
         </div>
       </div>
 
-      {/* Platform tabs */}
       <div>
         <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Platformă</label>
         <div className="grid grid-cols-3 gap-2">
@@ -348,7 +664,6 @@ function StepConnect({
         </div>
       </div>
 
-      {/* Account type */}
       <div>
         <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Tip cont</label>
         <div className="grid grid-cols-3 gap-2">
@@ -363,44 +678,38 @@ function StepConnect({
         </div>
       </div>
 
-      {/* Connection fields */}
       <div className="space-y-3">
         <div className="space-y-1.5">
           <label className="text-sm text-zinc-300 flex items-center gap-1.5">
-            <Hash className="w-3.5 h-3.5 text-zinc-500" />
-            Număr cont (Login)
+            <Hash className="w-3.5 h-3.5 text-zinc-500" />Număr cont (Login)
           </label>
-          <Input placeholder="Ex: 12345678" value={login} onChange={(e) => setLogin(e.target.value)}
-            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20 font-mono" />
+          <Input placeholder="Ex: 12345678" value={login}
+            onChange={(e) => setLogin(e.target.value)}
+            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 font-mono" />
         </div>
-
         <div className="space-y-1.5">
           <label className="text-sm text-zinc-300 flex items-center gap-1.5">
-            <Lock className="w-3.5 h-3.5 text-zinc-500" />
-            Parolă investitor (read-only)
+            <Lock className="w-3.5 h-3.5 text-zinc-500" />Parolă investitor (read-only)
           </label>
           <div className="relative">
             <Input type={showPassword ? "text" : "password"}
-              placeholder="Parola de investor/read-only"
-              value={password} onChange={(e) => setPassword(e.target.value)}
-              className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20 pr-10" />
+              placeholder="Parola de investor/read-only" value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 pr-10" />
             <button type="button" onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
         </div>
-
         <div className="space-y-1.5 relative">
           <label className="text-sm text-zinc-300 flex items-center gap-1.5">
-            <Server className="w-3.5 h-3.5 text-zinc-500" />
-            Server broker
+            <Server className="w-3.5 h-3.5 text-zinc-500" />Server broker
           </label>
           <Input placeholder="Ex: ICMarkets-Live, FTMO-Server"
-            value={server}
-            onChange={(e) => filterServers(e.target.value)}
+            value={server} onChange={(e) => filterServers(e.target.value)}
             onBlur={() => setTimeout(() => setServerSuggestions([]), 200)}
-            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20" />
+            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
           {serverSuggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-zinc-800 border border-zinc-700 rounded-xl shadow-xl overflow-hidden">
               {serverSuggestions.map((s) => (
@@ -415,80 +724,23 @@ function StepConnect({
         </div>
       </div>
 
-      {/* Optional fields */}
-      <details className="group">
-        <summary className="cursor-pointer list-none flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-400 transition-colors select-none">
-          <ChevronRight className="w-3.5 h-3.5 group-open:rotate-90 transition-transform" />
-          Setări avansate (opțional)
-        </summary>
-        <div className="mt-3 space-y-3 pl-5">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs text-zinc-400">Nume cont</label>
-              <Input placeholder="Ex: FTMO $100K" value={accountName}
-                onChange={(e) => setAccountName(e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 text-sm" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-zinc-400">Monedă</label>
-              <select value={currency} onChange={(e) => setCurrency(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-zinc-400">Levier</label>
-            <select value={leverage} onChange={(e) => setLeverage(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-              {[10, 20, 30, 50, 100, 200, 400, 500].map((l) => (
-                <option key={l} value={String(l)}>1:{l}</option>
-              ))}
-            </select>
-          </div>
-          {accountType === "CHALLENGE" && (
-            <div className="border border-amber-500/20 bg-amber-500/5 rounded-xl p-3 space-y-3">
-              <p className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Reguli Prop Firm</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs text-zinc-400">Pierdere zilnică max (%)</label>
-                  <Input type="number" step="0.1" placeholder="Ex: 5" value={maxDailyLoss}
-                    onChange={(e) => setMaxDailyLoss(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-zinc-400">Drawdown max (%)</label>
-                  <Input type="number" step="0.1" placeholder="Ex: 10" value={maxDrawdown}
-                    onChange={(e) => setMaxDrawdown(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </details>
-
       {error && (
         <div className="space-y-2">
           <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
             <p className="text-sm text-rose-300">{error}</p>
           </div>
-          {/* Offer CSV as fallback if MetaAPI fails */}
-          <button
-            onClick={onSwitchToCSV}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs transition-all"
-          >
-            <Upload className="w-3.5 h-3.5" />
-            Folosește import CSV în schimb
+          <button onClick={onSwitchToEA}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs transition-all">
+            <Plug className="w-3.5 h-3.5" />
+            Folosește conectare prin EA în schimb
           </button>
         </div>
       )}
 
       <Button onClick={handleConnect} disabled={!login || !password || !server || loading}
         className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/20 h-11">
-        <Wifi className="w-4 h-4 mr-2" />
-        Conectează contul
+        <Wifi className="w-4 h-4 mr-2" />Conectează contul
       </Button>
 
       <p className="text-center text-[11px] text-zinc-600">
@@ -500,33 +752,20 @@ function StepConnect({
 
 // ─── Step: CSV Import ─────────────────────────────────────────────────────────
 
-function StepCSV({
-  onBack,
-  onSuccess,
-  onClose,
-}: {
-  onBack: () => void;
-  onSuccess: () => void;
-  onClose: () => void;
-}) {
+function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess: () => void; onClose: () => void; }) {
   const { toast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [file, setFile] = React.useState<File | null>(null);
-  const [dragging, setDragging] = React.useState(false);
-  const [accountName, setAccountName] = React.useState("");
-  const [accountType, setAccountType] = React.useState<AccountTyp>("LIVE");
-  const [currency, setCurrency] = React.useState("USD");
-  const [balance, setBalance] = React.useState("");
-  const [broker, setBroker] = React.useState("");
-  const [platform, setPlatform] = React.useState<"mt4" | "mt5" | "ctrader">("mt5");
-  const [loading, setLoading] = React.useState(false);
-  const [result, setResult] = React.useState<{ imported: number; skipped: number; format: string } | null>(null);
-  const [error, setError] = React.useState("");
-
-  function handleFileDrop(e: React.DragEvent) {
-    e.preventDefault(); setDragging(false);
-    const f = e.dataTransfer.files[0]; if (f) setFile(f);
-  }
+  const [file, setFile]           = React.useState<File | null>(null);
+  const [dragging, setDragging]   = React.useState(false);
+  const [accountName, setAccName] = React.useState("");
+  const [accountType, setType]    = React.useState<AccountTyp>("LIVE");
+  const [currency, setCurrency]   = React.useState("USD");
+  const [balance, setBalance]     = React.useState("");
+  const [broker, setBroker]       = React.useState("");
+  const [platform, setPlatform]   = React.useState<"mt4" | "mt5" | "ctrader">("mt5");
+  const [loading, setLoading]     = React.useState(false);
+  const [result, setResult]       = React.useState<{ imported: number; skipped: number; format: string } | null>(null);
+  const [error, setError]         = React.useState("");
 
   async function handleImport() {
     if (!file) return;
@@ -563,34 +802,18 @@ function StepCSV({
     );
   }
 
-  const instructions: Record<typeof platform, { step: string; note?: string }[]> = {
-    mt4: [
-      { step: 'Deschide MT4 → fila "Account History"' },
-      { step: 'Click dreapta pe listă → "Save as Report"' },
-      { step: "Alege HTML sau CSV", note: "Ambele formate sunt acceptate" },
-      { step: "Încarcă fișierul mai jos" },
-    ],
-    mt5: [
-      { step: 'Deschide MT5 → fila "History"' },
-      { step: 'Click dreapta → "Save as Report"' },
-      { step: "Alege HTML sau CSV", note: "Ambele formate sunt acceptate" },
-      { step: "Încarcă fișierul mai jos" },
-    ],
-    ctrader: [
-      { step: "Deschide cTrader → History" },
-      { step: '"Closed Positions" → butonul Export' },
-      { step: "Descarcă CSV-ul generat" },
-      { step: "Încarcă fișierul mai jos" },
-    ],
+  const instructions: Record<typeof platform, string[]> = {
+    mt4: ['MT4 → "Account History" → Click dreapta → "Save as Report" → HTML sau CSV'],
+    mt5: ['MT5 → "History" → Click dreapta → "Save as Report" → HTML sau CSV'],
+    ctrader: ["cTrader → History → Closed Positions → Export → CSV"],
   };
 
   return (
     <div className="space-y-4">
-      <button onClick={onBack} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
+      <button onClick={onBack}
+        className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
         <ChevronLeft className="w-4 h-4" />Înapoi
       </button>
-
-      {/* Platform selector */}
       <div className="grid grid-cols-3 gap-2">
         {(["mt4", "mt5", "ctrader"] as const).map((p) => (
           <button key={p} onClick={() => setPlatform(p)}
@@ -601,39 +824,20 @@ function StepCSV({
           </button>
         ))}
       </div>
-
-      {/* Instructions */}
-      <div className="bg-zinc-800/40 rounded-xl p-3.5 space-y-2">
-        <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2.5">Cum exportezi din {platform.toUpperCase()}</p>
-        {instructions[platform].map((ins, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <span className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-              {i + 1}
-            </span>
-            <div>
-              <p className="text-xs text-zinc-300">{ins.step}</p>
-              {ins.note && <p className="text-[10px] text-zinc-600 mt-0.5">{ins.note}</p>}
-            </div>
-          </div>
-        ))}
+      <div className="bg-zinc-800/50 rounded-xl px-4 py-3 text-xs text-zinc-400 leading-relaxed">
+        {instructions[platform]}
       </div>
-
-      {/* File drop zone */}
       {!file ? (
-        <div
-          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        <div onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
           onDragLeave={() => setDragging(false)}
-          onDrop={handleFileDrop}
+          onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) setFile(f); }}
           onClick={() => fileInputRef.current?.click()}
-          className={cn(
-            "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all",
-            dragging ? "border-indigo-500/60 bg-indigo-500/10" : "border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800/30"
-          )}>
+          className={cn("border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all",
+            dragging ? "border-indigo-500/60 bg-indigo-500/10" : "border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800/30")}>
           <Upload className="w-7 h-7 text-zinc-600 mx-auto mb-2" />
-          <p className="text-sm font-medium text-zinc-300">Trage fișierul aici sau <span className="text-indigo-400">apasă pentru selectare</span></p>
-          <p className="text-xs text-zinc-600 mt-1">Formate acceptate: .html, .htm, .csv</p>
-          <input ref={fileInputRef} type="file" className="hidden"
-            accept=".html,.htm,.csv,.txt"
+          <p className="text-sm font-medium text-zinc-300">Trage fișierul sau <span className="text-indigo-400">apasă</span></p>
+          <p className="text-xs text-zinc-600 mt-1">.html, .htm, .csv acceptate</p>
+          <input ref={fileInputRef} type="file" className="hidden" accept=".html,.htm,.csv,.txt"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) setFile(f); }} />
         </div>
       ) : (
@@ -646,58 +850,45 @@ function StepCSV({
           <button onClick={() => setFile(null)} className="text-zinc-600 hover:text-zinc-300"><X className="w-4 h-4" /></button>
         </div>
       )}
-
-      {/* Account details */}
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2 space-y-1.5">
           <label className="text-xs text-zinc-400">Nume cont <span className="text-zinc-600">(opțional)</span></label>
           <Input placeholder={`${platform.toUpperCase()} Cont`} value={accountName}
-            onChange={(e) => setAccountName(e.target.value)}
+            onChange={(e) => setAccName(e.target.value)}
             className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs text-zinc-400">Broker <span className="text-zinc-600">(opțional)</span></label>
+          <label className="text-xs text-zinc-400">Broker</label>
           <Input placeholder="Ex: FTMO" value={broker}
             onChange={(e) => setBroker(e.target.value)}
             className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs text-zinc-400">Monedă cont</label>
+          <label className="text-xs text-zinc-400">Monedă</label>
           <select value={currency} onChange={(e) => setCurrency(e.target.value)}
             className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
             {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-        <div className="col-span-2 space-y-1.5">
-          <label className="text-xs text-zinc-400">Balanță cont <span className="text-zinc-600">(opțional — se calculează automat din tranzacții)</span></label>
-          <Input type="number" step="0.01" placeholder="Ex: 100000" value={balance}
-            onChange={(e) => setBalance(e.target.value)}
-            className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
-        </div>
       </div>
-
-      {/* Account type */}
       <div className="grid grid-cols-3 gap-2">
         {ACCOUNT_TYPES.map((t) => (
-          <button key={t.value} onClick={() => setAccountType(t.value)}
+          <button key={t.value} onClick={() => setType(t.value)}
             className={cn("py-2 rounded-xl border text-sm font-semibold transition-all",
               accountType === t.value ? `${t.bg} ${t.color}` : "bg-zinc-900 border-zinc-800 text-zinc-600 hover:border-zinc-600")}>
             {t.label}
           </button>
         ))}
       </div>
-
       {error && (
         <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
           <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
           <p className="text-sm text-rose-300">{error}</p>
         </div>
       )}
-
       <Button onClick={handleImport} disabled={!file || loading}
         className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold h-10 shadow-lg shadow-indigo-500/20">
-        {loading
-          ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se procesează...</>
+        {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se procesează...</>
           : <><Upload className="w-4 h-4 mr-2" />Importă tranzacțiile</>}
       </Button>
     </div>
@@ -706,14 +897,9 @@ function StepCSV({
 
 // ─── Step: Manual Form ────────────────────────────────────────────────────────
 
-function StepForm({
-  prefill, isEdit, onBack, onClose, onSuccess,
-}: {
+function StepForm({ prefill, isEdit, onBack, onClose, onSuccess }: {
   prefill?: Partial<TradingAccountInput & { id?: string }>;
-  isEdit: boolean;
-  onBack?: () => void;
-  onClose: () => void;
-  onSuccess: () => void;
+  isEdit: boolean; onBack?: () => void; onClose: () => void; onSuccess: () => void;
 }) {
   const { toast } = useToast();
   const form = useForm<TradingAccountInput>({
@@ -730,7 +916,6 @@ function StepForm({
       maxDrawdownPct: prefill?.maxDrawdownPct ?? undefined,
     },
   });
-
   const { isSubmitting } = form.formState;
   const watchType = form.watch("type");
 
@@ -756,7 +941,6 @@ function StepForm({
             <ChevronLeft className="w-4 h-4" />Înapoi
           </button>
         )}
-
         <FormField control={form.control} name="type" render={({ field }) => (
           <FormItem>
             <FormLabel className="text-zinc-300 text-xs uppercase tracking-wider">Tip cont</FormLabel>
@@ -771,7 +955,6 @@ function StepForm({
             </div>
           </FormItem>
         )} />
-
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
             <FormLabel className="text-zinc-300">Nume cont</FormLabel>
@@ -782,7 +965,6 @@ function StepForm({
             <FormMessage />
           </FormItem>
         )} />
-
         <div className="grid grid-cols-2 gap-3">
           <FormField control={form.control} name="broker" render={({ field }) => (
             <FormItem>
@@ -792,7 +974,6 @@ function StepForm({
               </FormControl>
             </FormItem>
           )} />
-
           <FormField control={form.control} name="accountNumber" render={({ field }) => (
             <FormItem>
               <FormLabel className="text-zinc-300">Nr. cont</FormLabel>
@@ -801,7 +982,6 @@ function StepForm({
               </FormControl>
             </FormItem>
           )} />
-
           <FormField control={form.control} name="balance" render={({ field }) => (
             <FormItem>
               <FormLabel className="text-zinc-300">Balanță</FormLabel>
@@ -811,7 +991,6 @@ function StepForm({
               </FormControl>
             </FormItem>
           )} />
-
           <FormField control={form.control} name="currency" render={({ field }) => (
             <FormItem>
               <FormLabel className="text-zinc-300">Monedă</FormLabel>
@@ -825,7 +1004,6 @@ function StepForm({
               </Select>
             </FormItem>
           )} />
-
           <FormField control={form.control} name="leverage" render={({ field }) => (
             <FormItem className="col-span-2">
               <FormLabel className="text-zinc-300">Levier</FormLabel>
@@ -842,7 +1020,6 @@ function StepForm({
             </FormItem>
           )} />
         </div>
-
         {watchType === "CHALLENGE" && (
           <div className="border border-amber-500/20 bg-amber-500/5 rounded-xl p-4 space-y-3">
             <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Reguli Prop Firm</p>
@@ -872,7 +1049,6 @@ function StepForm({
             </div>
           </div>
         )}
-
         <div className="flex gap-3 pt-1">
           {onBack && (
             <Button type="button" variant="outline" onClick={onBack}
@@ -896,8 +1072,8 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
   const isEdit = !!account;
   const [step, setStep] = React.useState<Step>(isEdit ? "form" : "method");
   const [metaApiAvailable, setMetaApiAvailable] = React.useState<boolean | null>(null);
+  const [eaAccountId, setEaAccountId] = React.useState<string | null>(null);
 
-  // Check MetaAPI availability when dialog opens
   React.useEffect(() => {
     if (open && !isEdit) {
       setMetaApiAvailable(null);
@@ -909,14 +1085,19 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
   }, [open, isEdit]);
 
   React.useEffect(() => {
-    if (open) setStep(isEdit ? "form" : "method");
+    if (open) {
+      setStep(isEdit ? "form" : "method");
+      setEaAccountId(null);
+    }
   }, [open, isEdit]);
 
   const TITLES: Partial<Record<Step, string>> = {
-    method:  "Adaugă cont de trading",
-    connect: "Conectare directă MT4/MT5",
-    csv:     "Import fișier MT4 / MT5 / cTrader",
-    form:    isEdit ? "Editează cont" : "Cont manual",
+    method:   "Adaugă cont de trading",
+    "ea-form":  "Conectare MT4 / MT5 — Pas 1",
+    "ea-code":  "Instalează Expert Advisor",
+    direct:   "Conectare directă MetaAPI",
+    csv:      "Import fișier",
+    form:     isEdit ? "Editează cont" : "Cont manual",
   };
 
   return (
@@ -930,19 +1111,34 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
           <StepMethod
             metaApiAvailable={metaApiAvailable}
             onSelect={(m) => {
-              if (m === "direct") setStep("connect");
-              else if (m === "csv") setStep("csv");
-              else setStep("form");
+              if (m === "ea")     setStep("ea-form");
+              else if (m === "direct") setStep("direct");
+              else if (m === "csv")    setStep("csv");
+              else                     setStep("form");
             }}
           />
         )}
 
-        {step === "connect" && (
-          <StepConnect
+        {step === "ea-form" && (
+          <StepEAForm
+            onBack={() => setStep("method")}
+            onAccountCreated={(id) => { setEaAccountId(id); setStep("ea-code"); }}
+          />
+        )}
+
+        {step === "ea-code" && eaAccountId && (
+          <StepEACode
+            accountId={eaAccountId}
+            onDone={() => { onSuccess(); onClose(); }}
+          />
+        )}
+
+        {step === "direct" && (
+          <StepDirect
             onBack={() => setStep("method")}
             onSuccess={onSuccess}
             onClose={onClose}
-            onSwitchToCSV={() => setStep("csv")}
+            onSwitchToEA={() => setStep("ea-form")}
           />
         )}
 
