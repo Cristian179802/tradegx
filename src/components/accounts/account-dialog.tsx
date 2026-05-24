@@ -19,16 +19,18 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import {
-  Loader2, ChevronLeft, ArrowRight, CheckCircle2, AlertCircle,
-  Upload, FileText, X, Info, Wifi, WifiOff, Eye, EyeOff,
-  Shield, Zap, Link2, Server, Hash, Lock, User2, ChevronRight,
+  Loader2, ChevronLeft, CheckCircle2, AlertCircle,
+  Upload, FileText, X,
+  Wifi, WifiOff, Eye, EyeOff,
+  Shield, Zap, Server, Hash, Lock, User2, ChevronRight,
+  Info,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ConnectionMethod = "direct" | "csv" | "manual";
 type Platform = "mt4" | "mt5" | "ctrader";
-type Step = "method" | "platform" | "connect" | "connecting" | "success" | "csv" | "form";
+type Step = "method" | "connect" | "csv" | "form";
 type AccountTyp = "DEMO" | "CHALLENGE" | "LIVE";
 
 interface AccountDialogProps {
@@ -52,7 +54,6 @@ const ACCOUNT_TYPES = [
   { value: "LIVE",      label: "Live",      color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/40" },
 ] as const;
 
-// Popular brokers for autocomplete
 const POPULAR_SERVERS = [
   "ICMarkets-Live", "ICMarkets-Demo", "FTMO-Server", "FTMO-Demo",
   "Pepperstone-Live", "Pepperstone-Demo", "Exness-Real", "Exness-Demo",
@@ -62,49 +63,80 @@ const POPULAR_SERVERS = [
 
 // ─── Step: Choose Method ──────────────────────────────────────────────────────
 
-function StepMethod({ onSelect }: { onSelect: (m: ConnectionMethod) => void }) {
+function StepMethod({
+  onSelect,
+  metaApiAvailable,
+}: {
+  onSelect: (m: ConnectionMethod) => void;
+  metaApiAvailable: boolean | null;
+}) {
+  const checking = metaApiAvailable === null;
+
   return (
     <div className="space-y-3">
       <p className="text-sm text-zinc-400 mb-5">Cum vrei să conectezi contul de trading?</p>
 
-      {/* Direct connection — PRIMARY */}
+      {/* CSV import — PRIMARY (always works, no API key needed) */}
       <button
-        onClick={() => onSelect("direct")}
+        onClick={() => onSelect("csv")}
         className="w-full flex items-center gap-4 p-4 rounded-xl border border-indigo-500/40 bg-gradient-to-r from-indigo-500/8 to-violet-500/5 hover:border-indigo-400/70 hover:from-indigo-500/15 hover:to-violet-500/10 transition-all text-left group relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0 relative">
-          <Wifi className="w-5 h-5 text-indigo-400" />
+          <Upload className="w-5 h-5 text-indigo-400" />
         </div>
         <div className="flex-1 relative">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-sm font-bold text-zinc-100">Conectare directă MT4/MT5</span>
-            <Badge className="bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] px-1.5 py-0">
+            <span className="text-sm font-bold text-zinc-100">Import fișier MT4 / MT5 / cTrader</span>
+            <Badge className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] px-1.5 py-0">
               Recomandat
             </Badge>
           </div>
           <p className="text-xs text-zinc-500">
-            Introdu login-ul, parola de investitor și serverul — ca pe MyFXBook. Fără export manual.
+            Exportă istoricul din MT4/MT5/cTrader și încarcă fișierul CSV sau HTML. Nu necesită configurare.
           </p>
         </div>
         <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-indigo-400 transition-colors shrink-0" />
       </button>
 
-      {/* CSV import */}
+      {/* Direct connection — requires MetaAPI */}
       <button
-        onClick={() => onSelect("csv")}
-        className="w-full flex items-center gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-left group"
+        onClick={() => metaApiAvailable ? onSelect("direct") : undefined}
+        disabled={!metaApiAvailable || checking}
+        className={cn(
+          "w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left group relative",
+          metaApiAvailable
+            ? "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 cursor-pointer"
+            : "border-zinc-800/50 bg-zinc-900/20 cursor-not-allowed opacity-60"
+        )}
       >
         <div className="w-11 h-11 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-          <Upload className="w-5 h-5 text-zinc-500" />
+          {checking ? (
+            <Loader2 className="w-5 h-5 text-zinc-600 animate-spin" />
+          ) : metaApiAvailable ? (
+            <Wifi className="w-5 h-5 text-zinc-500" />
+          ) : (
+            <WifiOff className="w-5 h-5 text-zinc-600" />
+          )}
         </div>
         <div className="flex-1">
-          <div className="mb-0.5">
-            <span className="text-sm font-bold text-zinc-300">Import CSV / HTML</span>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-sm font-bold text-zinc-400">Conectare directă MT4/MT5</span>
+            {!checking && !metaApiAvailable && (
+              <Badge className="bg-zinc-700/50 border border-zinc-700 text-zinc-500 text-[10px] px-1.5 py-0">
+                Indisponibil
+              </Badge>
+            )}
           </div>
-          <p className="text-xs text-zinc-500">Exportă istoricul din MT4/MT5/cTrader și importă fișierul.</p>
+          <p className="text-xs text-zinc-600">
+            {checking
+              ? "Se verifică disponibilitatea..."
+              : metaApiAvailable
+              ? "Login + parolă investitor + server. Sincronizare automată."
+              : "Necesită configurare MetaAPI pe server. Folosește import CSV în locul său."}
+          </p>
         </div>
-        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
+        <ChevronRight className="w-4 h-4 text-zinc-700 shrink-0" />
       </button>
 
       {/* Manual */}
@@ -119,7 +151,7 @@ function StepMethod({ onSelect }: { onSelect: (m: ConnectionMethod) => void }) {
           <div className="mb-0.5">
             <span className="text-sm font-bold text-zinc-300">Manual</span>
           </div>
-          <p className="text-xs text-zinc-500">Creează cont și adaugă tranzacțiile manual.</p>
+          <p className="text-xs text-zinc-500">Creează cont și adaugă tranzacțiile manual, una câte una.</p>
         </div>
         <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
       </button>
@@ -133,10 +165,12 @@ function StepConnect({
   onBack,
   onSuccess,
   onClose,
+  onSwitchToCSV,
 }: {
   onBack: () => void;
   onSuccess: () => void;
   onClose: () => void;
+  onSwitchToCSV: () => void;
 }) {
   const { toast } = useToast();
   const [platform, setPlatform] = React.useState<Platform>("mt5");
@@ -181,7 +215,6 @@ function StepConnect({
     setLoading(true);
     setConnectStep(0);
 
-    // Animate progress steps
     const stepInterval = setInterval(() => {
       setConnectStep(p => Math.min(p + 1, CONNECT_STEPS.length - 1));
     }, 1800);
@@ -191,13 +224,9 @@ function StepConnect({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          login,
-          password,
-          server,
-          platform,
+          login, password, server, platform,
           name: accountName || `${platform.toUpperCase()} ${server.split("-")[0]} ${login}`,
-          accountType,
-          currency,
+          accountType, currency,
           leverage: parseInt(leverage),
           maxDailyLossPct: maxDailyLoss ? parseFloat(maxDailyLoss) : undefined,
           maxDrawdownPct: maxDrawdown ? parseFloat(maxDrawdown) : undefined,
@@ -215,10 +244,7 @@ function StepConnect({
 
       setConnectStep(CONNECT_STEPS.length - 1);
       setSuccess({ imported: data.imported ?? 0, message: data.message });
-      setTimeout(() => {
-        onSuccess();
-        onClose();
-      }, 2500);
+      setTimeout(() => { onSuccess(); onClose(); }, 2500);
     } catch {
       clearInterval(stepInterval);
       setError("Eroare de rețea. Încearcă din nou.");
@@ -226,7 +252,6 @@ function StepConnect({
     }
   }
 
-  // ── Success screen ──
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center py-10 gap-5">
@@ -251,7 +276,6 @@ function StepConnect({
     );
   }
 
-  // ── Connecting screen ──
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-10 gap-6">
@@ -271,23 +295,17 @@ function StepConnect({
             )}>
               <div className={cn(
                 "w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all",
-                i < connectStep
-                  ? "bg-emerald-500/20 border-emerald-500/50"
-                  : i === connectStep
-                  ? "border-indigo-500 bg-indigo-500/20"
+                i < connectStep ? "bg-emerald-500/20 border-emerald-500/50"
+                  : i === connectStep ? "border-indigo-500 bg-indigo-500/20"
                   : "border-zinc-700"
               )}>
                 {i < connectStep
                   ? <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                   : i === connectStep
                   ? <Loader2 className="w-3 h-3 text-indigo-400 animate-spin" />
-                  : null
-                }
+                  : null}
               </div>
-              <span className={cn(
-                "text-sm",
-                i <= connectStep ? "text-zinc-300" : "text-zinc-600"
-              )}>{step}</span>
+              <span className={cn("text-sm", i <= connectStep ? "text-zinc-300" : "text-zinc-600")}>{step}</span>
             </div>
           ))}
         </div>
@@ -304,7 +322,6 @@ function StepConnect({
         <ChevronLeft className="w-4 h-4" />Înapoi
       </button>
 
-      {/* Security note */}
       <div className="flex items-start gap-2.5 bg-indigo-500/8 border border-indigo-500/20 rounded-xl px-3.5 py-3">
         <Shield className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
         <div>
@@ -321,16 +338,10 @@ function StepConnect({
         <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Platformă</label>
         <div className="grid grid-cols-3 gap-2">
           {(["mt4", "mt5", "ctrader"] as Platform[]).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPlatform(p)}
-              className={cn(
-                "py-2.5 rounded-xl border text-sm font-bold transition-all",
-                platform === p
-                  ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
-                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
-              )}
-            >
+            <button key={p} onClick={() => setPlatform(p)}
+              className={cn("py-2.5 rounded-xl border text-sm font-bold transition-all",
+                platform === p ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
+                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
               {p === "mt4" ? "MT4" : p === "mt5" ? "MT5" : "cTrader"}
             </button>
           ))}
@@ -342,16 +353,10 @@ function StepConnect({
         <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Tip cont</label>
         <div className="grid grid-cols-3 gap-2">
           {ACCOUNT_TYPES.map((t) => (
-            <button
-              key={t.value}
-              onClick={() => setAccountType(t.value)}
-              className={cn(
-                "py-2.5 rounded-xl border text-sm font-semibold transition-all",
-                accountType === t.value
-                  ? `${t.bg} ${t.color}`
-                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
-              )}
-            >
+            <button key={t.value} onClick={() => setAccountType(t.value)}
+              className={cn("py-2.5 rounded-xl border text-sm font-semibold transition-all",
+                accountType === t.value ? `${t.bg} ${t.color}`
+                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
               {t.label}
             </button>
           ))}
@@ -365,12 +370,8 @@ function StepConnect({
             <Hash className="w-3.5 h-3.5 text-zinc-500" />
             Număr cont (Login)
           </label>
-          <Input
-            placeholder="Ex: 12345678"
-            value={login}
-            onChange={(e) => setLogin(e.target.value)}
-            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20 font-mono"
-          />
+          <Input placeholder="Ex: 12345678" value={login} onChange={(e) => setLogin(e.target.value)}
+            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20 font-mono" />
         </div>
 
         <div className="space-y-1.5">
@@ -379,18 +380,12 @@ function StepConnect({
             Parolă investitor (read-only)
           </label>
           <div className="relative">
-            <Input
-              type={showPassword ? "text" : "password"}
+            <Input type={showPassword ? "text" : "password"}
               placeholder="Parola de investor/read-only"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20 pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400"
-            >
+              value={password} onChange={(e) => setPassword(e.target.value)}
+              className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20 pr-10" />
+            <button type="button" onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
@@ -401,22 +396,17 @@ function StepConnect({
             <Server className="w-3.5 h-3.5 text-zinc-500" />
             Server broker
           </label>
-          <Input
-            placeholder="Ex: ICMarkets-Live, FTMO-Server"
+          <Input placeholder="Ex: ICMarkets-Live, FTMO-Server"
             value={server}
             onChange={(e) => filterServers(e.target.value)}
             onBlur={() => setTimeout(() => setServerSuggestions([]), 200)}
-            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20"
-          />
+            className="bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20" />
           {serverSuggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-zinc-800 border border-zinc-700 rounded-xl shadow-xl overflow-hidden">
               {serverSuggestions.map((s) => (
-                <button
-                  key={s}
-                  type="button"
+                <button key={s} type="button"
                   className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700 transition-colors"
-                  onClick={() => { setServer(s); setServerSuggestions([]); }}
-                >
+                  onClick={() => { setServer(s); setServerSuggestions([]); }}>
                   {s}
                 </button>
               ))}
@@ -425,7 +415,7 @@ function StepConnect({
         </div>
       </div>
 
-      {/* Optional fields - collapsible */}
+      {/* Optional fields */}
       <details className="group">
         <summary className="cursor-pointer list-none flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-400 transition-colors select-none">
           <ChevronRight className="w-3.5 h-3.5 group-open:rotate-90 transition-transform" />
@@ -435,37 +425,27 @@ function StepConnect({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-zinc-400">Nume cont</label>
-              <Input
-                placeholder="Ex: FTMO $100K"
-                value={accountName}
+              <Input placeholder="Ex: FTMO $100K" value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 text-sm"
-              />
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 text-sm" />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs text-zinc-400">Monedă</label>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              >
+              <select value={currency} onChange={(e) => setCurrency(e.target.value)}
+                className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-zinc-400">Levier</label>
-            <select
-              value={leverage}
-              onChange={(e) => setLeverage(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
+            <select value={leverage} onChange={(e) => setLeverage(e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
               {[10, 20, 30, 50, 100, 200, 400, 500].map((l) => (
                 <option key={l} value={String(l)}>1:{l}</option>
               ))}
             </select>
           </div>
-
           {accountType === "CHALLENGE" && (
             <div className="border border-amber-500/20 bg-amber-500/5 rounded-xl p-3 space-y-3">
               <p className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Reguli Prop Firm</p>
@@ -488,19 +468,25 @@ function StepConnect({
         </div>
       </details>
 
-      {/* Error */}
       {error && (
-        <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
-          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-          <p className="text-sm text-rose-300">{error}</p>
+        <div className="space-y-2">
+          <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <p className="text-sm text-rose-300">{error}</p>
+          </div>
+          {/* Offer CSV as fallback if MetaAPI fails */}
+          <button
+            onClick={onSwitchToCSV}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs transition-all"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            Folosește import CSV în schimb
+          </button>
         </div>
       )}
 
-      <Button
-        onClick={handleConnect}
-        disabled={!login || !password || !server || loading}
-        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/20 h-11"
-      >
+      <Button onClick={handleConnect} disabled={!login || !password || !server || loading}
+        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/20 h-11">
         <Wifi className="w-4 h-4 mr-2" />
         Conectează contul
       </Button>
@@ -571,16 +557,31 @@ function StepCSV({
         </div>
         <div className="text-center">
           <p className="text-base font-bold text-zinc-100">{result.imported} tranzacții importate!</p>
-          <p className="text-sm text-zinc-400">Format: {result.format}</p>
+          <p className="text-sm text-zinc-500">{result.skipped > 0 ? `${result.skipped} duplicate sărite · ` : ""}Format: {result.format}</p>
         </div>
       </div>
     );
   }
 
-  const instructions: Record<typeof platform, string[]> = {
-    mt4: ["Deschide MT4", 'Click dreapta pe "Account History"', '"Save as Report" → HTML sau CSV', "Încarcă fișierul mai jos"],
-    mt5: ["Deschide MT5", '"History" → Click dreapta', '"Save as Report" → HTML sau CSV', "Încarcă fișierul mai jos"],
-    ctrader: ["Deschide cTrader", "History → Closed Positions", '"Export" → CSV', "Încarcă fișierul mai jos"],
+  const instructions: Record<typeof platform, { step: string; note?: string }[]> = {
+    mt4: [
+      { step: 'Deschide MT4 → fila "Account History"' },
+      { step: 'Click dreapta pe listă → "Save as Report"' },
+      { step: "Alege HTML sau CSV", note: "Ambele formate sunt acceptate" },
+      { step: "Încarcă fișierul mai jos" },
+    ],
+    mt5: [
+      { step: 'Deschide MT5 → fila "History"' },
+      { step: 'Click dreapta → "Save as Report"' },
+      { step: "Alege HTML sau CSV", note: "Ambele formate sunt acceptate" },
+      { step: "Încarcă fișierul mai jos" },
+    ],
+    ctrader: [
+      { step: "Deschide cTrader → History" },
+      { step: '"Closed Positions" → butonul Export' },
+      { step: "Descarcă CSV-ul generat" },
+      { step: "Încarcă fișierul mai jos" },
+    ],
   };
 
   return (
@@ -589,37 +590,51 @@ function StepCSV({
         <ChevronLeft className="w-4 h-4" />Înapoi
       </button>
 
+      {/* Platform selector */}
       <div className="grid grid-cols-3 gap-2">
         {(["mt4", "mt5", "ctrader"] as const).map((p) => (
           <button key={p} onClick={() => setPlatform(p)}
             className={cn("py-2 rounded-xl border text-sm font-bold transition-all",
-              platform === p ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300" : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
+              platform === p ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
+                : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
             {p === "ctrader" ? "cTrader" : p.toUpperCase()}
           </button>
         ))}
       </div>
 
+      {/* Instructions */}
       <div className="bg-zinc-800/40 rounded-xl p-3.5 space-y-2">
+        <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2.5">Cum exportezi din {platform.toUpperCase()}</p>
         {instructions[platform].map((ins, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <span className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold flex items-center justify-center shrink-0">
+          <div key={i} className="flex items-start gap-3">
+            <span className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
               {i + 1}
             </span>
-            <p className="text-xs text-zinc-400">{ins}</p>
+            <div>
+              <p className="text-xs text-zinc-300">{ins.step}</p>
+              {ins.note && <p className="text-[10px] text-zinc-600 mt-0.5">{ins.note}</p>}
+            </div>
           </div>
         ))}
       </div>
 
+      {/* File drop zone */}
       {!file ? (
-        <div onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-          onDragLeave={() => setDragging(false)} onDrop={handleFileDrop}
+        <div
+          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={handleFileDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={cn("border-2 border-dashed rounded-xl p-7 text-center cursor-pointer transition-all",
-            dragging ? "border-indigo-500/60 bg-indigo-500/10" : "border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800/30")}>
+          className={cn(
+            "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all",
+            dragging ? "border-indigo-500/60 bg-indigo-500/10" : "border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800/30"
+          )}>
           <Upload className="w-7 h-7 text-zinc-600 mx-auto mb-2" />
-          <p className="text-sm font-medium text-zinc-300">Trage fișierul sau <span className="text-indigo-400">alege</span></p>
-          <p className="text-xs text-zinc-600 mt-1">HTML sau CSV din {platform.toUpperCase()}</p>
-          <input ref={fileInputRef} type="file" className="hidden" accept=".html,.htm,.csv,.txt" onChange={(e) => { const f = e.target.files?.[0]; if (f) setFile(f); }} />
+          <p className="text-sm font-medium text-zinc-300">Trage fișierul aici sau <span className="text-indigo-400">apasă pentru selectare</span></p>
+          <p className="text-xs text-zinc-600 mt-1">Formate acceptate: .html, .htm, .csv</p>
+          <input ref={fileInputRef} type="file" className="hidden"
+            accept=".html,.htm,.csv,.txt"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) setFile(f); }} />
         </div>
       ) : (
         <div className="flex items-center gap-3 bg-zinc-800/60 border border-zinc-700 rounded-xl p-3">
@@ -632,34 +647,36 @@ function StepCSV({
         </div>
       )}
 
+      {/* Account details */}
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2 space-y-1.5">
-          <label className="text-xs text-zinc-400">Nume cont</label>
-          <Input placeholder="Ex: FTMO $100K MT5" value={accountName}
+          <label className="text-xs text-zinc-400">Nume cont <span className="text-zinc-600">(opțional)</span></label>
+          <Input placeholder={`${platform.toUpperCase()} Cont`} value={accountName}
             onChange={(e) => setAccountName(e.target.value)}
             className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs text-zinc-400">Broker</label>
+          <label className="text-xs text-zinc-400">Broker <span className="text-zinc-600">(opțional)</span></label>
           <Input placeholder="Ex: FTMO" value={broker}
             onChange={(e) => setBroker(e.target.value)}
             className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs text-zinc-400">Monedă</label>
+          <label className="text-xs text-zinc-400">Monedă cont</label>
           <select value={currency} onChange={(e) => setCurrency(e.target.value)}
             className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
             {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div className="col-span-2 space-y-1.5">
-          <label className="text-xs text-zinc-400">Balanță cont (opțional)</label>
+          <label className="text-xs text-zinc-400">Balanță cont <span className="text-zinc-600">(opțional — se calculează automat din tranzacții)</span></label>
           <Input type="number" step="0.01" placeholder="Ex: 100000" value={balance}
             onChange={(e) => setBalance(e.target.value)}
             className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
         </div>
       </div>
 
+      {/* Account type */}
       <div className="grid grid-cols-3 gap-2">
         {ACCOUNT_TYPES.map((t) => (
           <button key={t.value} onClick={() => setAccountType(t.value)}
@@ -679,7 +696,9 @@ function StepCSV({
 
       <Button onClick={handleImport} disabled={!file || loading}
         className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold h-10 shadow-lg shadow-indigo-500/20">
-        {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se procesează...</> : <><Upload className="w-4 h-4 mr-2" />Importă tranzacțiile</>}
+        {loading
+          ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se procesează...</>
+          : <><Upload className="w-4 h-4 mr-2" />Importă tranzacțiile</>}
       </Button>
     </div>
   );
@@ -876,19 +895,28 @@ function StepForm({
 export function AccountDialog({ open, onClose, onSuccess, account }: AccountDialogProps) {
   const isEdit = !!account;
   const [step, setStep] = React.useState<Step>(isEdit ? "form" : "method");
+  const [metaApiAvailable, setMetaApiAvailable] = React.useState<boolean | null>(null);
+
+  // Check MetaAPI availability when dialog opens
+  React.useEffect(() => {
+    if (open && !isEdit) {
+      setMetaApiAvailable(null);
+      fetch("/api/integrations/metaapi/status")
+        .then((r) => r.json())
+        .then((d) => setMetaApiAvailable(d.available === true))
+        .catch(() => setMetaApiAvailable(false));
+    }
+  }, [open, isEdit]);
 
   React.useEffect(() => {
     if (open) setStep(isEdit ? "form" : "method");
   }, [open, isEdit]);
 
   const TITLES: Partial<Record<Step, string>> = {
-    method: "Adaugă cont de trading",
-    platform: "Alege platforma",
+    method:  "Adaugă cont de trading",
     connect: "Conectare directă MT4/MT5",
-    connecting: "Se conectează...",
-    success: "Succes!",
-    csv: "Import fișier",
-    form: isEdit ? "Editează cont" : "Cont manual",
+    csv:     "Import fișier MT4 / MT5 / cTrader",
+    form:    isEdit ? "Editează cont" : "Cont manual",
   };
 
   return (
@@ -899,15 +927,23 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
         </DialogHeader>
 
         {step === "method" && (
-          <StepMethod onSelect={(m) => {
-            if (m === "direct") setStep("connect");
-            else if (m === "csv") setStep("csv");
-            else setStep("form");
-          }} />
+          <StepMethod
+            metaApiAvailable={metaApiAvailable}
+            onSelect={(m) => {
+              if (m === "direct") setStep("connect");
+              else if (m === "csv") setStep("csv");
+              else setStep("form");
+            }}
+          />
         )}
 
         {step === "connect" && (
-          <StepConnect onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />
+          <StepConnect
+            onBack={() => setStep("method")}
+            onSuccess={onSuccess}
+            onClose={onClose}
+            onSwitchToCSV={() => setStep("csv")}
+          />
         )}
 
         {step === "csv" && (
