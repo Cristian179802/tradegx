@@ -10,9 +10,9 @@ function getWebhookToken(accountId: string): string {
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { accountId: string } }
+  { params }: { params: Promise<{ accountId: string }> }
 ) {
-  const { accountId } = params;
+  const { accountId } = await params;
 
   // ── 1. Verify token ────────────────────────────────────────────────────────
   const headerToken = req.headers.get("x-apex-token") ?? req.headers.get("x-token");
@@ -142,9 +142,9 @@ export async function POST(
 // Allow MT4/MT5 to verify connectivity with GET
 export async function GET(
   req: NextRequest,
-  { params }: { params: { accountId: string } }
+  { params }: { params: Promise<{ accountId: string }> }
 ) {
-  const { accountId } = params;
+  const { accountId } = await params;
   const headerToken   = req.headers.get("x-apex-token") ?? "";
   const queryToken    = req.nextUrl.searchParams.get("token") ?? "";
   const token         = headerToken || queryToken;

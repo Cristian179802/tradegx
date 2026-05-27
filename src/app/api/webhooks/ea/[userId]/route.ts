@@ -10,10 +10,11 @@ function getUserToken(userId: string): string {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
+  const { userId: paramUserId } = await params;
   const token = req.headers.get("x-apex-token") ?? req.nextUrl.searchParams.get("token") ?? "";
-  if (token !== getUserToken(params.userId)) {
+  if (token !== getUserToken(paramUserId)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   return NextResponse.json({ ok: true });
@@ -21,9 +22,9 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
-  const { userId } = params;
+  const { userId } = await params;
 
   // ── Verify token ───────────────────────────────────────────────────────────
   const token = req.headers.get("x-apex-token") ?? req.nextUrl.searchParams.get("token") ?? "";
