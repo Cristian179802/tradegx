@@ -156,14 +156,16 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
 
   const steps = platform === "mt4" ? [
     { icon: "📁", text: <>Deschide <b>MT4 → File → Open Data Folder</b></> },
-    { icon: "📂", text: <>Pune fișierul în <b>MQL4 → Experts</b></> },
+    { icon: "📂", text: <>Pune fișierul în folderul <b>MQL4 → Experts</b></> },
+    { icon: "🔄", text: <>În Navigator, <b>click dreapta pe "Expert Advisors" → Refresh</b> — "TradeGx" apare în listă</> },
     { icon: "🔧", text: <><b>Tools → Options → Expert Advisors</b> → bifează "Allow WebRequest" → adaugă <code className="bg-zinc-800 px-1 rounded text-[10px]">{ea?.appDomain ?? "tradegx.com"}</code></> },
-    { icon: "🖱️", text: <>Din <b>Navigator → Expert Advisors</b>, trage "TradeGx" pe orice grafic</> },
+    { icon: "🖱️", text: <>Trage <b>"TradeGx"</b> din Navigator pe orice grafic. ✅ Gata!</> },
   ] : [
     { icon: "📁", text: <>Deschide <b>MT5 → File → Open Data Folder</b></> },
-    { icon: "📂", text: <>Pune fișierul în <b>MQL5 → Experts</b></> },
+    { icon: "📂", text: <>Pune fișierul în folderul <b>MQL5 → Experts</b></> },
+    { icon: "🔄", text: <>În Navigator, <b>click dreapta pe "Expert Advisors" → Refresh</b> — "TradeGx" apare în listă</> },
     { icon: "🔧", text: <><b>Tools → Options → Expert Advisors</b> → bifează "Allow WebRequest" → adaugă <code className="bg-zinc-800 px-1 rounded text-[10px]">{ea?.appDomain ?? "tradegx.com"}</code></> },
-    { icon: "🖱️", text: <>Din <b>Navigator → Expert Advisors</b>, trage "TradeGx" pe orice grafic</> },
+    { icon: "🖱️", text: <>Trage <b>"TradeGx"</b> din Navigator pe orice grafic. ✅ Gata!</> },
   ];
 
   return (
@@ -211,7 +213,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
 
       {/* Steps */}
       <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 space-y-3">
-        <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-3">Instalare — 4 pași simpli</p>
+        <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-3">Instalare — 5 pași simpli</p>
         {steps.map((s, i) => (
           <div key={i} className="flex items-start gap-3">
             <span className="text-base leading-none mt-0.5 shrink-0">{s.icon}</span>
