@@ -1,6 +1,6 @@
 /**
  * Generates MT4 (MQL4) and MT5 (MQL5) Expert Advisor source code
- * that automatically syncs closed trades to Apex Trader via webhook.
+ * that automatically syncs closed trades to TradeGx via webhook.
  *
  * The EA:
  *  - Runs a timer every 15 seconds
@@ -11,12 +11,12 @@
 
 export function generateMQ4(webhookUrl: string, token: string): string {
   return `//+------------------------------------------------------------------+
-//|  Apex Trader — Auto Sync EA                                      |
+//|  TradeGx — Auto Sync EA                                      |
 //|  Instalare: copiaza in MT4/Experts si ataseaza la orice chart   |
 //|  Setari: Tools > Options > Expert Advisors > Allow WebRequest:  |
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
-#property copyright "Apex Trader"
+#property copyright "TradeGx"
 #property version   "1.10"
 #property strict
 
@@ -33,14 +33,14 @@ int      g_lastCount = -1;
 int OnInit()
 {
    EventSetTimer(SyncEvery);
-   Print("[ApexTrader] EA pornit. Sincronizare la fiecare ", SyncEvery, "s.");
+   Print("[TradeGx] EA pornit. Sincronizare la fiecare ", SyncEvery, "s.");
    return INIT_SUCCEEDED;
 }
 
 void OnDeinit(const int reason)
 {
    EventKillTimer();
-   Print("[ApexTrader] EA oprit.");
+   Print("[TradeGx] EA oprit.");
 }
 
 //+------------------------------------------------------------------+
@@ -61,7 +61,7 @@ void OnTimer()
    }
 
    if(synced > 0)
-      Print("[ApexTrader] Sincronizate: ", synced, " tranzactii.");
+      Print("[TradeGx] Sincronizate: ", synced, " tranzactii.");
 
    g_lastCount = total;
    g_lastSync  = TimeCurrent();
@@ -103,13 +103,13 @@ bool SendTrade()
 
    if(code < 0)
    {
-      Print("[ApexTrader] Eroare WebRequest: ", GetLastError(),
+      Print("[TradeGx] Eroare WebRequest: ", GetLastError(),
             ". Verifica: Tools > Options > Expert Advisors > Allow WebRequest");
       return false;
    }
    if(code != 200 && code != 201)
    {
-      Print("[ApexTrader] Server a raspuns cu codul: ", code);
+      Print("[TradeGx] Server a raspuns cu codul: ", code);
       return false;
    }
 
@@ -120,12 +120,12 @@ bool SendTrade()
 
 export function generateMQ5(webhookUrl: string, token: string): string {
   return `//+------------------------------------------------------------------+
-//|  Apex Trader — Auto Sync EA (MT5)                                |
+//|  TradeGx — Auto Sync EA (MT5)                                |
 //|  Instalare: copiaza in MT5/Experts si ataseaza la orice chart   |
 //|  Setari: Tools > Options > Expert Advisors > Allow WebRequest:  |
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
-#property copyright "Apex Trader"
+#property copyright "TradeGx"
 #property version   "1.10"
 
 //--- Configurare (nu modifica)
@@ -141,7 +141,7 @@ datetime g_lastSync  = 0;
 int OnInit()
 {
    EventSetTimer(SyncEvery);
-   Print("[ApexTrader] EA pornit. Sincronizare la fiecare ", SyncEvery, "s.");
+   Print("[TradeGx] EA pornit. Sincronizare la fiecare ", SyncEvery, "s.");
    return INIT_SUCCEEDED;
 }
 
@@ -170,7 +170,7 @@ void OnTimer()
    }
 
    if(synced > 0)
-      Print("[ApexTrader] Sincronizate: ", synced, " pozitii.");
+      Print("[TradeGx] Sincronizate: ", synced, " pozitii.");
 
    g_lastCount = total;
    g_lastSync  = TimeCurrent();
@@ -238,7 +238,7 @@ bool SendDeal(ulong ticket)
 
    if(code < 0)
    {
-      Print("[ApexTrader] Eroare WebRequest: ", GetLastError(),
+      Print("[TradeGx] Eroare WebRequest: ", GetLastError(),
             ". Verifica: Tools > Options > Expert Advisors > Allow WebRequest");
       return false;
    }

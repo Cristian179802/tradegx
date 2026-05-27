@@ -153,7 +153,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
     if (!code) return;
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([code], { type: "text/plain" }));
-    a.download = `ApexTrader.${ext}`;
+    a.download = `TradeGx.${ext}`;
     a.click();
   }
 
@@ -161,8 +161,8 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
     {
       num: "1",
       text: platform === "mt4"
-        ? `MT4 → File → Open Data Folder → MQL4 → Experts → salvează fișierul ca "ApexTrader.mq4"`
-        : `MT5 → File → Open Data Folder → MQL5 → Experts → salvează fișierul ca "ApexTrader.mq5"`,
+        ? `MT4 → File → Open Data Folder → MQL4 → Experts → salvează fișierul ca "TradeGx.mq4"`
+        : `MT5 → File → Open Data Folder → MQL5 → Experts → salvează fișierul ca "TradeGx.mq5"`,
     },
     {
       num: "2",
@@ -170,7 +170,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
     },
     {
       num: "3",
-      text: `Drag & drop "ApexTrader" din Navigator → Expert Advisors pe orice grafic. ✅ Gata!`,
+      text: `Drag & drop "TradeGx" din Navigator → Expert Advisors pe orice grafic. ✅ Gata!`,
     },
   ];
 
@@ -211,10 +211,11 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
           {/* Preview */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-3 py-1.5 border-b border-zinc-800">
-              <span className="text-[10px] font-mono text-zinc-600">ApexTrader.{ext}</span>
+              <span className="text-[10px] font-mono text-zinc-600">TradeGx.{ext}</span>
+              <span className="text-[10px] text-zinc-600">{code.split("\n").length} linii</span>
             </div>
-            <pre className="text-[10px] text-zinc-500 font-mono p-3 leading-relaxed overflow-hidden max-h-24 select-none">
-              {code.slice(0, 300)}…
+            <pre className="text-[10px] text-zinc-500 font-mono p-3 leading-relaxed overflow-y-auto max-h-52 select-all whitespace-pre">
+              {code}
             </pre>
           </div>
         </div>
@@ -588,7 +589,7 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="bg-zinc-950 border-zinc-800/80 sm:max-w-md max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50">
+      <DialogContent className="bg-zinc-950 border-zinc-800/80 sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50">
         <DialogHeader>
           <DialogTitle className="text-zinc-100 text-base">{TITLES[step]}</DialogTitle>
         </DialogHeader>
