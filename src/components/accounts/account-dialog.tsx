@@ -79,64 +79,61 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
       {/* EA — PRIMARY */}
       <button
         onClick={() => onSelect("ea")}
-        className="w-full flex items-center gap-4 p-4 rounded-xl border border-indigo-500/40 bg-gradient-to-r from-indigo-500/8 to-violet-500/5 hover:border-indigo-400/70 hover:from-indigo-500/15 transition-all text-left group relative overflow-hidden"
+        className="w-full flex items-start gap-4 p-5 rounded-2xl border-2 border-indigo-500/50 bg-gradient-to-br from-indigo-500/10 to-violet-500/5 hover:border-indigo-400/80 hover:from-indigo-500/18 transition-all text-left group relative overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-          <Plug className="w-5 h-5 text-indigo-400" />
+        <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0 text-2xl">
+          🔌
         </div>
-        <div className="flex-1 relative">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="font-bold text-zinc-100">MT4 / MT5 / cTrader</span>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-bold text-white text-base">MT4 / MT5 / cTrader</span>
             <Badge className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] px-1.5 py-0">Recomandat</Badge>
             <Badge className="bg-zinc-700/60 border border-zinc-700 text-zinc-400 text-[10px] px-1.5 py-0">Gratuit</Badge>
           </div>
-          <p className="text-xs text-zinc-500">Copiezi un cod în MT4/MT5 — tranzacțiile se sincronizează singure.</p>
+          <p className="text-sm text-zinc-400 leading-relaxed">
+            Descarcă un fișier mic, pune-l în MT4/MT5 — tranzacțiile se sincronizează automat.
+          </p>
         </div>
-        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-indigo-400 transition-colors shrink-0" />
+        <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-indigo-400 transition-colors shrink-0 mt-1" />
       </button>
 
-      {/* CSV */}
-      <button
-        onClick={() => onSelect("csv")}
-        className="w-full flex items-center gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-left group"
-      >
-        <div className="w-11 h-11 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-          <Upload className="w-5 h-5 text-zinc-500" />
-        </div>
-        <div className="flex-1">
-          <span className="font-bold text-zinc-300">Import CSV / HTML</span>
-          <p className="text-xs text-zinc-500 mt-0.5">Exportă istoricul din MT4/MT5 și importă fișierul.</p>
-        </div>
-        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
-      </button>
+      {/* CSV + Manual — secundare, mai mici */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          onClick={() => onSelect("csv")}
+          className="flex items-center gap-3 p-3.5 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-left group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0 text-lg">📄</div>
+          <div>
+            <p className="font-semibold text-zinc-300 text-sm">Import CSV</p>
+            <p className="text-[11px] text-zinc-600 mt-0.5">Fișier din MT4/MT5</p>
+          </div>
+        </button>
 
-      {/* Manual */}
-      <button
-        onClick={() => onSelect("form")}
-        className="w-full flex items-center gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-left group"
-      >
-        <div className="w-11 h-11 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-          <User2 className="w-5 h-5 text-zinc-500" />
-        </div>
-        <div className="flex-1">
-          <span className="font-bold text-zinc-300">Manual</span>
-          <p className="text-xs text-zinc-500 mt-0.5">Adaugă tranzacțiile manual, una câte una.</p>
-        </div>
-        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
-      </button>
+        <button
+          onClick={() => onSelect("form")}
+          className="flex items-center gap-3 p-3.5 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-left group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0 text-lg">✏️</div>
+          <div>
+            <p className="font-semibold text-zinc-300 text-sm">Manual</p>
+            <p className="text-[11px] text-zinc-600 mt-0.5">Adaugă tranzacții</p>
+          </div>
+        </button>
+      </div>
     </div>
   );
 }
 
-// ─── Step: EA Connect (ultra-simple) ─────────────────────────────────────────
+// ─── Step: EA Connect ─────────────────────────────────────────────────────────
 
 interface EAData { eaMQ4: string; eaMQ5: string; appDomain: string; }
 
 function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
   const [platform, setPlatform] = React.useState<"mt4" | "mt5">("mt5");
-  const [ea, setEa] = React.useState<EAData | null>(null);
-  const [loading, setLoading] = React.useState(true);
+  const [ea, setEa]             = React.useState<EAData | null>(null);
+  const [loading, setLoading]   = React.useState(true);
+  const [downloaded, setDl]     = React.useState(false);
 
   React.useEffect(() => {
     fetch("/api/me/ea")
@@ -147,7 +144,6 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
 
   const code = platform === "mt4" ? ea?.eaMQ4 : ea?.eaMQ5;
   const ext  = platform === "mt4" ? "mq4" : "mq5";
-  const folder = platform === "mt4" ? "MQL4" : "MQL5";
 
   function downloadEA() {
     if (!code) return;
@@ -155,23 +151,19 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
     a.href = URL.createObjectURL(new Blob([code], { type: "text/plain" }));
     a.download = `TradeGx.${ext}`;
     a.click();
+    setDl(true);
   }
 
-  const steps = [
-    {
-      num: "1",
-      text: platform === "mt4"
-        ? `MT4 → File → Open Data Folder → MQL4 → Experts → salvează fișierul ca "TradeGx.mq4"`
-        : `MT5 → File → Open Data Folder → MQL5 → Experts → salvează fișierul ca "TradeGx.mq5"`,
-    },
-    {
-      num: "2",
-      text: `Tools → Options → Expert Advisors → bifează "Allow WebRequest" → adaugă: ${ea?.appDomain ?? "domeniul aplicației"}`,
-    },
-    {
-      num: "3",
-      text: `Drag & drop "TradeGx" din Navigator → Expert Advisors pe orice grafic. ✅ Gata!`,
-    },
+  const steps = platform === "mt4" ? [
+    { icon: "📁", text: <>Deschide <b>MT4 → File → Open Data Folder</b></> },
+    { icon: "📂", text: <>Pune fișierul în <b>MQL4 → Experts</b></> },
+    { icon: "🔧", text: <><b>Tools → Options → Expert Advisors</b> → bifează "Allow WebRequest" → adaugă <code className="bg-zinc-800 px-1 rounded text-[10px]">{ea?.appDomain ?? "tradegx.com"}</code></> },
+    { icon: "🖱️", text: <>Din <b>Navigator → Expert Advisors</b>, trage "TradeGx" pe orice grafic</> },
+  ] : [
+    { icon: "📁", text: <>Deschide <b>MT5 → File → Open Data Folder</b></> },
+    { icon: "📂", text: <>Pune fișierul în <b>MQL5 → Experts</b></> },
+    { icon: "🔧", text: <><b>Tools → Options → Expert Advisors</b> → bifează "Allow WebRequest" → adaugă <code className="bg-zinc-800 px-1 rounded text-[10px]">{ea?.appDomain ?? "tradegx.com"}</code></> },
+    { icon: "🖱️", text: <>Din <b>Navigator → Expert Advisors</b>, trage "TradeGx" pe orice grafic</> },
   ];
 
   return (
@@ -180,11 +172,11 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
         <ChevronLeft className="w-4 h-4" />Înapoi
       </button>
 
-      {/* Platform selector */}
+      {/* Platform tabs */}
       <div className="grid grid-cols-2 gap-2">
         {(["mt4", "mt5"] as const).map(p => (
-          <button key={p} onClick={() => setPlatform(p)}
-            className={cn("py-3 rounded-xl border text-sm font-bold transition-all",
+          <button key={p} onClick={() => { setPlatform(p); setDl(false); }}
+            className={cn("py-2.5 rounded-xl border text-sm font-bold transition-all",
               platform === p
                 ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
                 : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
@@ -193,58 +185,49 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
         ))}
       </div>
 
-      {/* Copy + Download */}
+      {/* Download button — primary CTA */}
       {loading ? (
-        <div className="flex items-center justify-center py-6">
+        <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
         </div>
       ) : code ? (
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <CopyBtn text={code} className="flex-1 justify-center" />
-            <button onClick={downloadEA}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 text-sm transition-all">
-              <Download className="w-4 h-4" />
-              .{ext}
-            </button>
-          </div>
-          {/* Preview */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-3 py-1.5 border-b border-zinc-800">
-              <span className="text-[10px] font-mono text-zinc-600">TradeGx.{ext}</span>
-              <span className="text-[10px] text-zinc-600">{code.split("\n").length} linii</span>
-            </div>
-            <pre className="text-[10px] text-zinc-500 font-mono p-3 leading-relaxed overflow-y-auto h-72 select-all whitespace-pre">
-              {code}
-            </pre>
-          </div>
-        </div>
+        <button
+          onClick={downloadEA}
+          className={cn(
+            "w-full flex items-center justify-center gap-3 py-5 rounded-2xl border-2 text-base font-bold transition-all",
+            downloaded
+              ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+              : "bg-indigo-500/10 border-indigo-500/40 text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/60 active:scale-[0.98]"
+          )}
+        >
+          {downloaded
+            ? <><CheckCircle2 className="w-5 h-5" /> Descărcat — instalează-l în {platform.toUpperCase()}</>
+            : <><Download className="w-5 h-5" /> Descarcă TradeGx.{ext}</>
+          }
+        </button>
       ) : (
-        <div className="text-center py-4 text-sm text-rose-400">
-          Eroare la generarea codului. Reîncarcă pagina.
-        </div>
+        <div className="text-center py-4 text-sm text-rose-400">Eroare. Reîncarcă pagina.</div>
       )}
 
       {/* Steps */}
-      <div className="space-y-2.5">
-        {steps.map((s) => (
-          <div key={s.num} className="flex gap-3 items-start">
-            <span className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-              {s.num}
-            </span>
-            <p className="text-xs text-zinc-400 leading-relaxed">{s.text}</p>
+      <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 space-y-3">
+        <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-3">Instalare — 4 pași simpli</p>
+        {steps.map((s, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <span className="text-base leading-none mt-0.5 shrink-0">{s.icon}</span>
+            <p className="text-sm text-zinc-300 leading-relaxed">{s.text}</p>
           </div>
         ))}
       </div>
 
       <Button onClick={onDone}
-        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold h-10">
+        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold h-11 text-sm">
         <CheckCircle2 className="w-4 h-4 mr-2" />
-        Am instalat — Închide
+        Am instalat — Gata!
       </Button>
 
-      <p className="text-center text-[10px] text-zinc-600">
-        Contul apare automat după prima tranzacție închisă în MT4/MT5.
+      <p className="text-center text-[11px] text-zinc-600">
+        Tranzacțiile apar automat după prima închidere în {platform.toUpperCase()}. Nu e nevoie să creezi contul manual.
       </p>
     </div>
   );
