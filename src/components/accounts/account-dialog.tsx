@@ -214,7 +214,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
               <span className="text-[10px] font-mono text-zinc-600">TradeGx.{ext}</span>
               <span className="text-[10px] text-zinc-600">{code.split("\n").length} linii</span>
             </div>
-            <pre className="text-[10px] text-zinc-500 font-mono p-3 leading-relaxed overflow-y-auto max-h-52 select-all whitespace-pre">
+            <pre className="text-[10px] text-zinc-500 font-mono p-3 leading-relaxed overflow-y-auto h-72 select-all whitespace-pre">
               {code}
             </pre>
           </div>
@@ -589,7 +589,7 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="bg-zinc-950 border-zinc-800/80 sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50">
+      <DialogContent className="bg-zinc-950 border-zinc-800/80 sm:max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl shadow-black/50">
         <DialogHeader>
           <DialogTitle className="text-zinc-100 text-base">{TITLES[step]}</DialogTitle>
         </DialogHeader>
