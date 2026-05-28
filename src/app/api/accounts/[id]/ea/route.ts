@@ -4,9 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { createHmac } from "crypto";
 import { generateMQ4, generateMQ5 } from "@/lib/ea-templates";
 
-function getWebhookToken(accountId: string): string {
-  const secret = process.env.NEXTAUTH_SECRET ?? "apex-trader-fallback-secret";
-  return createHmac("sha256", secret).update(accountId).digest("hex").slice(0, 32);
+/** Token bound to userId — matches the /webhooks/ea/[userId] route */
+function getUserEaToken(userId: string): string {
+  const secret = process.env.NEXTAUTH_SECRET ?? "apex-trader-secret";
+  return createHmac("sha256", secret).update(`ea:${userId}`).digest("hex").slice(0, 32);
 }
 
 function getAppUrl(): string {
@@ -27,6 +28,7 @@ export async function GET(
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
+  // Verify the account belongs to this user (just for auth check)
   const account = await prisma.tradingAccount.findFirst({
     where: { id, userId: session.user.id },
     select: { id: true, name: true },
@@ -36,9 +38,12 @@ export async function GET(
     return NextResponse.json({ error: "Cont inexistent" }, { status: 404 });
   }
 
-  const token = getWebhookToken(account.id);
+  // Use userId-based token + userId-based webhook URL
+  // This allows the EA route to auto-create a new trading account on first sync
+  const userId = session.user.id;
+  const token = getUserEaToken(userId);
   const appUrl = getAppUrl();
-  const webhookUrl = `${appUrl}/api/webhooks/mt/${account.id}`;
+  const webhookUrl = `${appUrl}/api/webhooks/ea/${userId}`;
 
   return NextResponse.json({
     token,
