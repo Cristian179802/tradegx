@@ -146,34 +146,23 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
   }, []);
 
   async function testConnection() {
-    if (!ea) return;
     setTestState("testing"); setTestMsg("");
     try {
-      const now = Math.floor(Date.now() / 1000);
-      const res = await fetch(ea.webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Apex-Token": ea.token },
-        body: JSON.stringify({
-          ticket: 999999999, positionId: 999999999,
-          symbol: "EURUSD", type: "buy", lots: 0.01,
-          openPrice: 1.10000, closePrice: 1.10100,
-          openTime: now - 3600, closeTime: now,
-          profit: 10.00, commission: -0.5, swap: 0,
-          sl: 0, tp: 0, balance: 10000,
-          login: "TEST", platform: platform,
-        }),
-      });
+      // Server-side test — avoids browser CORS/network restrictions
+      const res = await fetch("/api/me/test-ea", { method: "POST" });
       const data = await res.json().catch(() => ({}));
-      if (res.ok) {
+      if (res.ok && data.ok) {
         setTestState("ok");
-        setTestMsg(`✅ Funcționează! ${data.status === "created" ? "Cont + tranzacție create." : "Tranzacție actualizată."}`);
+        const s = data.body?.status;
+        setTestMsg(`✅ Webhook OK! ${s === "created" ? "Cont + tranzacție create." : s === "updated" ? "Tranzacție actualizată." : `Status ${data.status}`}`);
       } else {
         setTestState("error");
-        setTestMsg(`❌ Eroare ${res.status}: ${data.error ?? JSON.stringify(data)}`);
+        const detail = data.error ?? data.body?.error ?? JSON.stringify(data.body ?? data);
+        setTestMsg(`❌ ${data.status ?? res.status}: ${detail}`);
       }
     } catch (e) {
       setTestState("error");
-      setTestMsg(`❌ Rețea: ${e instanceof Error ? e.message : "eroare necunoscută"}`);
+      setTestMsg(`❌ ${e instanceof Error ? e.message : "eroare necunoscută"}`);
     }
   }
 
