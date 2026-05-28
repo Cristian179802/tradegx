@@ -69,6 +69,12 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
     router.refresh();
   }
 
+  // Auto-refresh every 15s to pick up new accounts synced by EA
+  React.useEffect(() => {
+    const id = setInterval(refresh, 15_000);
+    return () => clearInterval(id);
+  }, []);
+
   async function handleDelete() {
     if (!deletingId) return;
     setIsDeleting(true);

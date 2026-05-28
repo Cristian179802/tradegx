@@ -67,11 +67,12 @@ export async function POST(
   // EA accounts use brokerSource MT4/MT5 — never touch MANUAL accounts
   const eaBrokerSource = platform === "mt5" ? "MT5" : "MT4";
 
-  let tradingAccount = accountNumber
-    ? await prisma.tradingAccount.findFirst({
-        where: { userId, accountNumber, brokerSource: eaBrokerSource },
-      })
-    : null; // fără login nu căutăm — creăm cont nou
+  let tradingAccount = await prisma.tradingAccount.findFirst({
+    where: accountNumber
+      ? { userId, accountNumber, brokerSource: eaBrokerSource }
+      : { userId, brokerSource: eaBrokerSource, accountNumber: "" },
+    orderBy: { createdAt: "desc" },
+  });
 
   if (!tradingAccount) {
     const name = accountNumber

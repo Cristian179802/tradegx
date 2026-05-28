@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { AccountsClient } from "./accounts-client";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Conturi de trading" };
 
 export default async function AccountsPage() {
