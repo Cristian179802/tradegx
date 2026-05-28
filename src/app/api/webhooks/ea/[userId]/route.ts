@@ -12,12 +12,12 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
-  const { userId: paramUserId } = await params;
+  const { userId } = await params;
   const token = req.headers.get("x-apex-token") ?? req.nextUrl.searchParams.get("token") ?? "";
-  if (token !== getUserToken(paramUserId)) {
+  if (token !== getUserToken(userId)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, userId });
 }
 
 export async function POST(
@@ -34,16 +34,16 @@ export async function POST(
 
   // ── Verify user exists ─────────────────────────────────────────────────────
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
-  if (!user) return NextResponse.json({ error: "User inexistent" }, { status: 404 });
+  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   // ── Parse payload ──────────────────────────────────────────────────────────
   let body: Record<string, unknown>;
   try { body = await req.json(); }
-  catch { return NextResponse.json({ error: "JSON invalid" }, { status: 400 }); }
+  catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
 
   const platform      = String(body.platform ?? "mt4").toLowerCase();
-  const accountNumber = String(body.accountNumber ?? body.login ?? "");
-  const brokerTradeId = String(body.positionId ?? body.ticket ?? "");
+  const loginRaw      = String(body.login ?? body.accountNumber ?? "").trim();
+  const brokerTradeId = String(body.positionId ?? body.ticket ?? "").trim();
   const symbol        = String(body.symbol ?? "").toUpperCase().replace(/\s/g, "");
   const typeRaw       = String(body.type ?? "").toLowerCase();
   const direction     = typeRaw === "buy" ? "BUY" : typeRaw === "sell" ? "SELL" : null;
@@ -60,37 +60,36 @@ export async function POST(
   const balance       = Number(body.balance    ?? 0);
 
   if (!brokerTradeId || !symbol || !direction || !openTime || !closeTime) {
-    return NextResponse.json({ error: "Date incomplete" }, { status: 400 });
+    return NextResponse.json({
+      error: "Missing fields",
+      got: { brokerTradeId, symbol, direction, openTime, closeTime }
+    }, { status: 400 });
   }
 
-  // ── Find or auto-create trading account ────────────────────────────────────
-  // EA accounts use brokerSource MT4/MT5 — never touch MANUAL accounts
-  const eaBrokerSource = platform === "mt5" ? "MT5" : "MT4";
+  // ── Find or create account ─────────────────────────────────────────────────
+  // accountKey: use MT5 login if available, otherwise a user-specific key
+  const accountKey = loginRaw || `ea_${userId.slice(-8)}`;
+  const accountName = loginRaw
+    ? `${platform.toUpperCase()} #${loginRaw}`
+    : `${platform.toUpperCase()} Sync`;
 
-  let tradingAccount = await prisma.tradingAccount.findFirst({
-    where: accountNumber
-      ? { userId, accountNumber, brokerSource: eaBrokerSource }
-      : { userId, brokerSource: eaBrokerSource, accountNumber: "" },
-    orderBy: { createdAt: "desc" },
+  let account = await prisma.tradingAccount.findFirst({
+    where: { userId, accountNumber: accountKey },
   });
 
-  if (!tradingAccount) {
-    const name = accountNumber
-      ? `${platform.toUpperCase()} #${accountNumber}`
-      : `${platform.toUpperCase()} Sync`;
-
-    tradingAccount = await prisma.tradingAccount.create({
+  if (!account) {
+    account = await prisma.tradingAccount.create({
       data: {
         userId,
-        name,
+        name:           accountName,
         type:           "LIVE",
         broker:         platform.toUpperCase(),
-        accountNumber:  accountNumber || "",
+        accountNumber:  accountKey,
         currency:       "USD",
         balance:        balance || 0,
         initialBalance: balance || 0,
         leverage:       100,
-        brokerSource:   eaBrokerSource,
+        brokerSource:   "MANUAL",
         lastSyncedAt:   new Date(),
       },
     });
@@ -98,7 +97,7 @@ export async function POST(
 
   // ── Upsert trade ───────────────────────────────────────────────────────────
   const existing = await prisma.trade.findFirst({
-    where: { accountId: tradingAccount.id, brokerTradeId },
+    where: { accountId: account.id, brokerTradeId },
   });
 
   const durationMinutes = Math.max(
@@ -112,14 +111,17 @@ export async function POST(
       data: { exitPrice: closePrice, exitTime: closeTime, pnlMoney: profit, commission, swap, durationMinutes },
     });
     if (balance > 0) {
-      await prisma.tradingAccount.update({ where: { id: tradingAccount.id }, data: { balance, lastSyncedAt: new Date() } });
+      await prisma.tradingAccount.update({
+        where: { id: account.id },
+        data: { balance, lastSyncedAt: new Date() },
+      });
     }
-    return NextResponse.json({ status: "updated", tradeId: existing.id });
+    return NextResponse.json({ ok: true, status: "updated", tradeId: existing.id, accountId: account.id });
   }
 
   const trade = await prisma.trade.create({
     data: {
-      accountId:      tradingAccount.id,
+      accountId:      account.id,
       symbol,
       instrumentType: detectInstrumentType(symbol) as any,
       direction,
@@ -144,10 +146,16 @@ export async function POST(
 
   if (balance > 0) {
     await prisma.tradingAccount.update({
-      where: { id: tradingAccount.id },
+      where: { id: account.id },
       data: { balance, lastSyncedAt: new Date() },
     });
   }
 
-  return NextResponse.json({ status: "created", tradeId: trade.id, accountId: tradingAccount.id }, { status: 201 });
+  return NextResponse.json({
+    ok: true,
+    status: "created",
+    tradeId: trade.id,
+    accountId: account.id,
+    accountName: account.name,
+  }, { status: 201 });
 }
