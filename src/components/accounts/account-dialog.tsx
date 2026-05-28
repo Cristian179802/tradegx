@@ -178,8 +178,8 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
     {
       icon: "📂",
       text: platform === "mt4"
-        ? <>Pune <b>{fileLabel}</b> în: <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] font-mono text-zinc-300">MT4 → File → Open Data Folder → MQL4 → Experts</code></>
-        : <>Pune <b>{fileLabel}</b> în: <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] font-mono text-zinc-300">MT5 → File → Open Data Folder → MQL5 → Experts</code></>,
+        ? <>Pune <b>{fileLabel}</b> în folderul <b>MQL4 → Experts</b> <span className="text-zinc-500 text-[10px]">(MT4 → File → Open Data Folder)</span></>
+        : <>Pune <b>{fileLabel}</b> în folderul <b>MQL5 → Experts</b> <span className="text-zinc-500 text-[10px]">(MT5 → File → Open Data Folder)</span></>,
     },
     {
       icon: "🔄",
@@ -187,7 +187,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
     },
     {
       icon: "⚙️",
-      text: <><b>Tools → Options → Expert Advisors</b> → bifează <b>"Allow WebRequest"</b> → adaugă <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] font-mono text-zinc-300">{ea?.appDomain ?? "tradegx.com"}</code></>,
+      text: <><b>Tools → Options → Expert Advisors</b> → bifează <b>"Allow WebRequest"</b> → adaugă <b>tradegx.com</b></>,
     },
     {
       icon: "🖱️",
@@ -624,7 +624,7 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="bg-zinc-950 border-zinc-800/80 sm:max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl shadow-black/50">
+      <DialogContent className="bg-zinc-950 border-zinc-800/80 sm:max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl shadow-black/50">
         <DialogHeader>
           <DialogTitle className="text-zinc-100 text-base">{TITLES[step]}</DialogTitle>
         </DialogHeader>
