@@ -127,13 +127,14 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
 
 // ─── Step: EA Connect ─────────────────────────────────────────────────────────
 
-interface EAData { eaMQ4: string; eaMQ5: string; appDomain: string; }
+interface EAData { eaMQ4: string; eaMQ5: string; appDomain: string; webhookUrl: string; token: string; }
 
 function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
-  const [platform, setPlatform] = React.useState<"mt4" | "mt5">("mt5");
-  const [ea, setEa]             = React.useState<EAData | null>(null);
-  const [loading, setLoading]   = React.useState(true);
-  const [downloaded, setDl]     = React.useState(false);
+  const [platform, setPlatform]   = React.useState<"mt4" | "mt5">("mt5");
+  const [ea, setEa]               = React.useState<EAData | null>(null);
+  const [loading, setLoading]     = React.useState(true);
+  const [downloaded, setDl]       = React.useState(false);
+  const [hasCompiled, setHasComp] = React.useState<boolean | null>(null);
 
   React.useEffect(() => {
     fetch("/api/me/ea")
@@ -142,34 +143,60 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
       .catch(() => setLoading(false));
   }, []);
 
+  // Check if pre-compiled file exists in /public/ea/
+  React.useEffect(() => {
+    const ext = platform === "mt4" ? "ex4" : "ex5";
+    fetch(`/ea/TradeGx.${ext}`, { method: "HEAD" })
+      .then(r => setHasComp(r.ok))
+      .catch(() => setHasComp(false));
+  }, [platform]);
+
   const code = platform === "mt4" ? ea?.eaMQ4 : ea?.eaMQ5;
   const ext  = platform === "mt4" ? "mq4" : "mq5";
+  const cext = platform === "mt4" ? "ex4" : "ex5";
 
   function downloadEA() {
-    if (!code) return;
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([code], { type: "text/plain" }));
-    a.download = `TradeGx.${ext}`;
-    a.click();
     setDl(true);
+    if (hasCompiled) {
+      // Download pre-compiled binary — no compilation needed
+      window.open(`/ea/TradeGx.${cext}`, "_blank");
+    } else if (code) {
+      // Fallback: download source
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([code], { type: "text/plain" }));
+      a.download = `TradeGx.${ext}`;
+      a.click();
+    }
   }
 
-  const steps = platform === "mt4" ? [
-    { icon: "📁", text: <>Deschide <b>MT4 → File → Open Data Folder</b></> },
-    { icon: "📂", text: <>Pune fișierul în folderul <b>MQL4 → Experts</b></> },
-    { icon: "🔄", text: <>În Navigator, <b>click dreapta pe "Expert Advisors" → Refresh</b> — "TradeGx" apare în listă</> },
-    { icon: "🔧", text: <><b>Tools → Options → Expert Advisors</b> → bifează "Allow WebRequest" → adaugă <code className="bg-zinc-800 px-1 rounded text-[10px]">{ea?.appDomain ?? "tradegx.com"}</code></> },
-    { icon: "🖱️", text: <>Trage <b>"TradeGx"</b> din Navigator pe orice grafic. ✅ Gata!</> },
-  ] : [
-    { icon: "📁", text: <>Deschide <b>MT5 → File → Open Data Folder</b></> },
-    { icon: "📂", text: <>Pune fișierul în folderul <b>MQL5 → Experts</b></> },
-    { icon: "🔄", text: <>În Navigator, <b>click dreapta pe "Expert Advisors" → Refresh</b> — "TradeGx" apare în listă</> },
-    { icon: "🔧", text: <><b>Tools → Options → Expert Advisors</b> → bifează "Allow WebRequest" → adaugă <code className="bg-zinc-800 px-1 rounded text-[10px]">{ea?.appDomain ?? "tradegx.com"}</code></> },
-    { icon: "🖱️", text: <>Trage <b>"TradeGx"</b> din Navigator pe orice grafic. ✅ Gata!</> },
+  const fileLabel = hasCompiled ? `TradeGx.${cext}` : `TradeGx.${ext}`;
+  const fileNote  = hasCompiled
+    ? "fișier gata — nu necesită compilare"
+    : "sursă — necesită compilare în MetaEditor (F7)";
+
+  const steps = [
+    {
+      icon: "📂",
+      text: platform === "mt4"
+        ? <>Pune <b>{fileLabel}</b> în: <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] font-mono text-zinc-300">MT4 → File → Open Data Folder → MQL4 → Experts</code></>
+        : <>Pune <b>{fileLabel}</b> în: <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] font-mono text-zinc-300">MT5 → File → Open Data Folder → MQL5 → Experts</code></>,
+    },
+    {
+      icon: "🔄",
+      text: <>În <b>Navigator</b>, click dreapta pe <b>"Expert Advisors" → Refresh</b> — "TradeGx" apare în listă</>,
+    },
+    {
+      icon: "⚙️",
+      text: <><b>Tools → Options → Expert Advisors</b> → bifează <b>"Allow WebRequest"</b> → adaugă <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] font-mono text-zinc-300">{ea?.appDomain ?? "tradegx.com"}</code></>,
+    },
+    {
+      icon: "🖱️",
+      text: <>Trage <b>"TradeGx"</b> din Navigator pe orice grafic → în tab-ul <b>"Inputs"</b> lipește <b>URL</b> și <b>Token</b> de mai sus → OK</>,
+    },
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <button onClick={onBack} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
         <ChevronLeft className="w-4 h-4" />Înapoi
       </button>
@@ -187,40 +214,72 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
         ))}
       </div>
 
-      {/* Download button — primary CTA */}
       {loading ? (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
         </div>
-      ) : code ? (
+      ) : ea ? (<>
+
+        {/* ── Credentials box ─────────────────────────────────────── */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-3">
+          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+            Datele tale — copiază în MT{platform === "mt4" ? "4" : "5"}
+          </p>
+
+          {/* Webhook URL */}
+          <div className="space-y-1">
+            <p className="text-[10px] text-zinc-600">Webhook URL</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-[11px] text-indigo-300 bg-zinc-800/80 border border-zinc-700/50 px-3 py-2 rounded-lg font-mono truncate">
+                {ea.webhookUrl}
+              </code>
+              <CopyBtn text={ea.webhookUrl} className="shrink-0 px-2.5 py-2 text-xs" />
+            </div>
+          </div>
+
+          {/* Token */}
+          <div className="space-y-1">
+            <p className="text-[10px] text-zinc-600">Token</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-[11px] text-emerald-300 bg-zinc-800/80 border border-zinc-700/50 px-3 py-2 rounded-lg font-mono truncate">
+                {ea.token}
+              </code>
+              <CopyBtn text={ea.token} className="shrink-0 px-2.5 py-2 text-xs" />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Download button ──────────────────────────────────────── */}
         <button
           onClick={downloadEA}
           className={cn(
-            "w-full flex items-center justify-center gap-3 py-5 rounded-2xl border-2 text-base font-bold transition-all",
+            "w-full flex flex-col items-center justify-center gap-1 py-4 rounded-2xl border-2 font-bold transition-all",
             downloaded
               ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
               : "bg-indigo-500/10 border-indigo-500/40 text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/60 active:scale-[0.98]"
           )}
         >
-          {downloaded
-            ? <><CheckCircle2 className="w-5 h-5" /> Descărcat — instalează-l în {platform.toUpperCase()}</>
-            : <><Download className="w-5 h-5" /> Descarcă TradeGx.{ext}</>
-          }
+          <span className="flex items-center gap-2 text-base">
+            {downloaded ? <CheckCircle2 className="w-5 h-5" /> : <Download className="w-5 h-5" />}
+            {downloaded ? "Descărcat!" : `Descarcă ${fileLabel}`}
+          </span>
+          <span className="text-[10px] font-normal opacity-60">{fileNote}</span>
         </button>
-      ) : (
+
+        {/* ── Steps ───────────────────────────────────────────────── */}
+        <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 space-y-3">
+          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Instalare — 4 pași</p>
+          {steps.map((s, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <span className="text-base leading-none mt-0.5 shrink-0">{s.icon}</span>
+              <p className="text-sm text-zinc-300 leading-relaxed">{s.text}</p>
+            </div>
+          ))}
+        </div>
+
+      </>) : (
         <div className="text-center py-4 text-sm text-rose-400">Eroare. Reîncarcă pagina.</div>
       )}
-
-      {/* Steps */}
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 space-y-3">
-        <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-3">Instalare — 5 pași simpli</p>
-        {steps.map((s, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <span className="text-base leading-none mt-0.5 shrink-0">{s.icon}</span>
-            <p className="text-sm text-zinc-300 leading-relaxed">{s.text}</p>
-          </div>
-        ))}
-      </div>
 
       <Button onClick={onDone}
         className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold h-11 text-sm">
@@ -229,7 +288,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
       </Button>
 
       <p className="text-center text-[11px] text-zinc-600">
-        Tranzacțiile apar automat după prima închidere în {platform.toUpperCase()}. Nu e nevoie să creezi contul manual.
+        Contul apare automat după prima tranzacție închisă. Nu trebuie creat manual.
       </p>
     </div>
   );

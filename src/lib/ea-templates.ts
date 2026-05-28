@@ -20,10 +20,10 @@ export function generateMQ4(webhookUrl: string, token: string): string {
 #property version   "1.10"
 #property strict
 
-//--- Configurare (nu modifica)
-string WebhookURL = "${webhookUrl}";
-string AuthToken  = "${token}";
-int    SyncEvery  = 15;  // secunde intre verificari
+//--- Configurare — lipeste valorile din tradegx.com/accounts
+extern string WebhookURL = "${webhookUrl}";
+extern string AuthToken  = "${token}";
+extern int    SyncEvery  = 15;  // secunde intre verificari
 
 //--- Stare interna
 datetime g_lastSync  = 0;
