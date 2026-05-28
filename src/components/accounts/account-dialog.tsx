@@ -135,6 +135,8 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
   const [loading, setLoading]     = React.useState(true);
   const [downloaded, setDl]       = React.useState(false);
   const [hasCompiled, setHasComp] = React.useState<boolean | null>(null);
+  const [testState, setTestState] = React.useState<"idle" | "testing" | "ok" | "error">("idle");
+  const [testMsg, setTestMsg]     = React.useState("");
 
   React.useEffect(() => {
     fetch("/api/me/ea")
@@ -142,6 +144,38 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
       .then(d => { setEa(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
+
+  async function testConnection() {
+    if (!ea) return;
+    setTestState("testing"); setTestMsg("");
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      const res = await fetch(ea.webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Apex-Token": ea.token },
+        body: JSON.stringify({
+          ticket: 999999999, positionId: 999999999,
+          symbol: "EURUSD", type: "buy", lots: 0.01,
+          openPrice: 1.10000, closePrice: 1.10100,
+          openTime: now - 3600, closeTime: now,
+          profit: 10.00, commission: -0.5, swap: 0,
+          sl: 0, tp: 0, balance: 10000,
+          login: "TEST", platform: platform,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setTestState("ok");
+        setTestMsg(`✅ Funcționează! ${data.status === "created" ? "Cont + tranzacție create." : "Tranzacție actualizată."}`);
+      } else {
+        setTestState("error");
+        setTestMsg(`❌ Eroare ${res.status}: ${data.error ?? JSON.stringify(data)}`);
+      }
+    } catch (e) {
+      setTestState("error");
+      setTestMsg(`❌ Rețea: ${e instanceof Error ? e.message : "eroare necunoscută"}`);
+    }
+  }
 
   // Check if pre-compiled file exists in /public/ea/
   React.useEffect(() => {
@@ -241,6 +275,21 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
             <CopyBtn text={ea.token} className="shrink-0 px-2 py-1.5 text-[10px] gap-1" />
           </div>
         </div>
+
+        {/* ── Test Connection ──────────────────────────────────────── */}
+        <button
+          onClick={testConnection}
+          disabled={testState === "testing"}
+          className={cn(
+            "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold transition-all",
+            testState === "ok"    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300" :
+            testState === "error" ? "bg-rose-500/15 border-rose-500/30 text-rose-300" :
+            "bg-zinc-800/60 border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
+          )}
+        >
+          {testState === "testing" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plug className="w-3.5 h-3.5" />}
+          {testState === "testing" ? "Se testează..." : testState === "idle" ? "Testează conexiunea" : testMsg}
+        </button>
 
         {/* ── Download ─────────────────────────────────────────────── */}
         <button
