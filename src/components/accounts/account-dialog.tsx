@@ -191,7 +191,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
     },
     {
       icon: "🖱️",
-      text: <>Trage <b>"TradeGx"</b> din Navigator pe orice grafic → în tab-ul <b>"Inputs"</b> lipește <b>URL</b> și <b>Token</b> de mai sus → OK</>,
+      text: <>Trage <b>"TradeGx"</b> din Navigator pe orice grafic → apare un dialog → click tab <b>"Inputs"</b> → lipește <b>WebhookURL</b> și <b>AuthToken</b> din câmpurile de mai sus → <b>OK</b></>,
     },
   ];
 
