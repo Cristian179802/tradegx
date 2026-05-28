@@ -196,83 +196,74 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
   ];
 
   return (
-    <div className="space-y-4">
-      <button onClick={onBack} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
-        <ChevronLeft className="w-4 h-4" />Înapoi
-      </button>
-
-      {/* Platform tabs */}
-      <div className="grid grid-cols-2 gap-2">
-        {(["mt4", "mt5"] as const).map(p => (
-          <button key={p} onClick={() => { setPlatform(p); setDl(false); }}
-            className={cn("py-2.5 rounded-xl border text-sm font-bold transition-all",
-              platform === p
-                ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
-                : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
-            {p.toUpperCase()}
-          </button>
-        ))}
+    <div className="flex flex-col gap-2.5">
+      {/* Back + tabs on same row */}
+      <div className="flex items-center gap-2">
+        <button onClick={onBack} className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors text-xs shrink-0">
+          <ChevronLeft className="w-3.5 h-3.5" />Înapoi
+        </button>
+        <div className="flex-1 grid grid-cols-2 gap-1.5">
+          {(["mt4", "mt5"] as const).map(p => (
+            <button key={p} onClick={() => { setPlatform(p); setDl(false); }}
+              className={cn("py-1.5 rounded-lg border text-xs font-bold transition-all",
+                platform === p
+                  ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
+                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
+              {p.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
+          <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
         </div>
       ) : ea ? (<>
 
-        {/* ── Credentials box ─────────────────────────────────────── */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-3">
-          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
-            Datele tale — copiază în MT{platform === "mt4" ? "4" : "5"}
+        {/* ── Credentials ─────────────────────────────────────────── */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-2">
+          <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+            Datele tale — copiază în {platform.toUpperCase()} Inputs
           </p>
-
-          {/* Webhook URL */}
-          <div className="space-y-1">
-            <p className="text-[10px] text-zinc-600">Webhook URL</p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-[11px] text-indigo-300 bg-zinc-800/80 border border-zinc-700/50 px-3 py-2 rounded-lg font-mono truncate">
-                {ea.webhookUrl}
-              </code>
-              <CopyBtn text={ea.webhookUrl} className="shrink-0 px-2.5 py-2 text-xs" />
-            </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-zinc-600 w-14 shrink-0">URL</span>
+            <code className="flex-1 text-[10px] text-indigo-300 bg-zinc-800 px-2 py-1.5 rounded-lg font-mono truncate min-w-0">
+              {ea.webhookUrl}
+            </code>
+            <CopyBtn text={ea.webhookUrl} className="shrink-0 px-2 py-1.5 text-[10px] gap-1" />
           </div>
-
-          {/* Token */}
-          <div className="space-y-1">
-            <p className="text-[10px] text-zinc-600">Token</p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-[11px] text-emerald-300 bg-zinc-800/80 border border-zinc-700/50 px-3 py-2 rounded-lg font-mono truncate">
-                {ea.token}
-              </code>
-              <CopyBtn text={ea.token} className="shrink-0 px-2.5 py-2 text-xs" />
-            </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-zinc-600 w-14 shrink-0">Token</span>
+            <code className="flex-1 text-[10px] text-emerald-300 bg-zinc-800 px-2 py-1.5 rounded-lg font-mono truncate min-w-0">
+              {ea.token}
+            </code>
+            <CopyBtn text={ea.token} className="shrink-0 px-2 py-1.5 text-[10px] gap-1" />
           </div>
         </div>
 
-        {/* ── Download button ──────────────────────────────────────── */}
+        {/* ── Download ─────────────────────────────────────────────── */}
         <button
           onClick={downloadEA}
           className={cn(
-            "w-full flex flex-col items-center justify-center gap-1 py-4 rounded-2xl border-2 font-bold transition-all",
+            "w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-bold transition-all",
             downloaded
               ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
               : "bg-indigo-500/10 border-indigo-500/40 text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/60 active:scale-[0.98]"
           )}
         >
-          <span className="flex items-center gap-2 text-base">
-            {downloaded ? <CheckCircle2 className="w-5 h-5" /> : <Download className="w-5 h-5" />}
-            {downloaded ? "Descărcat!" : `Descarcă ${fileLabel}`}
-          </span>
-          <span className="text-[10px] font-normal opacity-60">{fileNote}</span>
+          {downloaded ? <CheckCircle2 className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+          {downloaded ? "Descărcat!" : `Descarcă ${fileLabel}`}
+          <span className="text-[10px] font-normal opacity-50 ml-1">{fileNote}</span>
         </button>
 
-        {/* ── Steps ───────────────────────────────────────────────── */}
-        <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 space-y-3">
-          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Instalare — 4 pași</p>
+        {/* ── Steps ────────────────────────────────────────────────── */}
+        <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 space-y-2">
+          <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Instalare — 4 pași</p>
           {steps.map((s, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <span className="text-base leading-none mt-0.5 shrink-0">{s.icon}</span>
-              <p className="text-sm text-zinc-300 leading-relaxed">{s.text}</p>
+            <div key={i} className="flex items-start gap-2">
+              <span className="text-sm leading-none mt-0.5 shrink-0">{s.icon}</span>
+              <p className="text-xs text-zinc-300 leading-relaxed">{s.text}</p>
             </div>
           ))}
         </div>
@@ -282,13 +273,13 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
       )}
 
       <Button onClick={onDone}
-        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold h-11 text-sm">
-        <CheckCircle2 className="w-4 h-4 mr-2" />
+        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold h-9 text-sm">
+        <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
         Am instalat — Gata!
       </Button>
 
-      <p className="text-center text-[11px] text-zinc-600">
-        Contul apare automat după prima tranzacție închisă. Nu trebuie creat manual.
+      <p className="text-center text-[10px] text-zinc-600">
+        Contul apare automat după prima tranzacție închisă în {platform.toUpperCase()}.
       </p>
     </div>
   );
