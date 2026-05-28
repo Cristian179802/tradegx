@@ -64,35 +64,33 @@ export async function POST(
   }
 
   // ── Find or auto-create trading account ────────────────────────────────────
-  // Match by accountNumber (login) if provided, otherwise find the first EA account for this user
+  // EA accounts use brokerSource MT4/MT5 — never touch MANUAL accounts
+  const eaBrokerSource = platform === "mt5" ? "MT5" : "MT4";
+
   let tradingAccount = accountNumber
     ? await prisma.tradingAccount.findFirst({
-        where: { userId, accountNumber, brokerSource: "MANUAL" },
+        where: { userId, accountNumber, brokerSource: eaBrokerSource },
       })
-    : await prisma.tradingAccount.findFirst({
-        where: { userId, brokerSource: "MANUAL" },
-        orderBy: { createdAt: "desc" },
-      });
+    : null; // fără login nu căutăm — creăm cont nou
 
   if (!tradingAccount) {
-    // Auto-create account on first trade
     const name = accountNumber
       ? `${platform.toUpperCase()} #${accountNumber}`
-      : `${platform.toUpperCase()} Cont`;
+      : `${platform.toUpperCase()} Sync`;
 
     tradingAccount = await prisma.tradingAccount.create({
       data: {
         userId,
         name,
-        type:          "LIVE",
-        broker:        "MT4/MT5",
-        accountNumber: accountNumber || "",
-        currency:      "USD",
-        balance:       balance || 0,
+        type:           "LIVE",
+        broker:         platform.toUpperCase(),
+        accountNumber:  accountNumber || "",
+        currency:       "USD",
+        balance:        balance || 0,
         initialBalance: balance || 0,
-        leverage:      100,
-        brokerSource:  "MANUAL",
-        lastSyncedAt:  new Date(),
+        leverage:       100,
+        brokerSource:   eaBrokerSource,
+        lastSyncedAt:   new Date(),
       },
     });
   }

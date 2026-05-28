@@ -75,7 +75,8 @@ bool SendTrade()
       "\\"lots\\":%.2f,\\"openPrice\\":%.5f,\\"closePrice\\":%.5f," +
       "\\"openTime\\":%d,\\"closeTime\\":%d," +
       "\\"profit\\":%.2f,\\"commission\\":%.2f,\\"swap\\":%.2f," +
-      "\\"sl\\":%.5f,\\"tp\\":%.5f,\\"balance\\":%.2f}",
+      "\\"sl\\":%.5f,\\"tp\\":%.5f,\\"balance\\":%.2f," +
+      "\\"login\\":\\"%d\\",\\"platform\\":\\"mt4\\"}",
       OrderTicket(),
       OrderSymbol(),
       OrderType() == OP_BUY ? "buy" : "sell",
@@ -89,7 +90,8 @@ bool SendTrade()
       OrderSwap(),
       OrderStopLoss(),
       OrderTakeProfit(),
-      AccountBalance()
+      AccountBalance(),
+      AccountNumber()
    );
 
    char  post[], res[];
@@ -218,14 +220,16 @@ bool SendDeal(ulong ticket)
       "\\"openPrice\\":%.5f,\\"closePrice\\":%.5f," +
       "\\"openTime\\":%I64d,\\"closeTime\\":%I64d," +
       "\\"profit\\":%.2f,\\"commission\\":%.2f,\\"swap\\":%.2f," +
-      "\\"sl\\":%.5f,\\"tp\\":%.5f,\\"balance\\":%.2f}",
+      "\\"sl\\":%.5f,\\"tp\\":%.5f,\\"balance\\":%.2f," +
+      "\\"login\\":\\"%I64d\\",\\"platform\\":\\"mt5\\"}",
       (long)ticket, posId, symbol,
       dealType == DEAL_TYPE_BUY ? "buy" : "sell",
       volume, openPrice, closePrice,
       (long)openTime, (long)closeTime,
       profit, commission, swap,
       sl, tp,
-      AccountInfoDouble(ACCOUNT_BALANCE)
+      AccountInfoDouble(ACCOUNT_BALANCE),
+      AccountInfoInteger(ACCOUNT_LOGIN)
    );
 
    uchar post[], res[];
