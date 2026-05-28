@@ -14,9 +14,11 @@ const publicRoutes = [
 
 const publicPrefixes = [
   "/api/auth",
+  "/api/webhooks",   // webhook routes use their own HMAC token auth, no session needed
   "/_next",
   "/favicon",
   "/images",
+  "/ea",             // pre-compiled EA files in /public/ea/
 ];
 
 export default auth((req: NextRequest & { auth: { user?: { id?: string } } | null }) => {
