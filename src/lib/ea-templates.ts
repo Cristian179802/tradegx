@@ -5,7 +5,7 @@
  * The EA:
  *  - Runs a timer every 15 seconds
  *  - Detects newly closed trades/deals in account history
- *  - POSTs each trade as JSON to /api/webhooks/mt/[accountId]
+ *  - POSTs each trade as JSON to /api/webhooks/ea/[userId]
  *  - Requires only WebRequest enabled in MT4/MT5 settings
  */
 
@@ -17,7 +17,7 @@ export function generateMQ4(webhookUrl: string, token: string): string {
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
 #property copyright "TradeGx"
-#property version   "1.20"
+#property version   "1.30"
 #property strict
 
 //--- Configurare — lipeste valorile din tradegx.com/accounts
@@ -71,29 +71,26 @@ void OnTimer()
 //+------------------------------------------------------------------+
 bool SendTrade()
 {
-   string body = StringFormat(
-      "{\\"ticket\\":%d,\\"symbol\\":\\"%s\\",\\"type\\":\\"%s\\"," +
-      "\\"lots\\":%.2f,\\"openPrice\\":%.5f,\\"closePrice\\":%.5f," +
-      "\\"openTime\\":%d,\\"closeTime\\":%d," +
-      "\\"profit\\":%.2f,\\"commission\\":%.2f,\\"swap\\":%.2f," +
-      "\\"sl\\":%.5f,\\"tp\\":%.5f,\\"balance\\":%.2f," +
-      "\\"login\\":\\"%d\\",\\"platform\\":\\"mt4\\"}",
-      OrderTicket(),
-      OrderSymbol(),
-      OrderType() == OP_BUY ? "buy" : "sell",
-      OrderLots(),
-      OrderOpenPrice(),
-      OrderClosePrice(),
-      (int)OrderOpenTime(),
-      (int)OrderCloseTime(),
-      OrderProfit(),
-      OrderCommission(),
-      OrderSwap(),
-      OrderStopLoss(),
-      OrderTakeProfit(),
-      AccountBalance(),
-      AccountNumber()
-   );
+   // JSON construit cu IntegerToString/DoubleToString (separator zecimal '.',
+   // fara specificatori de format) ca sa fie mereu JSON valid.
+   string body = "{"
+      + "\\"ticket\\":"       + IntegerToString(OrderTicket())
+      + ",\\"symbol\\":\\""   + OrderSymbol() + "\\""
+      + ",\\"type\\":\\""     + (OrderType() == OP_BUY ? "buy" : "sell") + "\\""
+      + ",\\"lots\\":"        + DoubleToString(OrderLots(), 2)
+      + ",\\"openPrice\\":"   + DoubleToString(OrderOpenPrice(), 5)
+      + ",\\"closePrice\\":"  + DoubleToString(OrderClosePrice(), 5)
+      + ",\\"openTime\\":"    + IntegerToString((int)OrderOpenTime())
+      + ",\\"closeTime\\":"   + IntegerToString((int)OrderCloseTime())
+      + ",\\"profit\\":"      + DoubleToString(OrderProfit(), 2)
+      + ",\\"commission\\":"  + DoubleToString(OrderCommission(), 2)
+      + ",\\"swap\\":"        + DoubleToString(OrderSwap(), 2)
+      + ",\\"sl\\":"          + DoubleToString(OrderStopLoss(), 5)
+      + ",\\"tp\\":"          + DoubleToString(OrderTakeProfit(), 5)
+      + ",\\"balance\\":"     + DoubleToString(AccountBalance(), 2)
+      + ",\\"login\\":\\""    + IntegerToString(AccountNumber()) + "\\""
+      + ",\\"platform\\":\\"mt4\\""
+      + "}";
 
    char  post[], res[];
    string resHeaders;
@@ -140,7 +137,7 @@ export function generateMQ5(webhookUrl: string, token: string): string {
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
 #property copyright "TradeGx"
-#property version   "1.20"
+#property version   "1.30"
 
 //--- Configurare (nu modifica)
 input string WebhookURL = "${webhookUrl}";
@@ -227,29 +224,35 @@ bool SendDeal(ulong ticket)
    sl = HistoryOrderGetDouble(posId, ORDER_SL);
    tp = HistoryOrderGetDouble(posId, ORDER_TP);
 
-   string body = StringFormat(
-      "{\\"ticket\\":%I64d,\\"positionId\\":%I64d,\\"symbol\\":\\"%s\\"," +
-      "\\"type\\":\\"%s\\",\\"lots\\":%.2f," +
-      "\\"openPrice\\":%.5f,\\"closePrice\\":%.5f," +
-      "\\"openTime\\":%I64d,\\"closeTime\\":%I64d," +
-      "\\"profit\\":%.2f,\\"commission\\":%.2f,\\"swap\\":%.2f," +
-      "\\"sl\\":%.5f,\\"tp\\":%.5f,\\"balance\\":%.2f," +
-      "\\"login\\":\\"%I64d\\",\\"platform\\":\\"mt5\\"}",
-      (long)ticket, posId, symbol,
-      dealType == DEAL_TYPE_BUY ? "buy" : "sell",
-      volume, openPrice, closePrice,
-      (long)openTime, (long)closeTime,
-      profit, commission, swap,
-      sl, tp,
-      AccountInfoDouble(ACCOUNT_BALANCE),
-      AccountInfoInteger(ACCOUNT_LOGIN)
-   );
+   // JSON construit cu IntegerToString/DoubleToString (separator zecimal '.',
+   // fara %I64d) ca sa fie mereu JSON valid.
+   string body = "{"
+      + "\\"ticket\\":"       + IntegerToString((long)ticket)
+      + ",\\"positionId\\":"  + IntegerToString(posId)
+      + ",\\"symbol\\":\\""   + symbol + "\\""
+      + ",\\"type\\":\\""     + (dealType == DEAL_TYPE_BUY ? "buy" : "sell") + "\\""
+      + ",\\"lots\\":"        + DoubleToString(volume, 2)
+      + ",\\"openPrice\\":"   + DoubleToString(openPrice, 5)
+      + ",\\"closePrice\\":"  + DoubleToString(closePrice, 5)
+      + ",\\"openTime\\":"    + IntegerToString((long)openTime)
+      + ",\\"closeTime\\":"   + IntegerToString((long)closeTime)
+      + ",\\"profit\\":"      + DoubleToString(profit, 2)
+      + ",\\"commission\\":"  + DoubleToString(commission, 2)
+      + ",\\"swap\\":"        + DoubleToString(swap, 2)
+      + ",\\"sl\\":"          + DoubleToString(sl, 5)
+      + ",\\"tp\\":"          + DoubleToString(tp, 5)
+      + ",\\"balance\\":"     + DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE), 2)
+      + ",\\"login\\":\\""    + IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN)) + "\\""
+      + ",\\"platform\\":\\"mt5\\""
+      + "}";
 
    uchar post[], res[];
    string resHeaders;
    string headers = "Content-Type: application/json\\r\\n"
                   + "X-Apex-Token: " + AuthToken + "\\r\\n";
-   StringToCharArray(body, post);
+   // count = StringLen(body) => fara byte-ul NULL final, altfel serverul
+   // primeste un caracter invalid si raspunde 400 "Invalid JSON".
+   StringToCharArray(body, post, 0, StringLen(body));
 
    int code = WebRequest("POST", WebhookURL, headers, 5000, post, res, resHeaders);
 
