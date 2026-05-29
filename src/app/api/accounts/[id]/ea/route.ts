@@ -11,11 +11,16 @@ function getUserEaToken(userId: string): string {
 }
 
 function getAppUrl(): string {
-  return (
+  const url = (
     process.env.NEXTAUTH_URL ??
     process.env.NEXT_PUBLIC_APP_URL ??
     "http://localhost:3000"
   ).replace(/\/$/, "");
+  // MT4/MT5 WebRequest downgrades POST->GET when it follows a redirect.
+  // Vercel 307-redirects the apex domain (tradegx.com) to www, which silently
+  // broke EA syncs (POST landed on the GET handler). Target the canonical www
+  // host directly so the EA's POST hits the webhook with no redirect in between.
+  return url.replace("://tradegx.com", "://www.tradegx.com");
 }
 
 export async function GET(
