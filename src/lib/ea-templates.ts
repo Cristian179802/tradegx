@@ -17,7 +17,7 @@ export function generateMQ4(webhookUrl: string, token: string): string {
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
 #property copyright "TradeGx"
-#property version   "1.10"
+#property version   "1.20"
 #property strict
 
 //--- Configurare — lipeste valorile din tradegx.com/accounts
@@ -33,7 +33,8 @@ int      g_lastCount = -1;
 int OnInit()
 {
    EventSetTimer(SyncEvery);
-   Print("[TradeGx] EA pornit. Sincronizare la fiecare ", SyncEvery, "s.");
+   Print("[TradeGx] EA pornit. Trimite catre: ", WebhookURL);
+   Print("[TradeGx] Token: ", StringSubstr(AuthToken, 0, 6), "... (", StringLen(AuthToken), " caractere)");
    return INIT_SUCCEEDED;
 }
 
@@ -109,9 +110,20 @@ bool SendTrade()
             ". Verifica: Tools > Options > Expert Advisors > Allow WebRequest");
       return false;
    }
+
+   string response = CharArrayToString(res);
+
    if(code != 200 && code != 201)
    {
-      Print("[TradeGx] Server a raspuns cu codul: ", code);
+      Print("[TradeGx] Server a raspuns cu codul: ", code, " | ", StringSubstr(response, 0, 200));
+      return false;
+   }
+
+   // Confirmare reala: webhook-ul nostru include mereu accountId in raspuns.
+   // Daca lipseste => alt raspuns (ex: redirect la pagina de login) = fals succes.
+   if(StringFind(response, "accountId") < 0)
+   {
+      Print("[TradeGx] ATENTIE: cod ", code, " dar raspuns necunoscut. URL gresit sau redirect? Raspuns: ", StringSubstr(response, 0, 200));
       return false;
    }
 
@@ -128,7 +140,7 @@ export function generateMQ5(webhookUrl: string, token: string): string {
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
 #property copyright "TradeGx"
-#property version   "1.10"
+#property version   "1.20"
 
 //--- Configurare (nu modifica)
 input string WebhookURL = "${webhookUrl}";
@@ -143,7 +155,8 @@ datetime g_lastSync  = 0;
 int OnInit()
 {
    EventSetTimer(SyncEvery);
-   Print("[TradeGx] EA pornit. Sincronizare la fiecare ", SyncEvery, "s.");
+   Print("[TradeGx] EA pornit. Trimite catre: ", WebhookURL);
+   Print("[TradeGx] Token: ", StringSubstr(AuthToken, 0, 6), "... (", StringLen(AuthToken), " caractere)");
    return INIT_SUCCEEDED;
 }
 
@@ -247,7 +260,23 @@ bool SendDeal(ulong ticket)
       return false;
    }
 
-   return code == 200 || code == 201;
+   string response = CharArrayToString(res);
+
+   if(code != 200 && code != 201)
+   {
+      Print("[TradeGx] Server a raspuns cu codul: ", code, " | ", StringSubstr(response, 0, 200));
+      return false;
+   }
+
+   // Confirmare reala: webhook-ul nostru include mereu accountId in raspuns.
+   // Daca lipseste => alt raspuns (ex: redirect la pagina de login) = fals succes.
+   if(StringFind(response, "accountId") < 0)
+   {
+      Print("[TradeGx] ATENTIE: cod ", code, " dar raspuns necunoscut. URL gresit sau redirect? Raspuns: ", StringSubstr(response, 0, 200));
+      return false;
+   }
+
+   return true;
 }
 `;
 }
