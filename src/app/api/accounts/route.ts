@@ -26,13 +26,16 @@ export async function GET() {
     },
     _sum: { pnlMoney: true, commission: true, swap: true },
   });
+  // MT4/MT5 commission & swap are already signed, so the broker-accurate net is
+  // pnlMoney + commission + swap (NOT minus). Must match accounts/page.tsx + the
+  // EA webhook anchor, otherwise a client refetch would revert to wrong numbers.
   const pnlMap = new Map(
     pnlAgg.map((g) => [
       g.accountId,
       (
         Number(g._sum.pnlMoney ?? 0)
-        - Number(g._sum.commission ?? 0)
-        - Number(g._sum.swap ?? 0)
+        + Number(g._sum.commission ?? 0)
+        + Number(g._sum.swap ?? 0)
       ).toFixed(2),
     ])
   );

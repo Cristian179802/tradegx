@@ -27,12 +27,14 @@ export default async function AccountsPage() {
     },
     _sum: { pnlMoney: true, commission: true, swap: true },
   });
+  // MT4/MT5 commission & swap are already signed, so the broker-accurate net is
+  // pnlMoney + commission + swap (NOT minus). This matches the webhook's anchor.
   const pnlMap = new Map(
     pnlAgg.map((g) => [
       g.accountId,
       Number(g._sum.pnlMoney ?? 0)
-        - Number(g._sum.commission ?? 0)
-        - Number(g._sum.swap ?? 0),
+        + Number(g._sum.commission ?? 0)
+        + Number(g._sum.swap ?? 0),
     ])
   );
 

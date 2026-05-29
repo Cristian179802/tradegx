@@ -105,57 +105,77 @@ export async function POST(
     Math.round((closeTime.getTime() - openTime.getTime()) / 60_000)
   );
 
+  let tradeId: string;
+  let createdNew = false;
+
   if (existing) {
     await prisma.trade.update({
       where: { id: existing.id },
       data: { exitPrice: closePrice, exitTime: closeTime, pnlMoney: profit, commission, swap, durationMinutes },
     });
-    if (balance > 0) {
-      await prisma.tradingAccount.update({
-        where: { id: account.id },
-        data: { balance, lastSyncedAt: new Date() },
-      });
-    }
-    return NextResponse.json({ ok: true, status: "updated", tradeId: existing.id, accountId: account.id });
+    tradeId = existing.id;
+  } else {
+    const trade = await prisma.trade.create({
+      data: {
+        accountId:      account.id,
+        symbol,
+        instrumentType: detectInstrumentType(symbol) as any,
+        direction,
+        entryPrice:     openPrice,
+        entryTime:      openTime,
+        exitPrice:      closePrice,
+        exitTime:       closeTime,
+        lotSize:        lots,
+        stopLoss:       sl,
+        takeProfit:     tp,
+        pnlMoney:       profit,
+        pnlPercent:     0,
+        commission,
+        swap,
+        status:         "CLOSED",
+        brokerSource:   "MANUAL",
+        brokerTradeId,
+        durationMinutes,
+        tags:           [],
+      },
+    });
+    tradeId = trade.id;
+    createdNew = true;
   }
 
-  const trade = await prisma.trade.create({
+  // ── Re-anchor account totals ───────────────────────────────────────────────
+  // The EA-reported balance is the source of truth (it equals the live MT4/MT5
+  // terminal balance). initialBalance is back-solved so that
+  //   initialBalance + Σ(pnlMoney + commission + swap) === balance
+  // holds exactly. This keeps balance, total P&L and return % mutually
+  // consistent and matching the broker, even if some historical trades are
+  // missing (the gap is absorbed by initialBalance, never by the live balance).
+  // NOTE: in MT4/MT5 commission and swap are already signed, so they are ADDED.
+  const agg = await prisma.trade.aggregate({
+    where: { accountId: account.id },
+    _sum: { pnlMoney: true, commission: true, swap: true },
+  });
+  const netPnl =
+    Number(agg._sum.pnlMoney ?? 0) +
+    Number(agg._sum.commission ?? 0) +
+    Number(agg._sum.swap ?? 0);
+
+  await prisma.tradingAccount.update({
+    where: { id: account.id },
     data: {
-      accountId:      account.id,
-      symbol,
-      instrumentType: detectInstrumentType(symbol) as any,
-      direction,
-      entryPrice:     openPrice,
-      entryTime:      openTime,
-      exitPrice:      closePrice,
-      exitTime:       closeTime,
-      lotSize:        lots,
-      stopLoss:       sl,
-      takeProfit:     tp,
-      pnlMoney:       profit,
-      pnlPercent:     0,
-      commission,
-      swap,
-      status:         "CLOSED",
-      brokerSource:   "MANUAL",
-      brokerTradeId,
-      durationMinutes,
-      tags:           [],
+      lastSyncedAt: new Date(),
+      ...(balance > 0 ? { balance, initialBalance: balance - netPnl } : {}),
     },
   });
 
-  if (balance > 0) {
-    await prisma.tradingAccount.update({
-      where: { id: account.id },
-      data: { balance, lastSyncedAt: new Date() },
-    });
-  }
-
-  return NextResponse.json({
-    ok: true,
-    status: "created",
-    tradeId: trade.id,
-    accountId: account.id,
-    accountName: account.name,
-  }, { status: 201 });
+  return NextResponse.json(
+    {
+      ok: true,
+      status: createdNew ? "created" : "updated",
+      tradeId,
+      accountId: account.id,
+      accountName: account.name,
+    },
+    { status: createdNew ? 201 : 200 }
+  );
 }

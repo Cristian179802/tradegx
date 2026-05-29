@@ -42,4 +42,5 @@ next-env.d.ts
 # Local debug / one-off scripts (may contain secrets — never commit)
 diag.mjs
 cleanup.mjs
+backfill.mjs
 *.bundle

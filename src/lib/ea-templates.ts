@@ -17,21 +17,24 @@ export function generateMQ4(webhookUrl: string, token: string): string {
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
 #property copyright "TradeGx"
-#property version   "1.30"
+#property version   "1.31"
 #property strict
 
 //--- Configurare — lipeste valorile din tradegx.com/accounts
-extern string WebhookURL = "${webhookUrl}";
-extern string AuthToken  = "${token}";
-extern int    SyncEvery  = 15;  // secunde intre verificari
+extern string WebhookURL  = "${webhookUrl}";
+extern string AuthToken   = "${token}";
+extern int    SyncEvery   = 15;   // secunde intre verificari
+extern int    MaxPerCycle = 100;  // cate tranzactii noi trimite per ciclu (anti-blocare)
 
-//--- Stare interna
-datetime g_lastSync  = 0;
-int      g_lastCount = -1;
+//--- Stare interna: tichetele deja confirmate (anti-duplicat local)
+int g_sent[];
+int g_sentCount = 0;
 
 //+------------------------------------------------------------------+
 int OnInit()
 {
+   ArrayResize(g_sent, 0);
+   g_sentCount = 0;
    EventSetTimer(SyncEvery);
    Print("[TradeGx] EA pornit. Trimite catre: ", WebhookURL);
    Print("[TradeGx] Token: ", StringSubstr(AuthToken, 0, 6), "... (", StringLen(AuthToken), " caractere)");
@@ -45,27 +48,49 @@ void OnDeinit(const int reason)
 }
 
 //+------------------------------------------------------------------+
+// Verifica daca un tichet a fost deja trimis cu succes in aceasta sesiune.
+bool AlreadySent(int ticket)
+{
+   for(int k = g_sentCount - 1; k >= 0; k--)
+      if(g_sent[k] == ticket) return true;
+   return false;
+}
+
+// Marcheaza un tichet ca trimis (dedup local, anti-spam).
+void MarkSent(int ticket)
+{
+   ArrayResize(g_sent, g_sentCount + 1);
+   g_sent[g_sentCount] = ticket;
+   g_sentCount++;
+}
+
+//+------------------------------------------------------------------+
 void OnTimer()
 {
+   // Rescaneaza TOT istoricul la fiecare ciclu si trimite orice tichet inca
+   // neconfirmat. Nu folosim reper de timp — asa nu se mai pierde nimic, chiar
+   // daca o tranzactie apare cu intarziere sau o sincronizare anterioara a esuat.
+   // Serverul ignora duplicatele (upsert dupa brokerTradeId), deci e sigur.
    int total = OrdersHistoryTotal();
-   if(total == g_lastCount) return;
 
-   int synced = 0;
-   for(int i = total - 1; i >= 0; i--)
+   int synced = 0, failed = 0;
+   for(int i = 0; i < total; i++)
    {
       if(!OrderSelect(i, SELECT_BY_POS, MODE_HISTORY)) continue;
-      if(OrderType() > 1) continue;                    // skip pending
-      if(OrderCloseTime() <= g_lastSync) continue;     // already sent
+      if(OrderType() > 1) continue;                    // skip pending/non-trade
+      int ticket = OrderTicket();
+      if(AlreadySent(ticket)) continue;                // deja confirmat local
 
-      if(SendTrade())
-         synced++;
+      if(SendTrade()) { MarkSent(ticket); synced++; }
+      else            { failed++; }
+
+      if(synced >= MaxPerCycle) break;                 // anti-blocare per ciclu
    }
 
    if(synced > 0)
       Print("[TradeGx] Sincronizate: ", synced, " tranzactii.");
-
-   g_lastCount = total;
-   g_lastSync  = TimeCurrent();
+   if(failed > 0)
+      Print("[TradeGx] ", failed, " esuate — reincerc la urmatorul ciclu.");
 }
 
 //+------------------------------------------------------------------+
@@ -137,21 +162,24 @@ export function generateMQ5(webhookUrl: string, token: string): string {
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
 #property copyright "TradeGx"
-#property version   "1.30"
+#property version   "1.31"
 
 //--- Configurare (nu modifica)
 input string WebhookURL = "${webhookUrl}";
 input string AuthToken  = "${token}";
-input int    SyncEvery  = 15;  // secunde
+input int    SyncEvery   = 15;   // secunde intre verificari
+input int    MaxPerCycle = 100;  // cate pozitii noi trimite per ciclu (anti-blocare)
 
-//--- Stare interna
-int      g_lastCount = -1;
-datetime g_lastSync  = 0;
+//--- Stare interna: tichetele deja confirmate (anti-duplicat local)
+ulong g_sent[];
+int   g_sentCount = 0;
 
 //+------------------------------------------------------------------+
 int OnInit()
 {
    EventSetTimer(SyncEvery);
+   ArrayResize(g_sent, 0);
+   g_sentCount = 0;
    Print("[TradeGx] EA pornit. Trimite catre: ", WebhookURL);
    Print("[TradeGx] Token: ", StringSubstr(AuthToken, 0, 6), "... (", StringLen(AuthToken), " caractere)");
    return INIT_SUCCEEDED;
@@ -160,32 +188,51 @@ int OnInit()
 void OnDeinit(const int reason) { EventKillTimer(); }
 
 //+------------------------------------------------------------------+
+//| Anti-duplicat local: tine minte tichetele deja trimise cu succes |
+//+------------------------------------------------------------------+
+bool AlreadySent(ulong ticket)
+{
+   for(int k = g_sentCount - 1; k >= 0; k--)
+      if(g_sent[k] == ticket) return true;
+   return false;
+}
+
+void MarkSent(ulong ticket)
+{
+   ArrayResize(g_sent, g_sentCount + 1);
+   g_sent[g_sentCount] = ticket;
+   g_sentCount++;
+}
+
+//+------------------------------------------------------------------+
 void OnTimer()
 {
+   // Rescaneaza TOT istoricul la fiecare ciclu si trimite orice pozitie inchisa
+   // care nu a fost inca confirmata. Serverul ignora duplicatele (upsert dupa
+   // brokerTradeId), deci nu se pierde si nu se dubleaza absolut nimic.
    HistorySelect(0, TimeCurrent());
    int total = (int)HistoryDealsTotal();
-   if(total == g_lastCount) return;
+   int synced = 0, failed = 0;
 
-   int synced = 0;
-   for(int i = total - 1; i >= 0; i--)
+   for(int i = 0; i < total; i++)
    {
       ulong ticket = HistoryDealGetTicket(i);
       if(ticket == 0) continue;
 
       ENUM_DEAL_ENTRY entry = (ENUM_DEAL_ENTRY)HistoryDealGetInteger(ticket, DEAL_ENTRY);
-      if(entry != DEAL_ENTRY_OUT) continue;  // doar tranzactii inchise
+      if(entry != DEAL_ENTRY_OUT) continue;  // doar inchideri de pozitie
+      if(AlreadySent(ticket)) continue;      // deja trimisa in sesiunea asta
 
-      datetime closeTime = (datetime)HistoryDealGetInteger(ticket, DEAL_TIME);
-      if(closeTime <= g_lastSync) continue;
+      if(SendDeal(ticket)) { MarkSent(ticket); synced++; }
+      else                 { failed++; }
 
-      if(SendDeal(ticket)) synced++;
+      if(synced >= MaxPerCycle) break;        // restul la urmatorul ciclu
    }
 
    if(synced > 0)
       Print("[TradeGx] Sincronizate: ", synced, " pozitii.");
-
-   g_lastCount = total;
-   g_lastSync  = TimeCurrent();
+   if(failed > 0)
+      Print("[TradeGx] ", failed, " esuate, reincerc la ciclul urmator.");
 }
 
 //+------------------------------------------------------------------+
