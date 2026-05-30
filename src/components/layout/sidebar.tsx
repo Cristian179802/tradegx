@@ -186,7 +186,7 @@ export function Sidebar() {
       </Link>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-2 scrollbar-hide">
+      <nav className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-2 sidebar-scroll">
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="mb-0.5">
             <AnimatePresence>

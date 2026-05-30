@@ -31,6 +31,7 @@ interface Account {
   maxDrawdownPct: string | number | null;
   metaApiId?: string | null;
   lastSyncedAt?: string | null;
+  brokerSource?: string | null;
   _count: { trades: number };
   tradePnl?: string | number;
 }

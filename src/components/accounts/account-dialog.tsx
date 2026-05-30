@@ -39,6 +39,8 @@ interface AccountDialogProps {
     balance: string | number; leverage: number;
     maxDailyLossPct?: string | number | null;
     maxDrawdownPct?: string | number | null;
+    lastSyncedAt?: string | null;
+    brokerSource?: string | null;
   } | null;
 }
 
@@ -465,9 +467,9 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
 
 // ─── Step: Manual Form ────────────────────────────────────────────────────────
 
-function StepForm({ prefill, isEdit, onBack, onClose, onSuccess }: {
+function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
   prefill?: Partial<TradingAccountInput & { id?: string }>;
-  isEdit: boolean; onBack?: () => void; onClose: () => void; onSuccess: () => void;
+  isEdit: boolean; locked?: boolean; onBack?: () => void; onClose: () => void; onSuccess: () => void;
 }) {
   const { toast } = useToast();
   const form = useForm<TradingAccountInput>({
@@ -559,11 +561,23 @@ function StepForm({ prefill, isEdit, onBack, onClose, onSuccess }: {
           )} />
           <FormField control={form.control} name="balance" render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-300">Balanță</FormLabel>
+              <FormLabel className="text-zinc-300 flex items-center gap-1.5">
+                Balanță
+                {locked && <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/25 rounded px-1.5 py-0.5">AUTO</span>}
+              </FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                <Input type="number" step="0.01"
+                  disabled={locked}
+                  readOnly={locked}
+                  className={cn("bg-zinc-800 border-zinc-700 text-zinc-100",
+                    locked && "opacity-60 cursor-not-allowed")}
                   {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
               </FormControl>
+              {locked && (
+                <p className="text-[10px] text-zinc-500 mt-1 leading-relaxed">
+                  Sincronizat automat din MT4/MT5 — balanța vine de la broker și nu poate fi editată.
+                </p>
+              )}
             </FormItem>
           )} />
           <FormField control={form.control} name="currency" render={({ field }) => (
@@ -647,6 +661,11 @@ function StepForm({ prefill, isEdit, onBack, onClose, onSuccess }: {
 
 export function AccountDialog({ open, onClose, onSuccess, account }: AccountDialogProps) {
   const isEdit = !!account;
+  // An auto-synced account (EA / MetaApi) owns its balance — lock that field.
+  const isLocked = !!account && (
+    account.lastSyncedAt != null ||
+    (account.brokerSource != null && account.brokerSource !== "MANUAL")
+  );
   const [step, setStep] = React.useState<Step>(isEdit ? "form" : "method");
 
   React.useEffect(() => {
@@ -674,6 +693,7 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
           <StepForm
             prefill={isEdit ? { ...account, id: account?.id } as any : undefined}
             isEdit={isEdit}
+            locked={isLocked}
             onBack={isEdit ? undefined : () => setStep("method")}
             onClose={onClose}
             onSuccess={onSuccess}

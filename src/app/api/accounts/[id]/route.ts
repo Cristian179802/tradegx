@@ -54,9 +54,19 @@ export async function PATCH(
 
   const { balance, ...rest } = result.data;
 
+  // Auto-synced accounts (MT4/MT5/cTrader/MetaApi) own their balance — it is
+  // re-anchored from the broker on every sync. Never let a manual edit override
+  // it, otherwise the next sync would just revert it and confuse the user.
+  const isSynced =
+    existing.lastSyncedAt != null ||
+    (existing.brokerSource != null && existing.brokerSource !== "MANUAL");
+
   const account = await prisma.tradingAccount.update({
     where: { id },
-    data: { ...rest, ...(balance !== undefined ? { balance } : {}) },
+    data: {
+      ...rest,
+      ...(balance !== undefined && !isSynced ? { balance } : {}),
+    },
   });
 
   return NextResponse.json(account);

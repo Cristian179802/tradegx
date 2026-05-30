@@ -523,6 +523,13 @@
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Sidebar — scrollbar subțire vizibil (permite scroll pe ecrane mici) */
+.sidebar-scroll { scrollbar-width: thin; scrollbar-color: #3f3f46 transparent; }
+.sidebar-scroll::-webkit-scrollbar { width: 3px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 99px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
 /* ── Dialog ──────────────────────────────────────────────────────────────── */
 [data-radix-popper-content-wrapper] { z-index: 9999 !important; }
 

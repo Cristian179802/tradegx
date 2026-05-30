@@ -3,26 +3,13 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Settings, Zap, ChevronRight, TrendingUp, TrendingDown } from "lucide-react";
+import { Settings, Zap, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { NotificationDropdown } from "@/components/layout/notification-dropdown";
 import { AccountSwitcher } from "@/components/layout/account-switcher";
-
-// Static market snapshot — in a real app this would come from a websocket feed
-const MARKET_TICKERS = [
-  { symbol: "EUR/USD", price: "1.0847", change: "+0.12%", up: true },
-  { symbol: "GBP/USD", price: "1.2714", change: "-0.08%", up: false },
-  { symbol: "XAU/USD", price: "2,321.4", change: "+0.34%", up: true },
-  { symbol: "BTC/USD", price: "67,820", change: "+1.82%", up: true },
-  { symbol: "USD/JPY", price: "157.34", change: "+0.22%", up: true },
-  { symbol: "NAS100",  price: "18,247", change: "-0.15%", up: false },
-  { symbol: "SPX500",  price: "5,304",  change: "+0.07%", up: true },
-  { symbol: "OIL/USD", price: "78.42",  change: "-0.51%", up: false },
-  { symbol: "ETH/USD", price: "3,416",  change: "+2.14%", up: true },
-  { symbol: "USD/CHF", price: "0.9042", change: "+0.05%", up: true },
-];
+import { MarketTicker } from "@/components/layout/market-ticker";
 
 const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: string }> = {
   "/dashboard":    { title: "Panou de Control",  icon: "📊", description: "Statistici & activitate recentă" },
@@ -42,23 +29,6 @@ const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: 
   "/risk-manager": { title: "Risk Manager",        icon: "🛡️", description: "Monitorizare risc în timp real" },
 };
 
-function TickerItem({ symbol, price, change, up }: typeof MARKET_TICKERS[0]) {
-  return (
-    <span className="flex items-center gap-1.5 shrink-0 select-none">
-      <span className="text-zinc-500 text-[11px] font-bold tracking-wide">{symbol}</span>
-      <span className="text-zinc-200 text-[11px] font-mono font-semibold">{price}</span>
-      <span className={cn(
-        "text-[10px] font-bold flex items-center gap-0.5",
-        up ? "text-emerald-400" : "text-rose-400"
-      )}>
-        {up ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
-        {change}
-      </span>
-      <span className="text-zinc-800 mx-2 text-[10px]">·</span>
-    </span>
-  );
-}
-
 export function Topbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -68,28 +38,8 @@ export function Topbar() {
 
   return (
     <div className="shrink-0">
-      {/* ── Live market ticker strip ────────────────────────────────────── */}
-      <div className="h-8 border-b border-indigo-500/10 overflow-hidden flex items-center"
-        style={{ background: "linear-gradient(90deg, rgba(99,102,241,0.06) 0%, rgba(9,9,11,0.95) 30%, rgba(9,9,11,0.95) 70%, rgba(139,92,246,0.04) 100%)" }}>
-        {/* Left label */}
-        <div className="shrink-0 flex items-center gap-1.5 px-3 border-r border-indigo-500/20 h-full"
-          style={{ background: "rgba(99,102,241,0.08)" }}>
-          <span className="live-dot-indigo" />
-          <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest whitespace-nowrap">
-            Live
-          </span>
-        </div>
-        {/* Scrolling ticker */}
-        <div className="flex-1 overflow-hidden">
-          <div className="flex animate-ticker whitespace-nowrap gap-0">
-            {[...MARKET_TICKERS, ...MARKET_TICKERS].map((t, i) => (
-              <TickerItem key={i} {...t} />
-            ))}
-          </div>
-        </div>
-        {/* Right fade */}
-        <div className="shrink-0 w-12 h-full bg-gradient-to-l from-zinc-950 to-transparent pointer-events-none" />
-      </div>
+      {/* ── Live market ticker strip (auto-refreshing) ──────────────────── */}
+      <MarketTicker />
 
       {/* ── Main topbar ─────────────────────────────────────────────────── */}
       <header className="relative h-12 border-b border-zinc-800/60 backdrop-blur-xl flex items-center justify-between px-5"

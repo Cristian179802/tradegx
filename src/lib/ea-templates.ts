@@ -17,7 +17,7 @@ export function generateMQ4(webhookUrl: string, token: string): string {
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
 #property copyright "TradeGx"
-#property version   "1.31"
+#property version   "1.32"
 #property strict
 
 //--- Configurare — lipeste valorile din tradegx.com/accounts
@@ -114,6 +114,9 @@ bool SendTrade()
       + ",\\"tp\\":"          + DoubleToString(OrderTakeProfit(), 5)
       + ",\\"balance\\":"     + DoubleToString(AccountBalance(), 2)
       + ",\\"login\\":\\""    + IntegerToString(AccountNumber()) + "\\""
+      + ",\\"tradeMode\\":"   + IntegerToString(IsDemo() ? 0 : 2)
+      + ",\\"server\\":\\""   + AccountServer() + "\\""
+      + ",\\"company\\":\\"" + AccountCompany() + "\\""
       + ",\\"platform\\":\\"mt4\\""
       + "}";
 
@@ -162,7 +165,7 @@ export function generateMQ5(webhookUrl: string, token: string): string {
 //|    ${new URL(webhookUrl).origin}                                  |
 //+------------------------------------------------------------------+
 #property copyright "TradeGx"
-#property version   "1.31"
+#property version   "1.32"
 
 //--- Configurare (nu modifica)
 input string WebhookURL = "${webhookUrl}";
@@ -290,6 +293,9 @@ bool SendDeal(ulong ticket)
       + ",\\"tp\\":"          + DoubleToString(tp, 5)
       + ",\\"balance\\":"     + DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE), 2)
       + ",\\"login\\":\\""    + IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN)) + "\\""
+      + ",\\"tradeMode\\":"   + IntegerToString((int)AccountInfoInteger(ACCOUNT_TRADE_MODE))
+      + ",\\"server\\":\\""   + AccountInfoString(ACCOUNT_SERVER) + "\\""
+      + ",\\"company\\":\\"" + AccountInfoString(ACCOUNT_COMPANY) + "\\""
       + ",\\"platform\\":\\"mt5\\""
       + "}";
 

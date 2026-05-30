@@ -58,6 +58,24 @@ export async function POST(
   const sl            = body.sl ? Number(body.sl) : null;
   const tp            = body.tp ? Number(body.tp) : null;
   const balance       = Number(body.balance    ?? 0);
+  // ── Account-type detection (sent by EA v1.32+) ─────────────────────────────
+  // tradeMode: 0 = demo, 1 = contest/challenge, 2 = real (live).
+  const tradeMode     = body.tradeMode != null ? Number(body.tradeMode) : null;
+  const serverName    = String(body.server ?? body.company ?? "").toLowerCase();
+  // Prop-firm / challenge keywords (server or company name).
+  const looksChallenge = /(ftmo|prop|challenge|funded|fundednext|the5ers|myforexfunds|e8|alpha\s*capital|instant\s*funding|finotive|blueberry\s*funded|smart\s*prop|goat\s*funded)/i.test(serverName);
+  function detectAccountType(): "DEMO" | "CHALLENGE" | "LIVE" {
+    if (looksChallenge) return "CHALLENGE";
+    if (tradeMode === 1) return "CHALLENGE";
+    if (tradeMode === 0) return "DEMO";
+    if (tradeMode === 2) return "LIVE";
+    return "DEMO"; // safe default when EA didn't send a mode
+  }
+  // brokerSource maps the live-sync platform to the schema enum.
+  const brokerSourceEnum =
+    platform === "mt5" ? "MT5" :
+    platform === "mt4" ? "MT4" :
+    platform === "ctrader" ? "CTRADER" : "MT5";
 
   if (!brokerTradeId || !symbol || !direction || !openTime || !closeTime) {
     return NextResponse.json({
@@ -82,14 +100,14 @@ export async function POST(
       data: {
         userId,
         name:           accountName,
-        type:           "LIVE",
+        type:           detectAccountType(),
         broker:         platform.toUpperCase(),
         accountNumber:  accountKey,
         currency:       "USD",
         balance:        balance || 0,
         initialBalance: balance || 0,
         leverage:       100,
-        brokerSource:   "MANUAL",
+        brokerSource:   brokerSourceEnum as any,
         lastSyncedAt:   new Date(),
       },
     });
@@ -133,7 +151,7 @@ export async function POST(
         commission,
         swap,
         status:         "CLOSED",
-        brokerSource:   "MANUAL",
+        brokerSource:   brokerSourceEnum as any,   // MT4 / MT5 / CTRADER, nu MANUAL
         brokerTradeId,
         durationMinutes,
         tags:           [],
@@ -160,10 +178,23 @@ export async function POST(
     Number(agg._sum.commission ?? 0) +
     Number(agg._sum.swap ?? 0);
 
+  // Dacă EA trimite tradeMode sau server cu keyword prop-firm, re-detectăm tipul
+  // și îl actualizăm pe cont (util pentru conturi vechi create cu default DEMO).
+  const detectedType = detectAccountType();
+  const shouldUpdateType = tradeMode !== null || looksChallenge;
+
   await prisma.tradingAccount.update({
     where: { id: account.id },
     data: {
       lastSyncedAt: new Date(),
+      // Mark the live-sync source so the UI locks the balance fields (an
+      // auto-synced account's balance must never be hand-edited). Older accounts
+      // were created as MANUAL before this was tracked — upgrade them here.
+      ...(account.brokerSource == null || account.brokerSource === "MANUAL"
+        ? { brokerSource: brokerSourceEnum as any }
+        : {}),
+      // Re-aplică tipul detectat dacă EA trimite info de cont (tradeMode/server).
+      ...(shouldUpdateType ? { type: detectedType } : {}),
       ...(balance > 0 ? { balance, initialBalance: balance - netPnl } : {}),
     },
   });
