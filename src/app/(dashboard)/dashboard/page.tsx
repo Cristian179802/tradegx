@@ -113,31 +113,29 @@ export default async function DashboardPage() {
   const avgWin = winAmounts.length > 0 ? winAmounts.reduce((s, p) => s + p, 0) / winAmounts.length : 0;
   const avgLoss = lossAmounts.length > 0 ? Math.abs(lossAmounts.reduce((s, p) => s + p, 0) / lossAmounts.length) : 0;
 
-  // Max drawdown (from all trades in last 30)
-  let peak = 0;
-  let runBal = 0;
-  let maxDD = 0;
-  for (const t of [...recentTrades].reverse()) {
-    runBal += Number(t.pnlMoney ?? 0);
-    if (runBal > peak) peak = runBal;
-    const dd = peak > 0 ? ((peak - runBal) / peak) * 100 : 0;
-    if (dd > maxDD) maxDD = dd;
-  }
-
-  // Equity curve: daily balance accumulation
-  const initialBalance = accounts.reduce((s, a) => s + Number(a.initialBalance), 0);
+  // Equity curve: construiește harta zilnică ÎNAINTE de drawdown (e folosită la ambele)
   const dailyMap = new Map<string, number>();
   for (const t of dailyTrades) {
-    // Use exitTime if available, else entryTime (for MT5 imports without exitTime)
     const dateSource = t.exitTime ?? t.entryTime;
     if (!dateSource) continue;
     const day = new Date(dateSource).toISOString().slice(0, 10);
     dailyMap.set(day, (dailyMap.get(day) ?? 0) + Number(t.pnlMoney ?? 0));
   }
-  // Sparkline data — last 7 daily pnl snapshots (reuse dailyMap)
-  const sortedDays = Array.from(dailyMap.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .slice(-10);
+
+  // Max drawdown calculat din toate zilele disponibile (mai precis decât per-trade)
+  let peak = 0;
+  let runBal = 0;
+  let maxDD = 0;
+  const allDaysSorted = Array.from(dailyMap.entries()).sort(([a], [b]) => a.localeCompare(b));
+  for (const [, dayPnl] of allDaysSorted) {
+    runBal += dayPnl;
+    if (runBal > peak) peak = runBal;
+    const dd = peak > 0 ? ((peak - runBal) / peak) * 100 : 0;
+    if (dd > maxDD) maxDD = dd;
+  }
+
+  // Sparkline data — ultimele 10 zile cu date
+  const sortedDays = allDaysSorted.slice(-10);
   const sparkPnl = sortedDays.map(([, v]) => v);
 
   // Pair performance
@@ -147,13 +145,37 @@ export default async function DashboardPage() {
     trades: g._count._all,
   }));
 
-  // Sparklines placeholder arrays
+  // Sparklines reale — evoluție cumulativă per zi (ultimele 10 zile cu date)
+  const cumulativePnl: number[] = [];
+  let cum = 0;
+  for (const [, v] of sortedDays) { cum += v; cumulativePnl.push(cum); }
+
+  // Win-rate zilnic cumulativ (aproximat din recentTrades sortate pe zi)
+  const dailyWinRate: number[] = sortedDays.map(([day]) => {
+    const dayTrades = recentTrades.filter((t) => {
+      const d = new Date(t.exitTime ?? t.entryTime).toISOString().slice(0, 10);
+      return d <= day;
+    });
+    if (dayTrades.length === 0) return winRate ?? 0;
+    const w = dayTrades.filter((t) => Number(t.pnlMoney ?? 0) > 0).length;
+    return (w / dayTrades.length) * 100;
+  });
+
+  // Drawdown cumulativ pe zi
+  const dailyDD: number[] = [];
+  let ddPeak = 0; let ddBal = 0;
+  for (const [, v] of sortedDays) {
+    ddBal += v;
+    if (ddBal > ddPeak) ddPeak = ddBal;
+    dailyDD.push(ddPeak > 0 ? ((ddPeak - ddBal) / ddPeak) * 100 : 0);
+  }
+
   const sparklines = {
-    pnl: sparkPnl.length >= 2 ? sparkPnl : [0, 0],
-    winRate: sparkPnl.map(() => winRate ?? 0),
-    profitFactor: sparkPnl.map(() => profitFactor ?? 0),
-    drawdown: sparkPnl.map(() => maxDD),
-    trades: sparkPnl.map((_, i) => i + 1),
+    pnl:          cumulativePnl.length >= 2 ? cumulativePnl : [0, 0],
+    winRate:      dailyWinRate.length  >= 2 ? dailyWinRate  : [winRate ?? 0, winRate ?? 0],
+    profitFactor: sparkPnl.length      >= 2 ? sparkPnl      : [0, 0],
+    drawdown:     dailyDD.length       >= 2 ? dailyDD       : [0, 0],
+    trades:       sortedDays.map((_, i) => i + 1),
   };
 
   return (

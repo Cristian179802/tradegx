@@ -21,7 +21,7 @@ export default async function DashboardLayout({
           className="flex-1 overflow-y-auto mesh-bg"
           style={{ background: "#09090b" }}
         >
-          <div className="p-5 md:p-6 max-w-[1600px]">{children}</div>
+          <div className="p-5 md:p-6 max-w-[1600px] mx-auto w-full">{children}</div>
         </main>
       </div>
       <LocaleWidget />

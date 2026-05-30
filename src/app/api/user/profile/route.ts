@@ -3,8 +3,15 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
+// Acceptă atât câmpurile de profil (nume) cât și preferințele de afișare
+// (limbă, monedă, temă, fus orar) — AppearanceTab și ProfileTab apelează
+// ambele această rută.
 const updateProfileSchema = z.object({
-  name: z.string().min(2).max(50).optional(),
+  name:     z.string().min(2).max(50).optional(),
+  language: z.enum(["RO", "EN", "ES", "DE", "FR", "IT"]).optional(),
+  currency: z.enum(["USD", "EUR", "GBP", "RON", "CHF", "JPY"]).optional(),
+  theme:    z.enum(["DARK", "LIGHT", "AMOLED"]).optional(),
+  timezone: z.string().min(1).max(50).optional(),
 });
 
 export async function PATCH(req: NextRequest) {
@@ -25,7 +32,7 @@ export async function PATCH(req: NextRequest) {
   const user = await prisma.user.update({
     where: { id: session.user.id },
     data: result.data,
-    select: { id: true, name: true, email: true },
+    select: { id: true, name: true, email: true, language: true, currency: true, theme: true, timezone: true },
   });
 
   return NextResponse.json(user);

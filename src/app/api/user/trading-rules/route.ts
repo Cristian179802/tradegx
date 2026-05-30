@@ -17,8 +17,20 @@ export async function PATCH(req: NextRequest) {
 
   const user = await prisma.user.update({
     where: { id: session.user.id },
-    data,
-    select: { id: true, maxTradesPerDay: true, defaultRiskPct: true, noTradeDays: true },
+    data: {
+      ...data,
+      // Salvează explicit orele de no-trade (null dacă câmpul e gol/omis)
+      noTradeHoursStart: noTradeHoursStart ?? null,
+      noTradeHoursEnd: noTradeHoursEnd ?? null,
+    },
+    select: {
+      id: true,
+      maxTradesPerDay: true,
+      defaultRiskPct: true,
+      noTradeDays: true,
+      noTradeHoursStart: true,
+      noTradeHoursEnd: true,
+    },
   });
 
   return NextResponse.json(user);

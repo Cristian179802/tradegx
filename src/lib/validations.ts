@@ -124,6 +124,7 @@ export const tradeSchema = z.object({
     .enum(["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN1"])
     .optional()
     .nullable(),
+  sessionType: z.enum(["ASIAN", "LONDON", "NEW_YORK", "OVERLAP"]).optional().nullable(),
   status: z.enum(["OPEN", "CLOSED", "CANCELLED"]).default("CLOSED"),
   tags: z.array(z.string()).default([]),
   notes: z.string().max(2000).optional().nullable(),

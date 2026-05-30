@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { tradeSchema } from "@/lib/validations";
-import { Decimal } from "@prisma/client/runtime/library";
 import { checkTradingRuleViolations } from "@/lib/trading-rules";
 
 function calcPnlPercent(pnlMoney: number, balance: number): number {
@@ -15,16 +14,19 @@ function calcRisk(
   entryPrice: number,
   stopLoss: number | null | undefined,
   lotSize: number,
-  balance: number
+  balance: number,
+  symbol = ""
 ) {
   if (!stopLoss) return { riskMoney: null, riskPercent: null };
   const priceDiff =
     direction === "BUY"
       ? entryPrice - stopLoss
       : stopLoss - entryPrice;
-  const isJPY = false;
+  // Detectează perechile JPY (pip = 0.01, nu 0.0001)
+  const isJPY = /JPY/i.test(symbol);
   const contractSize = 100000;
-  const riskMoney = Math.abs(priceDiff) * lotSize * contractSize * 0.0001;
+  const pipSize = isJPY ? 0.01 : 0.0001;
+  const riskMoney = Math.abs(priceDiff) * lotSize * contractSize * pipSize;
   const riskPercent = balance > 0 ? (riskMoney / balance) * 100 : null;
   return { riskMoney, riskPercent };
 }
@@ -49,6 +51,11 @@ export async function GET(req: NextRequest) {
     select: { id: true },
   });
   const accountIds = userAccounts.map((a) => a.id);
+
+  // Securitate: verifică că accountId aparține utilizatorului curent
+  if (accountId && !accountIds.includes(accountId)) {
+    return NextResponse.json({ error: "Acces interzis" }, { status: 403 });
+  }
 
   const where = {
     accountId: accountId ? accountId : { in: accountIds },
@@ -118,7 +125,8 @@ export async function POST(req: NextRequest) {
     data.entryPrice,
     data.stopLoss,
     data.lotSize,
-    balance
+    balance,
+    data.symbol   // pentru detectarea corectă a pipSize JPY
   );
 
   let durationMinutes: number | null = null;
@@ -148,6 +156,7 @@ export async function POST(req: NextRequest) {
       setupType: data.setupType ?? null,
       killzone: data.killzone ?? null,
       timeframe: data.timeframe ?? null,
+      sessionType: data.sessionType ?? null,
       status: data.status,
       tags: data.tags,
       riskMoney: riskMoney,
