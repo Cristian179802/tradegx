@@ -160,9 +160,9 @@ export function LiveChart() {
     : null;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* ── Header ───────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-3 gap-3">
+      <div className="shrink-0 flex items-center justify-between mb-2 gap-3">
         <div>
           <h2 className="text-sm font-semibold text-zinc-200">Grafic Live</h2>
           <p className="text-xs text-zinc-600 mt-0.5">Date în timp real TradingView</p>
@@ -281,11 +281,10 @@ export function LiveChart() {
         </div>
       </div>
 
-      {/* ── TradingView container ─────────────────────────── */}
+      {/* ── TradingView container — flex-1 umple tot spațiul rămas ── */}
       <div
         ref={containerRef}
-        className="tradingview-widget-container flex-1 rounded-xl overflow-hidden"
-        style={{ minHeight: 280 }}
+        className="tradingview-widget-container flex-1 min-h-0 rounded-xl overflow-hidden"
       />
     </div>
   );

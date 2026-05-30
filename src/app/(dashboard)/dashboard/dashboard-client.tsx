@@ -472,8 +472,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 animate-fade-in-up delay-200">
 
         {/* Live TradingView Chart */}
-        <div className="lg:col-span-3 bg-zinc-900/80 border border-zinc-800/70 rounded-2xl overflow-hidden premium-card" style={{ minHeight: 360 }}>
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/60 bg-zinc-900/60">
+        <div className="lg:col-span-3 bg-zinc-900/80 border border-zinc-800/70 rounded-2xl overflow-hidden premium-card flex flex-col" style={{ height: 520 }}>
+          {/* Header — înălțime fixă, nu se strânge */}
+          <div className="shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/60 bg-zinc-900/60">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-indigo-500/12 border border-indigo-500/20 flex items-center justify-center">
                 <BarChart2 className="w-3.5 h-3.5 text-indigo-400" />
@@ -485,7 +486,8 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               Ecran complet <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="p-1">
+          {/* Grafic — umple tot spațiul rămas */}
+          <div className="flex-1 min-h-0 p-1">
             <LiveChart />
           </div>
         </div>
