@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { NotificationDropdown } from "@/components/layout/notification-dropdown";
 import { AccountSwitcher } from "@/components/layout/account-switcher";
-import { MarketTicker } from "@/components/layout/market-ticker";
 
 const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: string }> = {
   "/dashboard":    { title: "Panou de Control",  icon: "📊", description: "Statistici & activitate recentă" },
@@ -38,9 +37,6 @@ export function Topbar() {
 
   return (
     <div className="shrink-0">
-      {/* ── Live market ticker strip (auto-refreshing) ──────────────────── */}
-      <MarketTicker />
-
       {/* ── Main topbar ─────────────────────────────────────────────────── */}
       <header className="relative h-12 border-b border-zinc-800/60 backdrop-blur-xl flex items-center justify-between px-5"
         style={{ background: "linear-gradient(90deg, rgba(13,13,18,0.98) 0%, rgba(9,9,11,0.98) 100%)" }}>
