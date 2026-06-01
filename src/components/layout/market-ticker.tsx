@@ -63,7 +63,7 @@ function TickerItem({ symbol, price, change, up }: Tick) {
 export function MarketTicker() {
   const [ticks, setTicks] = React.useState<Tick[]>(SEED);
   const [live, setLive] = React.useState(false);
-  const [source, setSource] = React.useState<"twelvedata" | "yahoo" | null>(null);
+  const [source, setSource] = React.useState<"twelvedata" | "yahoo" | "open-er" | null>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -97,7 +97,11 @@ export function MarketTicker() {
           setTicks(next);
           if (Object.keys(quotes).length > 0) {
             setLive(true);
-            setSource(data.source === "yahoo" ? "yahoo" : "twelvedata");
+            setSource(
+            data.source === "yahoo" ? "yahoo" :
+            data.source === "open-er" ? "open-er" :
+            "twelvedata"
+          );
           }
         }
       } catch {
@@ -127,7 +131,8 @@ export function MarketTicker() {
         style={{ background: "rgba(99,102,241,0.08)" }}
         title={
           !live ? "Prețuri orientative — se încarcă date live..." :
-          source === "yahoo" ? "Prețuri live (Yahoo Finance)" :
+          source === "yahoo"    ? "Prețuri live (Yahoo Finance)" :
+          source === "open-er"  ? "Prețuri live (ExchangeRate API + Coinbase)" :
           "Prețuri live (TwelveData)"
         }
       >
