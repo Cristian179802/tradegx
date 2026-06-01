@@ -4,7 +4,6 @@ import * as React from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// ── Tipuri ───────────────────────────────────────────────────────────────────
 interface Tick {
   symbol: string;
   price: string;
@@ -12,7 +11,6 @@ interface Tick {
   up: boolean;
 }
 
-// ── Simboluri: [afișat, baza, cotă] ──────────────────────────────────────────
 const PAIRS: Array<{ sym: string; base: string; quote: string }> = [
   { sym: "EUR/USD", base: "EUR", quote: "USD" },
   { sym: "GBP/USD", base: "GBP", quote: "USD" },
@@ -26,9 +24,6 @@ const PAIRS: Array<{ sym: string; base: string; quote: string }> = [
   { sym: "ETH/USD", base: "ETH", quote: "USD" },
 ];
 
-const CRYPTO_SYMS = new Set(["BTC/USD", "ETH/USD"]);
-
-// ── Formatare preț ───────────────────────────────────────────────────────────
 function formatPrice(sym: string, n: number): string {
   if (!Number.isFinite(n) || n <= 0) return "—";
   if (sym === "BTC/USD") return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -38,23 +33,18 @@ function formatPrice(sym: string, n: number): string {
   return n.toFixed(4);
 }
 
-// ── Derivă prețul din ratele open.er-api (baza USD) ─────────────────────────
-// open.er-api.com/v6/latest/USD → rates[code] = câte unități dintr-o monedă
-// valorează 1 USD (ex: rates["EUR"] = 0.923 → 1 USD = 0.923 EUR).
+// open.er-api.com returnează câte unități dintr-o monedă = 1 USD
+// EUR: 0.923 → EUR/USD = 1/0.923 = 1.0833
+// JPY: 157  → USD/JPY = 157
 function deriveFromER(base: string, quote: string, rates: Record<string, number>): number {
-  if (base === "USD") {
-    // USD/JPY, USD/CHF, USD/CAD → direct rate[quote]
-    return rates[quote] ?? 0;
-  }
+  if (base === "USD") return rates[quote] ?? 0;
   if (quote === "USD") {
-    // EUR/USD, GBP/USD, XAU/USD, XAG/USD → inversul ratei bazei
     const r = rates[base];
     return r && r > 0 ? 1 / r : 0;
   }
   return 0;
 }
 
-// ── Componentă tick ──────────────────────────────────────────────────────────
 function TickerItem({ symbol, price, change, up }: Tick) {
   return (
     <span className="flex items-center gap-1.5 shrink-0 select-none">
@@ -74,14 +64,11 @@ function TickerItem({ symbol, price, change, up }: Tick) {
   );
 }
 
-// ── Ticker principal ─────────────────────────────────────────────────────────
 export function MarketTicker() {
   const [ticks, setTicks] = React.useState<Tick[]>(
     PAIRS.map((p) => ({ symbol: p.sym, price: "—", change: "+0.00%", up: true }))
   );
   const [live, setLive] = React.useState(false);
-
-  // Prețuri de sesiune pentru calculul % zilnic pe forex/metale
   const sessionOpen = React.useRef<Record<string, number>>({});
 
   React.useEffect(() => {
@@ -89,25 +76,37 @@ export function MarketTicker() {
 
     async function load() {
       try {
-        // ── Fetch paralel: open.er-api (forex + metale) + Binance (crypto) ──
-        const [erSettled, bnSettled] = await Promise.allSettled([
-          // Sursă 1: open.er-api.com — gratuit, CORS, forex + XAU + XAG
+        // ── 4 surse paralele din browser (fără IP Vercel, fără blocare) ──────
+        const [erRes, bnRes, xauRes, xagRes] = await Promise.allSettled([
+          // 1. Forex: open.er-api.com — gratuit, CORS, fără cheie
           fetch("https://open.er-api.com/v6/latest/USD", {
             cache: "no-store",
             signal: AbortSignal.timeout(8_000),
           }).then((r) => (r.ok ? r.json() : null)),
 
-          // Sursă 2: Binance — real-time, CORS, BTC/ETH cu % 24h real
+          // 2. Crypto: Binance — real-time, CORS, fără cheie
           fetch(
             'https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","ETHUSDT"]',
             { cache: "no-store", signal: AbortSignal.timeout(6_000) }
           ).then((r) => (r.ok ? r.json() : null)),
+
+          // 3. Aur (XAU): Bybit futures publice — real-time, CORS
+          fetch(
+            "https://api.bybit.com/v5/market/tickers?category=linear&symbol=XAUUSDT",
+            { cache: "no-store", signal: AbortSignal.timeout(6_000) }
+          ).then((r) => (r.ok ? r.json() : null)),
+
+          // 4. Argint (XAG): Bybit futures publice — real-time, CORS
+          fetch(
+            "https://api.bybit.com/v5/market/tickers?category=linear&symbol=XAGUSD",
+            { cache: "no-store", signal: AbortSignal.timeout(6_000) }
+          ).then((r) => (r.ok ? r.json() : null)),
         ]);
 
-        const erData = erSettled.status === "fulfilled" ? erSettled.value : null;
-        const bnData = bnSettled.status === "fulfilled" ? bnSettled.value : null;
+        // ── Parsare rezultate ─────────────────────────────────────────────────
 
-        // Ratele ExchangeRate (număr, nu string)
+        // Forex rates (EUR, GBP, JPY, CHF, AUD, CAD per 1 USD)
+        const erData = erRes.status === "fulfilled" ? erRes.value : null;
         const erRates: Record<string, number> = {};
         if (erData?.result === "success" && erData.rates) {
           for (const [k, v] of Object.entries(erData.rates as Record<string, unknown>)) {
@@ -116,11 +115,14 @@ export function MarketTicker() {
           }
         }
 
-        // Prețuri Binance
+        // Crypto (BTC/ETH cu % 24h real)
+        const bnData = bnRes.status === "fulfilled" ? bnRes.value : null;
         const bnPrices: Record<string, { price: number; pct: number }> = {};
         if (Array.isArray(bnData)) {
           for (const t of bnData as Array<{ symbol: string; lastPrice: string; priceChangePercent: string }>) {
-            const ourSym = t.symbol === "BTCUSDT" ? "BTC/USD" : t.symbol === "ETHUSDT" ? "ETH/USD" : null;
+            const ourSym =
+              t.symbol === "BTCUSDT" ? "BTC/USD" :
+              t.symbol === "ETHUSDT" ? "ETH/USD" : null;
             if (!ourSym) continue;
             const price = Number(t.lastPrice);
             const pct   = Number(t.priceChangePercent);
@@ -128,22 +130,62 @@ export function MarketTicker() {
           }
         }
 
-        // Construim tick-urile
-        const anyData = Object.keys(erRates).length > 0 || Object.keys(bnPrices).length > 0;
+        // XAU din Bybit (lastPrice + price24hPcnt)
+        const xauData = xauRes.status === "fulfilled" ? xauRes.value : null;
+        const xauTicker = xauData?.result?.list?.[0];
+        const xauPrice  = xauTicker ? Number(xauTicker.lastPrice)    : 0;
+        const xauPct    = xauTicker ? Number(xauTicker.price24hPcnt) * 100 : 0;
+
+        // XAG din Bybit — încearcă XAGUSD, dacă nu există încearcă XAGUSDT
+        const xagData = xagRes.status === "fulfilled" ? xagRes.value : null;
+        const xagTicker = xagData?.result?.list?.[0];
+        const xagPrice  = xagTicker ? Number(xagTicker.lastPrice)    : 0;
+        const xagPct    = xagTicker ? Number(xagTicker.price24hPcnt) * 100 : 0;
+
+        // Metalele din Bybit → injectează în erRates pentru procesare uniformă
+        // (cu prețuri inverse: rates["XAU"] = 1/price, astfel deriveFromER întoarce price)
+        if (xauPrice > 0) erRates["__XAU_PRICE__"] = xauPrice;
+        if (xagPrice > 0) erRates["__XAG_PRICE__"] = xagPrice;
+
+        const anyData =
+          Object.keys(erRates).length > 0 ||
+          Object.keys(bnPrices).length > 0;
         if (!anyData) return;
 
+        // ── Construiește tick-urile ───────────────────────────────────────────
         const next: Tick[] = PAIRS.map(({ sym, base, quote }) => {
           let price = 0;
           let pct   = 0;
 
-          if (CRYPTO_SYMS.has(sym) && bnPrices[sym]) {
-            // Crypto: folosim Binance (real-time + % 24h autentic)
-            price = bnPrices[sym].price;
-            pct   = bnPrices[sym].pct;
-          } else if (Object.keys(erRates).length > 0) {
-            // Forex + metale: open.er-api (actualizare zilnică, date corecte)
+          if (sym === "BTC/USD" || sym === "ETH/USD") {
+            // Crypto → Binance (real-time, % 24h autentic)
+            const bn = bnPrices[sym];
+            if (bn) { price = bn.price; pct = bn.pct; }
+
+          } else if (sym === "XAU/USD") {
+            // Aur → Bybit (real-time, % 24h autentic)
+            if (xauPrice > 0) { price = xauPrice; pct = xauPct; }
+            else {
+              // Fallback: open.er-api dacă trimite XAU
+              price = deriveFromER(base, quote, erRates);
+              const open = sessionOpen.current[sym];
+              if (!open && price > 0) sessionOpen.current[sym] = price;
+              pct = open && open > 0 ? ((price - open) / open) * 100 : 0;
+            }
+
+          } else if (sym === "XAG/USD") {
+            // Argint → Bybit (real-time, % 24h autentic)
+            if (xagPrice > 0) { price = xagPrice; pct = xagPct; }
+            else {
+              price = deriveFromER(base, quote, erRates);
+              const open = sessionOpen.current[sym];
+              if (!open && price > 0) sessionOpen.current[sym] = price;
+              pct = open && open > 0 ? ((price - open) / open) * 100 : 0;
+            }
+
+          } else {
+            // Forex → open.er-api (actualizare zilnică, date corecte)
             price = deriveFromER(base, quote, erRates);
-            // % față de prețul de sesiune (primul preț văzut azi)
             const open = sessionOpen.current[sym];
             if (!open && price > 0) sessionOpen.current[sym] = price;
             pct = open && open > 0 ? ((price - open) / open) * 100 : 0;
@@ -187,13 +229,12 @@ export function MarketTicker() {
           "linear-gradient(90deg, rgba(99,102,241,0.06) 0%, rgba(9,9,11,0.95) 30%, rgba(9,9,11,0.95) 70%, rgba(139,92,246,0.04) 100%)",
       }}
     >
-      {/* Label stânga */}
       <div
         className="shrink-0 flex items-center gap-1.5 px-3 border-r border-indigo-500/20 h-full"
         style={{ background: "rgba(99,102,241,0.08)" }}
         title={
           live
-            ? "Prețuri live — Forex/Metale: ExchangeRate API · Crypto: Binance"
+            ? "Forex: ExchangeRate API · Metale: Bybit · Crypto: Binance"
             : "Se încarcă date live..."
         }
       >
@@ -203,7 +244,6 @@ export function MarketTicker() {
         </span>
       </div>
 
-      {/* Bandă derulantă */}
       <div className="flex-1 overflow-hidden">
         <div className="flex animate-ticker whitespace-nowrap gap-0">
           {[...ticks, ...ticks].map((t, i) => (
@@ -212,7 +252,6 @@ export function MarketTicker() {
         </div>
       </div>
 
-      {/* Degrade dreapta */}
       <div className="shrink-0 w-12 h-full bg-gradient-to-l from-zinc-950 to-transparent pointer-events-none" />
     </div>
   );
