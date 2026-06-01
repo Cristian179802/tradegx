@@ -12,9 +12,7 @@ interface Tick {
   up: boolean;
 }
 
-// ── Simboluri dorite ─────────────────────────────────────────────────────────
-// Fiecare intrare: [simbol afișat, monedă bază, monedă cotă]
-// "baza USD" → rates[cotă]; "cotă USD" → 1 / rates[bază]
+// ── Simboluri: [afișat, baza, cotă] ──────────────────────────────────────────
 const PAIRS: Array<{ sym: string; base: string; quote: string }> = [
   { sym: "EUR/USD", base: "EUR", quote: "USD" },
   { sym: "GBP/USD", base: "GBP", quote: "USD" },
@@ -28,6 +26,8 @@ const PAIRS: Array<{ sym: string; base: string; quote: string }> = [
   { sym: "ETH/USD", base: "ETH", quote: "USD" },
 ];
 
+const CRYPTO_SYMS = new Set(["BTC/USD", "ETH/USD"]);
+
 // ── Formatare preț ───────────────────────────────────────────────────────────
 function formatPrice(sym: string, n: number): string {
   if (!Number.isFinite(n) || n <= 0) return "—";
@@ -38,24 +38,23 @@ function formatPrice(sym: string, n: number): string {
   return n.toFixed(4);
 }
 
-// ── Derivă prețul dintr-un map de rate (baza USD) ────────────────────────────
-// Coinbase v2/exchange-rates?currency=USD returnează câte unități dintr-o
-// monedă valorează 1 USD (ex: rates["EUR"] = 0.923 → 1 USD = 0.923 EUR).
-function derivePrice(base: string, quote: string, rates: Record<string, string>): number {
+// ── Derivă prețul din ratele open.er-api (baza USD) ─────────────────────────
+// open.er-api.com/v6/latest/USD → rates[code] = câte unități dintr-o monedă
+// valorează 1 USD (ex: rates["EUR"] = 0.923 → 1 USD = 0.923 EUR).
+function deriveFromER(base: string, quote: string, rates: Record<string, number>): number {
   if (base === "USD") {
-    // USD/JPY, USD/CHF, USD/CAD → câte unități quote per 1 USD
-    const r = Number(rates[quote]);
-    return r > 0 ? r : 0;
+    // USD/JPY, USD/CHF, USD/CAD → direct rate[quote]
+    return rates[quote] ?? 0;
   }
   if (quote === "USD") {
-    // EUR/USD, GBP/USD, XAU/USD, BTC/USD → 1 / (unități base per USD)
-    const r = Number(rates[base]);
-    return r > 0 ? 1 / r : 0;
+    // EUR/USD, GBP/USD, XAU/USD, XAG/USD → inversul ratei bazei
+    const r = rates[base];
+    return r && r > 0 ? 1 / r : 0;
   }
   return 0;
 }
 
-// ── Componentă ticker item ────────────────────────────────────────────────────
+// ── Componentă tick ──────────────────────────────────────────────────────────
 function TickerItem({ symbol, price, change, up }: Tick) {
   return (
     <span className="flex items-center gap-1.5 shrink-0 select-none">
@@ -75,15 +74,14 @@ function TickerItem({ symbol, price, change, up }: Tick) {
   );
 }
 
-// ── Componenta principală ─────────────────────────────────────────────────────
+// ── Ticker principal ─────────────────────────────────────────────────────────
 export function MarketTicker() {
-  // Inițializare cu placeholder "—" (nu cu valori vechi hardcodate)
   const [ticks, setTicks] = React.useState<Tick[]>(
     PAIRS.map((p) => ({ symbol: p.sym, price: "—", change: "+0.00%", up: true }))
   );
-  const [live, setLive]   = React.useState(false);
+  const [live, setLive] = React.useState(false);
 
-  // Prețuri de sesiune: prima valoare citită → baza pentru % schimbare
+  // Prețuri de sesiune pentru calculul % zilnic pe forex/metale
   const sessionOpen = React.useRef<Record<string, number>>({});
 
   React.useEffect(() => {
@@ -91,31 +89,74 @@ export function MarketTicker() {
 
     async function load() {
       try {
-        // ── Sursă primară: Coinbase Exchange Rates (gratuit, CORS deschis) ──
-        // Un singur apel acoperă forex + metale + crypto.
-        // Nu necesită autentificare, funcționează din orice browser.
-        const res = await fetch(
-          "https://api.coinbase.com/v2/exchange-rates?currency=USD",
-          { cache: "no-store" }
-        );
-        if (!res.ok) return;
-        const json = await res.json();
-        const rates: Record<string, string> = json?.data?.rates ?? {};
-        if (Object.keys(rates).length === 0) return;
+        // ── Fetch paralel: open.er-api (forex + metale) + Binance (crypto) ──
+        const [erSettled, bnSettled] = await Promise.allSettled([
+          // Sursă 1: open.er-api.com — gratuit, CORS, forex + XAU + XAG
+          fetch("https://open.er-api.com/v6/latest/USD", {
+            cache: "no-store",
+            signal: AbortSignal.timeout(8_000),
+          }).then((r) => (r.ok ? r.json() : null)),
+
+          // Sursă 2: Binance — real-time, CORS, BTC/ETH cu % 24h real
+          fetch(
+            'https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","ETHUSDT"]',
+            { cache: "no-store", signal: AbortSignal.timeout(6_000) }
+          ).then((r) => (r.ok ? r.json() : null)),
+        ]);
+
+        const erData = erSettled.status === "fulfilled" ? erSettled.value : null;
+        const bnData = bnSettled.status === "fulfilled" ? bnSettled.value : null;
+
+        // Ratele ExchangeRate (număr, nu string)
+        const erRates: Record<string, number> = {};
+        if (erData?.result === "success" && erData.rates) {
+          for (const [k, v] of Object.entries(erData.rates as Record<string, unknown>)) {
+            const n = Number(v);
+            if (Number.isFinite(n) && n > 0) erRates[k] = n;
+          }
+        }
+
+        // Prețuri Binance
+        const bnPrices: Record<string, { price: number; pct: number }> = {};
+        if (Array.isArray(bnData)) {
+          for (const t of bnData as Array<{ symbol: string; lastPrice: string; priceChangePercent: string }>) {
+            const ourSym = t.symbol === "BTCUSDT" ? "BTC/USD" : t.symbol === "ETHUSDT" ? "ETH/USD" : null;
+            if (!ourSym) continue;
+            const price = Number(t.lastPrice);
+            const pct   = Number(t.priceChangePercent);
+            if (price > 0) bnPrices[ourSym] = { price, pct };
+          }
+        }
+
+        // Construim tick-urile
+        const anyData = Object.keys(erRates).length > 0 || Object.keys(bnPrices).length > 0;
+        if (!anyData) return;
 
         const next: Tick[] = PAIRS.map(({ sym, base, quote }) => {
-          const price = derivePrice(base, quote, rates);
-          if (!price) return { symbol: sym, price: "—", change: "+0.00%", up: true };
+          let price = 0;
+          let pct   = 0;
 
-          // Calcul % față de prețul din sesiune (prima citire)
-          const open = sessionOpen.current[sym];
-          if (!open) sessionOpen.current[sym] = price;
-          const pct = open && open > 0 ? ((price - open) / open) * 100 : 0;
-          const up  = pct >= 0;
+          if (CRYPTO_SYMS.has(sym) && bnPrices[sym]) {
+            // Crypto: folosim Binance (real-time + % 24h autentic)
+            price = bnPrices[sym].price;
+            pct   = bnPrices[sym].pct;
+          } else if (Object.keys(erRates).length > 0) {
+            // Forex + metale: open.er-api (actualizare zilnică, date corecte)
+            price = deriveFromER(base, quote, erRates);
+            // % față de prețul de sesiune (primul preț văzut azi)
+            const open = sessionOpen.current[sym];
+            if (!open && price > 0) sessionOpen.current[sym] = price;
+            pct = open && open > 0 ? ((price - open) / open) * 100 : 0;
+          }
 
+          if (!price || !Number.isFinite(price)) {
+            return { symbol: sym, price: "—", change: "+0.00%", up: true };
+          }
+
+          const up = pct >= 0;
           return {
             symbol: sym,
-            price: formatPrice(sym, price),
+            price:  formatPrice(sym, price),
             change: `${up ? "+" : ""}${pct.toFixed(2)}%`,
             up,
           };
@@ -126,12 +167,12 @@ export function MarketTicker() {
           setLive(true);
         }
       } catch {
-        /* menține ultimele valori la orice eroare de rețea */
+        /* menține ultimele valori la eroare de rețea */
       }
     }
 
     load();
-    const id = setInterval(load, 15_000); // reîncarcă la 15s
+    const id = setInterval(load, 15_000);
     return () => {
       cancelled = true;
       clearInterval(id);
@@ -150,7 +191,11 @@ export function MarketTicker() {
       <div
         className="shrink-0 flex items-center gap-1.5 px-3 border-r border-indigo-500/20 h-full"
         style={{ background: "rgba(99,102,241,0.08)" }}
-        title={live ? "Prețuri live (Coinbase)" : "Se încarcă date live..."}
+        title={
+          live
+            ? "Prețuri live — Forex/Metale: ExchangeRate API · Crypto: Binance"
+            : "Se încarcă date live..."
+        }
       >
         <span className="live-dot-indigo" />
         <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest whitespace-nowrap">
