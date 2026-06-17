@@ -54,3 +54,26 @@ export async function notifyTelegram(userId: string, title: string, message: str
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
+
+/**
+ * Difuzează un mesaj către TOȚI utilizatorii cu integrare Telegram activă.
+ * Folosit pentru semnalele AI zilnice. Returnează numărul de mesaje trimise.
+ */
+export async function broadcastTelegram(text: string): Promise<number> {
+  if (!process.env.TELEGRAM_BOT_TOKEN) return 0;
+  const integrations = await prisma.userIntegration.findMany({
+    where: { service: "telegram", isActive: true, apiKey: { not: null } },
+    select: { apiKey: true },
+  });
+  let sent = 0;
+  // Trimitere secvențială cu pauză scurtă (respectă rate limit Telegram ~30 msg/s)
+  for (const integ of integrations) {
+    if (!integ.apiKey) continue;
+    const ok = await sendTelegramMessage(integ.apiKey, text);
+    if (ok) sent++;
+    await new Promise((r) => setTimeout(r, 60));
+  }
+  return sent;
+}
+
+export { escapeHtml };

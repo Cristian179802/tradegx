@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { LiveChart } from "@/components/dashboard/live-chart";
 import { MarketSessions } from "@/components/dashboard/market-sessions";
+import { MotivationBanner } from "@/components/dashboard/motivation-banner";
 import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -334,6 +335,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           </div>
         </div>
       </div>
+
+      {/* ── Banner motivațional zilnic ─────────────────────────────────────── */}
+      <MotivationBanner />
 
       {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">

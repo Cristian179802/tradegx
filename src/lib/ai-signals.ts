@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
+import { broadcastTelegram, escapeHtml } from "@/lib/telegram";
 
 // ── Generator zilnic de semnale AI (HPS — High Probability Setups) ───────────
 // Maxim 3 semnale pe zi, generate o singură dată (lazy), pe baza prețurilor reale.
@@ -220,7 +221,32 @@ Valori permise:
     }),
   });
 
+  // Difuzează semnalele pe Telegram către utilizatorii conectați (best-effort)
+  try {
+    await broadcastSignalsToTelegram(valid);
+  } catch {
+    /* eșec silențios — nu blocăm generarea */
+  }
+
   return valid.length;
+}
+
+// Formatează și difuzează semnalele zilei pe Telegram
+async function broadcastSignalsToTelegram(signals: RawSignal[]): Promise<void> {
+  if (signals.length === 0) return;
+  const lines = signals.map((s, i) => {
+    const arrow = s.direction === "BUY" ? "🟢" : "🔴";
+    return `${arrow} <b>${escapeHtml(s.symbol)}</b> ${s.direction} (${s.timeframe})\n` +
+      `   🎯 Entry: <code>${s.entryPrice}</code>\n` +
+      `   🛡️ SL: <code>${s.stopLoss}</code>  ✅ TP: <code>${s.takeProfit}</code>\n` +
+      `   📊 Încredere: ${s.confidence}%${i < signals.length - 1 ? "\n" : ""}`;
+  });
+  const text =
+    `📡 <b>Semnalele AI ale zilei — TradeGx</b>\n` +
+    `<i>Maxim ${signals.length} setup-uri de înaltă probabilitate</i>\n\n` +
+    lines.join("\n") +
+    `\n\n⚠️ <i>Nu sunt sfaturi financiare. Vezi analiza completă în aplicație și tranzacționează responsabil.</i>`;
+  await broadcastTelegram(text);
 }
 
 // ── Lock in-memory per instanță pentru a evita generarea concurentă ───────────
