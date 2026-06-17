@@ -11,6 +11,8 @@ import { LiveChart } from "@/components/dashboard/live-chart";
 import { MarketSessions } from "@/components/dashboard/market-sessions";
 import { MotivationBanner } from "@/components/dashboard/motivation-banner";
 import { TelegramChannelCard } from "@/components/telegram-channel-card";
+import { EconomicCountdown } from "@/components/dashboard/economic-countdown";
+import { DailyReviewCard } from "@/components/dashboard/daily-review-card";
 import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -340,8 +342,11 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       {/* ── Banner motivațional zilnic ─────────────────────────────────────── */}
       <MotivationBanner />
 
-      {/* ── Invitație canal Telegram ───────────────────────────────────────── */}
-      <TelegramChannelCard variant="compact" />
+      {/* ── Invitație canal Telegram + countdown știri ─────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <TelegramChannelCard variant="compact" />
+        <EconomicCountdown />
+      </div>
 
       {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -629,6 +634,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         </div>
 
       </div>
+
+      {/* Rezumatul AI al zilei */}
+      <DailyReviewCard />
 
       {/* Today's key events hint */}
       <div className="rounded-2xl border border-amber-500/15 bg-zinc-900/80 p-4">
