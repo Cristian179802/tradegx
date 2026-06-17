@@ -732,3 +732,43 @@ model Subscription {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ============================================================
+// AI TRADING SIGNALS (HPS — High Probability Setups)
+// ============================================================
+
+enum SignalStatus {
+  ACTIVE
+  TP_HIT
+  SL_HIT
+  EXPIRED
+}
+
+model AiSignal {
+  id             String         @id @default(cuid())
+  date           String // "YYYY-MM-DD" — ziua pentru care a fost generat
+  symbol         String
+  instrumentType InstrumentType @default(FOREX)
+  direction      TradeDirection
+  timeframe      Timeframe      @default(H4)
+
+  entryPrice  Decimal  @db.Decimal(15, 5)
+  stopLoss    Decimal  @db.Decimal(15, 5)
+  takeProfit  Decimal  @db.Decimal(15, 5)
+  takeProfit2 Decimal? @db.Decimal(15, 5)
+  riskReward  Decimal  @db.Decimal(5, 2)
+  confidence  Int // 0-100
+
+  setupType    SetupType?
+  bias         String? // "Bullish" | "Bearish"
+  session      SessionType?
+
+  rationale    String  @db.Text // analiza completă: de ce
+  confirmation String  @db.Text // confirmarea de așteptat înainte de intrare
+  invalidation String? @db.Text // ce invalidează setup-ul
+
+  status    SignalStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+
+  @@index([date])
+}

@@ -9,7 +9,7 @@ import {
   LayoutDashboard, BookOpen, Calculator, BarChart3, LineChart, Globe,
   CalendarDays, Users, Settings, TrendingUp, LogOut, ChevronDown,
   Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
-  PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield,
+  PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Trading",
     items: [
       { href: "/dashboard",    label: "Panou de Control", icon: LayoutDashboard, color: "indigo" },
+      { href: "/signals",      label: "Semnale AI",        icon: Target,          color: "emerald", badge: "HPS" },
       { href: "/trades",       label: "Tranzacții",        icon: BookOpen,        color: "violet" },
       { href: "/journal",      label: "Jurnal",            icon: NotebookPen,     color: "emerald" },
       { href: "/calculator",   label: "Calculator Lot",    icon: Calculator,      color: "amber" },
@@ -276,6 +277,11 @@ export function Sidebar() {
                   {!sidebarCollapsed && item.proOnly && !isPro && (
                     <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] px-1.5 py-0 h-4 font-bold">
                       PRO
+                    </Badge>
+                  )}
+                  {!sidebarCollapsed && item.badge && !item.proOnly && (
+                    <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0 h-4 font-bold">
+                      {item.badge}
                     </Badge>
                   )}
                   {!sidebarCollapsed && item.href === "/alerts" && (
