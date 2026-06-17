@@ -12,8 +12,6 @@ export default async function DashboardPage() {
 
   const userId = session.user.id;
   const now = new Date();
-  const thirtyDaysAgo = new Date(now);
-  thirtyDaysAgo.setDate(now.getDate() - 30);
 
   const [
     accounts,
@@ -23,7 +21,7 @@ export default async function DashboardPage() {
     grossLoss,
     recentTrades,
     pairGroups,
-    dailyTrades,
+    allSettledTrades,
   ] = await Promise.all([
     // Trading accounts
     prisma.tradingAccount.findMany({
@@ -82,12 +80,12 @@ export default async function DashboardPage() {
       take: 5,
     }),
 
-    // Daily PnL for equity curve (last 30 days)
+    // TOATE tranzacțiile decontate (drawdown all-time, streak, statistici săptămânale, best/worst).
+    // Doar 3 câmpuri → ușor de încărcat chiar și la mii de trade-uri.
     prisma.trade.findMany({
       where: {
         account: { userId },
         OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }],
-        entryTime: { gte: thirtyDaysAgo },
       },
       orderBy: { entryTime: "asc" },
       select: { exitTime: true, entryTime: true, pnlMoney: true },
@@ -104,25 +102,25 @@ export default async function DashboardPage() {
   const profitFactor = gl > 0 ? gp / gl : null;
   const primaryCurrency = accounts[0]?.currency ?? "USD";
 
-  // Best / worst / avg trades
-  const pnlValues = recentTrades.map((t) => Number(t.pnlMoney ?? 0));
-  const winAmounts = pnlValues.filter((p) => p > 0);
-  const lossAmounts = pnlValues.filter((p) => p < 0);
+  // Best / worst / avg trades — din TOATĂ istoria (nu doar ultimele 30)
+  const allPnl = allSettledTrades.map((t) => Number(t.pnlMoney ?? 0));
+  const winAmounts = allPnl.filter((p) => p > 0);
+  const lossAmounts = allPnl.filter((p) => p < 0);
   const bestTrade = winAmounts.length > 0 ? Math.max(...winAmounts) : 0;
   const worstTrade = lossAmounts.length > 0 ? Math.min(...lossAmounts) : 0;
   const avgWin = winAmounts.length > 0 ? winAmounts.reduce((s, p) => s + p, 0) / winAmounts.length : 0;
   const avgLoss = lossAmounts.length > 0 ? Math.abs(lossAmounts.reduce((s, p) => s + p, 0) / lossAmounts.length) : 0;
 
-  // Equity curve: construiește harta zilnică ÎNAINTE de drawdown (e folosită la ambele)
+  // Equity curve: harta zilnică (PnL net per zi) — bază pentru drawdown + streak + sparklines
   const dailyMap = new Map<string, number>();
-  for (const t of dailyTrades) {
+  for (const t of allSettledTrades) {
     const dateSource = t.exitTime ?? t.entryTime;
     if (!dateSource) continue;
     const day = new Date(dateSource).toISOString().slice(0, 10);
     dailyMap.set(day, (dailyMap.get(day) ?? 0) + Number(t.pnlMoney ?? 0));
   }
 
-  // Max drawdown calculat din toate zilele disponibile (mai precis decât per-trade)
+  // Max drawdown din TOATĂ istoria (echity curve cumulativ pe zi)
   let peak = 0;
   let runBal = 0;
   let maxDD = 0;
@@ -133,6 +131,23 @@ export default async function DashboardPage() {
     const dd = peak > 0 ? ((peak - runBal) / peak) * 100 : 0;
     if (dd > maxDD) maxDD = dd;
   }
+
+  // Streak consistență: zile de tranzacționare consecutive (cele mai recente) cu PnL net pozitiv
+  let tradingStreak = 0;
+  for (let i = allDaysSorted.length - 1; i >= 0; i--) {
+    if (allDaysSorted[i][1] > 0) tradingStreak++;
+    else break;
+  }
+
+  // Statistici săptămânale — din toate trade-urile cu intrare în ultimele 7 zile
+  const weekAgo = new Date(now);
+  weekAgo.setDate(now.getDate() - 7);
+  const weekTrades = allSettledTrades.filter(
+    (t) => new Date(t.entryTime).getTime() >= weekAgo.getTime()
+  );
+  const weekTradeCount = weekTrades.length;
+  const weekWins = weekTrades.filter((t) => Number(t.pnlMoney ?? 0) > 0).length;
+  const weekWinRate = weekTradeCount > 0 ? (weekWins / weekTradeCount) * 100 : null;
 
   // Sparkline data — ultimele 10 zile cu date
   const sortedDays = allDaysSorted.slice(-10);
@@ -194,6 +209,9 @@ export default async function DashboardPage() {
         avgWin,
         avgLoss,
         currency: primaryCurrency,
+        tradingStreak,
+        weekTradeCount,
+        weekWinRate,
         recentTrades: recentTrades.slice(0, 8).map((t) => ({
           id: t.id,
           symbol: t.symbol,

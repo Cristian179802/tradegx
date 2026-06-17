@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowRight, CalendarDays, TrendingUp, TrendingDown,
   Activity, Target, BarChart2, Zap, ChevronRight, Award,
@@ -27,6 +27,9 @@ interface DashboardData {
   avgWin: number;
   avgLoss: number;
   currency: string;
+  tradingStreak: number;
+  weekTradeCount: number;
+  weekWinRate: number | null;
   recentTrades: Array<{
     id: string; symbol: string; direction: string;
     lotSize: number; pnlMoney: number | null; pnlPips: number | null; entryTime: string; exitTime: string | null;
@@ -277,6 +280,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
   const {
     userName, totalTrades, netPnl, winRate, profitFactor, maxDrawdown,
     wins, losses, bestTrade, worstTrade, avgWin, avgLoss, currency,
+    tradingStreak, weekTradeCount, weekWinRate,
     recentTrades, pairPerformance, sparklines,
   } = data;
 
@@ -290,36 +294,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
 
   const maxPairPnl = Math.max(...pairPerformance.map(p => Math.abs(p.pnl)), 1);
 
-  // Calculate trading streak
-  const streak = useMemo(() => {
-    if (!recentTrades?.length) return 0;
-    const tradeDays = new Set(
-      recentTrades
-        .filter((t) => t.exitTime)
-        .map((t) => new Date(t.exitTime!).toDateString())
-    );
-    let count = 0;
-    const today = new Date();
-    for (let i = 0; i <= 30; i++) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      if (tradeDays.has(d.toDateString())) count++;
-      else if (i > 0) break;
-    }
-    return count;
-  }, [recentTrades]);
-
-  // Week stats
-  const weekStats = useMemo(() => {
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const weekTrades = recentTrades.filter(
-      (t) => new Date(t.entryTime).getTime() >= oneWeekAgo.getTime()
-    );
-    const weekWins = weekTrades.filter((t) => (t.pnlMoney ?? 0) > 0).length;
-    const weekRate = weekTrades.length > 0 ? (weekWins / weekTrades.length) * 100 : null;
-    return { count: weekTrades.length, winRate: weekRate };
-  }, [recentTrades]);
+  // Streak + statistici săptămânale vin gata calculate server-side (din toată istoria)
+  const streak = tradingStreak;
+  const weekStats = { count: weekTradeCount, winRate: weekWinRate };
 
   return (
     <div className="space-y-5 pb-4 relative">
@@ -462,7 +439,12 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             <p className="text-[22px] font-black num tracking-tight text-indigo-200 leading-none">
               {weekStats.winRate !== null ? `${weekStats.winRate.toFixed(0)}%` : "—"}
             </p>
-            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">Win Rate săptămânal</p>
+            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">
+              Win Rate săptămânal
+              {weekStats.count > 0 && (
+                <span className="text-zinc-700 normal-case tracking-normal"> · {weekStats.count} trades</span>
+              )}
+            </p>
           </div>
           <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 bg-indigo-500/20" />
         </div>
