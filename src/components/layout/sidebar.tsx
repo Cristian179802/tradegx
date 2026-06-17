@@ -10,7 +10,7 @@ import {
   CalendarDays, Users, Settings, TrendingUp, LogOut, ChevronDown,
   Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
   PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
-  Trophy, ListChecks,
+  Trophy, ListChecks, Newspaper, Gauge,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -67,7 +67,9 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/charts",   label: "Grafice Live",      icon: LineChart,    color: "emerald" },
       { href: "/market",   label: "Selector Piață",    icon: Globe,        color: "sky" },
+      { href: "/tools",    label: "Unelte Pro",        icon: Gauge,        color: "violet" },
       { href: "/calendar", label: "Calendar Economic", icon: CalendarDays, color: "amber" },
+      { href: "/news",     label: "Știri de Piață",    icon: Newspaper,    color: "sky" },
     ],
   },
   {

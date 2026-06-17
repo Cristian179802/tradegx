@@ -24,6 +24,8 @@ const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: 
   "/backtesting":  { title: "Backtesting",        icon: "🔬", description: "Testează strategii pe date istorice" },
   "/charts":       { title: "Grafice Live",       icon: "💹", description: "TradingView avansat" },
   "/market":       { title: "Piețe",              icon: "🌍", description: "Prețuri & instrumente" },
+  "/tools":        { title: "Unelte Pro",         icon: "📊", description: "Forța valutelor, risc de ruină, corelații" },
+  "/news":         { title: "Știri de Piață",     icon: "📰", description: "Știri financiare clasificate pe impact" },
   "/calendar":     { title: "Calendar Economic",  icon: "📅", description: "Evenimente macro importante" },
   "/community":    { title: "Comunitate",         icon: "👥", description: "Conectează-te cu traderii" },
   "/settings":     { title: "Setări",             icon: "⚙️", description: "Personalizează TradeGx" },
