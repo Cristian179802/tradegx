@@ -4,12 +4,33 @@ import { auth } from "@/lib/auth";
 // ── Agregator de știri Forex/macro din feed-uri RSS publice ──────────────────
 // Server-side cu cache 5 min, ca să nu lovim sursele la fiecare cerere.
 
+type Impact = "HIGH" | "MEDIUM" | "LOW";
+
 interface NewsItem {
   title: string;
   link: string;
   source: string;
   pubDate: string;       // ISO
   description: string;
+  impact: Impact;
+}
+
+// Clasificare impact pe baza cuvintelor cheie macro (limbaj de știri financiare)
+const HIGH_KW = [
+  "nfp", "non-farm", "nonfarm", "payroll", "cpi", "inflation", "fomc", "fed ", "federal reserve",
+  "interest rate", "rate decision", "rate hike", "rate cut", "gdp", "unemployment", "jobs report",
+  "ecb", "boe", "boj", "central bank", "recession", "powell", "lagarde", "ppi", "core pce",
+];
+const MEDIUM_KW = [
+  "pmi", "retail sales", "consumer confidence", "consumer sentiment", "manufacturing", "trade balance",
+  "housing", "durable goods", "ism", "earnings", "jobless claims", "industrial production", "wages",
+];
+
+function classifyImpact(text: string): Impact {
+  const t = text.toLowerCase();
+  if (HIGH_KW.some((k) => t.includes(k))) return "HIGH";
+  if (MEDIUM_KW.some((k) => t.includes(k))) return "MEDIUM";
+  return "LOW";
 }
 
 const FEEDS: Array<{ url: string; source: string }> = [
@@ -71,6 +92,7 @@ async function fetchFeed(url: string, source: string): Promise<NewsItem[]> {
         source,
         pubDate: iso,
         description: desc.slice(0, 180),
+        impact: classifyImpact(`${title} ${desc}`),
       });
     }
     return items;

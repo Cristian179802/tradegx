@@ -10,7 +10,14 @@ interface NewsItem {
   source: string;
   pubDate: string;
   description: string;
+  impact?: "HIGH" | "MEDIUM" | "LOW";
 }
+
+const IMPACT_CFG: Record<string, { label: string; cls: string; dot: string }> = {
+  HIGH:   { label: "Impact ridicat", cls: "text-rose-400 bg-rose-500/10 border-rose-500/25",     dot: "bg-rose-500" },
+  MEDIUM: { label: "Impact mediu",   cls: "text-amber-400 bg-amber-500/10 border-amber-500/25",  dot: "bg-amber-500" },
+  LOW:    { label: "Impact scăzut",  cls: "text-zinc-500 bg-zinc-800/60 border-zinc-700/40",     dot: "bg-zinc-600" },
+};
 
 function timeAgo(iso: string) {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -103,7 +110,16 @@ export function ForexNews({ className }: { className?: string }) {
                   </p>
                   <ExternalLink className="w-3 h-3 text-zinc-600 group-hover:text-sky-400 shrink-0 mt-0.5 transition-colors" />
                 </div>
-                <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  {item.impact && (
+                    <span className={cn(
+                      "text-[9px] font-bold px-1.5 py-0.5 rounded border flex items-center gap-1",
+                      IMPACT_CFG[item.impact].cls
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", IMPACT_CFG[item.impact].dot)} />
+                      {IMPACT_CFG[item.impact].label}
+                    </span>
+                  )}
                   <span className="text-[10px] font-semibold text-sky-500/80">{item.source}</span>
                   <span className="text-zinc-700 text-[10px]">·</span>
                   <span className="text-[10px] text-zinc-600">{timeAgo(item.pubDate)}</span>

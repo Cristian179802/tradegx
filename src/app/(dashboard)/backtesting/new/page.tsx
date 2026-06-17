@@ -86,17 +86,23 @@ const STRATEGY_TYPES = [
   },
 ] as const;
 
-const SYMBOLS = [
-  "EURUSD","GBPUSD","USDJPY","USDCHF","AUDUSD","NZDUSD","USDCAD",
-  "EURGBP","EURJPY","GBPJPY","EURCAD","XAUUSD","XAGUSD","US30","NAS100","SP500","BTCUSD",
+const SYMBOL_GROUPS: { group: string; symbols: string[] }[] = [
+  { group: "Forex Majors", symbols: ["EURUSD","GBPUSD","USDJPY","USDCHF","AUDUSD","NZDUSD","USDCAD"] },
+  { group: "Forex Minors", symbols: ["EURGBP","EURJPY","GBPJPY","EURCAD","EURCHF","GBPCHF","EURAUD","GBPAUD","AUDCAD","AUDNZD","CADJPY","CHFJPY","NZDJPY","GBPNZD"] },
+  { group: "Metale", symbols: ["XAUUSD","XAGUSD","XPTUSD"] },
+  { group: "Indici", symbols: ["US30","NAS100","SP500","US2000"] },
+  { group: "Crypto", symbols: ["BTCUSD","ETHUSD","BNBUSD","SOLUSD","XRPUSD"] },
+  { group: "Energie", symbols: ["CRUDE","BRENT","NATGAS"] },
 ];
 
 const TIMEFRAMES = [
+  { value: "M5",  label: "M5 — 5 minute" },
   { value: "M15", label: "M15 — 15 minute" },
   { value: "M30", label: "M30 — 30 minute" },
   { value: "H1",  label: "H1 — 1 oră" },
   { value: "H4",  label: "H4 — 4 ore" },
   { value: "D1",  label: "D1 — Zilnic" },
+  { value: "W1",  label: "W1 — Săptămânal" },
 ];
 
 const COLORS = ["#6366f1","#f59e0b","#a78bfa","#34d399","#f43f5e","#38bdf8","#fb923c","#ec4899"];
@@ -1100,7 +1106,11 @@ export default function NewStrategyPage() {
               <div className="relative">
                 <select value={symbol} onChange={(e) => setSymbol(e.target.value)}
                   className="w-full appearance-none bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 pr-8">
-                  {SYMBOLS.map((s) => <option key={s} value={s}>{s}</option>)}
+                  {SYMBOL_GROUPS.map((g) => (
+                    <optgroup key={g.group} label={g.group}>
+                      {g.symbols.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </optgroup>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 pointer-events-none" />
               </div>
