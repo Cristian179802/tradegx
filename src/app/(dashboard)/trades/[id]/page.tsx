@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import { TradeDetailClient } from "./trade-detail-client";
+import { signShareToken } from "@/lib/share";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -58,5 +59,7 @@ export default async function TradeDetailPage({ params }: Props) {
       : null,
   };
 
-  return <TradeDetailClient trade={serialized} />;
+  const shareToken = signShareToken(trade.id);
+
+  return <TradeDetailClient trade={serialized} shareToken={shareToken} />;
 }

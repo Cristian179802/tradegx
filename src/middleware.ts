@@ -15,6 +15,8 @@ const publicRoutes = [
 const publicPrefixes = [
   "/api/auth",
   "/api/webhooks",   // webhook routes use their own HMAC token auth, no session needed
+  "/share",          // public share pages — protected by per-trade HMAC token
+  "/api/share",      // share token validation endpoint
   "/_next",
   "/favicon",
   "/images",

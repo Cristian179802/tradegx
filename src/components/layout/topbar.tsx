@@ -3,12 +3,13 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Settings, Zap, ChevronRight } from "lucide-react";
+import { Settings, Zap, ChevronRight, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { NotificationDropdown } from "@/components/layout/notification-dropdown";
 import { AccountSwitcher } from "@/components/layout/account-switcher";
+import { useAuthStore } from "@/stores/auth.store";
 
 const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: string }> = {
   "/dashboard":    { title: "Panou de Control",  icon: "📊", description: "Statistici & activitate recentă" },
@@ -31,6 +32,7 @@ const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: 
 export function Topbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { toggleMobileSidebar } = useAuthStore();
 
   const matchKey = Object.keys(PAGE_TITLES).find(k => pathname === k || pathname.startsWith(k + "/"));
   const page = (matchKey ? PAGE_TITLES[matchKey] : null) ?? { title: "TradeGx", icon: "⚡" };
@@ -45,6 +47,14 @@ export function Topbar() {
 
         {/* Left: page title with breadcrumb */}
         <div className="flex items-center gap-2 min-w-0">
+          {/* Hamburger — doar pe mobil */}
+          <button
+            onClick={toggleMobileSidebar}
+            className="md:hidden flex items-center justify-center w-8 h-8 -ml-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition-colors"
+            aria-label="Deschide meniul"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
           <span className="text-zinc-700 text-[11px] hidden sm:block font-bold tracking-wide">
             Trade<span className="gradient-text-indigo">Gx</span>
           </span>

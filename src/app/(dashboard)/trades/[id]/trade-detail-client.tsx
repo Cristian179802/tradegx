@@ -14,7 +14,7 @@ import {
   ArrowLeft, TrendingUp, TrendingDown, Clock, Tag,
   Trash2, Pencil, XCircle, BookOpen, Camera, Sparkles,
   Loader2, Target, Shield, DollarSign, Activity,
-  ChevronRight, AlertTriangle,
+  ChevronRight, AlertTriangle, Share2, Check,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -100,9 +100,10 @@ function StatRow({ label, value, mono, accent }: {
   );
 }
 
-export function TradeDetailClient({ trade }: { trade: Trade }) {
+export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareToken: string }) {
   const router = useRouter();
   const { toast } = useToast();
+  const [shared, setShared] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [journalKey, setJournalKey] = React.useState(0);
@@ -164,6 +165,19 @@ export function TradeDetailClient({ trade }: { trade: Trade }) {
       toast({ title: "Eroare AI", description: err.error ?? "Încearcă din nou", variant: "destructive" });
     }
     setAnalyzing(false);
+  }
+
+  async function handleShare() {
+    const url = `${window.location.origin}/share/trade/${trade.id}?t=${shareToken}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShared(true);
+      toast({ title: "Link copiat", description: "Linkul public de partajare a fost copiat în clipboard." });
+      setTimeout(() => setShared(false), 2500);
+    } catch {
+      // Fallback dacă clipboard nu e disponibil
+      window.prompt("Copiază linkul de partajare:", url);
+    }
   }
 
   async function handleDelete() {
@@ -308,6 +322,15 @@ export function TradeDetailClient({ trade }: { trade: Trade }) {
               <Pencil className="h-3.5 w-3.5 mr-1.5" />
               Editează
             </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+            className="border-zinc-700 text-zinc-400 hover:text-indigo-300 hover:border-indigo-500/40"
+          >
+            {shared ? <Check className="h-3.5 w-3.5 mr-1.5 text-emerald-400" /> : <Share2 className="h-3.5 w-3.5 mr-1.5" />}
+            {shared ? "Copiat" : "Partajează"}
           </Button>
           <Button
             variant="outline"

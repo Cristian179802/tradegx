@@ -103,7 +103,7 @@ const INDICATOR_MAP: Record<string, string> = {
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { sidebarCollapsed, setSidebarCollapsed } = useAuthStore();
+  const { sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useAuthStore();
   const isPro = session?.user?.plan === "PRO" || session?.user?.isTrialing;
 
   const userInitials = session?.user?.name
@@ -111,11 +111,25 @@ export function Sidebar() {
     : "TG";
 
   return (
+    <>
+    {/* Backdrop mobil — apare când drawerul e deschis */}
+    {mobileSidebarOpen && (
+      <div
+        onClick={() => setMobileSidebarOpen(false)}
+        className="md:hidden fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm"
+        aria-hidden
+      />
+    )}
     <motion.aside
       initial={false}
       animate={{ width: sidebarCollapsed ? 64 : 240 }}
       transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="relative flex-shrink-0 h-screen border-r border-zinc-800/60 flex flex-col overflow-visible"
+      className={cn(
+        "relative flex-shrink-0 h-screen border-r border-zinc-800/60 flex flex-col overflow-visible",
+        // Pe mobil: drawer fix peste conținut, lățime fixă, glisare cu transform
+        "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-[60] max-md:!w-[264px] max-md:transition-transform max-md:duration-300",
+        mobileSidebarOpen ? "max-md:translate-x-0 max-md:shadow-2xl max-md:shadow-black/60" : "max-md:-translate-x-full",
+      )}
       style={{ background: "linear-gradient(180deg, #0d0d12 0%, #09090b 100%)" }}
     >
       {/* Top neon line */}
@@ -130,7 +144,7 @@ export function Sidebar() {
       <motion.button
         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
         title={sidebarCollapsed ? "Extinde bara laterală" : "Restrânge bara laterală"}
-        className="absolute top-1/2 -translate-y-1/2 -right-3 z-50 flex items-center justify-center w-6 h-12 rounded-r-xl border border-l-0 border-zinc-700/60 bg-zinc-900 hover:bg-zinc-800 hover:border-indigo-500/50 text-zinc-600 hover:text-indigo-400 transition-all duration-200 shadow-lg group"
+        className="max-md:hidden absolute top-1/2 -translate-y-1/2 -right-3 z-50 flex items-center justify-center w-6 h-12 rounded-r-xl border border-l-0 border-zinc-700/60 bg-zinc-900 hover:bg-zinc-800 hover:border-indigo-500/50 text-zinc-600 hover:text-indigo-400 transition-all duration-200 shadow-lg group"
         style={{ boxShadow: "2px 0 16px rgba(0,0,0,0.5)" }}
         whileHover={{ x: 2, scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -215,6 +229,7 @@ export function Sidebar() {
                 <Link
                   key={item.href}
                   href={locked ? "/pricing" : item.href}
+                  onClick={() => setMobileSidebarOpen(false)}
                   className={cn(
                     "relative flex items-center gap-3 mx-2 px-2.5 py-[7px] rounded-xl text-sm transition-all duration-200 group cyber-scan",
                     isActive
@@ -372,5 +387,6 @@ export function Sidebar() {
 
       </div>
     </motion.aside>
+    </>
   );
 }

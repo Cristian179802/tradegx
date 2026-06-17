@@ -394,7 +394,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       </div>
 
       {/* ── Streak Row ─────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-3 animate-fade-in-up delay-100">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-in-up delay-100">
         {/* Streak */}
         <div className="relative rounded-2xl border border-amber-500/25 overflow-hidden bg-zinc-900/80 px-5 py-4 flex items-center gap-4 hover:border-amber-400/50 transition-all group cursor-default"
           style={{ background: "linear-gradient(135deg, rgba(24,24,28,0.97) 0%, rgba(15,15,18,0.99) 100%)" }}>
