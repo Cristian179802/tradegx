@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, RefreshCw, Clock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ForexNews } from "@/components/dashboard/forex-news";
 
 type Impact = "High" | "Medium" | "Low" | "Holiday";
 type Week = "last" | "this" | "next";
@@ -245,6 +246,9 @@ export default function CalendarPage() {
           })}
         </div>
       </div>
+
+      {/* Știri de piață */}
+      <ForexNews />
 
       {/* Content */}
       {loading ? (
