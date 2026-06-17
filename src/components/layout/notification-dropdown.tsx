@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface Alert {
   id: string;
@@ -36,30 +37,79 @@ function timeAgo(iso: string) {
 }
 
 export function NotificationDropdown() {
+  const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   const [alerts, setAlerts] = React.useState<Alert[]>([]);
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
 
-  async function fetchAlerts() {
+  // ID-urile alertelor deja văzute — pentru a detecta alerte noi (toast live)
+  const knownIds = React.useRef<Set<string>>(new Set());
+  const initialized = React.useRef(false);
+
+  const fetchAlerts = React.useCallback(async (notify = false) => {
     setLoading(true);
     try {
-      const res = await fetch("/api/alerts");
+      const res = await fetch("/api/alerts", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        setAlerts(data.alerts ?? []);
+        const list: Alert[] = data.alerts ?? [];
+        setAlerts(list);
         setUnreadCount(data.unreadCount ?? 0);
+
+        // Detectează alerte noi (apărute de la ultima verificare) → toast live
+        if (notify && initialized.current) {
+          const fresh = list.filter((a) => !a.isRead && !knownIds.current.has(a.id));
+          // Cea mai recentă alertă nouă declanșează un toast (evită spam)
+          if (fresh.length > 0) {
+            const top = fresh[0];
+            toast({
+              title: top.title,
+              description: fresh.length > 1 ? `${top.message} · +${fresh.length - 1} alte alerte` : top.message,
+              variant: top.severity === "CRITICAL" || top.severity === "HIGH" ? "destructive" : "default",
+            });
+          }
+        }
+        // Reține toate ID-urile curente
+        knownIds.current = new Set(list.map((a) => a.id));
+        initialized.current = true;
       }
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
 
   React.useEffect(() => {
-    fetchAlerts();
-    const id = setInterval(fetchAlerts, 60_000);
-    return () => clearInterval(id);
-  }, []);
+    fetchAlerts(false); // prima încărcare — fără toast (doar baseline)
+
+    // Polling la 25s cât timp tab-ul e vizibil
+    let id: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (id) return;
+      id = setInterval(() => fetchAlerts(true), 25_000);
+    };
+    const stop = () => {
+      if (id) { clearInterval(id); id = null; }
+    };
+
+    start();
+
+    // Refetch instant când utilizatorul revine pe tab / fereastră
+    const onVisible = () => {
+      if (document.visibilityState === "visible") { fetchAlerts(true); start(); }
+      else stop();
+    };
+    const onFocus = () => fetchAlerts(true);
+
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [fetchAlerts]);
 
   async function markAllRead() {
     await fetch("/api/alerts", { method: "PATCH" });

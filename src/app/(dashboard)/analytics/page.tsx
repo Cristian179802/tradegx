@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { FileDown } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AnalyticsClient } from "./analytics-client";
@@ -9,13 +11,6 @@ export default async function AnalyticsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/analytics`, {
-    headers: { cookie: "" },
-    cache: "no-store",
-  });
-
-  // Fetch via Prisma directly instead of internal fetch (avoids cookie forwarding issues)
   const { prisma } = await import("@/lib/prisma");
   const userId = session.user.id;
 
@@ -56,9 +51,11 @@ export default async function AnalyticsPage() {
   if (closedTrades.length === 0) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Analiză Performanță</h1>
-          <p className="text-sm text-zinc-500 mt-1">Statistici detaliate ale tranzacțiilor tale</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-100">Analiză Performanță</h1>
+            <p className="text-sm text-zinc-500 mt-1">Statistici detaliate ale tranzacțiilor tale</p>
+          </div>
         </div>
         <AnalyticsClient data={{ empty: true }} />
       </div>
@@ -221,9 +218,19 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-100">Analiză Performanță</h1>
-        <p className="text-sm text-zinc-500 mt-1">Statistici detaliate ale tranzacțiilor tale</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-100">Analiză Performanță</h1>
+          <p className="text-sm text-zinc-500 mt-1">Statistici detaliate ale tranzacțiilor tale</p>
+        </div>
+        <Link
+          href="/report"
+          target="_blank"
+          className="shrink-0 flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/70 hover:border-indigo-500/50 text-zinc-200 text-sm font-semibold px-4 py-2 rounded-xl transition-all"
+        >
+          <FileDown className="w-4 h-4 text-indigo-400" />
+          Export PDF
+        </Link>
       </div>
       <AnalyticsClient data={data} />
     </div>
