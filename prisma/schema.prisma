@@ -281,6 +281,11 @@ model User {
   noTradeHoursStart String?
   noTradeHoursEnd   String?
 
+  // Obiective lunare (target trader)
+  monthlyProfitTarget  Decimal? @db.Decimal(15, 2)
+  monthlyTradeTarget   Int?
+  monthlyWinRateTarget Int?
+
   // 2FA
   totpSecret  String?
   totpEnabled Boolean @default(false)

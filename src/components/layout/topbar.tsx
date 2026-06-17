@@ -14,6 +14,8 @@ import { useAuthStore } from "@/stores/auth.store";
 const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: string }> = {
   "/dashboard":    { title: "Panou de Control",  icon: "📊", description: "Statistici & activitate recentă" },
   "/signals":      { title: "Semnale AI",         icon: "🎯", description: "Setup-uri de înaltă probabilitate (HPS)" },
+  "/checklist":    { title: "Checklist Pre-Trade", icon: "✅", description: "Verifică disciplina înainte de intrare" },
+  "/goals":        { title: "Obiective",          icon: "🏆", description: "Ținte lunare & monitor prop firm" },
   "/trades":       { title: "Tranzacții",         icon: "📋", description: "Istoric complet de trading" },
   "/journal":      { title: "Jurnal",             icon: "📓", description: "Analiză & reflecție" },
   "/calculator":   { title: "Calculator Lot",     icon: "🧮", description: "Calculează dimensiunea poziției" },
