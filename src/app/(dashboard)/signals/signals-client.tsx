@@ -6,6 +6,7 @@ import {
   Sparkles, Clock, Activity, AlertTriangle, CheckCircle2, Loader2, Brain, RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TelegramChannelCard } from "@/components/telegram-channel-card";
 
 interface Signal {
   id: string;
@@ -247,6 +248,9 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
           </div>
         </div>
       </div>
+
+      {/* Invitație canal Telegram */}
+      <TelegramChannelCard variant="full" />
 
       {/* Conținut */}
       {generating && signals.length === 0 ? (
