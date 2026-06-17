@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
-import { broadcastTelegram, escapeHtml } from "@/lib/telegram";
+import { broadcastTelegram, sendToBroadcastChats, escapeHtml } from "@/lib/telegram";
 
 // ── Generator zilnic de semnale AI (HPS — High Probability Setups) ───────────
 // Maxim 3 semnale pe zi, generate o singură dată (lazy), pe baza prețurilor reale.
@@ -246,7 +246,9 @@ async function broadcastSignalsToTelegram(signals: RawSignal[]): Promise<void> {
     `<i>Maxim ${signals.length} setup-uri de înaltă probabilitate</i>\n\n` +
     lines.join("\n") +
     `\n\n⚠️ <i>Nu sunt sfaturi financiare. Vezi analiza completă în aplicație și tranzacționează responsabil.</i>`;
+  // Difuzare către utilizatorii individuali + canalele/grupurile comunității
   await broadcastTelegram(text);
+  await sendToBroadcastChats(text);
 }
 
 // ── Lock in-memory per instanță pentru a evita generarea concurentă ───────────

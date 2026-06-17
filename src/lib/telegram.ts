@@ -77,3 +77,22 @@ export async function broadcastTelegram(text: string): Promise<number> {
 }
 
 export { escapeHtml };
+
+/**
+ * Trimite un mesaj către canalele/grupurile de difuzare configurate prin
+ * env var TELEGRAM_SIGNALS_CHAT_IDS (chat ID-uri separate prin virgulă).
+ * Ex: "-1001234567890,@TradeGxSignals". Returnează numărul de destinații atinse.
+ */
+export async function sendToBroadcastChats(text: string): Promise<number> {
+  if (!process.env.TELEGRAM_BOT_TOKEN) return 0;
+  const raw = process.env.TELEGRAM_SIGNALS_CHAT_IDS;
+  if (!raw) return 0;
+  const chatIds = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  let sent = 0;
+  for (const chatId of chatIds) {
+    const ok = await sendTelegramMessage(chatId, text);
+    if (ok) sent++;
+    await new Promise((r) => setTimeout(r, 60));
+  }
+  return sent;
+}
