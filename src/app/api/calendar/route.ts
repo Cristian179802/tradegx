@@ -50,7 +50,12 @@ async function fetchFXStreet(): Promise<CalendarEvent[]> {
 async function fetchTV(from: string, to: string): Promise<CalendarEvent[]> {
   const url = `https://economic-calendar.tradingview.com/events?from=${from}T00:00:00.000Z&to=${to}T23:59:59.000Z&countries=US,EU,GB,JP,CA,AU,NZ,CH&importance=-1,0,1`;
   const res = await fetch(url, {
-    headers: { "Origin": "https://www.tradingview.com", "Referer": "https://www.tradingview.com/" },
+    headers: {
+      "Origin": "https://www.tradingview.com",
+      "Referer": "https://www.tradingview.com/",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+      "Accept": "application/json",
+    },
     next: { revalidate: 300 },
   });
   if (!res.ok) return [];
@@ -88,16 +93,20 @@ function getWeekRange(week: "last" | "this" | "next") {
 export async function GET(req: NextRequest) {
   const week = (req.nextUrl.searchParams.get("week") ?? "this") as "last" | "this" | "next";
   try {
-    let events: CalendarEvent[];
-    let source: string;
+    const { from, to } = getWeekRange(week);
 
-    if (week === "this") {
-      events = await fetchFXStreet();
-      source = "fxstreet";
-    } else {
-      const { from, to } = getWeekRange(week);
-      events = await fetchTV(from, to);
-      source = "tradingview";
+    // Sursă unică pentru TOATE săptămânile = consistență de date și impact (UTC corect).
+    let events: CalendarEvent[] = await fetchTV(from, to);
+    let source = "tradingview";
+
+    // Fallback FXStreet doar pentru săptămâna curentă, dacă TradingView e indisponibil.
+    if (events.length === 0 && week === "this") {
+      try {
+        const all = await fetchFXStreet();
+        // Filtrează strict pe intervalul săptămânii (FXStreet întoarce mai multe zile)
+        events = all.filter((e) => e.utcDate >= from && e.utcDate <= `${to}T23:59:59`);
+        source = "fxstreet";
+      } catch { /* păstrează gol */ }
     }
 
     events.sort((a, b) => a.utcDate.localeCompare(b.utcDate));
