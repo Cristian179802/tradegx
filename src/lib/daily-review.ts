@@ -56,7 +56,7 @@ export async function generateDailyReview(userId: string): Promise<DailyReview> 
       }).join("\n");
 
       const resp = await anthropic.messages.create({
-        model: "claude-opus-4-5",
+        model: "claude-sonnet-4-6",
         max_tokens: 400,
         system: "Ești un coach de trading concis și motivant. Scrii un rezumat scurt al zilei de tranzacționare în română (max 100 cuvinte), structurat: 1) cum a mers ziua, 2) o observație concretă (ce a mers bine sau ce de îmbunătățit), 3) o încurajare scurtă. Ton profesionist, direct, fără clișee. NU da sfaturi financiare specifice.",
         messages: [{
