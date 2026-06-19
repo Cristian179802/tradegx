@@ -4,6 +4,7 @@ import { FileDown } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AnalyticsClient } from "./analytics-client";
+import { PerformanceHeatmap } from "@/components/analytics/performance-heatmap";
 
 export const metadata: Metadata = { title: "Analiză Performanță" };
 
@@ -233,6 +234,7 @@ export default async function AnalyticsPage() {
         </Link>
       </div>
       <AnalyticsClient data={data} />
+      <PerformanceHeatmap />
     </div>
   );
 }
