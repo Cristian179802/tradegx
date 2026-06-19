@@ -32,6 +32,7 @@ const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: 
   "/ai-assistant": { title: "AI Trading Coach",   icon: "🤖", description: "Analiză inteligentă AI" },
   "/alerts":       { title: "Alerte AI",          icon: "🔔", description: "Monitorizare risc în timp real" },
   "/risk-manager": { title: "Risk Manager",        icon: "🛡️", description: "Monitorizare risc în timp real" },
+  "/prop-firm":    { title: "Prop Firm Challenge", icon: "🏆", description: "Monitorizare reguli challenge în timp real" },
 };
 
 export function Topbar() {

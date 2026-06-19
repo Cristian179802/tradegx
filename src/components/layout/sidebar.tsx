@@ -10,7 +10,7 @@ import {
   CalendarDays, Users, Settings, TrendingUp, LogOut, ChevronDown,
   Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
   PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
-  Trophy, ListChecks, Newspaper, Gauge,
+  Trophy, ListChecks, Newspaper, Gauge, Award,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -50,6 +50,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/goals",        label: "Obiective",         icon: Trophy,          color: "emerald" },
       { href: "/calculator",   label: "Calculator Lot",    icon: Calculator,      color: "amber" },
       { href: "/risk-manager", label: "Risk Manager",      icon: Shield,          color: "amber" },
+      { href: "/prop-firm",    label: "Prop Firm",         icon: Award,           color: "amber" },
       { href: "/accounts",     label: "Conturi",           icon: TrendingUp,      color: "sky" },
       { href: "/analytics",    label: "Analiză",           icon: BarChart3,       color: "violet" },
       { href: "/backtesting",  label: "Backtesting",       icon: FlaskConical,    color: "rose" },

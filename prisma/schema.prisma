@@ -330,10 +330,12 @@ model TradingAccount {
   leverage       Int         @default(100)
   isActive       Boolean     @default(true)
 
-  // Prop firm limits
+  // Prop firm limits & challenge rules
   maxDailyLossPct Decimal? @db.Decimal(5, 2)
   maxDrawdownPct  Decimal? @db.Decimal(5, 2)
   profitTarget    Decimal? @db.Decimal(5, 2)
+  propFirm        String? // presetul/firma: "FTMO", "The5ers", "Custom" etc.
+  minTradingDays  Int? // numărul minim de zile de tranzacționare cerut
 
   // Broker sync
   metaApiId    String?
