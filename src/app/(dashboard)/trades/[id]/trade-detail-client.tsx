@@ -14,8 +14,9 @@ import {
   ArrowLeft, TrendingUp, TrendingDown, Clock, Tag,
   Trash2, Pencil, XCircle, BookOpen, Camera, Sparkles,
   Loader2, Target, Shield, DollarSign, Activity,
-  ChevronRight, AlertTriangle, Share2, Check,
+  ChevronRight, AlertTriangle, Share2, Check, PlayCircle,
 } from "lucide-react";
+import { TradeReplay } from "@/components/trades/trade-replay";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -104,6 +105,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
   const router = useRouter();
   const { toast } = useToast();
   const [shared, setShared] = React.useState(false);
+  const [replayOpen, setReplayOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [journalKey, setJournalKey] = React.useState(0);
@@ -326,6 +328,15 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setReplayOpen(true)}
+            className="border-zinc-700 text-zinc-400 hover:text-indigo-300 hover:border-indigo-500/40"
+          >
+            <PlayCircle className="h-3.5 w-3.5 mr-1.5" />
+            Replay
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleShare}
             className="border-zinc-700 text-zinc-400 hover:text-indigo-300 hover:border-indigo-500/40"
           >
@@ -342,6 +353,9 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           </Button>
         </div>
       </div>
+
+      {/* Trade Replay modal */}
+      <TradeReplay tradeId={trade.id} open={replayOpen} onClose={() => setReplayOpen(false)} />
 
       <div className="grid gap-5 lg:grid-cols-3">
 

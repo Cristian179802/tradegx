@@ -13,6 +13,7 @@ import { MotivationBanner } from "@/components/dashboard/motivation-banner";
 import { TelegramChannelCard } from "@/components/telegram-channel-card";
 import { EconomicCountdown } from "@/components/dashboard/economic-countdown";
 import { DailyReviewCard } from "@/components/dashboard/daily-review-card";
+import { OnboardingGuide } from "@/components/dashboard/onboarding-guide";
 import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -338,6 +339,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           </div>
         </div>
       </div>
+
+      {/* ── Ghid de pornire (începători) ───────────────────────────────────── */}
+      <OnboardingGuide hasTrades={totalTrades > 0} />
 
       {/* ── Banner motivațional zilnic ─────────────────────────────────────── */}
       <MotivationBanner />
