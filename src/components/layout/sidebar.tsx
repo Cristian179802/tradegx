@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -113,6 +113,17 @@ export function Sidebar() {
   const { sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useAuthStore();
   const isPro = session?.user?.plan === "PRO" || session?.user?.isTrialing;
 
+  // Pe mobil (drawer), afișăm MEREU etichetele — ignorăm starea „collapsed" de pe desktop.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  const expanded = expanded || isMobile;
+
   const userInitials = session?.user?.name
     ? session.user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : "TG";
@@ -187,7 +198,7 @@ export function Sidebar() {
         </div>
 
         <AnimatePresence>
-          {!sidebarCollapsed && (
+          {expanded && (
             <motion.div
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
@@ -211,7 +222,7 @@ export function Sidebar() {
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="mb-0.5">
             <AnimatePresence>
-              {!sidebarCollapsed && (
+              {expanded && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -267,7 +278,7 @@ export function Sidebar() {
 
                   {/* Label */}
                   <AnimatePresence>
-                    {!sidebarCollapsed && (
+                    {expanded && (
                       <motion.span
                         initial={{ opacity: 0, width: 0 }}
                         animate={{ opacity: 1, width: "auto" }}
@@ -280,17 +291,17 @@ export function Sidebar() {
                     )}
                   </AnimatePresence>
 
-                  {!sidebarCollapsed && item.proOnly && !isPro && (
+                  {expanded && item.proOnly && !isPro && (
                     <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] px-1.5 py-0 h-4 font-bold">
                       PRO
                     </Badge>
                   )}
-                  {!sidebarCollapsed && item.badge && !item.proOnly && (
+                  {expanded && item.badge && !item.proOnly && (
                     <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0 h-4 font-bold">
                       {item.badge}
                     </Badge>
                   )}
-                  {!sidebarCollapsed && item.href === "/alerts" && (
+                  {expanded && item.href === "/alerts" && (
                     <AlertsBadge />
                   )}
                 </Link>
@@ -304,7 +315,7 @@ export function Sidebar() {
       <div className="border-t border-zinc-800/50 p-2.5 space-y-1.5">
         {/* Trial / PRO banner */}
         <AnimatePresence>
-          {!sidebarCollapsed && session?.user?.isTrialing && (
+          {expanded && session?.user?.isTrialing && (
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -342,7 +353,7 @@ export function Sidebar() {
                 </AvatarFallback>
               </Avatar>
               <AnimatePresence>
-                {!sidebarCollapsed && (
+                {expanded && (
                   <motion.div
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: "auto" }}
@@ -364,7 +375,7 @@ export function Sidebar() {
                   </motion.div>
                 )}
               </AnimatePresence>
-              {!sidebarCollapsed && (
+              {expanded && (
                 <ChevronDown className="w-3 h-3 text-zinc-700 shrink-0 group-hover:text-zinc-500 transition-colors" />
               )}
             </Button>
