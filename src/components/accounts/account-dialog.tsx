@@ -26,7 +26,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Step = "method" | "ea" | "csv" | "form";
+type Step = "method" | "ea" | "metaapi" | "csv" | "form";
 type AccountTyp = "DEMO" | "CHALLENGE" | "LIVE";
 
 interface AccountDialogProps {
@@ -97,6 +97,26 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
           </p>
         </div>
         <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-indigo-400 transition-colors shrink-0 mt-1" />
+      </button>
+
+      {/* MetaAPI — conectare automată cu credențiale */}
+      <button
+        onClick={() => onSelect("metaapi")}
+        className="w-full flex items-start gap-4 p-5 rounded-2xl border-2 border-sky-500/40 bg-gradient-to-br from-sky-500/10 to-cyan-500/5 hover:border-sky-400/70 hover:from-sky-500/16 transition-all text-left group relative overflow-hidden"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-sky-500/20 border border-sky-500/30 flex items-center justify-center shrink-0 text-2xl">
+          ⚡
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-bold text-white text-base">Conectare automată (MT4/MT5)</span>
+            <Badge className="bg-sky-500/20 border border-sky-500/30 text-sky-300 text-[10px] px-1.5 py-0">Cloud 24/7</Badge>
+          </div>
+          <p className="text-sm text-zinc-400 leading-relaxed">
+            Conectează contul cu login + parolă + server. Sincronizare automată în cloud, fără terminal deschis.
+          </p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-sky-400 transition-colors shrink-0 mt-1" />
       </button>
 
       {/* CSV + Manual — secundare, mai mici */}
@@ -321,6 +341,136 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
       <p className="text-center text-[10px] text-zinc-600">
         Contul apare automat după prima tranzacție închisă în {platform.toUpperCase()}.
       </p>
+    </div>
+  );
+}
+
+// ─── Step: MetaAPI Connect (login/parolă/server) ─────────────────────────────
+
+function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess: () => void; onClose: () => void }) {
+  const { toast } = useToast();
+  const [platform, setPlatform] = React.useState<"mt4" | "mt5">("mt5");
+  const [login, setLogin]       = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [server, setServer]     = React.useState("");
+  const [name, setName]         = React.useState("");
+  const [type, setType]         = React.useState<AccountTyp>("LIVE");
+  const [currency, setCurrency] = React.useState("USD");
+  const [loading, setLoading]   = React.useState(false);
+  const [error, setError]       = React.useState("");
+
+  async function connect() {
+    if (!login.trim() || !password || !server.trim()) {
+      setError("Login, parolă și server sunt obligatorii.");
+      return;
+    }
+    setLoading(true); setError("");
+    try {
+      const res = await fetch("/api/integrations/metaapi/provision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          login: login.trim(), password, server: server.trim(), platform,
+          name: name.trim() || undefined, accountType: type, currency,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Eroare la conectare."); return; }
+      toast({ title: "✅ Cont conectat!", description: data.message ?? "Tranzacțiile se sincronizează." });
+      onSuccess(); onClose();
+    } catch {
+      setError("Eroare de rețea. Încearcă din nou.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
+        <ChevronLeft className="w-4 h-4" />Înapoi
+      </button>
+
+      {/* Platformă */}
+      <div className="grid grid-cols-2 gap-2">
+        {(["mt4", "mt5"] as const).map(p => (
+          <button key={p} onClick={() => setPlatform(p)}
+            className={cn("py-2 rounded-xl border text-sm font-bold transition-all",
+              platform === p ? "bg-sky-500/15 border-sky-500/50 text-sky-300"
+                : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
+            {p.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      {/* Credențiale */}
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Login (număr cont)</label>
+            <Input value={login} onChange={e => setLogin(e.target.value)} inputMode="numeric"
+              placeholder="12345678" className="bg-zinc-800 border-zinc-700 text-zinc-100 font-mono placeholder:text-zinc-600" />
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Parolă (investor sau master)</label>
+            <Input type="password" value={password} onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••" className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-zinc-400 block mb-1">Server broker</label>
+          <Input value={server} onChange={e => setServer(e.target.value)}
+            placeholder="Ex: ICMarketsSC-Demo, FTMO-Server, Exness-Real"
+            className="bg-zinc-800 border-zinc-700 text-zinc-100 font-mono placeholder:text-zinc-600" />
+          <p className="text-[10px] text-zinc-600 mt-1">Îl găsești în MT4/MT5 → File → Login to Trade Account (numele exact al serverului).</p>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Nume cont (opțional)</label>
+            <Input value={name} onChange={e => setName(e.target.value)}
+              placeholder="Ex: FTMO $100K" className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Monedă</label>
+            <select value={currency} onChange={e => setCurrency(e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-sky-500">
+              {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+        </div>
+        {/* Tip cont */}
+        <div className="grid grid-cols-3 gap-2">
+          {ACCOUNT_TYPES.map(t => (
+            <button key={t.value} onClick={() => setType(t.value)}
+              className={cn("py-2 rounded-xl border text-sm font-semibold transition-all",
+                type === t.value ? `${t.bg} ${t.color}` : "bg-zinc-900 border-zinc-800 text-zinc-600 hover:border-zinc-600")}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Notă securitate */}
+      <div className="flex items-start gap-2 bg-sky-500/8 border border-sky-500/20 rounded-xl px-3 py-2.5">
+        <AlertCircle className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+        <p className="text-[11px] text-zinc-400 leading-relaxed">
+          Pentru siguranță maximă folosește <b className="text-sky-300">parola investor</b> (read-only) — permite citirea tranzacțiilor fără a permite tranzacționare. Conexiunea poate dura 10–30 secunde.
+        </p>
+      </div>
+
+      {error && (
+        <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
+          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+          <p className="text-sm text-rose-300">{error}</p>
+        </div>
+      )}
+
+      <Button onClick={connect} disabled={loading}
+        className="w-full bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-semibold h-10 shadow-lg shadow-sky-500/20">
+        {loading
+          ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se conectează... (până la 30s)</>
+          : <><Plug className="w-4 h-4 mr-2" />Conectează contul</>}
+      </Button>
     </div>
   );
 }
@@ -673,10 +823,11 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
   }, [open, isEdit]);
 
   const TITLES: Record<Step, string> = {
-    method: "Adaugă cont de trading",
-    ea:     "Conectare MT4 / MT5",
-    csv:    "Import fișier",
-    form:   isEdit ? "Editează cont" : "Cont manual",
+    method:  "Adaugă cont de trading",
+    ea:      "Conectare MT4 / MT5 (EA)",
+    metaapi: "Conectare automată (MT4 / MT5)",
+    csv:     "Import fișier",
+    form:    isEdit ? "Editează cont" : "Cont manual",
   };
 
   return (
@@ -686,9 +837,10 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
           <DialogTitle className="text-zinc-100 text-base">{TITLES[step]}</DialogTitle>
         </DialogHeader>
 
-        {step === "method" && <StepMethod onSelect={setStep} />}
-        {step === "ea"     && <StepEA onBack={() => setStep("method")} onDone={() => { onSuccess(); onClose(); }} />}
-        {step === "csv"    && <StepCSV onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
+        {step === "method"  && <StepMethod onSelect={setStep} />}
+        {step === "ea"      && <StepEA onBack={() => setStep("method")} onDone={() => { onSuccess(); onClose(); }} />}
+        {step === "metaapi" && <StepMetaApi onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
+        {step === "csv"     && <StepCSV onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
         {step === "form"   && (
           <StepForm
             prefill={isEdit ? { ...account, id: account?.id } as any : undefined}
