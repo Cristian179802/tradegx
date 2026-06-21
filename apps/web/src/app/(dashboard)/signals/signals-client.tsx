@@ -6,6 +6,7 @@ import {
   Sparkles, Clock, Activity, AlertTriangle, CheckCircle2, Loader2, Brain, RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
 import { TelegramChannelCard } from "@/components/telegram-channel-card";
 
 interface Signal {
@@ -185,11 +186,11 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
     triggered.current = true;
     setGenerating(true);
     try {
-      const res = await fetch("/api/signals", { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        setSignals(data.signals ?? []);
-      }
+      // Client API partajat (același cod pe web și mobile)
+      const data = await api.signals.generate() as { signals?: Signal[] };
+      setSignals(data.signals ?? []);
+    } catch {
+      /* păstrează semnalele existente */
     } finally {
       setGenerating(false);
     }

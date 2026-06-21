@@ -7,7 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./risk": "./src/risk.ts",
-    "./smc": "./src/smc.ts"
+    "./smc": "./src/smc.ts",
+    "./validations": "./src/validations.ts"
   },
   "dependencies": {
     "zod": "^3"
