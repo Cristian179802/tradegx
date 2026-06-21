@@ -5,6 +5,10 @@ node_modules/
 .next/
 out/
 
+# Monorepo / build output
+.turbo/
+dist/
+
 # Environment variables (NEVER commit these)
 .env
 .env.local

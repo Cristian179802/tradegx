@@ -4,6 +4,8 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const config = {
+  // Compilează pachetele interne din monorepo (sursă TS, fără build separat)
+  transpilePackages: ["@tradegx/core", "@tradegx/ui-tokens", "@tradegx/config", "@tradegx/api-client"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },

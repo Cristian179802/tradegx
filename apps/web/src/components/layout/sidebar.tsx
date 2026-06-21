@@ -122,7 +122,7 @@ export function Sidebar() {
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
-  const expanded = expanded || isMobile;
+  const expanded = !sidebarCollapsed || isMobile;
 
   const userInitials = session?.user?.name
     ? session.user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
