@@ -15,7 +15,8 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),
 ];
-// Pachetele @tradegx/* sunt sursă TS — Metro le transpilează direct.
-config.resolver.disableHierarchicalLookup = true;
+// Lookup ierarhic rămâne ACTIV — npm workspaces hoistează la root, deci Metro
+// trebuie să urce arborele pentru deps tranzitive (ex. polyfill-ul `promise` al RN).
+// Pachetele @tradegx/* sunt sursă TS și sunt în watchFolders → Metro le transpilează.
 
 module.exports = withNativeWind(config, { input: "./global.css" });
