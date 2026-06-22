@@ -9,6 +9,10 @@ out/
 .turbo/
 dist/
 
+# Expo (artefacte locale)
+.expo/
+*.hbc
+
 # Environment variables (NEVER commit these)
 .env
 .env.local
