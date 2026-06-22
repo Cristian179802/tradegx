@@ -112,8 +112,8 @@ export default function CalendarPage() {
   const [selCurr, setSelCurr]     = useState<string[]>([]);
   const [selImpact, setSelImpact] = useState<Impact[]>([]);
   const [now, setNow]             = useState(new Date());
-  const timerRef                  = useRef<ReturnType<typeof setInterval>>();
-  const refreshRef                = useRef<ReturnType<typeof setInterval>>();
+  const timerRef                  = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const refreshRef                = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   useEffect(() => {
     timerRef.current = setInterval(() => setNow(new Date()), 30000);
