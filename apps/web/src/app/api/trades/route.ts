@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { tradeSchema } from "@/lib/validations";
 import { checkTradingRuleViolations } from "@/lib/trading-rules";
@@ -32,8 +33,8 @@ function calcRisk(
 }
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(100, parseInt(searchParams.get("limit") ?? "20"));
 
   const userAccounts = await prisma.tradingAccount.findMany({
-    where: { userId: session.user.id },
+    where: { userId },
     select: { id: true },
   });
   const accountIds = userAccounts.map((a) => a.id);
