@@ -29,7 +29,9 @@ function isInternal(url: string): boolean {
 
 export default function Index() {
   const webRef = useRef<WebView>(null);
-  const [loading, setLoading] = useState(true);
+  // Loader DOAR la prima încărcare a site-ului. Navigările interne (ex: spre
+  // /login) sunt SPA și nu trebuie să reaprindă un overlay care acoperă pagina.
+  const [initialLoading, setInitialLoading] = useState(true);
   const [canGoBack, setCanGoBack] = useState(false);
 
   // Butonul fizic „înapoi" (Android) navighează în istoricul site-ului.
@@ -53,8 +55,7 @@ export default function Index() {
         ref={webRef}
         source={{ uri: SITE_URL }}
         style={styles.web}
-        onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
+        onLoadEnd={() => setInitialLoading(false)}
         onNavigationStateChange={onNav}
         // Sesiunea (cookie NextAuth) persistă între deschideri
         sharedCookiesEnabled
@@ -78,7 +79,7 @@ export default function Index() {
           return true;
         }}
       />
-      {loading && (
+      {initialLoading && (
         <View style={styles.loader} pointerEvents="none">
           <ActivityIndicator size="large" color="#6366f1" />
         </View>
