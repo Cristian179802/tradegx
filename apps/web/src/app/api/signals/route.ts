@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAuthUserId } from "@/lib/auth-bridge";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateTodaySignals, todayKey } from "@/lib/ai-signals";
 
@@ -32,8 +32,8 @@ function serialize(s: Awaited<ReturnType<typeof prisma.aiSignal.findMany>>[numbe
 
 // GET — semnalele existente pentru azi (rapid, fără generare)
 export async function GET() {
-  const userId = await getAuthUserId();
-  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const signals = await prisma.aiSignal.findMany({
     where: { date: todayKey() },
@@ -49,8 +49,8 @@ export async function GET() {
 
 // POST — generează semnalele zilei dacă lipsesc (poate dura ~10-20s)
 export async function POST() {
-  const userId = await getAuthUserId();
-  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const signals = await getOrCreateTodaySignals();
 

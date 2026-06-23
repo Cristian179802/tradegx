@@ -64,10 +64,15 @@ export default function Index() {
         // iOS pull-to-refresh
         pullToRefreshEnabled
         allowsBackForwardNavigationGestures
-        // Linkurile externe (broker, plăți, etc.) se deschid în browserul sistemului
+        // Linkurile externe (broker, plăți) → browser; mailto/tel → app dedicată
         onShouldStartLoadWithRequest={(req) => {
-          if (req.url.startsWith("http") && !isInternal(req.url)) {
-            Linking.openURL(req.url);
+          const { url } = req;
+          if (/^(mailto:|tel:|sms:)/.test(url)) {
+            Linking.openURL(url);
+            return false;
+          }
+          if (url.startsWith("http") && !isInternal(url)) {
+            Linking.openURL(url);
             return false;
           }
           return true;

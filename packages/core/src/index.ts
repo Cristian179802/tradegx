@@ -3,7 +3,6 @@
 
 export * from "./risk";
 export * from "./smc";
-export * from "./auth";
 
 // Tipuri de domeniu partajate (aliniate cu Prisma, fără a importa @prisma/client)
 export type TradeDirection = "BUY" | "SELL";
