@@ -36,6 +36,15 @@ export default auth((req: NextRequest & { auth: { user?: { id?: string } } | nul
     return NextResponse.next();
   }
 
+  // Cererile API cu Bearer token (mobile) trec mai departe — auth bridge-ul
+  // le validează în route handler (verify JWT crypto/Node, nu aici în Edge).
+  if (
+    pathname.startsWith("/api/") &&
+    req.headers.get("authorization")?.startsWith("Bearer ")
+  ) {
+    return NextResponse.next();
+  }
+
   // Require auth for everything else
   if (!req.auth?.user?.id) {
     const loginUrl = new URL("/login", req.url);

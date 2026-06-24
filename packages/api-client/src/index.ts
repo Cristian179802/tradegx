@@ -61,6 +61,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
     },
 
     analytics: {
+      overview: () => request("/api/analytics"),
       timePerformance: () => request("/api/analytics/time-performance"),
     },
 
