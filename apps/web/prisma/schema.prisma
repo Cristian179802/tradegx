@@ -307,9 +307,24 @@ model User {
   teamMemberships    TeamMember[]
   journalEntries  JournalEntry[]
   integrations    UserIntegration[]
+  pushTokens      PushToken[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Token-uri Expo pentru push notifications (app native). Un user poate avea
+// mai multe device-uri. Tokenul e unic; la re-înregistrare se face upsert.
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  platform  String?  // "ios" | "android"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 // ============================================================

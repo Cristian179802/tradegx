@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notifyTelegram } from "@/lib/telegram";
+import { sendPushToUser } from "@/lib/push";
 
 interface ViolationCheckParams {
   userId: string;
@@ -161,6 +162,12 @@ export async function checkTradingRuleViolations({
       });
       // Trimite și pe Telegram (dacă utilizatorul a conectat integrarea)
       await notifyTelegram(userId, alert.title, alert.message);
+      // Push către device-urile native ale userului
+      void sendPushToUser(userId, {
+        title: alert.title,
+        body: alert.message,
+        data: { route: "/(tabs)/alerts" },
+      });
     }
   }
 }

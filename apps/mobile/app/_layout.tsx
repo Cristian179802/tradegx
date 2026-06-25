@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { registerForPush, addNotificationResponseListener } from "@/lib/push";
 import { colors } from "@/theme";
 
 function RootNav() {
@@ -20,6 +21,16 @@ function RootNav() {
     if (!user && !inLogin) router.replace("/login");
     else if (user && inLogin) router.replace("/");
   }, [user, loading, segments, router]);
+
+  // Push: înregistrare la login + navigare la tap pe notificare.
+  useEffect(() => {
+    if (!user) return;
+    registerForPush();
+    const sub = addNotificationResponseListener((route) => {
+      if (route) router.push(route as never);
+    });
+    return () => sub.remove();
+  }, [user, router]);
 
   if (loading) {
     return (

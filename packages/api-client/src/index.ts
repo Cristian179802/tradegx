@@ -88,6 +88,13 @@ export function createApiClient(config: ApiClientConfig = {}) {
     accounts: {
       list: () => request("/api/accounts"),
     },
+
+    push: {
+      register: (token: string, platform?: string) =>
+        request("/api/push/register", { method: "POST", body: json({ token, platform }) }),
+      unregister: (token: string) =>
+        request("/api/push/register", { method: "DELETE", body: json({ token }) }),
+    },
   };
 }
 

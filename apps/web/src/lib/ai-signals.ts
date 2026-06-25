@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
 import { broadcastTelegram, sendToBroadcastChats, escapeHtml } from "@/lib/telegram";
+import { sendPushToAll } from "@/lib/push";
 
 // ── Generator zilnic de semnale AI (HPS — High Probability Setups) ───────────
 // Maxim 3 semnale pe zi, generate o singură dată (lazy), pe baza prețurilor reale.
@@ -273,6 +274,16 @@ export async function getOrCreateTodaySignals() {
   generating.add(date);
   try {
     await generateDailySignals(date);
+    // Push către device-urile native — semnale HPS noi disponibile
+    const fresh = await prisma.aiSignal.findMany({ where: { date }, orderBy: { confidence: "desc" } });
+    if (fresh.length > 0) {
+      const top = fresh[0];
+      void sendPushToAll({
+        title: "Semnale HPS noi 📊",
+        body: `${fresh.length} setup-uri azi · Top: ${top.symbol} ${top.direction === "BUY" ? "LONG" : "SHORT"} (${top.confidence}%)`,
+        data: { route: "/(tabs)/signals" },
+      });
+    }
   } catch {
     /* eșec silențios — pagina va arăta stare goală */
   } finally {
