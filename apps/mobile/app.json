@@ -51,7 +51,12 @@
       "typedRoutes": false
     },
     "extra": {
-      "apiUrl": "https://www.tradegx.com"
-    }
+      "apiUrl": "https://www.tradegx.com",
+      "router": {},
+      "eas": {
+        "projectId": "f8920b01-76c7-475e-a14e-f8292220fa00"
+      }
+    },
+    "owner": "cristianpp"
   }
 }
