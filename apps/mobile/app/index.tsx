@@ -63,7 +63,6 @@ export default function Index() {
           javaScriptEnabled
           pullToRefreshEnabled
           allowsBackForwardNavigationGestures
-          decelerationRate="normal"
           overScrollMode="never"
           onShouldStartLoadWithRequest={(req) => {
             const { url } = req;
