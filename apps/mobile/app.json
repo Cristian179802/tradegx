@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "scheme": "tradegx",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "backgroundColor": "#09090b",
     "icon": "./assets/icon.png",
     "assetBundlePatterns": [
