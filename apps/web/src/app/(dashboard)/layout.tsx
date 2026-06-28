@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { LocaleWidget } from "@/components/dashboard/locale-widget";
+import { BottomNav } from "@/components/layout/bottom-nav";
 
 export default async function DashboardLayout({
   children,
@@ -21,10 +22,11 @@ export default async function DashboardLayout({
           className="flex-1 overflow-y-auto mesh-bg"
           style={{ background: "#09090b" }}
         >
-          <div className="p-5 md:p-6 max-w-[1600px] mx-auto w-full">{children}</div>
+          <div className="p-5 md:p-6 pb-28 md:pb-6 max-w-[1600px] mx-auto w-full">{children}</div>
         </main>
       </div>
       <LocaleWidget />
+      <BottomNav />
     </div>
   );
 }
