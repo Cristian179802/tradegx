@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getDeals, pairDeals } from "@/lib/metaapi";
+import { checkTradingRuleViolations } from "@/lib/trading-rules";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -96,6 +97,15 @@ export async function POST(req: NextRequest) {
         where: { id: tradingAccountId },
         data: { balance: { increment: net } },
       });
+
+      // Reguli de risc DOAR pe tranzacții închise recent (live), nu la backfill istoric.
+      if (Date.now() - trade.exitTime.getTime() < 15 * 60 * 1000) {
+        void checkTradingRuleViolations({
+          userId: session.user.id,
+          accountId: tradingAccountId,
+          tradePnl: trade.pnlMoney,
+        }).catch(() => {});
+      }
 
       imported++;
     }

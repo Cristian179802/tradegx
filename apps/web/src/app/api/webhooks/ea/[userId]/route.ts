@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createHmac } from "crypto";
 import { detectInstrumentType } from "@/lib/parsers/index";
+import { checkTradingRuleViolations } from "@/lib/trading-rules";
 
 function getUserToken(userId: string): string {
   const secret = process.env.NEXTAUTH_SECRET ?? "apex-trader-secret";
@@ -159,6 +160,17 @@ export async function POST(
     });
     tradeId = trade.id;
     createdNew = true;
+  }
+
+  // ── Reguli de risc pe tranzacții REALE (revenge/overtrading/drawdown/daily-loss) ──
+  // Rulează DOAR pentru tranzacții închise recent (activitate live), nu la backfill
+  // de istoric — regulile sunt time-aware, iar deduparea evită alertele repetate.
+  if (Date.now() - closeTime.getTime() < 15 * 60 * 1000) {
+    void checkTradingRuleViolations({
+      userId,
+      accountId: account.id,
+      tradePnl: profit,
+    }).catch(() => {});
   }
 
   // ── Re-anchor account totals ───────────────────────────────────────────────

@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createHmac } from "crypto";
 import { detectInstrumentType } from "@/lib/parsers/index";
+import { checkTradingRuleViolations } from "@/lib/trading-rules";
+
+// Reguli de risc pe tranzacții REALE, doar pentru cele închise recent (live).
+function riskCheck(userId: string, accountId: string, closeTime: Date, profit: number) {
+  if (Date.now() - closeTime.getTime() < 15 * 60 * 1000) {
+    void checkTradingRuleViolations({ userId, accountId, tradePnl: profit }).catch(() => {});
+  }
+}
 
 function getWebhookToken(accountId: string): string {
   const secret = process.env.NEXTAUTH_SECRET ?? "apex-trader-fallback-secret";
@@ -27,7 +35,7 @@ export async function POST(
   // ── 2. Find account ────────────────────────────────────────────────────────
   const account = await prisma.tradingAccount.findUnique({
     where: { id: accountId },
-    select: { id: true, currency: true },
+    select: { id: true, currency: true, userId: true },
   });
   if (!account) {
     return NextResponse.json({ error: "Cont inexistent" }, { status: 404 });
@@ -100,6 +108,7 @@ export async function POST(
         data: { balance, lastSyncedAt: new Date() },
       });
     }
+    riskCheck(account.userId, accountId, closeTime, profit);
     return NextResponse.json({ status: "updated", tradeId: existing.id });
   }
 
@@ -127,6 +136,8 @@ export async function POST(
       tags:           [],
     },
   });
+
+  riskCheck(account.userId, accountId, closeTime, profit);
 
   // Update account balance
   if (balance > 0) {
