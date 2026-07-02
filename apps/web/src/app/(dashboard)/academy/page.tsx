@@ -20,9 +20,16 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 import { ACADEMY, LEVEL_META, TOTAL_LESSONS, lessonKey } from "@/lib/academy";
+import { PASS_THRESHOLD, QUIZZES } from "@/lib/academy/quiz";
 import type { Lang } from "@/lib/academy/types";
-import { useAcademyLang, useAcademyProgress } from "@/components/academy/use-academy";
+import {
+  useAcademyLang,
+  useAcademyProgress,
+  useQuizScores,
+} from "@/components/academy/use-academy";
+import { Award, BadgeCheck } from "lucide-react";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   book: BookOpen,
@@ -50,15 +57,27 @@ const UI = {
   continue: { ro: "Continuă", en: "Continue" },
   start: { ro: "Începe", en: "Start" },
   completed: { ro: "Finalizat", en: "Completed" },
+  quiz: { ro: "Quiz final", en: "Final quiz" },
+  quizPassed: { ro: "Absolvit", en: "Passed" },
+  certTitle: { ro: "Certificat de absolvire", en: "Certificate of completion" },
+  certBody: {
+    ro: "a absolvit Academia TradeGx — toate cele 9 module, cu scor de minim 80% la fiecare quiz final.",
+    en: "has completed the TradeGx Academy — all 9 modules, scoring at least 80% on every final quiz.",
+  },
+  certPrint: { ro: "Descarcă / Printează", en: "Download / Print" },
 } as const;
 
 export default function AcademyPage() {
   const [lang, setLang] = useAcademyLang();
   const { done } = useAcademyProgress();
+  const quizScores = useQuizScores();
+  const { data: session } = useSession();
   const [openId, setOpenId] = React.useState<string | null>(null);
 
   const doneCount = done.size;
   const pct = TOTAL_LESSONS > 0 ? Math.round((doneCount / TOTAL_LESSONS) * 100) : 0;
+  const quizPassed = (id: string) => (quizScores[id] ?? 0) >= PASS_THRESHOLD;
+  const allPassed = ACADEMY.every((b) => quizPassed(b.module.id));
 
   return (
     <div className="space-y-6 pb-8 max-w-5xl">
@@ -114,6 +133,33 @@ export default function AcademyPage() {
         </div>
       </div>
 
+      {/* Certificat de absolvire — apare când toate quiz-urile sunt promovate */}
+      {allPassed && (
+        <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-br from-amber-500/[0.08] to-zinc-900/80 p-8 text-center print:border-amber-600">
+          <Award className="w-10 h-10 text-amber-400 mx-auto mb-3" />
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-amber-400/80 mb-2">
+            TradeGx Academy
+          </p>
+          <h2 className="text-xl font-black text-zinc-100 mb-3">{UI.certTitle[lang]}</h2>
+          <p className="text-2xl font-black text-amber-300 mb-2">
+            {session?.user?.name ?? "Trader"}
+          </p>
+          <p className="text-xs text-zinc-400 max-w-md mx-auto mb-1">{UI.certBody[lang]}</p>
+          <p className="text-[10px] text-zinc-600 mb-5">
+            {new Date().toLocaleDateString(lang === "ro" ? "ro-RO" : "en-US", {
+              day: "numeric", month: "long", year: "numeric",
+            })}{" "}
+            · tradegx.com
+          </p>
+          <button
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition-colors print:hidden"
+          >
+            <Award className="w-3.5 h-3.5" /> {UI.certPrint[lang]}
+          </button>
+        </div>
+      )}
+
       {/* Module */}
       <div className="grid gap-4 md:grid-cols-2">
         {ACADEMY.map(({ module: mod }) => {
@@ -158,6 +204,11 @@ export default function AcademyPage() {
                       >
                         {meta.label[lang]}
                       </span>
+                      {quizPassed(mod.id) && (
+                        <span className="inline-flex items-center gap-0.5 ml-1.5 mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border text-amber-400 bg-amber-500/10 border-amber-500/30">
+                          <BadgeCheck className="w-3 h-3" /> {UI.quizPassed[lang]}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <ChevronDown
@@ -222,6 +273,30 @@ export default function AcademyPage() {
                       </Link>
                     );
                   })}
+                  {/* Quiz final */}
+                  {QUIZZES[mod.id]?.length > 0 && (
+                    <Link
+                      href={`/academy/${mod.id}/quiz`}
+                      className="flex items-center gap-3 px-5 py-3 hover:bg-amber-500/[0.06] transition-colors group"
+                    >
+                      {quizPassed(mod.id) ? (
+                        <BadgeCheck className="w-4 h-4 text-amber-400 shrink-0" />
+                      ) : (
+                        <Award className="w-4 h-4 text-zinc-600 group-hover:text-amber-400 shrink-0 transition-colors" />
+                      )}
+                      <span className="flex-1 text-xs font-bold text-amber-400/90 group-hover:text-amber-300">
+                        {UI.quiz[lang]}
+                        {quizScores[mod.id] != null && (
+                          <span className="ml-2 text-[10px] text-zinc-500 font-semibold">
+                            {UI.quizPassed[lang]}: {quizScores[mod.id]}%
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-[10px] text-zinc-600">
+                        {QUIZZES[mod.id].length} × ?
+                      </span>
+                    </Link>
+                  )}
                 </div>
               )}
 

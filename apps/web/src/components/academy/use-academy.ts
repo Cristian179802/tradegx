@@ -5,6 +5,7 @@ import type { Lang } from "@/lib/academy/types";
 
 const LANG_KEY = "tradegx-academy-lang";
 const PROGRESS_KEY = "tradegx-academy-done";
+const QUIZ_KEY = "tradegx-academy-quiz";
 
 // ── Limba conținutului (RO/EN), persistată local ────────────────────────────
 export function useAcademyLang(): [Lang, (l: Lang) => void] {
@@ -63,4 +64,24 @@ export function useAcademyProgress() {
   }, []);
 
   return { done, toggle, markDone };
+}
+
+// ── Scoruri quiz per modul (cel mai bun scor %, persistat local) ────────────
+export function useQuizScores(): Record<string, number> {
+  const [scores, setScores] = React.useState<Record<string, number>>({});
+
+  React.useEffect(() => {
+    const load = () => {
+      try {
+        const raw = localStorage.getItem(QUIZ_KEY);
+        setScores(raw ? (JSON.parse(raw) as Record<string, number>) : {});
+      } catch {}
+    };
+    load();
+    // Reîncarcă la revenirea pe tab (după un quiz terminat)
+    window.addEventListener("focus", load);
+    return () => window.removeEventListener("focus", load);
+  }, []);
+
+  return scores;
 }

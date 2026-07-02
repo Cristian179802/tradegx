@@ -202,15 +202,15 @@ export default function LessonPage() {
           </Link>
         ) : (
           <Link
-            href="/academy"
+            href={`/academy/${mod.id}/quiz`}
             onClick={() => markDone(key)}
-            className="flex-1 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.07] p-3.5 hover:border-emerald-500/50 transition-colors text-right"
+            className="flex-1 rounded-xl border border-amber-500/30 bg-amber-500/[0.07] p-3.5 hover:border-amber-500/50 transition-colors text-right"
           >
-            <span className="flex items-center justify-end gap-1 text-[10px] text-emerald-400/70 mb-1">
-              {UI.backToModules[lang]} <ArrowRight className="w-3 h-3" />
+            <span className="flex items-center justify-end gap-1 text-[10px] text-amber-400/70 mb-1">
+              {lang === "ro" ? "Testează-te" : "Test yourself"} <ArrowRight className="w-3 h-3" />
             </span>
-            <span className="text-xs font-bold text-emerald-300 line-clamp-1">
-              {mod.title[lang]} ✓
+            <span className="text-xs font-bold text-amber-300 line-clamp-1">
+              {lang === "ro" ? "Quiz final" : "Final quiz"} — {mod.title[lang]}
             </span>
           </Link>
         )}
