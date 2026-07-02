@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { LocaleWidget } from "@/components/dashboard/locale-widget";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { CommandPalette } from "@/components/layout/command-palette";
 
 export default async function DashboardLayout({
   children,
@@ -27,6 +28,7 @@ export default async function DashboardLayout({
       </div>
       <LocaleWidget />
       <BottomNav />
+      <CommandPalette />
     </div>
   );
 }

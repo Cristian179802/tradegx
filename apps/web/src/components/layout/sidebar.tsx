@@ -10,7 +10,7 @@ import {
   CalendarDays, Users, Settings, TrendingUp, LogOut, ChevronDown,
   Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
   PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
-  Trophy, ListChecks, Newspaper, Gauge, Award, GraduationCap,
+  Trophy, ListChecks, Newspaper, Gauge, Award, GraduationCap, Crosshair, Dices,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -53,6 +53,8 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/prop-firm",    label: "Prop Firm",         icon: Award,           color: "amber" },
       { href: "/accounts",     label: "Conturi",           icon: TrendingUp,      color: "sky" },
       { href: "/analytics",    label: "Analiză",           icon: BarChart3,       color: "violet" },
+      { href: "/edge",         label: "Edge Finder",       icon: Crosshair,       color: "emerald", badge: "NOU" },
+      { href: "/monte-carlo",  label: "Monte Carlo",       icon: Dices,           color: "violet", badge: "NOU" },
       { href: "/backtesting",  label: "Backtesting",       icon: FlaskConical,    color: "rose" },
     ],
   },
