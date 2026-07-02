@@ -50,7 +50,8 @@ export async function PATCH(
     return NextResponse.json({ error: "Trade negăsit" }, { status: 404 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const result = tradeSchema.partial().safeParse(body);
   if (!result.success) {
     return NextResponse.json(
@@ -61,17 +62,24 @@ export async function PATCH(
 
   const { notes, pnlMoney, accountId, ...rest } = result.data;
 
+  // Convenția sistemului: comision/swap SEMNATE (negativ = cost), net = pnl +
+  // commission + swap — la fel ca în accounts/route.ts și ancora EA. Comisionul
+  // introdus manual (pozitiv = cost) se normalizează la negativ.
+  if (rest.commission !== undefined && rest.commission !== null) {
+    rest.commission = -Math.abs(rest.commission);
+  }
+
   // Determine new status (may be changing from OPEN → CLOSED)
   const newStatus = rest.status ?? existing.status;
   const oldPnl = existing.status === "CLOSED" && existing.pnlMoney != null
-    ? Number(existing.pnlMoney) - Number(existing.commission ?? 0) - Number(existing.swap ?? 0)
+    ? Number(existing.pnlMoney) + Number(existing.commission ?? 0) + Number(existing.swap ?? 0)
     : null;
 
   const newPnlMoney = pnlMoney !== undefined ? pnlMoney : (existing.pnlMoney ? Number(existing.pnlMoney) : null);
-  const newCommission = result.data.commission !== undefined ? result.data.commission : Number(existing.commission ?? 0);
-  const newSwap = result.data.swap !== undefined ? result.data.swap : Number(existing.swap ?? 0);
+  const newCommission = rest.commission !== undefined && rest.commission !== null ? rest.commission : Number(existing.commission ?? 0);
+  const newSwap = result.data.swap !== undefined && result.data.swap !== null ? result.data.swap : Number(existing.swap ?? 0);
   const newNetPnl = newStatus === "CLOSED" && newPnlMoney != null
-    ? newPnlMoney - newCommission - newSwap
+    ? newPnlMoney + newCommission + newSwap
     : null;
 
   const balance = Number(existing.account.balance);

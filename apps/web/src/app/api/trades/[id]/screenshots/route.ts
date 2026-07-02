@@ -66,7 +66,8 @@ export async function POST(
     return NextResponse.json({ error: "Maxim 5 screenshot-uri per trade" }, { status: 400 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const { base64, mimeType, type = "ENTRY" } = body as {
     base64: string;
     mimeType: string;

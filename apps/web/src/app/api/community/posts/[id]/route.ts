@@ -70,7 +70,8 @@ export async function POST(
   const post = await prisma.communityPost.findUnique({ where: { id }, select: { id: true } });
   if (!post) return NextResponse.json({ error: "Post negăsit" }, { status: 404 });
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const result = commentSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json({ error: "Conținut invalid" }, { status: 400 });

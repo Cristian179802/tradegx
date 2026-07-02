@@ -236,11 +236,13 @@ async function importRows(
         },
       });
       created.push(trade.id);
-      // Accumulate net PnL to update account balance afterwards
+      // Accumulate net PnL to update account balance afterwards.
+      // Extrasele MT4/MT5 au comision/swap SEMNATE (negativ = cost) → se ADUNĂ,
+      // ca în accounts/route.ts și ancora webhook-ului EA.
       if (pnlMoney !== null) {
         const commission = parseNumber(get("commission")) ?? 0;
         const swap = parseNumber(get("swap")) ?? 0;
-        netPnlImported += pnlMoney - commission - swap;
+        netPnlImported += pnlMoney + commission + swap;
       }
     } catch {
       errors.push({ line: i + 1, error: `Rândul ${i + 1}: eroare salvare` });
@@ -258,7 +260,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const { accountId, csvContent, fileType } = body as {
     accountId: string;
     csvContent: string;

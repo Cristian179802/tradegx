@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const { metaApiAccountId, tradingAccountId, daysBack = 90 } = body;
 
   if (!metaApiAccountId || !tradingAccountId) {
@@ -91,8 +92,9 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Update account balance
-      const net = trade.pnlMoney - trade.commission - trade.swap;
+      // Update account balance — MetaAPI trimite comision/swap SEMNATE
+      // (negativ = cost) → se ADUNĂ, ca peste tot în sistem.
+      const net = trade.pnlMoney + trade.commission + trade.swap;
       await prisma.tradingAccount.update({
         where: { id: tradingAccountId },
         data: { balance: { increment: net } },

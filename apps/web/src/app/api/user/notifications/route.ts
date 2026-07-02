@@ -18,7 +18,8 @@ export async function PATCH(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const { preferences } = body as { preferences: Record<string, boolean> };
 
   if (!preferences || typeof preferences !== "object") {

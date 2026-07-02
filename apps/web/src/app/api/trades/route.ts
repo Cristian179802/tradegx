@@ -99,7 +99,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const result = tradeSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(
@@ -109,6 +110,11 @@ export async function POST(req: NextRequest) {
   }
 
   const { notes, ...data } = result.data;
+
+  // Convenția sistemului (vezi accounts/route.ts): comision/swap sunt SEMNATE
+  // (negativ = cost), iar netul = pnl + commission + swap. Formularele manuale
+  // primesc adesea comisionul ca număr pozitiv („costă 7$") — îl normalizăm.
+  data.commission = -Math.abs(data.commission ?? 0);
 
   // Verify account belongs to user
   const account = await prisma.tradingAccount.findFirst({
@@ -171,8 +177,10 @@ export async function POST(req: NextRequest) {
   });
 
   // Update account balance if trade is closed
+  // Net = pnl + commission + swap (valori semnate) — aceeași formulă ca în
+  // accounts/route.ts, accounts/page.tsx și ancora webhook-ului EA.
   if (data.status === "CLOSED" && pnlMoney != null) {
-    const netPnl = pnlMoney - data.commission - data.swap;
+    const netPnl = pnlMoney + data.commission + data.swap;
     await prisma.tradingAccount.update({
       where: { id: data.accountId },
       data: { balance: { increment: netPnl } },

@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Activity, BookOpen, BarChart3, Settings } from "lucide-react";
+import { LayoutGrid, Activity, BookOpen, BarChart3, GraduationCap } from "lucide-react";
 
 // Bottom navigation — vizibil DOAR pe mobil (md:hidden). Dă senzația de app nativ.
 // Glassmorphism + glow pe item-ul activ. Nu afectează desktop-ul.
+// Setările rămân accesibile din sidebar-ul drawer — Academia are prioritate aici.
 const items = [
   { href: "/dashboard", icon: LayoutGrid, label: "Acasă" },
   { href: "/signals", icon: Activity, label: "Semnale" },
   { href: "/journal", icon: BookOpen, label: "Jurnal" },
   { href: "/analytics", icon: BarChart3, label: "Analize" },
-  { href: "/settings", icon: Settings, label: "Setări" },
+  { href: "/academy", icon: GraduationCap, label: "Academie" },
 ];
 
 export function BottomNav() {

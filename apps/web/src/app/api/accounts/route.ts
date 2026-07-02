@@ -60,7 +60,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const result = tradingAccountSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(

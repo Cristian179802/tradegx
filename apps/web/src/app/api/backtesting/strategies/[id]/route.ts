@@ -22,7 +22,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const strategy = await getStrategy(id, session.user.id);
   if (!strategy) return NextResponse.json({ error: "Negăsit" }, { status: 404 });
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const result = updateSchema.safeParse(body);
   if (!result.success) return NextResponse.json({ error: "Date invalide" }, { status: 400 });
 

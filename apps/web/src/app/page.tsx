@@ -6,7 +6,7 @@ import {
   ArrowRight, CheckCircle2, Star, BookOpen, Calculator,
   Activity, Target, Trophy, ChevronRight, Wifi,
   LineChart, Bell, Users, Lock, Sparkles, Layers,
-  TrendingDown, BarChart2,
+  TrendingDown, BarChart2, GraduationCap, FlaskConical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +76,36 @@ const FEATURES = [
     border: "border-sky-500/20 hover:border-sky-500/40",
     glow: "group-hover:shadow-[0_0_30px_rgba(14,165,233,0.12)]",
     topLine: "via-sky-500/50",
+  },
+  {
+    icon: GraduationCap,
+    title: "Academie de Trading",
+    description: "Curs complet RO/EN cu diagrame interactive: de la prima lumânare la SMC, risk management și sisteme profesionale.",
+    color: "text-indigo-400",
+    bg: "bg-indigo-500/10",
+    border: "border-indigo-500/20 hover:border-indigo-500/40",
+    glow: "group-hover:shadow-[0_0_30px_rgba(99,102,241,0.12)]",
+    topLine: "via-indigo-500/50",
+  },
+  {
+    icon: FlaskConical,
+    title: "Backtesting cu Date Reale",
+    description: "Testează 5 strategii gata făcute sau construiește-ți propria strategie din 15+ indicatori, pe date istorice reale.",
+    color: "text-rose-400",
+    bg: "bg-rose-500/10",
+    border: "border-rose-500/20 hover:border-rose-500/40",
+    glow: "group-hover:shadow-[0_0_30px_rgba(244,63,94,0.12)]",
+    topLine: "via-rose-500/50",
+  },
+  {
+    icon: Target,
+    title: "Semnale AI (HPS)",
+    description: "Maximum 3 semnale de înaltă probabilitate pe zi, generate de AI pe structura pieței. Cu difuzare pe Telegram.",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    border: "border-emerald-500/20 hover:border-emerald-500/40",
+    glow: "group-hover:shadow-[0_0_30px_rgba(52,211,153,0.12)]",
+    topLine: "via-emerald-500/50",
   },
 ];
 

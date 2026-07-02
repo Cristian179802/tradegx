@@ -10,7 +10,7 @@ import {
   CalendarDays, Users, Settings, TrendingUp, LogOut, ChevronDown,
   Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
   PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
-  Trophy, ListChecks, Newspaper, Gauge, Award,
+  Trophy, ListChecks, Newspaper, Gauge, Award, GraduationCap,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -61,6 +61,12 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/ai-assistant", label: "AI Assistant", icon: Brain,    color: "violet" },
       { href: "/alerts",       label: "Alerte AI",    icon: BellRing, color: "amber" },
+    ],
+  },
+  {
+    label: "Educație",
+    items: [
+      { href: "/academy", label: "Academie", icon: GraduationCap, color: "indigo", badge: "NOU" },
     ],
   },
   {

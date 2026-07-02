@@ -80,7 +80,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const { login, password, server, platform, name, accountType, currency, leverage,
           maxDailyLossPct, maxDrawdownPct, tradingAccountId } = body;
 

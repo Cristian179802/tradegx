@@ -48,7 +48,8 @@ export async function PUT(
     return NextResponse.json({ error: "Trade negăsit" }, { status: 404 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const result = journalEntrySchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(

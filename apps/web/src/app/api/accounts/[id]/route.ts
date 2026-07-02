@@ -43,7 +43,8 @@ export async function PATCH(
     return NextResponse.json({ error: "Cont negăsit" }, { status: 404 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
   const result = tradingAccountSchema.partial().safeParse(body);
   if (!result.success) {
     return NextResponse.json(
