@@ -16,6 +16,11 @@ const publicRoutes = [
   "/contact",
   "/robots.txt",
   "/sitemap.xml",
+  // PWA — manifestul și iconițele trebuie accesibile fără login
+  "/manifest.webmanifest",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/apple-touch-icon.png",
 ];
 
 const publicPrefixes = [

@@ -1,8 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Dices, Play, Sparkles, ShieldAlert, Trophy, Percent } from "lucide-react";
+import { Dices, Play, ShieldAlert, Trophy, Percent } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { CountUp } from "@/components/ui/count-up";
 
 // ── Simulator Monte Carlo ───────────────────────────────────────────────────
 // Reeșantionează (cu înlocuire) randamentele REALE ale traderului și rulează
@@ -228,15 +231,22 @@ export default function MonteCarloPage() {
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-sm text-zinc-600">Se încarcă istoricul...</div>
-      ) : !returns || returns.length < 10 ? (
-        <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-10 text-center">
-          <Sparkles className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
-          <p className="text-sm font-bold text-zinc-400 mb-1">Ai nevoie de minim 10 tranzacții închise</p>
-          <p className="text-xs text-zinc-600">
-            Simularea folosește distribuția REALĂ a rezultatelor tale — cu cât mai multe tranzacții, cu atât mai fiabilă.
-          </p>
+        <div className="space-y-6">
+          <Skeleton className="h-36 w-full rounded-2xl bg-zinc-800/60" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-32 w-full rounded-2xl bg-zinc-800/60" />
+            ))}
+          </div>
         </div>
+      ) : !returns || returns.length < 10 ? (
+        <EmptyState
+          title="Ai nevoie de minim 10 tranzacții închise"
+          description="Simularea folosește distribuția REALĂ a rezultatelor tale — cu cât mai multe tranzacții în jurnal, cu atât mai fiabile probabilitățile calculate."
+          actionLabel="Conectează un cont de broker"
+          actionHref="/accounts"
+          hint="După sincronizare, revino aici și rulează simularea."
+        />
       ) : (
         <>
           {/* Parametri */}
@@ -268,21 +278,27 @@ export default function MonteCarloPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.05] p-5 text-center">
                   <Trophy className="w-5 h-5 text-emerald-400 mx-auto mb-2" />
-                  <p className="text-3xl font-black text-emerald-400">{result.pTarget.toFixed(1)}%</p>
+                  <p className="text-3xl font-black text-emerald-400 num">
+                    <CountUp value={result.pTarget} decimals={1} suffix="%" />
+                  </p>
                   <p className="text-[11px] text-zinc-500 mt-1 font-semibold">
                     șansa să atingi +{targetPct}% ÎNAINTE de a pica
                   </p>
                 </div>
                 <div className="rounded-2xl border border-rose-500/25 bg-rose-500/[0.05] p-5 text-center">
                   <ShieldAlert className="w-5 h-5 text-rose-400 mx-auto mb-2" />
-                  <p className="text-3xl font-black text-rose-400">{result.pRuin.toFixed(1)}%</p>
+                  <p className="text-3xl font-black text-rose-400 num">
+                    <CountUp value={result.pRuin} decimals={1} suffix="%" />
+                  </p>
                   <p className="text-[11px] text-zinc-500 mt-1 font-semibold">
                     riscul să atingi {maxDDPct}% drawdown (pici challenge-ul)
                   </p>
                 </div>
                 <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 text-center">
                   <Percent className="w-5 h-5 text-zinc-500 mx-auto mb-2" />
-                  <p className="text-3xl font-black text-zinc-300">{result.pNeither.toFixed(1)}%</p>
+                  <p className="text-3xl font-black text-zinc-300 num">
+                    <CountUp value={result.pNeither} decimals={1} suffix="%" />
+                  </p>
                   <p className="text-[11px] text-zinc-500 mt-1 font-semibold">
                     nici target, nici ruină în {nTrades} tranzacții
                   </p>

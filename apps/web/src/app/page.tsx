@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { HeroTilt } from "@/components/landing/hero-tilt";
 
 export const metadata: Metadata = {
   title: "TradeGx — Jurnal de Trading Profesional",
@@ -300,7 +301,8 @@ export default function LandingPage() {
 
         {/* ── Floating stats preview ─────────────────────────────────────── */}
         <div className="relative max-w-4xl mx-auto mt-20">
-          {/* Mock dashboard preview bar */}
+          {/* Mock dashboard preview bar — cu parallax 3D subtil la mouse */}
+          <HeroTilt>
           <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-1 backdrop-blur-xl shadow-2xl shadow-black/50 overflow-hidden">
             {/* Window chrome */}
             <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800/60">
@@ -379,6 +381,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          </HeroTilt>
 
           {/* Reflection / glow below card */}
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-16 bg-indigo-500/10 blur-2xl rounded-full pointer-events-none" />

@@ -86,8 +86,14 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: var(--font-sans), "Inter", system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Titlurile majore folosesc fontul de brand (Space Grotesk) */
+  h1, h2 {
+    font-family: var(--font-display), "Inter", system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
 
   .light body { @apply bg-white; }
@@ -100,10 +106,11 @@
 }
 
 @layer utilities {
-  /* ── Number / mono font ──────────────────────────────────────────────── */
+  /* ── Number / display font ───────────────────────────────────────────── */
+  /* Cifrele sunt eroii produsului: font de brand + aliniere tabulară. */
   .num {
     font-variant-numeric: tabular-nums;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-family: var(--font-display), "JetBrains Mono", monospace;
     letter-spacing: -0.02em;
   }
 

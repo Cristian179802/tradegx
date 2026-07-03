@@ -7,9 +7,10 @@ import {
   TrendingDown,
   ChevronDown,
   Info,
-  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { EdgeReport, EdgeStat } from "@/lib/edge-finder";
 
 const PERIOADE = [
@@ -128,18 +129,27 @@ export default function EdgeFinderPage() {
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-sm text-zinc-600">Se calculează edge-urile...</div>
-      ) : !report || report.totalTrades < 10 ? (
-        <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-10 text-center">
-          <Sparkles className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
-          <p className="text-sm font-bold text-zinc-400 mb-1">
-            Ai nevoie de minim 10 tranzacții închise în perioada selectată
-          </p>
-          <p className="text-xs text-zinc-600 max-w-md mx-auto">
-            Edge Finder devine cu atât mai precis cu cât jurnalul tău e mai bogat.
-            Sincronizează contul de broker sau adaugă tranzacții — apoi revino aici.
-          </p>
+        <div className="space-y-6">
+          <Skeleton className="h-12 w-full rounded-2xl bg-zinc-800/60" />
+          <div className="grid gap-6 lg:grid-cols-2">
+            {[0, 1].map((col) => (
+              <div key={col} className="space-y-3">
+                <Skeleton className="h-4 w-40 bg-zinc-800/60" />
+                {[0, 1, 2].map((i) => (
+                  <Skeleton key={i} className="h-28 w-full rounded-2xl bg-zinc-800/60" />
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
+      ) : !report || report.totalTrades < 10 ? (
+        <EmptyState
+          title="Ai nevoie de minim 10 tranzacții închise în perioada selectată"
+          description="Edge Finder devine cu atât mai precis cu cât jurnalul tău e mai bogat. Sincronizează contul de broker sau adaugă tranzacții — apoi revino aici."
+          actionLabel="Conectează un cont de broker"
+          actionHref="/accounts"
+          hint="Poți adăuga tranzacții și manual, din pagina Tranzacții."
+        />
       ) : (
         <>
           {/* Sumar */}

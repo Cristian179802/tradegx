@@ -1,6 +1,21 @@
 ﻿import type { Metadata, Viewport } from "next";
+import { Inter, Space_Grotesk } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
+
+// Tipografie de brand: Inter pentru text, Space Grotesk pentru titluri/cifre.
+// latin-ext e obligatoriu pentru diacriticele românești (ă â î ș ț).
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const grotesk = Space_Grotesk({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-display",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -54,8 +69,9 @@ export default function RootLayout({
     <html
       lang="ro"
       suppressHydrationWarning
+      className={`${inter.variable} ${grotesk.variable}`}
     >
-      <body className="min-h-screen bg-background antialiased">
+      <body className="min-h-screen bg-background antialiased font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>
