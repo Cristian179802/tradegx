@@ -130,6 +130,7 @@ enum AlertType {
   MONDAY_RESTRICTION
   DAILY_REVIEW
   WEEKLY_REVIEW
+  PRICE_ALERT
 }
 
 enum AlertSeverity {
@@ -499,6 +500,10 @@ model WatchlistItem {
   instrumentType InstrumentType
   groupName      String         @default("Default")
   sortOrder      Int            @default(0)
+
+  // Alerte de preț: se declanșează O dată, apoi pragul se golește (one-shot)
+  alertAbove Decimal? @db.Decimal(15, 5)
+  alertBelow Decimal? @db.Decimal(15, 5)
 
   createdAt DateTime @default(now())
 

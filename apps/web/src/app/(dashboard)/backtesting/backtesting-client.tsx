@@ -11,6 +11,7 @@ import {
   Plus, Play, Trash2, TrendingUp, TrendingDown, BarChart2,
   FlaskConical, Clock, ChevronRight, Sparkles, Activity,
 } from "lucide-react";
+import { QuickTest } from "./quick-test";
 
 const STRATEGY_TYPE_LABELS: Record<string, string> = {
   EMA_CROSSOVER:    "EMA Crossover",
@@ -89,13 +90,16 @@ export function BacktestingClient({
             Testează strategii pe date istorice reale — Yahoo Finance live data
           </p>
         </div>
-        <Button asChild className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20 gap-2">
+        <Button asChild variant="outline" className="border-zinc-700 text-zinc-300 hover:border-indigo-500/50 hover:text-indigo-300 gap-2">
           <Link href="/backtesting/new">
             <Plus className="h-4 w-4" />
-            Strategie nouă
+            Builder avansat
           </Link>
         </Button>
       </div>
+
+      {/* Testează instant — calea rapidă, fără configurare */}
+      <QuickTest strategies={strategies} />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Strategy List — Left Column */}

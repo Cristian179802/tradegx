@@ -10,11 +10,21 @@ export default async function MarketPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const items = await prisma.watchlistItem.findMany({
+  const rows = await prisma.watchlistItem.findMany({
     where: { userId: session.user.id },
     orderBy: [{ groupName: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
-    select: { id: true, symbol: true, instrumentType: true, groupName: true },
+    select: {
+      id: true, symbol: true, instrumentType: true, groupName: true,
+      alertAbove: true, alertBelow: true,
+    },
   });
+
+  // Decimal nu poate traversa granița server→client — serializăm la number
+  const items = rows.map((r) => ({
+    ...r,
+    alertAbove: r.alertAbove != null ? Number(r.alertAbove) : null,
+    alertBelow: r.alertBelow != null ? Number(r.alertBelow) : null,
+  }));
 
   return (
     <div className="space-y-6">

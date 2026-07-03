@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Globe, Search, ChevronDown, LineChart, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, Trash2, Globe, Search, ChevronDown, LineChart, TrendingUp, TrendingDown, Bell, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
@@ -13,6 +13,8 @@ interface WatchlistItem {
   symbol: string;
   instrumentType: string;
   groupName: string | null;
+  alertAbove: number | null;
+  alertBelow: number | null;
 }
 
 const POPULAR: { symbol: string; instrumentType: string; group: string }[] = [
@@ -167,6 +169,55 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
     }
   }
 
+  // ── Alerte de preț ──
+  const [alertEditId, setAlertEditId] = React.useState<string | null>(null);
+  const [aboveVal, setAboveVal] = React.useState("");
+  const [belowVal, setBelowVal] = React.useState("");
+  const [savingAlert, setSavingAlert] = React.useState(false);
+
+  function openAlertEditor(item: WatchlistItem) {
+    if (alertEditId === item.id) {
+      setAlertEditId(null);
+      return;
+    }
+    setAlertEditId(item.id);
+    setAboveVal(item.alertAbove != null ? String(item.alertAbove) : "");
+    setBelowVal(item.alertBelow != null ? String(item.alertBelow) : "");
+  }
+
+  async function saveAlert(item: WatchlistItem) {
+    const above = aboveVal.trim() === "" ? null : Number(aboveVal.replace(",", "."));
+    const below = belowVal.trim() === "" ? null : Number(belowVal.replace(",", "."));
+    if ((above != null && (!Number.isFinite(above) || above <= 0)) ||
+        (below != null && (!Number.isFinite(below) || below <= 0))) {
+      toast({ title: "Preț invalid", description: "Introdu valori numerice pozitive.", variant: "destructive" });
+      return;
+    }
+    setSavingAlert(true);
+    const res = await fetch("/api/watchlist", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: item.id, alertAbove: above, alertBelow: below }),
+    });
+    if (res.ok) {
+      setItems((prev) =>
+        prev.map((i) => (i.id === item.id ? { ...i, alertAbove: above, alertBelow: below } : i))
+      );
+      toast({
+        title: above == null && below == null
+          ? `Alertele pentru ${item.symbol} au fost dezactivate`
+          : `Alertă setată pe ${item.symbol}`,
+        description: above != null || below != null
+          ? "Primești notificare in-app + Telegram când prețul atinge pragul (verificare la ~10 min)."
+          : undefined,
+      });
+      setAlertEditId(null);
+    } else {
+      toast({ title: "Eroare la salvare", variant: "destructive" });
+    }
+    setSavingAlert(false);
+  }
+
   const grouped = items.reduce<Record<string, WatchlistItem[]>>((acc, item) => {
     const key = item.groupName ?? item.instrumentType;
     (acc[key] ??= []).push(item);
@@ -212,9 +263,11 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                   <div className="px-5 py-2 bg-zinc-900/80">
                     <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">{group}</p>
                   </div>
-                  {groupItems.map((item) => (
+                  {groupItems.map((item) => {
+                    const hasAlert = item.alertAbove != null || item.alertBelow != null;
+                    return (
+                    <React.Fragment key={item.id}>
                     <div
-                      key={item.id}
                       className="flex items-center justify-between px-5 py-3 hover:bg-indigo-500/5 transition-colors cursor-pointer group border-b border-transparent hover:border-b-indigo-500/10"
                       onClick={() => openChart(item.symbol)}
                     >
@@ -226,17 +279,86 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                         <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded border", INSTR_COLORS[item.instrumentType] ?? INSTR_COLORS.CFD)}>
                           {item.instrumentType}
                         </span>
+                        {hasAlert && (
+                          <span className="text-[9px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/25 rounded-full px-1.5 py-0.5">
+                            {item.alertAbove != null && `↑${item.alertAbove}`}
+                            {item.alertAbove != null && item.alertBelow != null && " · "}
+                            {item.alertBelow != null && `↓${item.alertBelow}`}
+                          </span>
+                        )}
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0 text-zinc-600 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => { e.stopPropagation(); removeSymbol(item.id, item.symbol); }}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={cn(
+                            "h-7 w-7 p-0 transition-all",
+                            hasAlert
+                              ? "text-amber-400 hover:text-amber-300"
+                              : "text-zinc-600 hover:text-amber-400 opacity-0 group-hover:opacity-100"
+                          )}
+                          onClick={(e) => { e.stopPropagation(); openAlertEditor(item); }}
+                          title="Alertă de preț"
+                        >
+                          {hasAlert ? <BellRing className="h-3.5 w-3.5" /> : <Bell className="h-3.5 w-3.5" />}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-zinc-600 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => { e.stopPropagation(); removeSymbol(item.id, item.symbol); }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </div>
-                  ))}
+
+                    {/* Editor alertă de preț */}
+                    {alertEditId === item.id && (
+                      <div className="px-5 py-3 bg-amber-500/[0.04] border-b border-amber-500/15" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-wrap items-end gap-3">
+                          <label className="block">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500 block mb-1">
+                              ↑ Peste (breakout)
+                            </span>
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              value={aboveVal}
+                              onChange={(e) => setAboveVal(e.target.value)}
+                              placeholder="ex: 1.0950"
+                              className="w-28 rounded-lg border border-zinc-700 bg-zinc-950/60 px-2.5 py-1.5 text-xs font-bold text-zinc-100 outline-none focus:border-emerald-500/50"
+                            />
+                          </label>
+                          <label className="block">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-rose-500 block mb-1">
+                              ↓ Sub (breakdown)
+                            </span>
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              value={belowVal}
+                              onChange={(e) => setBelowVal(e.target.value)}
+                              placeholder="ex: 1.0800"
+                              className="w-28 rounded-lg border border-zinc-700 bg-zinc-950/60 px-2.5 py-1.5 text-xs font-bold text-zinc-100 outline-none focus:border-rose-500/50"
+                            />
+                          </label>
+                          <button
+                            onClick={() => saveAlert(item)}
+                            disabled={savingAlert}
+                            className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+                          >
+                            {savingAlert ? "Se salvează…" : "Salvează"}
+                          </button>
+                          <p className="text-[9px] text-zinc-600 leading-tight max-w-[200px]">
+                            Gol = dezactivat. Alertele sunt one-shot: după declanșare, pragul se golește automat.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    </React.Fragment>
+                    );
+                  })}
                 </div>
               ))}
             </div>

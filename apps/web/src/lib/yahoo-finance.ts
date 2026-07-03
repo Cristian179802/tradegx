@@ -309,3 +309,22 @@ export async function fetchHistoricalCandles(
   if (timeframe === "H4") return resampleH4(allCandles);
   return allCandles;
 }
+
+// ─── Preț curent (pentru alertele de preț) ────────────────────────────────────
+// Folosește meta.regularMarketPrice din endpoint-ul v8 chart — un singur
+// request per simbol, fără crumb (endpoint public).
+export async function fetchLatestPrice(symbol: string): Promise<number | null> {
+  const yahooSymbol = SYMBOL_MAP[symbol.toUpperCase()] ?? symbol.toUpperCase();
+  try {
+    const res = await fetch(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?interval=1d&range=1d`,
+      { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(10_000) }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    return typeof price === "number" && Number.isFinite(price) ? price : null;
+  } catch {
+    return null;
+  }
+}

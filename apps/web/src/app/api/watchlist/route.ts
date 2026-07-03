@@ -9,6 +9,12 @@ const addSchema = z.object({
   groupName: z.string().max(50).optional().nullable(),
 });
 
+const alertSchema = z.object({
+  id: z.string().cuid(),
+  alertAbove: z.number().positive().max(100_000_000).optional().nullable(),
+  alertBelow: z.number().positive().max(100_000_000).optional().nullable(),
+});
+
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
@@ -49,4 +55,33 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json(item, { status: 201 });
+}
+
+// PATCH — setează/șterge pragurile de alertă de preț pe un item.
+// null = dezactivează pragul; undefined = păstrează valoarea existentă.
+export async function PATCH(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
+  const result = alertSchema.safeParse(body);
+  if (!result.success) {
+    return NextResponse.json({ error: "Date invalide" }, { status: 400 });
+  }
+
+  const item = await prisma.watchlistItem.findFirst({
+    where: { id: result.data.id, userId: session.user.id },
+  });
+  if (!item) return NextResponse.json({ error: "Item negăsit" }, { status: 404 });
+
+  const updated = await prisma.watchlistItem.update({
+    where: { id: item.id },
+    data: {
+      ...(result.data.alertAbove !== undefined && { alertAbove: result.data.alertAbove }),
+      ...(result.data.alertBelow !== undefined && { alertBelow: result.data.alertBelow }),
+    },
+  });
+
+  return NextResponse.json(updated);
 }
