@@ -182,7 +182,7 @@ export function RegisterForm() {
             Creează cont gratuit
           </h1>
           <p className="text-zinc-400 text-sm">
-            Alătură-te a mii de traderi profesioniști
+            Jurnalul profesional pentru traderi SMC / ICT
           </p>
         </div>
 
@@ -337,6 +337,19 @@ export function RegisterForm() {
               )}
               <div className="absolute inset-0 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] bg-white/10 transition-transform duration-700 ease-out" />
             </Button>
+
+            {/* Consimțământ legal */}
+            <p className="text-[11px] text-zinc-600 text-center leading-relaxed">
+              Prin crearea contului ești de acord cu{" "}
+              <Link href="/terms" className="text-zinc-400 hover:text-zinc-300 underline underline-offset-2">
+                Termenii și Condițiile
+              </Link>{" "}
+              și{" "}
+              <Link href="/privacy" className="text-zinc-400 hover:text-zinc-300 underline underline-offset-2">
+                Politica de Confidențialitate
+              </Link>
+              .
+            </p>
           </form>
         </Form>
 

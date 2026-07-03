@@ -1,0 +1,5 @@
+Contact: mailto:palcristi1@gmail.com
+Preferred-Languages: ro, en
+Canonical: https://www.tradegx.com/.well-known/security.txt
+Policy: https://www.tradegx.com/terms
+Expires: 2027-07-01T00:00:00.000Z

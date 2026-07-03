@@ -139,39 +139,28 @@ const STEPS = [
   },
 ];
 
-const TESTIMONIALS = [
+// Angajamente verificabile — fără testimoniale inventate sau cifre umflate.
+const COMMITMENTS = [
   {
-    name: "Marcus R.",
-    handle: "@marcus_fx",
-    avatar: "MR",
-    role: "FTMO Trader",
-    text: "În sfârșit un jurnal care vorbește SMC. Etichetarea OB și FVG îmi economisește 20 de minute per sesiune. Game changer.",
-    stars: 5,
-    gradient: "from-indigo-600 to-violet-700",
-    pnl: "+$4,820",
-    up: true,
+    icon: Lock,
+    title: "Datele tale rămân ale tale",
+    text: "Găzduire în UE (Frankfurt). Conectarea la broker se face DOAR cu parola de investitor (read-only): TradeGx nu poate deschide sau închide tranzacții și nu are niciodată acces la fondurile tale.",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
   },
   {
-    name: "Elena V.",
-    handle: "@elena_trades",
-    avatar: "EV",
-    role: "Prop Firm Trader",
-    text: "AI Coach a detectat pattern-ul meu de revenge trading după 3 pierderi consecutive. Mi-a salvat contul FTMO de 100k.",
-    stars: 5,
-    gradient: "from-violet-600 to-purple-700",
-    pnl: "+$11,240",
-    up: true,
+    icon: Shield,
+    title: "Zero promisiuni de îmbogățire",
+    text: "TradeGx este un instrument de analiză și disciplină, nu o schemă de profit. Semnalele și statisticile au scop educațional, nu constituie consultanță financiară. Tradingul implică risc real de pierdere.",
+    color: "text-indigo-400",
+    bg: "bg-indigo-500/10 border-indigo-500/20",
   },
   {
-    name: "Andrei M.",
-    handle: "@andreifx",
-    avatar: "AM",
-    role: "Full-time Trader",
-    text: "Profit factor per sesiune mi-a schimbat complet cum îmi structurez ziua. Cel mai bun dashboard pe care l-am folosit.",
-    stars: 5,
-    gradient: "from-emerald-600 to-teal-700",
-    pnl: "+$7,590",
-    up: true,
+    icon: Users,
+    title: "Construit în public, cu feedback real",
+    text: "Produs nou, dezvoltat activ, cu actualizări săptămânale. Sugestiile și problemele raportate ajung direct la fondator — ne poți scrie oricând prin pagina de contact.",
+    color: "text-violet-400",
+    bg: "bg-violet-500/10 border-violet-500/20",
   },
 ];
 
@@ -321,9 +310,12 @@ export default function LandingPage() {
               <div className="flex-1 flex items-center justify-center">
                 <div className="bg-zinc-800/80 border border-zinc-700/40 rounded-lg px-4 py-0.5 flex items-center gap-1.5">
                   <span className="live-dot" style={{ width: 5, height: 5 }} />
-                  <span className="text-[10px] text-zinc-500 font-mono">app.tradegx.io/dashboard</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">www.tradegx.com/dashboard</span>
                 </div>
               </div>
+              <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-wider border border-zinc-700/50 rounded px-1.5 py-0.5">
+                Demo
+              </span>
             </div>
 
             {/* Mock dashboard content */}
@@ -505,52 +497,40 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Testimonials ───────────────────────────────────────────────────── */}
+      {/* ── Transparență ───────────────────────────────────────────────────── */}
       <section className="py-28 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
-              <Trophy className="w-3 h-3" />
-              Testimoniale
+              <Shield className="w-3 h-3" />
+              Transparență
             </div>
             <h2 className="text-3xl font-black mb-3 tracking-tight">
-              De încredere pentru traderi din toată lumea
+              Angajamentele noastre, negru pe alb
             </h2>
-            <p className="text-zinc-500">Mii de traderi folosesc TradeGx zilnic pentru a-și îmbunătăți performanța.</p>
+            <p className="text-zinc-500">
+              Fără testimoniale inventate și fără cifre umflate — doar ce garantăm concret.
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name}
-                className="group bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 hover:border-zinc-700/60 transition-all duration-300 card-hover-lift overflow-hidden relative">
-                {/* Corner glow */}
-                <div className="absolute -top-6 -right-6 w-16 h-16 bg-indigo-500/8 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            {COMMITMENTS.map((c) => {
+              const Icon = c.icon;
+              return (
+                <div
+                  key={c.title}
+                  className="group bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 hover:border-zinc-700/60 transition-all duration-300 card-hover-lift overflow-hidden relative"
+                >
+                  {/* Corner glow */}
+                  <div className="absolute -top-6 -right-6 w-16 h-16 bg-indigo-500/8 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: t.stars }).map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                    ))}
+                  <div className={`w-10 h-10 rounded-xl border flex items-center justify-center mb-4 ${c.bg}`}>
+                    <Icon className={`w-5 h-5 ${c.color}`} />
                   </div>
-                  <span className={`text-sm font-black num ${t.up ? "text-emerald-400" : "text-rose-400"}`}>
-                    {t.pnl}
-                  </span>
+                  <h3 className="text-zinc-100 text-sm font-black mb-2">{c.title}</h3>
+                  <p className="text-zinc-400 text-sm leading-relaxed">{c.text}</p>
                 </div>
-
-                <p className="text-zinc-300 text-sm leading-relaxed mb-5">
-                  &ldquo;{t.text}&rdquo;
-                </p>
-
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <p className="text-zinc-200 text-sm font-bold">{t.name}</p>
-                    <p className="text-zinc-600 text-xs">{t.role} · {t.handle}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -619,6 +599,9 @@ export default function LandingPage() {
                 { href: "/login",    label: "Autentificare" },
                 { href: "/register", label: "Înregistrare" },
                 { href: "#features", label: "Funcționalități" },
+                { href: "/terms",    label: "Termeni" },
+                { href: "/privacy",  label: "Confidențialitate" },
+                { href: "/contact",  label: "Contact" },
               ].map((link) => (
                 <Link key={link.href} href={link.href}
                   className="hover:text-zinc-400 transition-colors font-medium">
@@ -631,6 +614,16 @@ export default function LandingPage() {
               &copy; {new Date().getFullYear()} TradeGx · Toate drepturile rezervate.
             </p>
           </div>
+
+          {/* Disclaimer de risc */}
+          <p className="mt-8 pt-6 border-t border-zinc-800/40 text-[11px] leading-relaxed text-zinc-700 max-w-4xl">
+            <strong className="text-zinc-600">Avertisment de risc:</strong> TradeGx este un instrument de
+            jurnalizare, analiză și educație — nu este broker, nu execută tranzacții și nu oferă consultanță
+            financiară sau de investiții. Tranzacționarea instrumentelor financiare (forex, CFD-uri, crypto)
+            implică un risc semnificativ de pierdere a capitalului și nu este potrivită pentru oricine.
+            Statisticile afișate în materialele de prezentare sunt demonstrative. Performanța trecută nu
+            garantează rezultate viitoare.
+          </p>
         </div>
       </footer>
     </div>

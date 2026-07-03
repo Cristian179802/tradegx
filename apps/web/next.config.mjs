@@ -24,6 +24,13 @@ const config = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          // Anti-clickjacking (site-ul nu se încarcă în iframe-uri străine).
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          // HTTPS forțat 2 ani, inclusiv subdomenii — semnal puternic anti-phishing.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
         ],
       },
     ];
