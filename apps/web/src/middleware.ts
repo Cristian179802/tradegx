@@ -10,6 +10,12 @@ const publicRoutes = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  // Pagini legale — obligatoriu publice (vizitatori, scannere, GDPR)
+  "/terms",
+  "/privacy",
+  "/contact",
+  "/robots.txt",
+  "/sitemap.xml",
 ];
 
 const publicPrefixes = [
@@ -22,6 +28,7 @@ const publicPrefixes = [
   "/favicon",
   "/images",
   "/ea",             // pre-compiled EA files in /public/ea/
+  "/.well-known",    // security.txt și alte standarde web
 ];
 
 export default auth((req: NextRequest & { auth: { user?: { id?: string } } | null }) => {
