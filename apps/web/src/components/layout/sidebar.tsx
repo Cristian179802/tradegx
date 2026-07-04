@@ -11,6 +11,7 @@ import {
   Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
   PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
   Trophy, ListChecks, Newspaper, Gauge, Award, GraduationCap, Crosshair, Dices,
+  CreditCard,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -91,6 +92,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Cont",
     items: [
       { href: "/settings", label: "Setări", icon: Settings, color: "zinc" },
+      { href: "/billing", label: "Abonament", icon: CreditCard, color: "indigo" },
     ],
   },
 ];

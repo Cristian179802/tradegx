@@ -7,6 +7,7 @@ import {
   Calculator, Shield, Award, TrendingUp, BarChart3, FlaskConical, Brain,
   BellRing, GraduationCap, Crosshair, Dices, LineChart, Globe, Gauge,
   CalendarDays, Newspaper, Users, Settings, Plus, Search, CornerDownLeft,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,7 @@ const COMMANDS: Cmd[] = [
   { label: "Știri de Piață", href: "/news", icon: Newspaper, keywords: "news" },
   { label: "Comunitate", href: "/community", icon: Users, keywords: "community echipe" },
   { label: "Setări", href: "/settings", icon: Settings, keywords: "settings profil telegram notificari" },
+  { label: "Abonament", href: "/billing", icon: CreditCard, keywords: "billing facturare plata pro upgrade abonament stripe" },
 ];
 
 const norm = (s: string) =>
