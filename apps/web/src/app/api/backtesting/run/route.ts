@@ -5,6 +5,7 @@ import { z } from "zod";
 import { fetchHistoricalCandles } from "@/lib/yahoo-finance";
 import { runBacktest } from "@/lib/backtest-engine";
 import type { StrategyType, StrategyRules } from "@/lib/backtest-engine";
+import { hasPro, FREE_LIMITS } from "@/lib/plan";
 
 const schema = z.object({
   strategyId:     z.string().cuid(),
@@ -37,6 +38,29 @@ export async function POST(req: NextRequest) {
     where: { id: strategyId, userId: session.user.id, isActive: true },
   });
   if (!strategy) return NextResponse.json({ error: "Strategie negăsită" }, { status: 404 });
+
+  // Plan FREE: maximum 3 backteste pe luna calendaristică curentă
+  if (!(await hasPro(session.user.id))) {
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const used = await prisma.backtest.count({
+      where: {
+        strategy: { userId: session.user.id },
+        createdAt: { gte: monthStart },
+      },
+    });
+    if (used >= FREE_LIMITS.backtestsPerMonth) {
+      return NextResponse.json(
+        {
+          error: `Ai folosit cele ${FREE_LIMITS.backtestsPerMonth} backteste gratuite ale lunii. Treci la PRO pentru backtesting nelimitat.`,
+          code: "PRO_REQUIRED",
+          upgradeUrl: "/pricing",
+        },
+        { status: 402 }
+      );
+    }
+  }
 
   // Create backtest record (RUNNING)
   const backtest = await prisma.backtest.create({

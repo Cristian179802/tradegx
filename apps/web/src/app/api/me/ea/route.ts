@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { hasPro, PRO_REQUIRED } from "@/lib/plan";
 import { createHmac } from "crypto";
 import { generateMQ4, generateMQ5 } from "@/lib/ea-templates";
 
@@ -21,6 +22,9 @@ export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  }
+  if (!(await hasPro(session.user.id))) {
+    return NextResponse.json(PRO_REQUIRED, { status: 402 });
   }
 
   const userId     = session.user.id;

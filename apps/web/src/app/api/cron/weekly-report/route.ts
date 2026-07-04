@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { generateWeeklyReport } from "@/lib/weekly-report";
 import { sendTelegramMessage, escapeHtml } from "@/lib/telegram";
 import { sendPushToUser } from "@/lib/push";
+import { hasPro } from "@/lib/plan";
 
 export const maxDuration = 120;
 
@@ -31,6 +32,9 @@ export async function GET(req: NextRequest) {
 
   for (const { userId } of accounts) {
     try {
+      // Raportul AI e funcție PRO (generarea costă credit Anthropic)
+      if (!(await hasPro(userId))) continue;
+
       // Dedup: nu genera de două ori raportul aceleiași săptămâni
       const recent = await prisma.alert.findFirst({
         where: {

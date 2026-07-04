@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { hasPro, PRO_REQUIRED } from "@/lib/plan";
 
 // GET /api/analytics/montecarlo?days=365&accountId=...
 // Returnează randamentele procentuale per tranzacție (materia primă a simulării).
@@ -8,6 +9,9 @@ export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  }
+  if (!(await hasPro(session.user.id))) {
+    return NextResponse.json(PRO_REQUIRED, { status: 402 });
   }
 
   const days = Math.min(Number(req.nextUrl.searchParams.get("days") ?? 365), 3650);

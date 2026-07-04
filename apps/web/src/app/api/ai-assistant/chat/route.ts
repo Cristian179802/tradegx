@@ -1,6 +1,7 @@
 ﻿import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@/lib/auth";
+import { hasPro } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
@@ -187,6 +188,9 @@ ${s.last5Trades}
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return new Response("Unauthorized", { status: 401 });
+  if (!(await hasPro(session.user.id))) {
+    return Response.json({ error: "AI Assistant este disponibil doar in planul PRO", code: "PRO_REQUIRED", upgradeUrl: "/pricing" }, { status: 402 });
+  }
 
   if (!checkRateLimit(session.user.id)) {
     return new Response(JSON.stringify({ error: "Ai atins limita de 30 mesaje/oră. Revino mai târziu." }), {

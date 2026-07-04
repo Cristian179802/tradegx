@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { hasPro, FREE_LIMITS } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { tradingAccountSchema } from "@/lib/validations";
 
@@ -58,6 +59,23 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  }
+
+  // Plan FREE: un singur cont de trading
+  if (!(await hasPro(session.user.id))) {
+    const count = await prisma.tradingAccount.count({
+      where: { userId: session.user.id },
+    });
+    if (count >= FREE_LIMITS.tradingAccounts) {
+      return NextResponse.json(
+        {
+          error: "Planul FREE include un singur cont de trading. Treci la PRO pentru conturi nelimitate.",
+          code: "PRO_REQUIRED",
+          upgradeUrl: "/pricing",
+        },
+        { status: 402 }
+      );
+    }
   }
 
   const body = await req.json().catch(() => null);

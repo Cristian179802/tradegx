@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { hasPro, PRO_REQUIRED } from "@/lib/plan";
 
 const addSchema = z.object({
   symbol: z.string().min(1).max(20).toUpperCase(),
@@ -62,6 +63,9 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  if (!(await hasPro(session.user.id))) {
+    return NextResponse.json(PRO_REQUIRED, { status: 402 });
+  }
 
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });

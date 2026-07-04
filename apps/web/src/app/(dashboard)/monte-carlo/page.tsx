@@ -3,8 +3,10 @@
 import * as React from "react";
 import { Dices, Play, ShieldAlert, Trophy, Percent } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PaywallCard } from "@/components/billing/paywall-card";
 import { CountUp } from "@/components/ui/count-up";
 
 // ── Simulator Monte Carlo ───────────────────────────────────────────────────
@@ -188,6 +190,8 @@ function NumInput({
 }
 
 export default function MonteCarloPage() {
+  const { data: session } = useSession();
+  const isFree = session?.user?.plan === "FREE";
   const [returns, setReturns] = React.useState<number[] | null>(null);
   const [loading, setLoading] = React.useState(true);
 
@@ -198,11 +202,29 @@ export default function MonteCarloPage() {
   const [running, setRunning] = React.useState(false);
 
   React.useEffect(() => {
+    if (isFree) { setLoading(false); return; }
     fetch("/api/analytics/montecarlo?days=3650", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setReturns(d?.returns ?? []))
       .finally(() => setLoading(false));
-  }, []);
+  }, [isFree]);
+
+  if (isFree) {
+    return (
+      <div className="max-w-3xl pb-8">
+        <PaywallCard
+          feature="Simulator Monte Carlo"
+          description="Află probabilitatea să treci un challenge de prop firm ÎNAINTE să plătești pentru el — pe baza rezultatelor tale reale."
+          bullets={[
+            "10.000 de simulări pe distribuția reală a tranzacțiilor tale",
+            "Probabilitatea de a atinge targetul vs. riscul de a pica challenge-ul",
+            "Percentile de equity + histogramă + trasee alternative",
+            "Parametri configurabili: target, drawdown maxim, număr de tranzacții",
+          ]}
+        />
+      </div>
+    );
+  }
 
   const run = React.useCallback(() => {
     if (!returns || returns.length < 10) return;

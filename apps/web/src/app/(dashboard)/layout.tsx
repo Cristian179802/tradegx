@@ -5,6 +5,7 @@ import { Topbar } from "@/components/layout/topbar";
 import { LocaleWidget } from "@/components/dashboard/locale-widget";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { CommandPalette } from "@/components/layout/command-palette";
+import { TrialBanner } from "@/components/billing/trial-banner";
 
 export default async function DashboardLayout({
   children,
@@ -19,6 +20,7 @@ export default async function DashboardLayout({
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Topbar />
+        <TrialBanner />
         <main
           className="flex-1 overflow-y-auto mesh-bg"
           style={{ background: "#09090b" }}

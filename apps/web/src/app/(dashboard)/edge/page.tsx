@@ -9,8 +9,10 @@ import {
   Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PaywallCard } from "@/components/billing/paywall-card";
 import type { EdgeReport, EdgeStat } from "@/lib/edge-finder";
 
 const PERIOADE = [
@@ -80,18 +82,38 @@ function EdgeCard({ stat, kind }: { stat: EdgeStat; kind: "edge" | "leak" }) {
 }
 
 export default function EdgeFinderPage() {
+  const { data: session } = useSession();
+  const isFree = session?.user?.plan === "FREE";
   const [days, setDays] = React.useState(365);
   const [report, setReport] = React.useState<EdgeReport | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [openDim, setOpenDim] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    if (isFree) { setLoading(false); return; }
     setLoading(true);
     fetch(`/api/analytics/edge?days=${days}`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => setReport(data))
       .finally(() => setLoading(false));
-  }, [days]);
+  }, [days, isFree]);
+
+  if (isFree) {
+    return (
+      <div className="max-w-3xl pb-8">
+        <PaywallCard
+          feature="Edge Finder"
+          description="Motorul statistic care îți arată exact unde câștigi și unde pierzi bani — pe simbol, setup, killzone, zi și oră."
+          bullets={[
+            "Edge-urile tale profitabile, dovedite statistic (min. 5 apariții)",
+            "Leak-urile care îți scurg contul, identificate automat",
+            "Analiză pe 10 dimensiuni: simbol, setup, killzone, zi, oră, durată, tag",
+            "Se actualizează cu fiecare tranzacție nouă din jurnal",
+          ]}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-8 max-w-5xl">

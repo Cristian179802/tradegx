@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { hasPro, PRO_REQUIRED } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { getDeals, pairDeals } from "@/lib/metaapi";
 import { checkTradingRuleViolations } from "@/lib/trading-rules";
@@ -8,6 +9,9 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  }
+  if (!(await hasPro(session.user.id))) {
+    return NextResponse.json(PRO_REQUIRED, { status: 402 });
   }
 
   const body = await req.json().catch(() => null);

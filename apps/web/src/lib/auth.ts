@@ -16,6 +16,8 @@ declare module "next-auth" {
       role: Role;
       plan: SubscriptionPlan;
       isTrialing: boolean;
+      /** ms epoch — sfârșitul trial-ului (pentru countdown în UI) */
+      trialEndsAt: number | null;
     };
   }
   interface JWT {
@@ -23,6 +25,7 @@ declare module "next-auth" {
     role: Role;
     plan: SubscriptionPlan;
     isTrialing: boolean;
+    trialEndsAt: number | null;
   }
 }
 
@@ -72,6 +75,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role: user.role,
           plan: user.subscription?.plan ?? "FREE",
           isTrialing: user.subscription?.status === "TRIALING",
+          trialEndsAt:
+            user.subscription?.status === "TRIALING" && user.subscription.trialEnd
+              ? user.subscription.trialEnd.getTime()
+              : null,
         };
       },
     }),
@@ -83,11 +90,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = (user as { role: Role }).role;
         token.plan = (user as { plan: SubscriptionPlan }).plan;
         token.isTrialing = (user as { isTrialing: boolean }).isTrialing;
+        token.trialEndsAt = (user as { trialEndsAt: number | null }).trialEndsAt ?? null;
       }
 
       if (trigger === "update" && session) {
         token.plan = session.plan;
         token.isTrialing = session.isTrialing;
+        if ("trialEndsAt" in session) token.trialEndsAt = session.trialEndsAt;
       }
 
       return token;
@@ -96,8 +105,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as Role;
-        session.user.plan = token.plan as SubscriptionPlan;
-        session.user.isTrialing = token.isTrialing as boolean;
+
+        // Planul EFECTIV, calculat la fiecare cerere de sesiune:
+        // trial valid → PRO; trial expirat → FREE (fără re-login).
+        const trialEndsAt = (token.trialEndsAt as number | null) ?? null;
+        const paidPro = (token.plan as SubscriptionPlan) === "PRO";
+        const trialActive =
+          !paidPro && trialEndsAt !== null && Date.now() < trialEndsAt;
+
+        session.user.plan = paidPro || trialActive ? "PRO" : "FREE";
+        session.user.isTrialing = trialActive;
+        session.user.trialEndsAt = trialActive ? trialEndsAt : null;
       }
       return session;
     },
