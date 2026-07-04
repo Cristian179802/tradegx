@@ -10,10 +10,12 @@ const publicRoutes = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
-  // Pagini legale — obligatoriu publice (vizitatori, scannere, GDPR)
+  // Pagini legale + prezentare — obligatoriu publice (vizitatori, scannere, GDPR)
   "/terms",
   "/privacy",
   "/contact",
+  "/about",
+  "/roadmap",
   "/robots.txt",
   "/sitemap.xml",
   // PWA — manifestul și iconițele trebuie accesibile fără login

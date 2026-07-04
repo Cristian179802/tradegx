@@ -17,26 +17,26 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
+// Matricea REALĂ — identică cu gate-urile din server (lib/plan.ts) și /billing.
 const FEATURES = [
-  { label: "Tranzacții pe lună", free: "50", pro: "Nelimitat" },
-  { label: "Conturi de trading", free: "1", pro: "Nelimitat" },
-  { label: "Dashboard analiză", free: true, pro: true },
-  { label: "Etichetare SMC/ICT setup", free: true, pro: true },
-  { label: "Screenshot-uri per trade", free: "3", pro: "Nelimitat" },
-  { label: "Jurnal de tranzacții", free: true, pro: true },
+  { label: "Jurnal de tranzacții (nelimitat) + etichetare SMC/ICT", free: true, pro: true },
   { label: "Import CSV (MT4/MT5/cTrader)", free: true, pro: true },
-  { label: "Calendar economic", free: true, pro: true },
-  { label: "Calculator lot universal", free: true, pro: true },
-  { label: "AI Trading Coach", free: false, pro: true },
-  { label: "Analiză AI per tranzacție", free: false, pro: true },
-  { label: "Sincronizare broker MT5", free: false, pro: true },
-  { label: "Alerte reguli prop firm", free: false, pro: true },
+  { label: "Academie completă — 41 lecții, quiz-uri, certificat", free: true, pro: true },
+  { label: "Dashboard analiză + calculator lot + checklist", free: true, pro: true },
+  { label: "Calendar economic + știri cu impact", free: true, pro: true },
   { label: "Acces comunitate", free: true, pro: true },
-  { label: "Echipe și coaching", free: false, pro: true },
-  { label: "Backtesting strategie", free: false, pro: true },
-  { label: "Export PDF rapoarte prop firm", free: false, pro: true },
-  { label: "Suport prioritar", free: false, pro: true },
-  { label: "Acces API", free: false, pro: true },
+  { label: "Conturi de trading", free: "1", pro: "Nelimitate" },
+  { label: "Backtesting pe date istorice reale", free: "3 / lună", pro: "Nelimitat" },
+  { label: "Sincronizare automată broker (EA MT4/MT5 + MetaAPI)", free: false, pro: true },
+  { label: "Semnale AI (HPS) — max 3/zi + Telegram", free: false, pro: true },
+  { label: "AI Trading Coach / Assistant", free: false, pro: true },
+  { label: "Edge Finder — statistica edge-urilor și leak-urilor tale", free: false, pro: true },
+  { label: "Simulator Monte Carlo (probabilitate challenge)", free: false, pro: true },
+  { label: "Raport AI săptămânal (in-app + Telegram)", free: false, pro: true },
+  { label: "Alerte de preț pe watchlist", free: false, pro: true },
+  { label: "Webhook TradingView → alerte instant", free: false, pro: true },
+  { label: "Alerte reguli prop firm (daily loss, drawdown)", free: false, pro: true },
+  { label: "Export PDF rapoarte", free: false, pro: true },
 ];
 
 const FAQ = [
@@ -58,7 +58,11 @@ const FAQ = [
   },
   {
     q: "Există un plan gratuit permanent?",
-    a: "Da. Planul GRATUIT permite până la 50 de tranzacții/lună cu un cont și analiză completă. Fără limită de timp.",
+    a: "Da. Planul GRATUIT include jurnal nelimitat, import CSV, Academia completă (41 de lecții cu quiz-uri și certificat), analytics de bază, un cont de trading și 3 backteste pe lună. Fără limită de timp.",
+  },
+  {
+    q: "Semnalele AI sunt recomandări de investiții?",
+    a: "Nu. Semnalele și toate funcțiile AI au exclusiv scop educațional și informativ — nu constituie consultanță financiară. Deciziile de tranzacționare îți aparțin în totalitate, iar tradingul implică risc real de pierdere.",
   },
 ];
 

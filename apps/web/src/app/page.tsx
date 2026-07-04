@@ -172,12 +172,49 @@ const STATS = [
   { value: "E2E", label: "Criptare completă", icon: Lock, color: "text-rose-400", bg: "bg-rose-500/10 border-rose-500/20" },
 ];
 
-// Mock floating stat cards for hero visualization
+// Mock dashboard demonstrativ — valori REALISTE, nu de marketing.
 const HERO_STATS = [
-  { label: "Win Rate", value: "68.4%", trend: "+4.2%", up: true, color: "emerald" },
-  { label: "Profit Factor", value: "2.14", trend: "+0.32", up: true, color: "indigo" },
-  { label: "Net P&L", value: "+$12,840", trend: "30 zile", up: true, color: "emerald" },
-  { label: "Max DD", value: "4.8%", trend: "SAFE", up: true, color: "violet" },
+  { label: "Win Rate", value: "56.8%", trend: "+2.1%", up: true, color: "emerald" },
+  { label: "Profit Factor", value: "1.68", trend: "+0.14", up: true, color: "indigo" },
+  { label: "Net P&L", value: "+$1,940", trend: "30 zile", up: true, color: "emerald" },
+  { label: "Max DD", value: "8.2%", trend: "-1.3%", up: true, color: "violet" },
+];
+
+// Integrări REALE, disponibile azi — fără promisiuni goale.
+const INTEGRATIONS = [
+  { name: "MetaTrader 4 / 5", desc: "EA gratuit — sincronizare automată a tranzacțiilor", status: "live" },
+  { name: "MetaAPI Cloud", desc: "Sincronizare 24/7 fără terminal deschis", status: "live" },
+  { name: "TradingView", desc: "Alertele tale ajung instant în TradeGx", status: "live" },
+  { name: "Import CSV / HTML", desc: "Extrase MT4, MT5, cTrader", status: "live" },
+  { name: "Telegram", desc: "Alerte, semnale și rapoarte pe telefon", status: "live" },
+  { name: "cTrader · TradeLocker", desc: "Următorii pe listă", status: "soon" },
+];
+
+const LANDING_FAQ = [
+  {
+    q: "Ce se întâmplă după cele 14 zile de probă PRO?",
+    a: "Treci automat pe planul Standard (gratuit pentru totdeauna): jurnal nelimitat, Academia completă, analytics de bază, un cont de trading și 3 backteste pe lună. Nicio taxă fără acordul tău explicit — nu îți cerem cardul la înregistrare.",
+  },
+  {
+    q: "TradeGx are acces la banii mei?",
+    a: "Nu, niciodată. Conectarea la broker se face exclusiv cu parola de investitor (read-only): putem citi istoricul tranzacțiilor, dar este imposibil să deschidem, închidem sau modificăm poziții. Fondurile rămân 100% la brokerul tău.",
+  },
+  {
+    q: "Semnalele AI sunt recomandări de investiții?",
+    a: "Nu. Toate funcțiile AI au scop educațional și informativ — nu constituie consultanță financiară. Deciziile îți aparțin, iar tradingul implică risc real de pierdere a capitalului.",
+  },
+  {
+    q: "Ce brokeri pot conecta?",
+    a: "Orice broker MT4 sau MT5 — prin EA-ul nostru gratuit sau prin MetaAPI (sincronizare cloud 24/7, inclusiv FTMO, IC Markets, Pepperstone și sute de alții). Alternativ: import CSV/HTML sau adăugare manuală.",
+  },
+  {
+    q: "Unde sunt stocate datele mele?",
+    a: "În Uniunea Europeană (Frankfurt), criptate în tranzit și la stocare, conform GDPR. Nu vindem datele nimănui, iar la ștergerea contului dispar și ele. Detalii complete în Politica de Confidențialitate.",
+  },
+  {
+    q: "Pot anula abonamentul PRO oricând?",
+    a: "Da, dintr-un click, fără telefoane și fără condiții. Păstrezi accesul PRO până la finalul perioadei plătite, iar datele tale rămân intacte pe planul gratuit.",
+  },
 ];
 
 export default function LandingPage() {
@@ -538,6 +575,160 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Integrări ──────────────────────────────────────────────────────── */}
+      <section id="integrari" className="py-24 px-6 border-t border-zinc-900">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
+              <Wifi className="w-3 h-3" />
+              Integrări
+            </div>
+            <h2 className="text-3xl font-black mb-3 tracking-tight">Se conectează la ce folosești deja</h2>
+            <p className="text-zinc-500">Doar integrări funcționale azi — fără logo-uri de decor.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {INTEGRATIONS.map((it) => (
+              <div
+                key={it.name}
+                className={`rounded-2xl border p-4 ${
+                  it.status === "live"
+                    ? "border-zinc-800/80 bg-zinc-900/60"
+                    : "border-dashed border-zinc-800 bg-zinc-950/40"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className={`text-sm font-bold ${it.status === "live" ? "text-zinc-100" : "text-zinc-500"}`}>
+                    {it.name}
+                  </p>
+                  <span
+                    className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
+                      it.status === "live"
+                        ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+                        : "text-zinc-500 bg-zinc-800/60 border-zinc-700"
+                    }`}
+                  >
+                    {it.status === "live" ? "Activ" : "În curând"}
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-500">{it.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Prețuri ────────────────────────────────────────────────────────── */}
+      <section id="preturi" className="py-24 px-6 border-t border-zinc-900">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
+              <Zap className="w-3 h-3" />
+              Prețuri
+            </div>
+            <h2 className="text-3xl font-black mb-3 tracking-tight">Simplu: gratuit sau PRO</h2>
+            <p className="text-zinc-500">14 zile PRO cadou la înregistrare — fără card. Apoi alegi.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Standard */}
+            <div className="rounded-3xl border border-zinc-800/80 bg-zinc-900/50 p-7">
+              <p className="text-sm font-black text-zinc-300 mb-1">Standard</p>
+              <p className="text-4xl font-black mb-1">0$</p>
+              <p className="text-xs text-zinc-600 mb-5">gratuit pentru totdeauna</p>
+              <ul className="space-y-2.5 mb-7">
+                {[
+                  "Jurnal de tranzacții nelimitat + import CSV",
+                  "Academia completă: 41 lecții, quiz-uri, certificat",
+                  "Analytics de bază, calculator lot, checklist",
+                  "Calendar economic + știri cu impact",
+                  "1 cont de trading · 3 backteste/lună",
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-zinc-400">
+                    <CheckCircle2 className="w-4 h-4 text-zinc-600 shrink-0 mt-0.5" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/register"
+                className="block text-center rounded-xl border border-zinc-700 py-3 text-sm font-bold text-zinc-300 hover:border-zinc-600 hover:text-white transition-colors"
+              >
+                Începe gratuit
+              </Link>
+            </div>
+
+            {/* PRO */}
+            <div className="relative rounded-3xl border border-indigo-500/40 bg-gradient-to-b from-indigo-500/[0.08] to-zinc-900/50 p-7 overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/70 to-transparent" />
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-sm font-black text-indigo-300">PRO</p>
+                <span className="text-[9px] font-black uppercase tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/40 rounded-full px-2 py-0.5">
+                  Recomandat
+                </span>
+              </div>
+              <p className="text-4xl font-black mb-1">
+                12$<span className="text-base font-bold text-zinc-500">/lună</span>
+              </p>
+              <p className="text-xs text-zinc-600 mb-5">plătit anual · sau 19$ lunar · anulezi oricând</p>
+              <ul className="space-y-2.5 mb-7">
+                {[
+                  "Tot ce e în Standard, plus:",
+                  "Sincronizare automată broker (EA MT4/MT5 + MetaAPI)",
+                  "Semnale AI (HPS) + AI Coach personal",
+                  "Edge Finder + Simulator Monte Carlo",
+                  "Raport AI săptămânal · alerte preț · TradingView",
+                  "Backtesting nelimitat · conturi nelimitate",
+                ].map((f, i) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-zinc-300">
+                    <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${i === 0 ? "text-zinc-600" : "text-emerald-400"}`} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/register"
+                className="block text-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all"
+              >
+                Începe cu 14 zile PRO gratuit
+              </Link>
+            </div>
+          </div>
+
+          <p className="text-center mt-6">
+            <Link href="/pricing" className="text-sm text-zinc-500 hover:text-zinc-300 underline underline-offset-4 transition-colors">
+              Vezi comparația completă a planurilor →
+            </Link>
+          </p>
+        </div>
+      </section>
+
+      {/* ── FAQ ────────────────────────────────────────────────────────────── */}
+      <section id="faq" className="py-24 px-6 border-t border-zinc-900">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
+              <Sparkles className="w-3 h-3" />
+              Întrebări frecvente
+            </div>
+            <h2 className="text-3xl font-black tracking-tight">Răspunsuri directe, fără ocolișuri</h2>
+          </div>
+          <div className="space-y-3">
+            {LANDING_FAQ.map((item) => (
+              <details
+                key={item.q}
+                className="group rounded-2xl border border-zinc-800/80 bg-zinc-900/50 open:border-indigo-500/30 transition-colors"
+              >
+                <summary className="flex items-center justify-between cursor-pointer list-none px-5 py-4 text-sm font-bold text-zinc-200 [&::-webkit-details-marker]:hidden">
+                  {item.q}
+                  <ChevronRight className="w-4 h-4 text-zinc-600 group-open:rotate-90 transition-transform shrink-0 ml-3" />
+                </summary>
+                <p className="px-5 pb-5 text-sm leading-relaxed text-zinc-400">{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA Banner ─────────────────────────────────────────────────────── */}
       <section className="py-28 px-6">
         <div className="max-w-2xl mx-auto text-center">
@@ -602,6 +793,8 @@ export default function LandingPage() {
                 { href: "/login",    label: "Autentificare" },
                 { href: "/register", label: "Înregistrare" },
                 { href: "#features", label: "Funcționalități" },
+                { href: "/about",    label: "Despre" },
+                { href: "/roadmap",  label: "Roadmap" },
                 { href: "/terms",    label: "Termeni" },
                 { href: "/privacy",  label: "Confidențialitate" },
                 { href: "/contact",  label: "Contact" },
