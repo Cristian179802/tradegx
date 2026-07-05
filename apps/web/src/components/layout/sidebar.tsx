@@ -14,6 +14,7 @@ import {
   CreditCard, Medal,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,61 +40,62 @@ interface NavGroup {
   items: NavItem[];
 }
 
+// label = cheie în messages/{locale}.json → nav.* (tradus la randare)
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Trading",
+    label: "groupTrading",
     items: [
-      { href: "/dashboard",    label: "Panou de Control", icon: LayoutDashboard, color: "indigo" },
-      { href: "/signals",      label: "Semnale AI",        icon: Target,          color: "emerald", badge: "HPS" },
-      { href: "/trades",       label: "Tranzacții",        icon: BookOpen,        color: "violet" },
-      { href: "/journal",      label: "Jurnal",            icon: NotebookPen,     color: "emerald" },
-      { href: "/checklist",    label: "Checklist Pre-Trade", icon: ListChecks,    color: "sky" },
-      { href: "/goals",        label: "Obiective",         icon: Trophy,          color: "emerald" },
-      { href: "/calculator",   label: "Calculator Lot",    icon: Calculator,      color: "amber" },
-      { href: "/risk-manager", label: "Risk Manager",      icon: Shield,          color: "amber" },
-      { href: "/prop-firm",    label: "Prop Firm",         icon: Award,           color: "amber" },
-      { href: "/accounts",     label: "Conturi",           icon: TrendingUp,      color: "sky" },
-      { href: "/analytics",    label: "Analiză",           icon: BarChart3,       color: "violet" },
-      { href: "/edge",         label: "Edge Finder",       icon: Crosshair,       color: "emerald", badge: "NOU" },
-      { href: "/monte-carlo",  label: "Monte Carlo",       icon: Dices,           color: "violet", badge: "NOU" },
-      { href: "/backtesting",  label: "Backtesting",       icon: FlaskConical,    color: "rose" },
+      { href: "/dashboard",    label: "dashboard",   icon: LayoutDashboard, color: "indigo" },
+      { href: "/signals",      label: "signals",     icon: Target,          color: "emerald", badge: "HPS" },
+      { href: "/trades",       label: "trades",      icon: BookOpen,        color: "violet" },
+      { href: "/journal",      label: "journal",     icon: NotebookPen,     color: "emerald" },
+      { href: "/checklist",    label: "checklist",   icon: ListChecks,      color: "sky" },
+      { href: "/goals",        label: "goals",       icon: Trophy,          color: "emerald" },
+      { href: "/calculator",   label: "calculator",  icon: Calculator,      color: "amber" },
+      { href: "/risk-manager", label: "riskManager", icon: Shield,          color: "amber" },
+      { href: "/prop-firm",    label: "propFirm",    icon: Award,           color: "amber" },
+      { href: "/accounts",     label: "accounts",    icon: TrendingUp,      color: "sky" },
+      { href: "/analytics",    label: "analytics",   icon: BarChart3,       color: "violet" },
+      { href: "/edge",         label: "edge",        icon: Crosshair,       color: "emerald", badge: "NOU" },
+      { href: "/monte-carlo",  label: "monteCarlo",  icon: Dices,           color: "violet", badge: "NOU" },
+      { href: "/backtesting",  label: "backtesting", icon: FlaskConical,    color: "rose" },
     ],
   },
   {
-    label: "AI",
+    label: "groupAI",
     items: [
-      { href: "/ai-assistant", label: "AI Assistant", icon: Brain,    color: "violet" },
-      { href: "/alerts",       label: "Alerte AI",    icon: BellRing, color: "amber" },
+      { href: "/ai-assistant", label: "aiAssistant", icon: Brain,    color: "violet" },
+      { href: "/alerts",       label: "alerts",      icon: BellRing, color: "amber" },
     ],
   },
   {
-    label: "Educație",
+    label: "groupEducation",
     items: [
-      { href: "/academy", label: "Academie", icon: GraduationCap, color: "indigo" },
-      { href: "/achievements", label: "Realizări", icon: Medal, color: "amber", badge: "NOU" },
+      { href: "/academy",      label: "academy",      icon: GraduationCap, color: "indigo" },
+      { href: "/achievements", label: "achievements", icon: Medal,         color: "amber", badge: "NOU" },
     ],
   },
   {
-    label: "Piețe",
+    label: "groupMarkets",
     items: [
-      { href: "/charts",   label: "Grafice Live",      icon: LineChart,    color: "emerald" },
-      { href: "/market",   label: "Selector Piață",    icon: Globe,        color: "sky" },
-      { href: "/tools",    label: "Unelte Pro",        icon: Gauge,        color: "violet" },
-      { href: "/calendar", label: "Calendar Economic", icon: CalendarDays, color: "amber" },
-      { href: "/news",     label: "Știri de Piață",    icon: Newspaper,    color: "sky" },
+      { href: "/charts",   label: "charts",   icon: LineChart,    color: "emerald" },
+      { href: "/market",   label: "market",   icon: Globe,        color: "sky" },
+      { href: "/tools",    label: "tools",    icon: Gauge,        color: "violet" },
+      { href: "/calendar", label: "calendar", icon: CalendarDays, color: "amber" },
+      { href: "/news",     label: "news",     icon: Newspaper,    color: "sky" },
     ],
   },
   {
-    label: "Comunitate",
+    label: "groupCommunity",
     items: [
-      { href: "/community", label: "Comunitate", icon: Users, proOnly: true, color: "indigo" },
+      { href: "/community", label: "community", icon: Users, proOnly: true, color: "indigo" },
     ],
   },
   {
-    label: "Cont",
+    label: "groupAccount",
     items: [
-      { href: "/settings", label: "Setări", icon: Settings, color: "zinc" },
-      { href: "/billing", label: "Abonament", icon: CreditCard, color: "indigo" },
+      { href: "/settings", label: "settings", icon: Settings,   color: "zinc" },
+      { href: "/billing",  label: "billing",  icon: CreditCard, color: "indigo" },
     ],
   },
 ];
@@ -119,6 +121,7 @@ const INDICATOR_MAP: Record<string, string> = {
 };
 
 export function Sidebar() {
+  const t = useTranslations("nav");
   const pathname = usePathname();
   const { data: session } = useSession();
   const { sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useAuthStore();
@@ -241,7 +244,7 @@ export function Sidebar() {
                   transition={{ duration: 0.12 }}
                   className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.12em] px-4 pt-4 pb-1.5 select-none"
                 >
-                  {group.label}
+                  {t(group.label)}
                 </motion.p>
               )}
             </AnimatePresence>
@@ -297,7 +300,7 @@ export function Sidebar() {
                         transition={{ duration: 0.15 }}
                         className="whitespace-nowrap overflow-hidden flex-1 text-[13px] font-medium"
                       >
-                        {item.label}
+                        {t(item.label)}
                       </motion.span>
                     )}
                   </AnimatePresence>
@@ -309,7 +312,7 @@ export function Sidebar() {
                   )}
                   {expanded && item.badge && !item.proOnly && (
                     <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0 h-4 font-bold">
-                      {item.badge}
+                      {item.badge === "NOU" ? t("new") : item.badge}
                     </Badge>
                   )}
                   {expanded && item.href === "/alerts" && (

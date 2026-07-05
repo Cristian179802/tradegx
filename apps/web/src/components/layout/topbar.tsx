@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { NotificationDropdown } from "@/components/layout/notification-dropdown";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { AccountSwitcher } from "@/components/layout/account-switcher";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -92,6 +93,8 @@ export function Topbar() {
               PRO
             </Badge>
           )}
+
+          <LanguageSwitcher compact />
 
           <NotificationDropdown />
 

@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Sparkles, X, Zap } from "lucide-react";
 
 // ── Banner plan: countdown trial / invitație upgrade ────────────────────────
@@ -11,6 +12,7 @@ import { Sparkles, X, Zap } from "lucide-react";
 const DISMISS_KEY = "tradegx-free-banner-dismissed";
 
 export function TrialBanner() {
+  const t = useTranslations("banner");
   const { data: session, status } = useSession();
   const [dismissed, setDismissed] = React.useState(true);
 
@@ -33,15 +35,14 @@ export function TrialBanner() {
       <div className="flex items-center justify-center gap-2.5 px-4 py-2 bg-gradient-to-r from-indigo-600/15 via-violet-600/15 to-indigo-600/15 border-b border-indigo-500/20 text-xs">
         <Zap className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
         <span className="text-zinc-300 font-medium">
-          <span className="font-black text-indigo-300">PRO Trial</span> — mai ai{" "}
-          <span className="font-black text-indigo-300">{daysLeft} {daysLeft === 1 ? "zi" : "zile"}</span>{" "}
-          cu acces complet
+          <span className="font-black text-indigo-300">{t("trialLabel")}</span> —{" "}
+          {t("trialDaysLeft", { days: daysLeft })}
         </span>
         <Link
           href="/pricing"
           className="font-bold text-indigo-300 hover:text-indigo-200 underline underline-offset-2 transition-colors"
         >
-          Păstrează PRO →
+          {t("trialCta")}
         </Link>
       </div>
     );
@@ -52,12 +53,9 @@ export function TrialBanner() {
     return (
       <div className="flex items-center justify-center gap-2.5 px-4 py-1.5 bg-zinc-900/90 border-b border-zinc-800 text-[11px]">
         <Sparkles className="w-3 h-3 text-amber-400 shrink-0" />
-        <span className="text-zinc-500">
-          Ești pe planul <span className="font-bold text-zinc-300">Standard</span> — semnalele AI,
-          Edge Finder și sincronizarea broker sunt în PRO
-        </span>
+        <span className="text-zinc-500">{t("freeText")}</span>
         <Link href="/pricing" className="font-bold text-amber-400 hover:text-amber-300 transition-colors">
-          Vezi PRO →
+          {t("freeCta")}
         </Link>
         <button
           onClick={() => {

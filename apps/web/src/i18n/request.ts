@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
   const locale = cookieStore.get("locale")?.value ?? "ro";
-  const validLocales = ["ro", "en", "es", "de", "fr", "it"];
+  // Doar limbile cu dicționar existent (altfel import-ul aruncă la runtime)
+  const validLocales = ["ro", "en"];
   const resolvedLocale = validLocales.includes(locale) ? locale : "ro";
 
   return {

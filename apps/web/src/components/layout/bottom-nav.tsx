@@ -2,20 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { LayoutGrid, Activity, BookOpen, BarChart3, GraduationCap } from "lucide-react";
 
 // Bottom navigation — vizibil DOAR pe mobil (md:hidden). Dă senzația de app nativ.
 // Glassmorphism + glow pe item-ul activ. Nu afectează desktop-ul.
 // Setările rămân accesibile din sidebar-ul drawer — Academia are prioritate aici.
+// label = cheie în messages → bottomNav.*
 const items = [
-  { href: "/dashboard", icon: LayoutGrid, label: "Acasă" },
-  { href: "/signals", icon: Activity, label: "Semnale" },
-  { href: "/journal", icon: BookOpen, label: "Jurnal" },
-  { href: "/analytics", icon: BarChart3, label: "Analize" },
-  { href: "/academy", icon: GraduationCap, label: "Academie" },
+  { href: "/dashboard", icon: LayoutGrid, label: "home" },
+  { href: "/signals", icon: Activity, label: "signals" },
+  { href: "/journal", icon: BookOpen, label: "journal" },
+  { href: "/analytics", icon: BarChart3, label: "analytics" },
+  { href: "/academy", icon: GraduationCap, label: "academy" },
 ];
 
 export function BottomNav() {
+  const t = useTranslations("bottomNav");
   const pathname = usePathname();
 
   return (
@@ -57,7 +60,7 @@ export function BottomNav() {
                   letterSpacing: 0.2,
                 }}
               >
-                {it.label}
+                {t(it.label)}
               </span>
             </Link>
           );
