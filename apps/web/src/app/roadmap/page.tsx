@@ -27,16 +27,17 @@ const SHIPPED: string[] = [
   "Aplicație Android + PWA instalabilă (desktop & iPhone)",
   "Command palette (Ctrl+K), temă dark premium, design responsive",
   "Realizări & streak-uri de disciplină — calculate din datele tale reale",
+  "AI Vision — analiza AI vede graficele atașate tranzacției (structură, intrare, SL)",
+  "Comutator de limbă RO/EN — navigarea și Academia complet bilingve",
 ];
 
 const IN_PROGRESS: string[] = [
-  "Interfață completă în engleză (limba se alege din setări)",
+  "Interfață completă în engleză — paginile individuale, în etape",
 ];
 
 const PLANNED: string[] = [
   "Notificări push native pe telefon (cu aplicația închisă)",
   "Autentificare în doi pași (2FA)",
-  "Analiză AI pe screenshot-urile graficelor tale (vision)",
   "Leaderboard comunitate cu track-record verificat din sync",
   "Prețuri realtime prin WebSocket",
   "Integrări noi: cTrader, TradeLocker, DXtrade",
@@ -67,7 +68,7 @@ function List({
 
 export default function RoadmapPage() {
   return (
-    <LegalPage title="Roadmap public" updated="5 iulie 2026">
+    <LegalPage title="Roadmap public" updated="5 iulie 2026 (seara)">
       <p className="text-sm leading-relaxed text-zinc-400 -mt-4">
         TradeGx se construiește în public. Aici vezi exact ce e livrat, ce e în lucru și ce
         urmează — fără promisiuni vagi. Ai o idee?{" "}
