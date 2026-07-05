@@ -15,6 +15,7 @@ import { EconomicCountdown } from "@/components/dashboard/economic-countdown";
 import { DailyReviewCard } from "@/components/dashboard/daily-review-card";
 import { OnboardingGuide } from "@/components/dashboard/onboarding-guide";
 import { cn } from "@/lib/utils";
+import { useTranslations, useLocale } from "next-intl";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,14 +63,15 @@ function fmtShort(value: number) {
   return `${sign}${abs.toFixed(2)}`;
 }
 
-function greetingRo(name: string) {
+// Salut localizat: primește textele deja traduse (morning/day/evening)
+function greeting(name: string, texts: { morning: string; day: string; evening: string }) {
   const h = new Date().getHours();
-  const salut = h < 12 ? "Bună dimineața" : h < 18 ? "Bună ziua" : "Bună seara";
+  const salut = h < 12 ? texts.morning : h < 18 ? texts.day : texts.evening;
   return `${salut}, ${name}`;
 }
 
-function todayRo() {
-  return new Date().toLocaleDateString("ro-RO", {
+function todayLocalized(locale: string) {
+  return new Date().toLocaleDateString(locale === "en" ? "en-US" : "ro-RO", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 }
@@ -282,6 +284,8 @@ function WinLossRing({ wins, losses, winRate }: { wins: number; losses: number; 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function DashboardClient({ data }: { data: DashboardData }) {
+  const t = useTranslations("dashboard");
+  const locale = useLocale();
   const {
     userName, totalTrades, netPnl, winRate, profitFactor, maxDrawdown,
     wins, losses, bestTrade, worstTrade, avgWin, avgLoss, currency,
@@ -322,16 +326,19 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             </span>
           </div>
           <h1 className="text-2xl font-black text-zinc-100 tracking-tight">
-            {greetingRo(userName)} <span className="inline-block animate-[wave_2s_ease-in-out_infinite]">👋</span>
+            {greeting(userName, {
+              morning: t("greetingMorning"),
+              day: t("greetingDay"),
+              evening: t("greetingEvening"),
+            })}{" "}
+            <span className="inline-block animate-[wave_2s_ease-in-out_infinite]">👋</span>
           </h1>
-          <p className="text-sm text-zinc-500 mt-0.5">
-            Performanța ta de trading, în timp real.
-          </p>
+          <p className="text-sm text-zinc-500 mt-0.5">{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 bg-zinc-900/80 border border-zinc-800/60 rounded-xl px-3 py-2">
             <CalendarDays className="w-3.5 h-3.5 text-zinc-500" />
-            <span className="capitalize text-zinc-400 font-medium">{todayRo()}</span>
+            <span className="capitalize text-zinc-400 font-medium">{todayLocalized(locale)}</span>
           </div>
           <div className="flex items-center gap-2 bg-zinc-900/80 border border-zinc-800/60 rounded-xl px-3 py-2">
             <span className="live-dot" />
@@ -355,9 +362,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <KPICard
-          label="Profit Net"
+          label={t("netPnl")}
           value={totalTrades > 0 ? fmt(netPnl, currency) : "—"}
-          sub={totalTrades > 0 ? `din ${totalTrades} trades` : "nicio tranzacție"}
+          sub={totalTrades > 0 ? t("ofTrades", { count: totalTrades }) : t("noTrade")}
           trend={netPnl > 0 ? "up" : netPnl < 0 ? "down" : "neutral"}
           sparkData={sparklines.pnl}
           sparkColor={netPnl >= 0 ? "#34d399" : "#f87171"}
@@ -377,9 +384,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           delay={60}
         />
         <KPICard
-          label="Profit Factor"
+          label={t("profitFactor")}
           value={profitFactor !== null ? profitFactor.toFixed(2) : "—"}
-          sub={profitFactor !== null ? (profitFactor >= 1.5 ? "excelent ✨" : profitFactor >= 1 ? "pozitiv" : "negativ") : "—"}
+          sub={profitFactor !== null ? (profitFactor >= 1.5 ? t("excellent") : profitFactor >= 1 ? t("positive") : t("negative")) : "—"}
           trend={profitFactor !== null ? (profitFactor >= 1 ? "up" : "down") : "neutral"}
           sparkData={sparklines.profitFactor}
           sparkColor="#f59e0b"
@@ -388,9 +395,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           delay={120}
         />
         <KPICard
-          label="Max Drawdown"
+          label={t("maxDrawdown")}
           value={maxDrawdown !== null ? `${maxDrawdown.toFixed(1)}%` : "—"}
-          sub={maxDrawdown !== null ? (maxDrawdown < 5 ? "excelent" : maxDrawdown < 15 ? "acceptabil" : "ridicat ⚠️") : "—"}
+          sub={maxDrawdown !== null ? (maxDrawdown < 5 ? t("excellentDd") : maxDrawdown < 15 ? t("acceptable") : t("high")) : "—"}
           trend={maxDrawdown !== null ? (maxDrawdown < 10 ? "up" : "down") : "neutral"}
           sparkData={sparklines.drawdown}
           sparkColor="#f87171"
@@ -399,9 +406,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           delay={180}
         />
         <KPICard
-          label="Tranzacții"
+          label={t("trades")}
           value={totalTrades === 0 ? "0" : String(totalTrades)}
-          sub={wins > 0 ? `${wins} câștigate` : "—"}
+          sub={wins > 0 ? t("won", { count: wins }) : "—"}
           sparkData={sparklines.trades}
           sparkColor="#a78bfa"
           icon={BarChart2}
@@ -424,7 +431,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             <p className="text-[22px] font-black num tracking-tight text-amber-300 leading-none">
               {streak}<span className="text-sm font-bold text-amber-500/70 ml-1">zile</span>
             </p>
-            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">Streak Consistență</p>
+            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">{t("streakLabel")}</p>
           </div>
           <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 bg-amber-500/20" />
         </div>
@@ -439,7 +446,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           </div>
           <div className="relative">
             <p className="text-[22px] font-black num tracking-tight text-violet-200 leading-none">{weekStats.count}</p>
-            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">Trades săptămâna asta</p>
+            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">{t("weekTrades")}</p>
           </div>
           <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 bg-violet-500/20" />
         </div>
@@ -457,7 +464,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               {weekStats.winRate !== null ? `${weekStats.winRate.toFixed(0)}%` : "—"}
             </p>
             <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">
-              Win Rate săptămânal
+              {t("weekWinRate")}
               {weekStats.count > 0 && (
                 <span className="text-zinc-700 normal-case tracking-normal"> · {weekStats.count} trades</span>
               )}
@@ -478,7 +485,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               <div className="w-7 h-7 rounded-lg bg-indigo-500/12 border border-indigo-500/20 flex items-center justify-center">
                 <BarChart2 className="w-3.5 h-3.5 text-indigo-400" />
               </div>
-              <span className="text-sm font-bold text-zinc-200">Grafic Live</span>
+              <span className="text-sm font-bold text-zinc-200">{t("liveChart")}</span>
               <span className="live-dot" />
             </div>
             <Link href="/charts" className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors font-semibold">
@@ -497,7 +504,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             <div className="w-7 h-7 rounded-lg bg-violet-500/12 border border-violet-500/20 flex items-center justify-center">
               <Award className="w-3.5 h-3.5 text-violet-400" />
             </div>
-            <h2 className="text-sm font-bold text-zinc-200">Performanță</h2>
+            <h2 className="text-sm font-bold text-zinc-200">{t("performance")}</h2>
           </div>
 
           {/* Ring */}
@@ -508,10 +515,10 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           {/* Stats */}
           <div className="space-y-2 flex-1">
             {[
-              { label: "Cel mai bun trade", value: fmtShort(bestTrade), color: "text-emerald-400" },
-              { label: "Cel mai slab", value: fmtShort(worstTrade), color: "text-rose-400" },
-              { label: "Avg câștig", value: `+${avgWin.toFixed(2)}`, color: "text-emerald-400" },
-              { label: "Avg pierdere", value: `-${Math.abs(avgLoss).toFixed(2)}`, color: "text-rose-400" },
+              { label: t("bestTrade"), value: fmtShort(bestTrade), color: "text-emerald-400" },
+              { label: t("worstTrade"), value: fmtShort(worstTrade), color: "text-rose-400" },
+              { label: t("avgWin"), value: `+${avgWin.toFixed(2)}`, color: "text-emerald-400" },
+              { label: t("avgLoss"), value: `-${Math.abs(avgLoss).toFixed(2)}`, color: "text-rose-400" },
             ].map((row) => (
               <div key={row.label} className="flex items-center justify-between py-1.5 border-b border-zinc-800/50 last:border-0">
                 <span className="text-[11px] text-zinc-500">{row.label}</span>
@@ -522,7 +529,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
 
           <Link href="/analytics"
             className="mt-4 flex items-center justify-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 bg-indigo-500/8 hover:bg-indigo-500/15 border border-indigo-500/20 rounded-xl py-2.5 transition-all">
-            Analiză completă <ArrowRight className="w-3.5 h-3.5" />
+            {t("fullAnalysis")} <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </div>
@@ -540,7 +547,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               <div className="w-7 h-7 rounded-lg bg-amber-500/12 border border-amber-500/20 flex items-center justify-center">
                 <Zap className="w-3.5 h-3.5 text-amber-400" />
               </div>
-              <h2 className="text-sm font-bold text-zinc-200">Top Perechi</h2>
+              <h2 className="text-sm font-bold text-zinc-200">{t("topPairs")}</h2>
             </div>
             <Link href="/analytics" className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
               Toate <ChevronRight className="w-3 h-3" />
@@ -549,7 +556,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           {pairPerformance.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 gap-2">
               <BarChart2 className="w-7 h-7 text-zinc-700" />
-              <p className="text-sm text-zinc-600">Nicio tranzacție înregistrată</p>
+              <p className="text-sm text-zinc-600">{t("noTradesRecorded")}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -585,7 +592,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               <div className="w-7 h-7 rounded-lg bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center">
                 <Clock className="w-3.5 h-3.5 text-zinc-400" />
               </div>
-              <h2 className="text-sm font-bold text-zinc-200">Tranzacții Recente</h2>
+              <h2 className="text-sm font-bold text-zinc-200">{t("recentTrades")}</h2>
             </div>
             <Link href="/trades" className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
               Toate <ChevronRight className="w-3 h-3" />
@@ -597,8 +604,8 @@ export function DashboardClient({ data }: { data: DashboardData }) {
                 <Activity className="w-5 h-5 text-zinc-500" />
               </div>
               <div>
-                <p className="text-zinc-300 font-semibold text-sm">Nicio tranzacție înregistrată</p>
-                <p className="text-zinc-500 text-xs mt-0.5">Adaugă primul tău trade pentru a-ți urmări progresul.</p>
+                <p className="text-zinc-300 font-semibold text-sm">{t("noTradesRecorded")}</p>
+                <p className="text-zinc-500 text-xs mt-0.5">{t("addFirstTrade")}</p>
               </div>
               <Link href="/trades/new"
                 className="text-xs text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-4 py-2 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/20">
@@ -648,11 +655,11 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           <div className="w-6 h-6 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
             <span className="text-xs">📅</span>
           </div>
-          <h3 className="text-sm font-bold text-zinc-200">Calendar azi</h3>
-          <a href="/calendar" className="ml-auto text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors">Vezi tot →</a>
+          <h3 className="text-sm font-bold text-zinc-200">{t("calendarToday")}</h3>
+          <a href="/calendar" className="ml-auto text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors">{t("seeAll")}</a>
         </div>
         <p className="text-xs text-zinc-500">
-          Verifică <a href="/calendar" className="text-amber-400 hover:text-amber-300 transition-colors font-medium">calendarul economic</a> pentru evenimentele de impact înalt de astăzi.
+          {t("calendarCheckPre")} <a href="/calendar" className="text-amber-400 hover:text-amber-300 transition-colors font-medium">{t("calendarCheckLink")}</a> {t("calendarCheckPost")}
         </p>
       </div>
     </div>
