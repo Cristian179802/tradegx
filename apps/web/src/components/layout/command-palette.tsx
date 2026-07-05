@@ -41,6 +41,7 @@ const COMMANDS: Cmd[] = [
   { label: "AI Assistant", href: "/ai-assistant", icon: Brain, keywords: "coach chat" },
   { label: "Alerte AI", href: "/alerts", icon: BellRing, keywords: "alerts notificari" },
   { label: "Academie", href: "/academy", icon: GraduationCap, keywords: "curs invatare lectii academy" },
+  { label: "Realizări", href: "/achievements", icon: GraduationCap, keywords: "achievements streak medalii gamification realizari" },
   { label: "Grafice Live", href: "/charts", icon: LineChart, keywords: "chart pret" },
   { label: "Selector Piață", href: "/market", icon: Globe, keywords: "market piete" },
   { label: "Unelte Pro", href: "/tools", icon: Gauge, keywords: "tools" },

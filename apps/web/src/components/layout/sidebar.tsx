@@ -11,7 +11,7 @@ import {
   Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
   PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
   Trophy, ListChecks, Newspaper, Gauge, Award, GraduationCap, Crosshair, Dices,
-  CreditCard,
+  CreditCard, Medal,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -69,7 +69,8 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Educație",
     items: [
-      { href: "/academy", label: "Academie", icon: GraduationCap, color: "indigo", badge: "NOU" },
+      { href: "/academy", label: "Academie", icon: GraduationCap, color: "indigo" },
+      { href: "/achievements", label: "Realizări", icon: Medal, color: "amber", badge: "NOU" },
     ],
   },
   {
