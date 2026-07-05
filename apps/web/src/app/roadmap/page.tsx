@@ -26,11 +26,11 @@ const SHIPPED: string[] = [
   "Export PDF, partajare publică a tranzacțiilor, comunitate",
   "Aplicație Android + PWA instalabilă (desktop & iPhone)",
   "Command palette (Ctrl+K), temă dark premium, design responsive",
+  "Realizări & streak-uri de disciplină — calculate din datele tale reale",
 ];
 
 const IN_PROGRESS: string[] = [
   "Interfață completă în engleză (limba se alege din setări)",
-  "Gamification: streak-uri de disciplină, achievements",
 ];
 
 const PLANNED: string[] = [
@@ -67,7 +67,7 @@ function List({
 
 export default function RoadmapPage() {
   return (
-    <LegalPage title="Roadmap public" updated="4 iulie 2026">
+    <LegalPage title="Roadmap public" updated="5 iulie 2026">
       <p className="text-sm leading-relaxed text-zinc-400 -mt-4">
         TradeGx se construiește în public. Aici vezi exact ce e livrat, ce e în lucru și ce
         urmează — fără promisiuni vagi. Ai o idee?{" "}
