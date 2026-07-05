@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import { useBinanceLive } from "@/hooks/use-binance-live";
 
 interface WatchlistItem {
   id: string;
@@ -130,6 +131,8 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
   const router = useRouter();
   const { toast } = useToast();
   const [items, setItems] = React.useState<WatchlistItem[]>(initial);
+  // Prețuri realtime pentru simbolurile crypto din watchlist (WebSocket Binance)
+  const livePrices = useBinanceLive(items.map((i) => i.symbol));
   const [search, setSearch] = React.useState("");
   const [category, setCategory] = React.useState("Toate");
   const [adding, setAdding] = React.useState<string | null>(null);
@@ -286,6 +289,41 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                             {item.alertBelow != null && `↓${item.alertBelow}`}
                           </span>
                         )}
+                        {(() => {
+                          const live = livePrices.get(item.symbol);
+                          if (!live) return null;
+                          return (
+                            <span className="flex items-center gap-1.5">
+                              <span
+                                className={cn(
+                                  "text-xs font-bold num transition-colors duration-300",
+                                  live.tick === 1
+                                    ? "text-emerald-400"
+                                    : live.tick === -1
+                                      ? "text-rose-400"
+                                      : "text-zinc-300"
+                                )}
+                              >
+                                {live.price.toLocaleString("en-US", {
+                                  minimumFractionDigits: live.price >= 100 ? 2 : 4,
+                                  maximumFractionDigits: live.price >= 100 ? 2 : 4,
+                                })}
+                              </span>
+                              <span
+                                className={cn(
+                                  "text-[9px] font-bold px-1 py-0.5 rounded",
+                                  live.changePct >= 0
+                                    ? "text-emerald-400 bg-emerald-500/10"
+                                    : "text-rose-400 bg-rose-500/10"
+                                )}
+                              >
+                                {live.changePct >= 0 ? "+" : ""}
+                                {live.changePct.toFixed(2)}%
+                              </span>
+                              <span className="live-dot" style={{ width: 4, height: 4 }} />
+                            </span>
+                          );
+                        })()}
                       </div>
                       <div className="flex items-center gap-0.5">
                         <Button
