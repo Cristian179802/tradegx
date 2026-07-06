@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { DataTable, Column } from "@/components/ui/data-table";
@@ -37,19 +38,21 @@ const statusColors: Record<string, string> = {
   CANCELLED: "bg-zinc-800/50 text-zinc-500 border-zinc-700/30",
 };
 
+// chei în messages → tradesPage.* (traduse la randare)
 const statusLabels: Record<string, string> = {
-  OPEN: "Deschis",
-  CLOSED: "Închis",
-  CANCELLED: "Anulat",
+  OPEN: "stOpen",
+  CLOSED: "stClosed",
+  CANCELLED: "stCancelled",
 };
 
 export function TradesTable({ trades, loading }: TradesTableProps) {
+  const t = useTranslations("tradesPage");
   const router = useRouter();
 
   const columns: Column<Trade>[] = [
     {
       key: "symbol",
-      header: "Symbol",
+      header: t("hSymbol"),
       sortable: true,
       cell: (row) => (
         <div className="flex items-center gap-2.5">
@@ -70,7 +73,7 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
     },
     {
       key: "entryTime",
-      header: "Data",
+      header: t("hDate"),
       sortable: true,
       cell: (row) => (
         <span className="text-zinc-400 text-xs">
@@ -80,14 +83,14 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
     },
     {
       key: "entryPrice",
-      header: "Intrare",
+      header: t("hEntry"),
       cell: (row) => (
         <span className="num text-zinc-300">{Number(row.entryPrice).toFixed(5)}</span>
       ),
     },
     {
       key: "exitPrice",
-      header: "Ieșire",
+      header: t("hExit"),
       cell: (row) =>
         row.exitPrice ? (
           <span className="num text-zinc-300">{Number(row.exitPrice).toFixed(5)}</span>
@@ -97,14 +100,14 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
     },
     {
       key: "lotSize",
-      header: "Volum",
+      header: t("hVolume"),
       cell: (row) => (
         <span className="num text-zinc-400">{Number(row.lotSize).toFixed(2)}</span>
       ),
     },
     {
       key: "pnlMoney",
-      header: "P&L",
+      header: t("hPnl"),
       sortable: true,
       cell: (row) => {
         if (row.pnlMoney == null)
@@ -143,7 +146,7 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
     },
     {
       key: "setupType",
-      header: "Setup",
+      header: t("hSetup"),
       cell: (row) =>
         row.setupType ? (
           <Badge variant="outline" className="text-xs border-zinc-700 text-zinc-400">
@@ -155,7 +158,7 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
     },
     {
       key: "status",
-      header: "Status",
+      header: t("hStatus"),
       cell: (row) => (
         <span
           className={cn(
@@ -163,13 +166,13 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
             statusColors[row.status]
           )}
         >
-          {statusLabels[row.status]}
+          {t(statusLabels[row.status])}
         </span>
       ),
     },
     {
       key: "account",
-      header: "Cont",
+      header: t("hAccount"),
       cell: (row) => (
         <span className="text-xs text-zinc-500">{row.account.name}</span>
       ),
@@ -183,7 +186,7 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
       keyFn={(r) => r.id}
       onRowClick={(row) => router.push(`/trades/${row.id}`)}
       loading={loading}
-      emptyMessage="Niciun trade găsit. Adaugă primul tău trade!"
+      emptyMessage={t("emptyTable")}
     />
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,6 +27,7 @@ interface TradesClientProps {
 }
 
 export function TradesClient({ accounts }: TradesClientProps) {
+  const t = useTranslations("tradesPage");
   const router = useRouter();
   const [trades, setTrades] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -71,11 +73,11 @@ export function TradesClient({ accounts }: TradesClientProps) {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-violet">Trade-uri</h1>
+          <h1 className="text-2xl font-black tracking-tight neon-violet">{t("title")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {total > 0 ? (
-              <span><span className="text-zinc-300 font-semibold">{total}</span> tranzacții înregistrate</span>
-            ) : "Nicio tranzacție înregistrată"}
+              <span>{t("count", { count: total })}</span>
+            ) : t("none")}
           </p>
         </div>
         <div className="flex gap-2">
@@ -85,12 +87,12 @@ export function TradesClient({ accounts }: TradesClientProps) {
             className="border-indigo-500/30 text-indigo-300 hover:text-white hover:border-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-all"
           >
             <Upload className="h-4 w-4 mr-2" />
-            Import CSV
+            {t("importCsv")}
           </Button>
           <Button asChild className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all">
             <Link href="/trades/new">
               <Plus className="h-4 w-4 mr-2" />
-              Trade nou
+              {t("newTrade")}
             </Link>
           </Button>
         </div>
@@ -102,7 +104,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input
-              placeholder="Caută symbol..."
+              placeholder={t("searchPlaceholder")}
               className="bg-zinc-900/80 border-zinc-800/80 text-zinc-100 pl-9 w-40 focus:border-indigo-500/50"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
@@ -115,7 +117,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
           onValueChange={(v) => { setAccountId(v); setPage(1); }}
         >
           <SelectTrigger className="bg-zinc-900/80 border-zinc-800/80 text-zinc-300 w-44">
-            <SelectValue placeholder="Toate conturile" />
+            <SelectValue placeholder={t("allAccounts")} />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
             <SelectItem value="all" className="text-zinc-100">Toate conturile</SelectItem>
@@ -135,10 +137,10 @@ export function TradesClient({ accounts }: TradesClientProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
-            <SelectItem value="all" className="text-zinc-100">Toate</SelectItem>
-            <SelectItem value="CLOSED" className="text-zinc-100">Închise</SelectItem>
-            <SelectItem value="OPEN" className="text-zinc-100">Deschise</SelectItem>
-            <SelectItem value="CANCELLED" className="text-zinc-100">Anulate</SelectItem>
+            <SelectItem value="all" className="text-zinc-100">{t("fAll")}</SelectItem>
+            <SelectItem value="CLOSED" className="text-zinc-100">{t("fClosed")}</SelectItem>
+            <SelectItem value="OPEN" className="text-zinc-100">{t("fOpen")}</SelectItem>
+            <SelectItem value="CANCELLED" className="text-zinc-100">{t("fCancelled")}</SelectItem>
           </SelectContent>
         </Select>
 
