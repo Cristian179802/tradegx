@@ -242,6 +242,27 @@
     "t8": "Alertă Drawdown",
     "d8": "Notificare când drawdown-ul contului depășește pragul setat."
   },
+  "accounts": {
+    "title": "Conturi de trading",
+    "countConnected": "{count, plural, one {# cont conectat} other {# conturi conectate}}",
+    "manageSubtitle": "Gestionează conturile tale DEMO, Challenge și Live",
+    "addAccount": "Adaugă cont",
+    "addFirst": "Adaugă primul cont",
+    "emptyTitle": "Niciun cont adăugat",
+    "emptyDesc": "Conectează direct contul MT4/MT5 sau importă un fișier CSV pentru a începe.",
+    "syncOk": "✅ Sincronizat!",
+    "syncOkDesc": "{count} tranzacții noi importate.",
+    "syncErr": "Eroare sincronizare",
+    "netErr": "Eroare de rețea",
+    "deleted": "Cont șters",
+    "deleteFailed": "Nu s-a putut șterge contul",
+    "syncTitle": "Sincronizează tranzacții",
+    "deleteTitle": "Șterge cont",
+    "deleteConfirm": "Ești sigur că vrei să ștergi acest cont? Toate tranzacțiile asociate vor fi șterse permanent și nu pot fi recuperate.",
+    "deleting": "Se șterge...",
+    "deleteForever": "Șterge definitiv",
+    "balance": "Balanță"
+  },
   "common": {
     "loading": "Se încarcă...",
     "save": "Salvează",

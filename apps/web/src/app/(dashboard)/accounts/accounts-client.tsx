@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { AccountDialog } from "@/components/accounts/account-dialog";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,8 @@ const CARD_GLOW: Record<string, string> = {
 };
 
 export function AccountsClient({ initialAccounts }: { initialAccounts: Account[] }) {
+  const t = useTranslations("accounts");
+  const tc = useTranslations("common");
   const router = useRouter();
   const { toast } = useToast();
   const [accounts, setAccounts] = React.useState(initialAccounts);
@@ -81,11 +84,11 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
     setIsDeleting(true);
     const res = await fetch(`/api/accounts/${deletingId}`, { method: "DELETE" });
     if (res.ok) {
-      toast({ title: "Cont șters" });
+      toast({ title: t("deleted") });
       setAccounts(prev => prev.filter(a => a.id !== deletingId));
       router.refresh();
     } else {
-      toast({ title: "Eroare", description: "Nu s-a putut șterge contul", variant: "destructive" });
+      toast({ title: t("syncErr"), description: t("deleteFailed"), variant: "destructive" });
     }
     setIsDeleting(false);
     setDeletingId(null);
@@ -102,13 +105,13 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
       });
       const data = await res.json();
       if (res.ok) {
-        toast({ title: `✅ Sincronizat!`, description: `${data.imported ?? 0} tranzacții noi importate.` });
+        toast({ title: t("syncOk"), description: t("syncOkDesc", { count: data.imported ?? 0 }) });
         refresh();
       } else {
-        toast({ title: "Eroare sincronizare", description: data.error, variant: "destructive" });
+        toast({ title: t("syncErr"), description: data.error, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Eroare de rețea", variant: "destructive" });
+      toast({ title: t("netErr"), variant: "destructive" });
     } finally {
       setSyncingId(null);
     }
@@ -119,11 +122,11 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-indigo">Conturi de trading</h1>
+          <h1 className="text-2xl font-black tracking-tight neon-indigo">{t("title")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {accounts.length > 0
-              ? `${accounts.length} cont${accounts.length !== 1 ? "uri" : ""} conectat${accounts.length !== 1 ? "e" : ""}`
-              : "Gestionează conturile tale DEMO, Challenge și Live"}
+              ? t("countConnected", { count: accounts.length })
+              : t("manageSubtitle")}
           </p>
         </div>
         <Button
@@ -131,7 +134,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
           className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Adaugă cont
+          {t("addAccount")}
         </Button>
       </div>
 
@@ -141,16 +144,16 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
           <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
             <BarChart3 className="h-7 w-7 text-zinc-600" />
           </div>
-          <h3 className="text-zinc-300 font-semibold mb-1">Niciun cont adăugat</h3>
+          <h3 className="text-zinc-300 font-semibold mb-1">{t("emptyTitle")}</h3>
           <p className="text-zinc-600 text-sm mb-6 max-w-xs mx-auto">
-            Conectează direct contul MT4/MT5 sau importă un fișier CSV pentru a începe.
+            {t("emptyDesc")}
           </p>
           <Button
             onClick={() => { setEditingAccount(null); setDialogOpen(true); }}
             className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Adaugă primul cont
+            {t("addFirst")}
           </Button>
         </div>
       ) : (
@@ -203,7 +206,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
                 {/* Balance + P&L */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-zinc-800/40 rounded-xl p-3">
-                    <p className="text-[10px] text-zinc-600 mb-1 uppercase tracking-wider">Balanță</p>
+                    <p className="text-[10px] text-zinc-600 mb-1 uppercase tracking-wider">{t("balance")}</p>
                     <p className="text-base font-black text-zinc-100 num truncate">
                       {formatCurrency(balance, account.currency)}
                     </p>
@@ -259,7 +262,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
                         onClick={() => handleSync(account)}
                         disabled={isSyncing}
                         className="p-1.5 rounded-lg hover:bg-indigo-500/10 text-zinc-600 hover:text-indigo-400 transition-colors"
-                        title="Sincronizează tranzacții"
+                        title={t("syncTitle")}
                       >
                         <RefreshCw className={cn("h-3.5 w-3.5", isSyncing && "animate-spin")} />
                       </button>
@@ -292,7 +295,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-zinc-500 group-hover:text-zinc-300 transition-colors">
-                Adaugă cont
+                {t("addAccount")}
               </p>
               <p className="text-[11px] text-zinc-700 mt-0.5">MT4 / MT5 / CSV / Manual</p>
             </div>
@@ -311,19 +314,18 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
       <Dialog open={!!deletingId} onOpenChange={(v) => !v && setDeletingId(null)}>
         <DialogContent className="bg-zinc-950 border-zinc-800 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-zinc-100">Șterge cont</DialogTitle>
+            <DialogTitle className="text-zinc-100">{t("deleteTitle")}</DialogTitle>
           </DialogHeader>
           <p className="text-zinc-400 text-sm leading-relaxed">
-            Ești sigur că vrei să ștergi acest cont? Toate tranzacțiile asociate vor fi șterse
-            permanent și nu pot fi recuperate.
+            {t("deleteConfirm")}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeletingId(null)} className="border-zinc-700 text-zinc-300">
-              Anulează
+              {tc("cancel")}
             </Button>
             <Button onClick={handleDelete} disabled={isDeleting}
               className="bg-rose-600 hover:bg-rose-500 text-white">
-              {isDeleting ? "Se șterge..." : "Șterge definitiv"}
+              {isDeleting ? t("deleting") : t("deleteForever")}
             </Button>
           </DialogFooter>
         </DialogContent>
