@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import {
   BellRing, AlertTriangle, TrendingDown, Flame, Shield,
@@ -44,64 +45,64 @@ const ALERT_CONFIG: Record<keyof AlertSettings, {
 }> = {
   OVERTRADING: {
     icon: Activity,
-    title: "Supratranzacționare",
-    desc: "Alertă când depășești numărul maxim de tranzacții pe zi sau sesiune.",
+    title: "t1",
+    desc: "d1",
     color: "text-amber-400",
     bg: "bg-amber-500/8 border-amber-500/20",
     borderActive: "border-amber-500/30",
   },
   REVENGE_TRADING: {
     icon: Flame,
-    title: "Revenge Trading",
-    desc: "Detectare automată când intri în tranzacții emoționale după o pierdere.",
+    title: "t2",
+    desc: "d2",
     color: "text-rose-400",
     bg: "bg-rose-500/8 border-rose-500/20",
     borderActive: "border-rose-500/30",
   },
   RISK_EXCEEDED: {
     icon: Shield,
-    title: "Risc Depășit",
-    desc: "Alertă când riscul pe tranzacție depășește procentul tău maxim setat.",
+    title: "t3",
+    desc: "d3",
     color: "text-orange-400",
     bg: "bg-orange-500/8 border-orange-500/20",
     borderActive: "border-orange-500/30",
   },
   DAILY_LOSS_LIMIT: {
     icon: TrendingDown,
-    title: "Limită Pierdere Zilnică",
-    desc: "Notificare când pierderile zilei ating limita ta sau limita prop firm.",
+    title: "t4",
+    desc: "d4",
     color: "text-rose-400",
     bg: "bg-rose-500/8 border-rose-500/20",
     borderActive: "border-rose-500/30",
   },
   FOMO: {
     icon: AlertTriangle,
-    title: "FOMO Detection",
-    desc: "Alertă când intri în tranzacții după mișcări mari fără un setup valid.",
+    title: "t5",
+    desc: "d5",
     color: "text-yellow-400",
     bg: "bg-yellow-500/8 border-yellow-500/20",
     borderActive: "border-yellow-500/30",
   },
   STREAK_ALERT: {
     icon: BarChart2,
-    title: "Serie Pierderi",
-    desc: "Notificare după 3+ pierderi consecutive pentru a lua o pauză.",
+    title: "t6",
+    desc: "d6",
     color: "text-indigo-400",
     bg: "bg-indigo-500/8 border-indigo-500/20",
     borderActive: "border-indigo-500/30",
   },
   NEWS_IMPACT: {
     icon: BellRing,
-    title: "Știri HIGH Impact",
-    desc: "Alertă cu 30 minute înainte de evenimentele economice de impact major.",
+    title: "t7",
+    desc: "d7",
     color: "text-violet-400",
     bg: "bg-violet-500/8 border-violet-500/20",
     borderActive: "border-violet-500/30",
   },
   DRAWDOWN_ALERT: {
     icon: TrendingDown,
-    title: "Alertă Drawdown",
-    desc: "Notificare când drawdown-ul contului depășește pragul setat.",
+    title: "t8",
+    desc: "d8",
     color: "text-red-400",
     bg: "bg-red-500/8 border-red-500/20",
     borderActive: "border-red-500/30",
@@ -109,10 +110,10 @@ const ALERT_CONFIG: Record<keyof AlertSettings, {
 };
 
 const SEVERITY_CONFIG: Record<string, { label: string; cls: string; dot: string; glow?: string }> = {
-  LOW:      { label: "Scăzut",  cls: "text-zinc-400 bg-zinc-800/80 border-zinc-700",           dot: "bg-zinc-500" },
-  MEDIUM:   { label: "Mediu",   cls: "text-amber-400 bg-amber-500/10 border-amber-500/25",     dot: "bg-amber-400", glow: "shadow-[0_0_8px_rgba(245,158,11,0.4)]" },
-  HIGH:     { label: "Ridicat", cls: "text-rose-400 bg-rose-500/10 border-rose-500/25",        dot: "bg-rose-400",  glow: "shadow-[0_0_8px_rgba(244,63,94,0.4)]" },
-  CRITICAL: { label: "Critic",  cls: "text-red-300 bg-red-500/15 border-red-500/30",           dot: "bg-red-400",   glow: "shadow-[0_0_12px_rgba(239,68,68,0.6)]" },
+  LOW:      { label: "sevLow",  cls: "text-zinc-400 bg-zinc-800/80 border-zinc-700",           dot: "bg-zinc-500" },
+  MEDIUM:   { label: "sevMedium",   cls: "text-amber-400 bg-amber-500/10 border-amber-500/25",     dot: "bg-amber-400", glow: "shadow-[0_0_8px_rgba(245,158,11,0.4)]" },
+  HIGH:     { label: "sevHigh", cls: "text-rose-400 bg-rose-500/10 border-rose-500/25",        dot: "bg-rose-400",  glow: "shadow-[0_0_8px_rgba(244,63,94,0.4)]" },
+  CRITICAL: { label: "sevCritical",  cls: "text-red-300 bg-red-500/15 border-red-500/30",           dot: "bg-red-400",   glow: "shadow-[0_0_12px_rgba(239,68,68,0.6)]" },
 };
 
 function fmtTime(iso: string) {
@@ -145,6 +146,7 @@ function Toggle({ checked, onChange, disabled }: {
 }
 
 export function AlertsClient({ alerts, settings: initialSettings }: AlertsClientProps) {
+  const t = useTranslations("alertsPage");
   const [settings, setSettings] = useState<AlertSettings>(initialSettings);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
@@ -188,9 +190,9 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black neon-amber tracking-tight">Alerte AI</h1>
+          <h1 className="text-2xl font-black neon-amber tracking-tight">{t("title")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            Protecție inteligentă împotriva greșelilor de trading.
+            {t("subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -218,7 +220,7 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
             ) : (
               <ShieldCheck className="w-4 h-4" />
             )}
-            {saved ? "Salvat!" : "Salvează Setările"}
+            {saved ? t("saved") : t("saveBtn")}
           </button>
         </div>
       </div>
@@ -226,9 +228,9 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
       {/* Stats bar */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Alerte active", value: `${activeCount}/${Object.keys(settings).length}`, color: "text-emerald-400", bg: "bg-emerald-500/8 border-emerald-500/15" },
-          { label: "Necitite", value: unread, color: unread > 0 ? "text-rose-400" : "text-zinc-400", bg: unread > 0 ? "bg-rose-500/8 border-rose-500/15" : "bg-zinc-800/40 border-zinc-700/40" },
-          { label: "Total primite", value: localAlerts.length, color: "text-zinc-300", bg: "bg-zinc-800/40 border-zinc-700/40" },
+          { label: t("statActive"), value: `${activeCount}/${Object.keys(settings).length}`, color: "text-emerald-400", bg: "bg-emerald-500/8 border-emerald-500/15" },
+          { label: t("statUnread"), value: unread, color: unread > 0 ? "text-rose-400" : "text-zinc-400", bg: unread > 0 ? "bg-rose-500/8 border-rose-500/15" : "bg-zinc-800/40 border-zinc-700/40" },
+          { label: t("statTotal"), value: localAlerts.length, color: "text-zinc-300", bg: "bg-zinc-800/40 border-zinc-700/40" },
         ].map(({ label, value, color, bg }) => (
           <div key={label} className={cn("rounded-xl border p-3.5 text-center", bg)}>
             <p className={cn("text-xl font-black", color)}>{value}</p>
@@ -243,7 +245,7 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
         <div className="lg:col-span-2 space-y-2.5">
           <div className="flex items-center gap-2 mb-1">
             <Brain className="w-4 h-4 text-violet-400" />
-            <h2 className="text-sm font-bold text-zinc-300">Configurare Alerte Inteligente</h2>
+            <h2 className="text-sm font-bold text-zinc-300">{t("configTitle")}</h2>
           </div>
 
           {(Object.keys(ALERT_CONFIG) as (keyof AlertSettings)[]).map((key) => {
@@ -268,8 +270,8 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
                   <Icon className={cn("w-4 h-4", config.color)} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-zinc-200">{config.title}</p>
-                  <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">{config.desc}</p>
+                  <p className="text-sm font-semibold text-zinc-200">{t(config.title)}</p>
+                  <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">{t(config.desc)}</p>
                 </div>
                 <Toggle
                   checked={enabled}
@@ -295,17 +297,16 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
               </div>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Activează toate alertele pentru protecție maximă. AI-ul monitorizează comportamentul
-              tău de trading în timp real și te avertizează înainte să faci o greșeală costisitoare.
+              {t("configDesc")}
             </p>
             <div className="mt-3 pt-3 border-t border-violet-500/10">
               <div className="flex justify-between text-[11px]">
-                <span className="text-zinc-600">Protecție activă</span>
+                <span className="text-zinc-600">{t("protection")}</span>
                 <span className={cn(
                   "font-bold",
                   activeCount >= 6 ? "text-emerald-400" : activeCount >= 3 ? "text-amber-400" : "text-rose-400"
                 )}>
-                  {activeCount >= 6 ? "Maximă" : activeCount >= 3 ? "Medie" : "Scăzută"}
+                  {activeCount >= 6 ? t("protMax") : activeCount >= 3 ? t("protMed") : t("protLow")}
                 </span>
               </div>
               <div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
@@ -333,7 +334,7 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
                   className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-all disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-3 h-3" />
-                  {markingAll ? "..." : "Marchează toate ca citite"}
+                  {markingAll ? "..." : t("markAll")}
                 </button>
               )}
             </div>
@@ -344,8 +345,8 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
                   <CheckCircle2 className="w-6 h-6 text-emerald-500/60" />
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-semibold text-zinc-500">Nicio alertă!</p>
-                  <p className="text-xs text-zinc-700 mt-0.5">Trading perfect 🎯</p>
+                  <p className="text-sm font-semibold text-zinc-500">{t("noAlerts")}</p>
+                  <p className="text-xs text-zinc-700 mt-0.5">{t("noAlertsSub")}</p>
                 </div>
               </div>
             ) : (
@@ -392,7 +393,7 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
                             sev.glow
                           )}>
                             <span className={cn("w-1 h-1 rounded-full", sev.dot)} />
-                            {sev.label}
+                            {t(sev.label)}
                           </span>
                         </div>
                         <p className="text-[10px] text-zinc-600 truncate">{alert.message}</p>
