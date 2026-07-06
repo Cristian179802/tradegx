@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import {
   Shield, Target, TrendingDown, CalendarCheck, Settings2, Loader2,
@@ -35,10 +36,10 @@ const PRESETS: { name: string; profitTarget: number | null; maxDailyLossPct: num
 ];
 
 const STATUS_CFG = {
-  PASSED:      { label: "Trecut ✓", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30", Icon: CheckCircle2 },
-  FAILED:      { label: "Eșuat",    cls: "bg-rose-500/15 text-rose-300 border-rose-500/30",          Icon: XCircle },
-  IN_PROGRESS: { label: "În desfășurare", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30", Icon: Clock },
-  NO_RULES:    { label: "Fără reguli",    cls: "bg-zinc-700/40 text-zinc-400 border-zinc-600/40",     Icon: Settings2 },
+  PASSED:      { label: "passed", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30", Icon: CheckCircle2 },
+  FAILED:      { label: "failed",    cls: "bg-rose-500/15 text-rose-300 border-rose-500/30",          Icon: XCircle },
+  IN_PROGRESS: { label: "inProgress", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30", Icon: Clock },
+  NO_RULES:    { label: "noRules",    cls: "bg-zinc-700/40 text-zinc-400 border-zinc-600/40",     Icon: Settings2 },
 };
 
 function money(n: number, c: string) {
@@ -47,7 +48,8 @@ function money(n: number, c: string) {
 
 // Bară "progres spre obiectiv" (verde, bine să umpli)
 function GoalBar({ value, target, unit = "%" }: { value: number; target: number | null; unit?: string }) {
-  if (target == null) return <p className="text-[11px] text-zinc-600">fără limită setată</p>;
+  const t = useTranslations("propFirmPage");
+  if (target == null) return <p className="text-[11px] text-zinc-600">{t("noLimitSet")}</p>;
   const pct = target > 0 ? Math.max(0, Math.min(100, (value / target) * 100)) : 0;
   const done = value >= target;
   return (
@@ -56,14 +58,15 @@ function GoalBar({ value, target, unit = "%" }: { value: number; target: number 
         <div className="h-full rounded-full transition-all duration-700"
           style={{ width: `${pct}%`, background: done ? "linear-gradient(90deg,#059669,#34d399)" : "linear-gradient(90deg,#4f46e5,#818cf8)" }} />
       </div>
-      <p className="text-[11px] text-zinc-500 mt-1">{value}{unit} din {target}{unit} {done && <span className="text-emerald-400">✓</span>}</p>
+      <p className="text-[11px] text-zinc-500 mt-1">{value}{unit} {t("of")} {target}{unit} {done && <span className="text-emerald-400">✓</span>}</p>
     </>
   );
 }
 
 // Bară "consum spre limită" (roșu, rău să umpli — alertă la apropiere)
 function LimitBar({ value, limit, unit = "%" }: { value: number; limit: number | null; unit?: string }) {
-  if (limit == null) return <p className="text-[11px] text-zinc-600">fără limită setată</p>;
+  const t = useTranslations("propFirmPage");
+  if (limit == null) return <p className="text-[11px] text-zinc-600">{t("noLimitSet")}</p>;
   const pct = limit > 0 ? Math.max(0, Math.min(100, (value / limit) * 100)) : 0;
   const danger = pct >= 80;
   const breached = value >= limit;
@@ -74,13 +77,14 @@ function LimitBar({ value, limit, unit = "%" }: { value: number; limit: number |
           style={{ width: `${pct}%`, background: breached || danger ? "linear-gradient(90deg,#e11d48,#fb7185)" : "linear-gradient(90deg,#f59e0b,#fbbf24)" }} />
       </div>
       <p className={cn("text-[11px] mt-1", danger ? "text-rose-400" : "text-zinc-500")}>
-        {value}{unit} din {limit}{unit} {breached ? <span className="text-rose-400">— încălcat!</span> : danger ? <span className="text-rose-400">— atenție!</span> : ""}
+        {value}{unit} {t("of")} {limit}{unit} {breached ? <span className="text-rose-400">{t("breached")}</span> : danger ? <span className="text-rose-400">{t("warning")}</span> : ""}
       </p>
     </>
   );
 }
 
 function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
+  const t = useTranslations("propFirmPage");
   const { toast } = useToast();
   const [editing, setEditing] = React.useState(acc.status === "NO_RULES");
   const [saving, setSaving] = React.useState(false);
@@ -119,11 +123,11 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
         }),
       });
       if (!res.ok) throw new Error();
-      toast({ title: "Reguli salvate", description: "Progresul se actualizează automat." });
+      toast({ title: t("savedTitle"), description: t("savedDesc") });
       setEditing(false);
       onSaved();
     } catch {
-      toast({ title: "Eroare", description: "Nu s-au putut salva regulile.", variant: "destructive" });
+      toast({ title: t("errTitle"), description: t("errDesc"), variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -160,9 +164,9 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
         </div>
         <div className="flex items-center gap-2">
           <span className={cn("flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border", st.cls)}>
-            <st.Icon className="w-3.5 h-3.5" /> {st.label}
+            <st.Icon className="w-3.5 h-3.5" /> {t(st.label)}
           </span>
-          <button onClick={() => setEditing((v) => !v)} className="text-zinc-500 hover:text-zinc-300 transition-colors p-1" title="Configurează reguli">
+          <button onClick={() => setEditing((v) => !v)} className="text-zinc-500 hover:text-zinc-300 transition-colors p-1" title={t("configRules")}>
             <Settings2 className="w-4 h-4" />
           </button>
         </div>
@@ -173,13 +177,13 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
         <div className="px-5 pb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400/80 mb-1.5">
-              <Target className="w-3 h-3" /> Profit țintă
+              <Target className="w-3 h-3" /> {t("ruleProfitTarget")}
             </div>
             <GoalBar value={p.profitPct} target={r.profitTarget} />
           </div>
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-rose-400/80 mb-1.5">
-              <TrendingDown className="w-3 h-3" /> Pierdere zilnică (azi)
+              <TrendingDown className="w-3 h-3" /> {t("ruleDailyLoss")}
             </div>
             <LimitBar value={p.dailyLossPct} limit={r.maxDailyLossPct} />
           </div>
@@ -191,7 +195,7 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
           </div>
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-indigo-400/80 mb-1.5">
-              <CalendarCheck className="w-3 h-3" /> Zile de tranzacționare
+              <CalendarCheck className="w-3 h-3" /> {t("ruleDays")}
             </div>
             <GoalBar value={p.tradingDays} target={r.minTradingDays} unit="" />
           </div>
@@ -202,7 +206,7 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
       {editing && (
         <div className="px-5 pb-5 border-t border-zinc-800/60 pt-4 space-y-4">
           <div>
-            <label className="text-[11px] text-zinc-500 font-medium block mb-1.5">Presetare</label>
+            <label className="text-[11px] text-zinc-500 font-medium block mb-1.5">{t("preset")}</label>
             <div className="flex flex-wrap gap-1.5">
               {PRESETS.map((pre) => (
                 <button key={pre.name} onClick={() => applyPreset(pre.name)}
@@ -215,10 +219,10 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { k: "profitTarget", label: "Profit țintă %" },
-              { k: "maxDailyLossPct", label: "Daily loss max %" },
-              { k: "maxDrawdownPct", label: "Drawdown max %" },
-              { k: "minTradingDays", label: "Zile minime" },
+              { k: "profitTarget", label: t("profitTarget") },
+              { k: "maxDailyLossPct", label: t("dailyLossMax") },
+              { k: "maxDrawdownPct", label: t("ddMax") },
+              { k: "minTradingDays", label: t("minDays") },
             ].map((f) => (
               <div key={f.k}>
                 <label className="text-[10px] text-zinc-500 block mb-1">{f.label}</label>
@@ -231,7 +235,7 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
           <button onClick={save} disabled={saving}
             className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-            Salvează regulile
+            {t("saveRules")}
           </button>
         </div>
       )}
@@ -240,6 +244,7 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
 }
 
 export function PropFirmClient() {
+  const t = useTranslations("propFirmPage");
   const [accounts, setAccounts] = React.useState<Account[]>([]);
   const [loading, setLoading] = React.useState(true);
 
@@ -261,9 +266,9 @@ export function PropFirmClient() {
           <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
             <Trophy className="w-4 h-4 text-amber-400" />
           </div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Prop Firm Challenge</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("title")}</h1>
         </div>
-        <p className="text-sm text-zinc-500">Monitorizează regulile challenge-ului în timp real — profit, daily loss, drawdown, zile minime.</p>
+        <p className="text-sm text-zinc-500">{t("subtitle")}</p>
       </div>
 
       {loading ? (
@@ -273,7 +278,7 @@ export function PropFirmClient() {
           <Shield className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
           <p className="text-sm font-semibold text-zinc-300">Niciun cont Challenge sau Live</p>
           <p className="text-xs text-zinc-500 mt-1 max-w-md mx-auto">
-            Adaugă un cont de tip Challenge sau Live din secțiunea Conturi pentru a urmări regulile prop firm.
+            {t("empty")}
           </p>
         </div>
       ) : (
@@ -284,7 +289,7 @@ export function PropFirmClient() {
 
       <p className="text-[11px] text-zinc-600 flex items-center gap-1.5">
         <AlertTriangle className="w-3 h-3" />
-        Presetările sunt orientative — verifică regulile exacte ale programului tău. Drawdown-ul e calculat din echity curve a tranzacțiilor înregistrate.
+        {t("disclaimer")}
       </p>
     </div>
   );

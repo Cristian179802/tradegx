@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Shield, TrendingDown, AlertTriangle, Target, DollarSign, BarChart3, CheckCircle2, XCircle, Zap } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -25,8 +26,13 @@ function calcLotSize(balance: number, riskPct: number, slPips: number, pipValue:
   return Math.round(lots * 100) / 100;
 }
 
-// Max risk amount in $ and %
-function getRiskStatus(pnl: number, balance: number, maxDailyLossPct: number | null) {
+// Max risk amount in $ and % — eticheta se traduce la randare (tLabel)
+function getRiskStatus(
+  pnl: number,
+  balance: number,
+  maxDailyLossPct: number | null,
+  tLabel: (pct: number) => string
+) {
   if (!maxDailyLossPct) return { pct: 0, safe: true, label: "—" };
   const maxLoss = balance * (maxDailyLossPct / 100);
   const used = Math.abs(Math.min(pnl, 0));
@@ -34,11 +40,12 @@ function getRiskStatus(pnl: number, balance: number, maxDailyLossPct: number | n
   return {
     pct: Math.min(pct, 100),
     safe: pct < 70,
-    label: `${pct.toFixed(0)}% utilizat`,
+    label: tLabel(pct),
   };
 }
 
 export function RiskManagerClient({ data }: { data: RiskData }) {
+  const t = useTranslations("riskManager");
   const [selectedAccount, setSelectedAccount] = React.useState<AccountData | null>(data.accounts[0] ?? null);
   const [riskPct, setRiskPct] = React.useState(parseFloat(data.user.defaultRiskPct) || 1);
   const [slPips, setSlPips] = React.useState(20);
@@ -59,7 +66,8 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
 
   const dailyLossStatus = selectedAccount
     ? getRiskStatus(data.todayPnl, parseFloat(selectedAccount.balance),
-        selectedAccount.maxDailyLossPct ? parseFloat(selectedAccount.maxDailyLossPct) : null)
+        selectedAccount.maxDailyLossPct ? parseFloat(selectedAccount.maxDailyLossPct) : null,
+        (pct) => t("pctUsed", { pct: pct.toFixed(0) }))
     : null;
 
   const drawdownStatus = selectedAccount
@@ -82,13 +90,13 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-indigo">Risk Manager</h1>
-          <p className="text-sm text-zinc-500 mt-0.5">Gestionează riscul în timp real — cont, poziție, reguli prop firm</p>
+          <h1 className="text-2xl font-black tracking-tight neon-indigo">{t("title")}</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">{t("subtitle")}</p>
         </div>
         {isNoTradeDay && (
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400">
             <XCircle className="h-4 w-4" />
-            <span className="text-sm font-semibold">Zi fără tranzacții</span>
+            <span className="text-sm font-semibold">{t("noTradeDay")}</span>
           </div>
         )}
       </div>
@@ -148,7 +156,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
           dailyLossStatus && !dailyLossStatus.safe ? "border-rose-500/30" : "border-zinc-800"
         )}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Limită pierdere zilnică</span>
+            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">{t("dailyLossLimit")}</span>
             <AlertTriangle className={cn("h-3.5 w-3.5", dailyLossStatus && !dailyLossStatus.safe ? "text-rose-400" : "text-zinc-600")} />
           </div>
           {dailyLossStatus && selectedAccount?.maxDailyLossPct ? (
@@ -203,8 +211,8 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
               <Target className="h-4 w-4 text-indigo-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-zinc-200">Calculator Poziție</h2>
-              <p className="text-[11px] text-zinc-600">Dimensionare lot în funcție de risc</p>
+              <h2 className="text-sm font-bold text-zinc-200">{t("calcTitle")}</h2>
+              <p className="text-[11px] text-zinc-600">{t("lotSizing")}</p>
             </div>
           </div>
 
@@ -223,7 +231,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
             {/* Risk % */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs text-zinc-400 font-medium">Risc per tranzacție</label>
+                <label className="text-xs text-zinc-400 font-medium">{t("riskPerTrade")}</label>
                 <span className="text-xs font-bold text-indigo-300 num bg-indigo-500/10 px-2 py-0.5 rounded-md">{riskPct}%</span>
               </div>
               <input type="range" min={0.1} max={5} step={0.1} value={riskPct}
@@ -268,15 +276,15 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-5 space-y-4">
           <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
             <Zap className="h-4 w-4 text-amber-400" />
-            Rezultate Calcul
+            {t("resultsTitle")}
           </h2>
 
           <div className="space-y-3">
             {/* Risk amount */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-rose-500/5 border border-rose-500/15">
               <div>
-                <p className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold">Risc maxim ($)</p>
-                <p className="text-[11px] text-zinc-500 mt-0.5">Suma maximă de pierdut</p>
+                <p className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold">{t("maxRisk")}</p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">{t("maxRiskSub")}</p>
               </div>
               <p className="text-xl font-black text-rose-400 num neon-rose">
                 -{formatCurrency(riskAmount, selectedAccount?.currency ?? "USD")}
@@ -286,8 +294,8 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
             {/* Lot Size */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/15">
               <div>
-                <p className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold">Volum recomandat</p>
-                <p className="text-[11px] text-zinc-500 mt-0.5">Dimensiunea lotului (standard)</p>
+                <p className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold">{t("recVolume")}</p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">{t("recVolumeSub")}</p>
               </div>
               <p className="text-2xl font-black text-indigo-300 num" style={{ textShadow: "0 0 12px rgba(99,102,241,0.6)" }}>
                 {lotSize}
@@ -297,8 +305,8 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
             {/* TP at 1:2 */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/15">
               <div>
-                <p className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold">Take Profit 1:2 ($)</p>
-                <p className="text-[11px] text-zinc-500 mt-0.5">Profit potențial la RR 2.0</p>
+                <p className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold">{t("tp2")}</p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">{t("tp2Sub")}</p>
               </div>
               <p className="text-xl font-black text-emerald-400 num neon-emerald">
                 +{formatCurrency(tpAmount, selectedAccount?.currency ?? "USD")}
@@ -341,29 +349,29 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
               <Shield className="h-4 w-4 text-amber-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-zinc-200">Reguli Prop Firm</h2>
-              <p className="text-[11px] text-zinc-600">Status cont {selectedAccount.name} ({selectedAccount.type})</p>
+              <h2 className="text-sm font-bold text-zinc-200">{t("rulesTitle")}</h2>
+              <p className="text-[11px] text-zinc-600">{t("accountStatus", { name: selectedAccount.name, type: selectedAccount.type })}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[
               {
-                label: "Pierdere zilnică",
+                label: t("dailyLoss"),
                 check: !dailyLossStatus || dailyLossStatus.pct < 100,
                 value: dailyLossStatus ? `${dailyLossStatus.pct.toFixed(0)}%` : "—",
                 limit: selectedAccount.maxDailyLossPct ? `Max ${selectedAccount.maxDailyLossPct}%` : "Nelimitat",
               },
               {
-                label: "Drawdown total",
+                label: t("totalDd"),
                 check: !drawdownStatus || drawdownStatus.dd < (drawdownStatus.maxDD ?? 999),
                 value: drawdownStatus ? `-${drawdownStatus.dd.toFixed(1)}%` : "0%",
                 limit: selectedAccount.maxDrawdownPct ? `Max ${selectedAccount.maxDrawdownPct}%` : "Nelimitat",
               },
               {
-                label: "Trades pe zi",
+                label: t("tradesPerDay"),
                 check: data.todayTradeCount <= data.user.maxTradesPerDay,
                 value: `${data.todayTradeCount}/${data.user.maxTradesPerDay}`,
-                limit: `Limită ${data.user.maxTradesPerDay}`,
+                limit: t("limitOf", { n: data.user.maxTradesPerDay }),
               },
             ].map((rule) => (
               <div key={rule.label} className={cn(
