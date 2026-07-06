@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import Decimal from "decimal.js";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ function isJPYPair(symbol: string): boolean {
 }
 
 export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalculatorProps) {
+  const t = useTranslations("calc");
   const [accountId, setAccountId] = React.useState(accounts[0]?.id ?? "");
   const [riskPct, setRiskPct] = React.useState(String(defaultRiskPct));
   const [riskMode, setRiskMode] = React.useState<"percent" | "money">("percent");
@@ -124,7 +126,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               </SelectContent>
             </Select>
             <p className="text-xs text-zinc-600 mt-1">
-              Balanță: <span className="text-zinc-400 num">{balance.toNumber().toLocaleString()} {account?.currency}</span>
+              {t("balanceLabel")} <span className="text-zinc-400 num">{balance.toNumber().toLocaleString()} {account?.currency}</span>
             </p>
           </div>
 
@@ -141,7 +143,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
 
           {/* Risk mode toggle */}
           <div className="col-span-full">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block mb-2">Mod risc</label>
+            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block mb-2">{t("riskMode")}</label>
             <div className="flex gap-2 mb-3">
               {(["percent", "money"] as const).map((m) => (
                 <button
@@ -155,7 +157,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
                       : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300"
                   )}
                 >
-                  {m === "percent" ? "Procent (%)" : "Sumă fixă ($)"}
+                  {m === "percent" ? t("percent") : t("fixed")}
                 </button>
               ))}
             </div>
@@ -205,7 +207,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
 
           {/* Stop Loss Pips */}
           <div>
-            <label className="text-xs font-medium text-zinc-400 block mb-1">Stop Loss (pips)</label>
+            <label className="text-xs font-medium text-zinc-400 block mb-1">{t("slPips")}</label>
             <Input
               type="number"
               step="0.1"
@@ -246,12 +248,12 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
         <div className="rounded-2xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/8 to-violet-500/5 p-6 cyber-card">
           <div className="flex items-center gap-2 mb-5">
             <TrendingUp className="h-4 w-4 text-indigo-400" />
-            <h3 className="text-sm font-bold text-indigo-300 uppercase tracking-wider">Rezultat calcul</h3>
+            <h3 className="text-sm font-bold text-indigo-300 uppercase tracking-wider">{t("result")}</h3>
           </div>
 
           {/* Main result */}
           <div className="text-center mb-6 py-4 bg-zinc-900/50 rounded-xl border border-zinc-800">
-            <p className="text-xs text-zinc-600 uppercase tracking-wider mb-1">Volum recomandat</p>
+            <p className="text-xs text-zinc-600 uppercase tracking-wider mb-1">{t("recommended")}</p>
             <p className="text-5xl font-black text-white num tracking-tight">
               {result.lotSize.toFixed(2)}
             </p>
@@ -263,7 +265,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               riskColor === "emerald" ? "bg-emerald-500/8 border-emerald-500/20"
               : riskColor === "amber" ? "bg-amber-500/8 border-amber-500/20"
               : "bg-rose-500/8 border-rose-500/20")}>
-              <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Risc $</p>
+              <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">{t("riskUsd")}</p>
               <p className={cn("text-xl font-black num",
                 riskColor === "emerald" ? "text-emerald-400 neon-emerald"
                 : riskColor === "amber" ? "text-amber-400 neon-amber"
@@ -275,7 +277,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               riskColor === "emerald" ? "bg-emerald-500/8 border-emerald-500/20"
               : riskColor === "amber" ? "bg-amber-500/8 border-amber-500/20"
               : "bg-rose-500/8 border-rose-500/20")}>
-              <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Risc %</p>
+              <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">{t("riskPct")}</p>
               <p className={cn("text-xl font-black num",
                 riskColor === "emerald" ? "text-emerald-400 neon-emerald"
                 : riskColor === "amber" ? "text-amber-400 neon-amber"
@@ -286,7 +288,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
           </div>
 
           <div className="mt-4 pt-4 border-t border-indigo-500/15 text-[11px] text-zinc-600 text-center font-mono">
-            {result.riskAmount.toFixed(2)}$ ÷ ({stopLossPips}p × {result.pipValue.toFixed(2)}$/lot) = <span className="text-indigo-400 font-bold">{result.lotSize.toFixed(2)} loturi</span>
+            {result.riskAmount.toFixed(2)}$ ÷ ({stopLossPips}p × {result.pipValue.toFixed(2)}$/lot) = <span className="text-indigo-400 font-bold">{result.lotSize.toFixed(2)} {t("lots")}</span>
           </div>
         </div>
       ) : (

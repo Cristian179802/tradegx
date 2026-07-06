@@ -296,6 +296,22 @@
     "add": "Add",
     "restoreDefaults": "Restore default list"
   },
+  "calc": {
+    "title": "Lot size calculator",
+    "subtitle": "Calculate the optimal volume based on risk and stop loss",
+    "empty": "Add a trading account to use the calculator.",
+    "account": "Trading account",
+    "riskMode": "Risk mode",
+    "percent": "Percent (%)",
+    "fixed": "Fixed amount ($)",
+    "slPips": "Stop Loss (pips)",
+    "result": "Calculation result",
+    "recommended": "Recommended volume",
+    "riskUsd": "Risk $",
+    "riskPct": "Risk %",
+    "balanceLabel": "Balance:",
+    "lots": "lots"
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",

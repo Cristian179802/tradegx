@@ -296,6 +296,22 @@
     "add": "Adaugă",
     "restoreDefaults": "Restabilește lista implicită"
   },
+  "calc": {
+    "title": "Calculator loturi",
+    "subtitle": "Calculează volumul optim în funcție de risc și stop loss",
+    "empty": "Adaugă un cont de trading pentru a folosi calculatorul.",
+    "account": "Cont trading",
+    "riskMode": "Mod risc",
+    "percent": "Procent (%)",
+    "fixed": "Sumă fixă ($)",
+    "slPips": "Stop Loss (pips)",
+    "result": "Rezultat calcul",
+    "recommended": "Volum recomandat",
+    "riskUsd": "Risc $",
+    "riskPct": "Risc %",
+    "balanceLabel": "Balanță:",
+    "lots": "loturi"
+  },
   "common": {
     "loading": "Se încarcă...",
     "save": "Salvează",
