@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -7,6 +8,7 @@ import { MarketClient } from "./market-client";
 export const metadata: Metadata = { title: "Selector Piață" };
 
 export default async function MarketPage() {
+  const t = await getTranslations("market");
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
@@ -29,8 +31,8 @@ export default async function MarketPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100">Selector Piață</h1>
-        <p className="text-sm text-zinc-500 mt-1">Gestionează lista ta de simboluri urmărite</p>
+        <h1 className="text-2xl font-bold text-zinc-100">{t("title")}</h1>
+        <p className="text-sm text-zinc-500 mt-1">{t("subtitle")}</p>
       </div>
       <MarketClient initial={items} />
     </div>

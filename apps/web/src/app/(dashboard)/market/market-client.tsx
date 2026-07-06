@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Globe, Search, ChevronDown, LineChart, TrendingUp, TrendingDown, Bell, BellRing } from "lucide-react";
@@ -128,6 +129,7 @@ const INSTR_COLORS: Record<string, string> = {
 };
 
 export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
+  const t = useTranslations("market");
   const router = useRouter();
   const { toast } = useToast();
   const [items, setItems] = React.useState<WatchlistItem[]>(initial);
@@ -156,10 +158,10 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
     if (res.ok) {
       const item = await res.json();
       setItems((prev) => [...prev, item]);
-      toast({ title: `${symbol} adăugat în watchlist` });
+      toast({ title: t("added", { symbol }) });
     } else {
       const err = await res.json();
-      toast({ title: "Eroare", description: err.error, variant: "destructive" });
+      toast({ title: t("error"), description: err.error, variant: "destructive" });
     }
     setAdding(null);
   }
@@ -168,7 +170,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
     const res = await fetch(`/api/watchlist/${id}`, { method: "DELETE" });
     if (res.ok) {
       setItems((prev) => prev.filter((i) => i.id !== id));
-      toast({ title: `${symbol} eliminat` });
+      toast({ title: t("removed", { symbol }) });
     }
   }
 
@@ -193,7 +195,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
     const below = belowVal.trim() === "" ? null : Number(belowVal.replace(",", "."));
     if ((above != null && (!Number.isFinite(above) || above <= 0)) ||
         (below != null && (!Number.isFinite(below) || below <= 0))) {
-      toast({ title: "Preț invalid", description: "Introdu valori numerice pozitive.", variant: "destructive" });
+      toast({ title: t("invalidPrice"), description: t("invalidPriceDesc"), variant: "destructive" });
       return;
     }
     setSavingAlert(true);
@@ -208,15 +210,15 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
       );
       toast({
         title: above == null && below == null
-          ? `Alertele pentru ${item.symbol} au fost dezactivate`
-          : `Alertă setată pe ${item.symbol}`,
+          ? t("alertsDisabled", { symbol: item.symbol })
+          : t("alertSet", { symbol: item.symbol }),
         description: above != null || below != null
-          ? "Primești notificare in-app + Telegram când prețul atinge pragul (verificare la ~10 min)."
+          ? t("alertSetDesc")
           : undefined,
       });
       setAlertEditId(null);
     } else {
-      toast({ title: "Eroare la salvare", variant: "destructive" });
+      toast({ title: t("saveError"), variant: "destructive" });
     }
     setSavingAlert(false);
   }
@@ -243,10 +245,10 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
               <div className="w-6 h-6 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
                 <Globe className="h-3.5 w-3.5 text-indigo-400" />
               </div>
-              Watchlist-ul meu
+              {t("myWatchlist")}
               <span className="text-[10px] font-semibold text-zinc-500 bg-zinc-800 border border-zinc-700 px-1.5 py-0.5 rounded-full">{items.length}</span>
             </h2>
-            <span className="text-[11px] text-zinc-600">Click pe simbol → grafic</span>
+            <span className="text-[11px] text-zinc-600">{t("clickHint")}</span>
           </div>
 
           {items.length === 0 ? (
@@ -255,8 +257,8 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                 <Globe className="h-6 w-6 text-indigo-400/60" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-semibold text-zinc-400">Watchlist gol</p>
-                <p className="text-xs text-zinc-600 mt-1">Adaugă simboluri din lista din dreapta pentru a le urmări</p>
+                <p className="text-sm font-semibold text-zinc-400">{t("emptyTitle")}</p>
+                <p className="text-xs text-zinc-600 mt-1">{t("emptyDesc")}</p>
               </div>
             </div>
           ) : (
@@ -336,7 +338,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                               : "text-zinc-600 hover:text-amber-400 opacity-0 group-hover:opacity-100"
                           )}
                           onClick={(e) => { e.stopPropagation(); openAlertEditor(item); }}
-                          title="Alertă de preț"
+                          title={t("priceAlert")}
                         >
                           {hasAlert ? <BellRing className="h-3.5 w-3.5" /> : <Bell className="h-3.5 w-3.5" />}
                         </Button>
@@ -357,7 +359,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                         <div className="flex flex-wrap items-end gap-3">
                           <label className="block">
                             <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500 block mb-1">
-                              ↑ Peste (breakout)
+                              {t("above")}
                             </span>
                             <input
                               type="text"
@@ -370,7 +372,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                           </label>
                           <label className="block">
                             <span className="text-[9px] font-bold uppercase tracking-wider text-rose-500 block mb-1">
-                              ↓ Sub (breakdown)
+                              {t("below")}
                             </span>
                             <input
                               type="text"
@@ -386,10 +388,10 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                             disabled={savingAlert}
                             className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
                           >
-                            {savingAlert ? "Se salvează…" : "Salvează"}
+                            {savingAlert ? t("saving") : t("save")}
                           </button>
                           <p className="text-[9px] text-zinc-600 leading-tight max-w-[200px]">
-                            Gol = dezactivat. Alertele sunt one-shot: după declanșare, pragul se golește automat.
+                            {t("oneShotHint")}
                           </p>
                         </div>
                       </div>
@@ -410,7 +412,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
             onClick={() => setShowCustom((v) => !v)}
           >
             <Plus className="h-4 w-4" />
-            Adaugă simbol custom
+            {t("addCustom")}
             <ChevronDown className={cn("h-3.5 w-3.5 ml-auto transition-transform", showCustom && "rotate-180")} />
           </button>
           {showCustom && (
@@ -450,14 +452,14 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
       {/* ── Simboluri populare ── */}
       <div className="card-3d rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden flex flex-col">
         <div className="px-5 py-4 border-b border-zinc-800 space-y-3">
-          <h2 className="text-sm font-bold text-zinc-200">Simboluri disponibile</h2>
+          <h2 className="text-sm font-bold text-zinc-200">{t("available")}</h2>
           {/* Search */}
           <div className="relative group">
             <div className="absolute inset-0 rounded-xl bg-indigo-500/0 group-focus-within:bg-indigo-500/5 transition-all duration-200 pointer-events-none rounded-lg" />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
             <input
               className="w-full bg-zinc-800/80 border border-zinc-700 rounded-lg pl-8 pr-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/60 focus:shadow-[0_0_0_1px_rgba(99,102,241,0.2)] transition-all"
-              placeholder="Caută simbol... (ex: EURUSD, BTCUSD)"
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -475,7 +477,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                     : "border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
                 )}
               >
-                {cat}
+                {cat === "Toate" ? t("all") : cat}
               </button>
             ))}
           </div>
@@ -490,7 +492,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
               </div>
               <div className="text-center">
                 <p className="text-sm font-semibold text-zinc-500">Niciun rezultat</p>
-                <p className="text-xs text-zinc-700 mt-1">Încearcă alt termen de căutare</p>
+                <p className="text-xs text-zinc-700 mt-1">{t("noResults")}</p>
               </div>
             </div>
           ) : (
@@ -517,7 +519,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                     disabled={inList || adding === p.symbol}
                     onClick={() => !inList && addSymbol(p.symbol, p.instrumentType, p.group)}
                   >
-                    {inList ? "Adăugat" : adding === p.symbol ? "..." : <Plus className="h-3.5 w-3.5" />}
+                    {inList ? t("addedBtn") : adding === p.symbol ? "..." : <Plus className="h-3.5 w-3.5" />}
                   </Button>
                 </div>
               );
