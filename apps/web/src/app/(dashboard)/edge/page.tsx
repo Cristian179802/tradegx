@@ -10,17 +10,21 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PaywallCard } from "@/components/billing/paywall-card";
 import type { EdgeReport, EdgeStat } from "@/lib/edge-finder";
 
 const PERIOADE = [
-  { days: 30, label: "30 zile" },
-  { days: 90, label: "90 zile" },
-  { days: 365, label: "1 an" },
-  { days: 3650, label: "Tot istoricul" },
-];
+  { days: 30, key: "p30" },
+  { days: 90, key: "p90" },
+  { days: 365, key: "p365" },
+  { days: 3650, key: "pAll" },
+] as const;
+
+/** cheia de traducere pentru o dimensiune (symbol → dimSymbol) */
+const dimKey = (d: string) => `dim${d.charAt(0).toUpperCase()}${d.slice(1)}`;
 
 function fmt(n: number) {
   const sign = n > 0 ? "+" : "";
@@ -28,6 +32,7 @@ function fmt(n: number) {
 }
 
 function EdgeCard({ stat, kind }: { stat: EdgeStat; kind: "edge" | "leak" }) {
+  const t = useTranslations("edge");
   const isEdge = kind === "edge";
   return (
     <div
@@ -40,7 +45,7 @@ function EdgeCard({ stat, kind }: { stat: EdgeStat; kind: "edge" | "leak" }) {
     >
       <div className="flex items-center justify-between gap-2 mb-1.5">
         <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-          {stat.dimensionLabel}
+          {t(dimKey(stat.dimension))}
         </span>
         <span
           className={cn(
@@ -54,7 +59,7 @@ function EdgeCard({ stat, kind }: { stat: EdgeStat; kind: "edge" | "leak" }) {
       <p className="text-sm font-bold text-zinc-100 mb-2 truncate">{stat.value}</p>
       <div className="flex items-center gap-3 text-[11px] text-zinc-500">
         <span>
-          <span className="text-zinc-300 font-semibold">{stat.n}</span> tranzacții
+          <span className="text-zinc-300 font-semibold">{stat.n}</span> {t("trades")}
         </span>
         <span>
           WR <span className="text-zinc-300 font-semibold">{stat.winRate}%</span>
@@ -65,7 +70,7 @@ function EdgeCard({ stat, kind }: { stat: EdgeStat; kind: "edge" | "leak" }) {
           </span>
         )}
         <span>
-          medie{" "}
+          {t("avg")}{" "}
           <span className={cn("font-semibold", isEdge ? "text-emerald-400" : "text-rose-400")}>
             {fmt(stat.avgPnl)}
           </span>
@@ -84,6 +89,7 @@ function EdgeCard({ stat, kind }: { stat: EdgeStat; kind: "edge" | "leak" }) {
 export default function EdgeFinderPage() {
   const { data: session } = useSession();
   const isFree = session?.user?.plan === "FREE";
+  const t = useTranslations("edge");
   const [days, setDays] = React.useState(365);
   const [report, setReport] = React.useState<EdgeReport | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -103,12 +109,9 @@ export default function EdgeFinderPage() {
       <div className="max-w-3xl pb-8">
         <PaywallCard
           feature="Edge Finder"
-          description="Motorul statistic care îți arată exact unde câștigi și unde pierzi bani — pe simbol, setup, killzone, zi și oră."
+          description={t("paywallDesc")}
           bullets={[
-            "Edge-urile tale profitabile, dovedite statistic (min. 5 apariții)",
-            "Leak-urile care îți scurg contul, identificate automat",
-            "Analiză pe 10 dimensiuni: simbol, setup, killzone, zi, oră, durată, tag",
-            "Se actualizează cu fiecare tranzacție nouă din jurnal",
+            t("pw1"), t("pw2"), t("pw3"), t("pw4"),
           ]}
         />
       </div>
@@ -127,8 +130,7 @@ export default function EdgeFinderPage() {
             <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Edge Finder</h1>
           </div>
           <p className="text-sm text-zinc-500 max-w-xl">
-            Motorul statistic care îți arată exact unde câștigi și unde pierzi bani —
-            pe simbol, setup, killzone, zi, oră și durată.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -144,7 +146,7 @@ export default function EdgeFinderPage() {
                   : "text-zinc-500 hover:text-zinc-300"
               )}
             >
-              {p.label}
+              {t(p.key)}
             </button>
           ))}
         </div>
@@ -166,11 +168,11 @@ export default function EdgeFinderPage() {
         </div>
       ) : !report || report.totalTrades < 10 ? (
         <EmptyState
-          title="Ai nevoie de minim 10 tranzacții închise în perioada selectată"
-          description="Edge Finder devine cu atât mai precis cu cât jurnalul tău e mai bogat. Sincronizează contul de broker sau adaugă tranzacții — apoi revino aici."
-          actionLabel="Conectează un cont de broker"
+          title={t("emptyTitle")}
+          description={t("emptyDesc")}
+          actionLabel={t("emptyAction")}
           actionHref="/accounts"
-          hint="Poți adăuga tranzacții și manual, din pagina Tranzacții."
+          hint={t("emptyHint")}
         />
       ) : (
         <>
@@ -178,9 +180,7 @@ export default function EdgeFinderPage() {
           <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 px-5 py-3.5 flex items-center gap-2 text-xs text-zinc-500">
             <Info className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
             <span>
-              Analiză pe <span className="text-zinc-300 font-bold">{report.totalTrades}</span>{" "}
-              tranzacții închise. Sunt afișate doar tiparele cu minim 5 apariții —
-              restul nu au semnificație statistică.
+              {t("summary", { count: report.totalTrades })}
             </span>
           </div>
 
@@ -190,14 +190,14 @@ export default function EdgeFinderPage() {
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                 <h2 className="text-sm font-black text-zinc-100 uppercase tracking-wide">
-                  Edge-urile tale
+                  {t("edgesTitle")}
                 </h2>
-                <span className="text-[10px] text-zinc-600">— continuă să le exploatezi</span>
+                <span className="text-[10px] text-zinc-600">{t("edgesHint")}</span>
               </div>
               <div className="space-y-3">
                 {report.edges.length === 0 ? (
                   <p className="text-xs text-zinc-600 py-6 text-center">
-                    Niciun tipar profitabil cu eșantion suficient încă.
+                    {t("noEdges")}
                   </p>
                 ) : (
                   report.edges.map((s) => (
@@ -211,14 +211,14 @@ export default function EdgeFinderPage() {
               <div className="flex items-center gap-2 mb-3">
                 <TrendingDown className="w-4 h-4 text-rose-400" />
                 <h2 className="text-sm font-black text-zinc-100 uppercase tracking-wide">
-                  Leak-urile tale
+                  {t("leaksTitle")}
                 </h2>
-                <span className="text-[10px] text-zinc-600">— aici pierzi bani sistematic</span>
+                <span className="text-[10px] text-zinc-600">{t("leaksHint")}</span>
               </div>
               <div className="space-y-3">
                 {report.leaks.length === 0 ? (
                   <p className="text-xs text-zinc-600 py-6 text-center">
-                    Niciun tipar negativ semnificativ. Excelent!
+                    {t("noLeaks")}
                   </p>
                 ) : (
                   report.leaks.map((s) => (
@@ -232,12 +232,12 @@ export default function EdgeFinderPage() {
           {/* Toate dimensiunile */}
           <div>
             <h2 className="text-sm font-black text-zinc-100 uppercase tracking-wide mb-3">
-              Analiză completă pe dimensiuni
+              {t("allDims")}
             </h2>
             <div className="space-y-2">
               {Object.entries(report.byDimension).map(([dim, stats]) => {
                 const isOpen = openDim === dim;
-                const label = stats[0]?.dimensionLabel ?? dim;
+                const label = t(dimKey(dim));
                 return (
                   <div
                     key={dim}
@@ -249,7 +249,7 @@ export default function EdgeFinderPage() {
                     >
                       <span className="text-xs font-bold text-zinc-200">{label}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-zinc-600">{stats.length} valori</span>
+                        <span className="text-[10px] text-zinc-600">{stats.length} {t("values")}</span>
                         <ChevronDown
                           className={cn(
                             "w-4 h-4 text-zinc-600 transition-transform",
@@ -263,9 +263,9 @@ export default function EdgeFinderPage() {
                         <table className="w-full text-xs min-w-[560px]">
                           <thead>
                             <tr className="text-[10px] uppercase tracking-wider text-zinc-600">
-                              <th className="text-left px-4 py-2 font-bold">Valoare</th>
-                              <th className="text-right px-3 py-2 font-bold">Tranzacții</th>
-                              <th className="text-right px-3 py-2 font-bold">Win rate</th>
+                              <th className="text-left px-4 py-2 font-bold">{t("thValue")}</th>
+                              <th className="text-right px-3 py-2 font-bold">{t("thTrades")}</th>
+                              <th className="text-right px-3 py-2 font-bold">{t("thWinRate")}</th>
                               <th className="text-right px-3 py-2 font-bold">PF</th>
                               <th className="text-right px-4 py-2 font-bold">Net P&L</th>
                             </tr>

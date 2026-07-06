@@ -4,6 +4,7 @@ import * as React from "react";
 import { Dices, Play, ShieldAlert, Trophy, Percent } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PaywallCard } from "@/components/billing/paywall-card";
@@ -81,7 +82,7 @@ function simulate(
 }
 
 // ── Histogramă SVG ──────────────────────────────────────────────────────────
-function Histogram({ finals, targetPct }: { finals: number[]; targetPct: number }) {
+function Histogram({ finals, targetPct, axisLabel }: { finals: number[]; targetPct: number; axisLabel: string }) {
   const BUCKETS = 28;
   const min = Math.min(...finals);
   const max = Math.max(...finals);
@@ -120,7 +121,7 @@ function Histogram({ finals, targetPct }: { finals: number[]; targetPct: number 
         {min.toFixed(0)}%
       </text>
       <text x={W / 2} y={H + 16} fontSize={10} fill="#71717a" textAnchor="middle">
-        equity finală
+        {axisLabel}
       </text>
       <text x={W} y={H + 16} fontSize={10} fill="#71717a" textAnchor="end">
         {max.toFixed(0)}%
@@ -192,6 +193,7 @@ function NumInput({
 export default function MonteCarloPage() {
   const { data: session } = useSession();
   const isFree = session?.user?.plan === "FREE";
+  const t = useTranslations("monteCarlo");
   const [returns, setReturns] = React.useState<number[] | null>(null);
   const [loading, setLoading] = React.useState(true);
 
@@ -213,13 +215,10 @@ export default function MonteCarloPage() {
     return (
       <div className="max-w-3xl pb-8">
         <PaywallCard
-          feature="Simulator Monte Carlo"
-          description="Află probabilitatea să treci un challenge de prop firm ÎNAINTE să plătești pentru el — pe baza rezultatelor tale reale."
+          feature={t("title")}
+          description={t("paywallDesc")}
           bullets={[
-            "10.000 de simulări pe distribuția reală a tranzacțiilor tale",
-            "Probabilitatea de a atinge targetul vs. riscul de a pica challenge-ul",
-            "Percentile de equity + histogramă + trasee alternative",
-            "Parametri configurabili: target, drawdown maxim, număr de tranzacții",
+            t("pw1"), t("pw2"), t("pw3"), t("pw4"),
           ]}
         />
       </div>
@@ -244,7 +243,7 @@ export default function MonteCarloPage() {
           <div className="w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-500/25 flex items-center justify-center">
             <Dices className="w-4 h-4 text-violet-400" />
           </div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Simulator Monte Carlo</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("title")}</h1>
         </div>
         <p className="text-sm text-zinc-500 max-w-2xl">
           10.000 de „vieți alternative" ale contului tău, construite din randamentele tale REALE.
@@ -263,25 +262,24 @@ export default function MonteCarloPage() {
         </div>
       ) : !returns || returns.length < 10 ? (
         <EmptyState
-          title="Ai nevoie de minim 10 tranzacții închise"
-          description="Simularea folosește distribuția REALĂ a rezultatelor tale — cu cât mai multe tranzacții în jurnal, cu atât mai fiabile probabilitățile calculate."
-          actionLabel="Conectează un cont de broker"
+          title={t("emptyTitle")}
+          description={t("emptyDesc")}
+          actionLabel={t("emptyAction")}
           actionHref="/accounts"
-          hint="După sincronizare, revino aici și rulează simularea."
+          hint={t("emptyHint")}
         />
       ) : (
         <>
           {/* Parametri */}
           <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-              <NumInput label="Tranzacții simulate" value={nTrades} onChange={setNTrades} min={10} max={500} />
-              <NumInput label="Target profit" value={targetPct} onChange={setTargetPct} suffix="%" min={1} max={100} />
-              <NumInput label="Drawdown maxim" value={maxDDPct} onChange={setMaxDDPct} suffix="%" min={1} max={100} />
+              <NumInput label={t("inTrades")} value={nTrades} onChange={setNTrades} min={10} max={500} />
+              <NumInput label={t("inTarget")} value={targetPct} onChange={setTargetPct} suffix="%" min={1} max={100} />
+              <NumInput label={t("inDd")} value={maxDDPct} onChange={setMaxDDPct} suffix="%" min={1} max={100} />
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-[11px] text-zinc-600">
-                Bază: <span className="text-zinc-400 font-bold">{returns.length}</span> tranzacții reale ·
-                10.000 simulări · reeșantionare cu înlocuire
+                {t("base", { count: returns.length })}
               </p>
               <button
                 onClick={run}
@@ -289,7 +287,7 @@ export default function MonteCarloPage() {
                 className="inline-flex items-center gap-2 rounded-xl bg-violet-500/15 border border-violet-500/40 px-4 py-2 text-sm font-bold text-violet-300 hover:bg-violet-500/25 transition-colors disabled:opacity-50"
               >
                 <Play className="w-4 h-4" />
-                {running ? "Se simulează..." : "Rulează simularea"}
+                {running ? t("running") : t("run")}
               </button>
             </div>
           </div>
@@ -304,7 +302,7 @@ export default function MonteCarloPage() {
                     <CountUp value={result.pTarget} decimals={1} suffix="%" />
                   </p>
                   <p className="text-[11px] text-zinc-500 mt-1 font-semibold">
-                    șansa să atingi +{targetPct}% ÎNAINTE de a pica
+                    {t("pTarget", { target: targetPct })}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-rose-500/25 bg-rose-500/[0.05] p-5 text-center">
@@ -313,7 +311,7 @@ export default function MonteCarloPage() {
                     <CountUp value={result.pRuin} decimals={1} suffix="%" />
                   </p>
                   <p className="text-[11px] text-zinc-500 mt-1 font-semibold">
-                    riscul să atingi {maxDDPct}% drawdown (pici challenge-ul)
+                    {t("pRuin", { dd: maxDDPct })}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 text-center">
@@ -322,7 +320,7 @@ export default function MonteCarloPage() {
                     <CountUp value={result.pNeither} decimals={1} suffix="%" />
                   </p>
                   <p className="text-[11px] text-zinc-500 mt-1 font-semibold">
-                    nici target, nici ruină în {nTrades} tranzacții
+                    {t("pNeither", { trades: nTrades })}
                   </p>
                 </div>
               </div>
@@ -330,16 +328,16 @@ export default function MonteCarloPage() {
               {/* Percentile */}
               <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
                 <h3 className="text-xs font-black text-zinc-300 uppercase tracking-wide mb-3">
-                  Unde ajunge contul după {nTrades} tranzacții (equity finală)
+                  {t("equityTitle", { trades: nTrades })}
                 </h3>
                 <div className="grid grid-cols-5 gap-2 text-center mb-4">
                   {(
                     [
-                      ["P5 (ghinion)", result.percentiles.p5],
+                      [t("pLuckless"), result.percentiles.p5],
                       ["P25", result.percentiles.p25],
-                      ["Median", result.percentiles.p50],
+                      [t("pMedian"), result.percentiles.p50],
                       ["P75", result.percentiles.p75],
-                      ["P95 (noroc)", result.percentiles.p95],
+                      [t("pLucky"), result.percentiles.p95],
                     ] as [string, number][]
                   ).map(([lbl, v]) => (
                     <div key={lbl}>
@@ -355,25 +353,22 @@ export default function MonteCarloPage() {
                     </div>
                   ))}
                 </div>
-                <Histogram finals={result.finals} targetPct={targetPct} />
+                <Histogram finals={result.finals} targetPct={targetPct} axisLabel={t("equityAxis")} />
                 <p className="text-[10px] text-zinc-600 mt-2">
-                  Drawdown maxim mediu pe simulare: {result.avgMaxDD.toFixed(1)}% ·
-                  Verde = peste target · Indigo = pe profit · Roșu = pe pierdere
+                  {t("ddNote", { dd: result.avgMaxDD.toFixed(1) })}
                 </p>
               </div>
 
               {/* Trasee mostră */}
               <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
                 <h3 className="text-xs font-black text-zinc-300 uppercase tracking-wide mb-3">
-                  6 vieți alternative ale contului tău
+                  {t("pathsTitle")}
                 </h3>
                 <Paths paths={result.samplePaths} targetPct={targetPct} maxDDPct={maxDDPct} />
               </div>
 
               <p className="text-[10px] text-zinc-600 leading-relaxed">
-                ⚠️ Simularea presupune că viitorul seamănă statistic cu trecutul tău și că tranzacțiile
-                sunt independente. Nu este o predicție — este un instrument de înțelegere a riscului.
-                Rezultatele trecute nu garantează rezultate viitoare.
+                {t("disclaimer")}
               </p>
             </>
           )}
