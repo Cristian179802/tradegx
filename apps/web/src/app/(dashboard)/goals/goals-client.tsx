@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import { Target, TrendingUp, Loader2, Save, Trophy, Shield, AlertTriangle, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,8 @@ function ProgressBar({ value, target, color }: { value: number; target: number; 
 }
 
 export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
+  const t = useTranslations("goals");
+  const locale = useLocale();
   const { toast } = useToast();
   const [data, setData] = React.useState<GoalsData | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -68,16 +71,16 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
       // Reîncarcă progresul
       const fresh = await fetch("/api/user/goals").then((r) => r.json());
       setData(fresh);
-      toast({ title: "Obiective salvate", description: "Progresul lunii curente se actualizează automat." });
+      toast({ title: t("savedTitle"), description: t("savedDesc") });
     } catch {
-      toast({ title: "Eroare", description: "Nu s-au putut salva obiectivele.", variant: "destructive" });
+      toast({ title: t("errTitle"), description: t("errDesc"), variant: "destructive" });
     } finally {
       setSaving(false);
     }
   }
 
   const c = data?.currency ?? "USD";
-  const monthLabel = new Date().toLocaleDateString("ro-RO", { month: "long", year: "numeric" });
+  const monthLabel = new Date().toLocaleDateString(locale === "en" ? "en-US" : "ro-RO", { month: "long", year: "numeric" });
 
   return (
     <div className="space-y-6 pb-8">
@@ -86,9 +89,9 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
           <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
             <Trophy className="w-4 h-4 text-emerald-400" />
           </div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Obiective</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("title")}</h1>
         </div>
-        <p className="text-sm text-zinc-500 capitalize">Țintele tale lunare și monitorizarea conturilor · {monthLabel}</p>
+        <p className="text-sm text-zinc-500 capitalize">{t("subtitle")} · {monthLabel}</p>
       </div>
 
       {loading ? (
@@ -101,68 +104,68 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
             <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Profit lunar</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t("monthlyProfit")}</span>
               </div>
               <p className={cn("text-2xl font-black num", (data?.progress.pnl ?? 0) >= 0 ? "text-emerald-400" : "text-rose-400")}>
                 {(data?.progress.pnl ?? 0) >= 0 ? "+" : ""}{money(data?.progress.pnl ?? 0, c)}
               </p>
               {data?.targets.monthlyProfitTarget ? (
                 <>
-                  <p className="text-xs text-zinc-500 mt-1 mb-2">din {money(data.targets.monthlyProfitTarget, c)} țintă</p>
+                  <p className="text-xs text-zinc-500 mt-1 mb-2">{t("ofTarget", { value: money(data.targets.monthlyProfitTarget, c) })}</p>
                   <ProgressBar value={Math.max(0, data.progress.pnl)} target={data.targets.monthlyProfitTarget} color="linear-gradient(90deg,#059669,#34d399)" />
                 </>
-              ) : <p className="text-xs text-zinc-600 mt-1">Setează o țintă mai jos</p>}
+              ) : <p className="text-xs text-zinc-600 mt-1">{t("setBelow")}</p>}
             </div>
 
             {/* Trades */}
             <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
               <div className="flex items-center gap-2 mb-3">
                 <BarChart3 className="w-4 h-4 text-violet-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Tranzacții</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t("trades")}</span>
               </div>
               <p className="text-2xl font-black num text-violet-300">{data?.progress.trades ?? 0}</p>
               {data?.targets.monthlyTradeTarget ? (
                 <>
-                  <p className="text-xs text-zinc-500 mt-1 mb-2">din {data.targets.monthlyTradeTarget} țintă</p>
+                  <p className="text-xs text-zinc-500 mt-1 mb-2">{t("ofTarget", { value: data.targets.monthlyTradeTarget })}</p>
                   <ProgressBar value={data.progress.trades} target={data.targets.monthlyTradeTarget} color="linear-gradient(90deg,#7c3aed,#a78bfa)" />
                 </>
-              ) : <p className="text-xs text-zinc-600 mt-1">Setează o țintă mai jos</p>}
+              ) : <p className="text-xs text-zinc-600 mt-1">{t("setBelow")}</p>}
             </div>
 
             {/* Win rate */}
             <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
               <div className="flex items-center gap-2 mb-3">
                 <Target className="w-4 h-4 text-indigo-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Win Rate</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t("winRate")}</span>
               </div>
               <p className="text-2xl font-black num text-indigo-300">{data?.progress.winRate ?? 0}%</p>
               {data?.targets.monthlyWinRateTarget ? (
                 <>
-                  <p className="text-xs text-zinc-500 mt-1 mb-2">din {data.targets.monthlyWinRateTarget}% țintă</p>
+                  <p className="text-xs text-zinc-500 mt-1 mb-2">{t("ofTarget", { value: data.targets.monthlyWinRateTarget + "%" })}</p>
                   <ProgressBar value={data.progress.winRate} target={data.targets.monthlyWinRateTarget} color="linear-gradient(90deg,#4f46e5,#818cf8)" />
                 </>
-              ) : <p className="text-xs text-zinc-600 mt-1">Setează o țintă mai jos</p>}
+              ) : <p className="text-xs text-zinc-600 mt-1">{t("setBelow")}</p>}
             </div>
           </div>
 
           {/* Setare obiective */}
           <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
-            <h2 className="text-sm font-bold text-zinc-200 mb-4">Setează obiectivele lunare</h2>
+            <h2 className="text-sm font-bold text-zinc-200 mb-4">{t("setTitle")}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs text-zinc-400 block mb-1.5">Profit țintă ({c})</label>
+                <label className="text-xs text-zinc-400 block mb-1.5">{t("profitTargetLabel", { currency: c })}</label>
                 <input type="number" value={form.profit} onChange={(e) => setForm({ ...form, profit: e.target.value })}
                   placeholder="ex: 2000"
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 num" />
               </div>
               <div>
-                <label className="text-xs text-zinc-400 block mb-1.5">Nr. tranzacții țintă</label>
+                <label className="text-xs text-zinc-400 block mb-1.5">{t("tradesTargetLabel")}</label>
                 <input type="number" value={form.trades} onChange={(e) => setForm({ ...form, trades: e.target.value })}
                   placeholder="ex: 40"
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-violet-500 num" />
               </div>
               <div>
-                <label className="text-xs text-zinc-400 block mb-1.5">Win Rate țintă (%)</label>
+                <label className="text-xs text-zinc-400 block mb-1.5">{t("wrTargetLabel")}</label>
                 <input type="number" value={form.winRate} onChange={(e) => setForm({ ...form, winRate: e.target.value })}
                   placeholder="ex: 55" min={0} max={100}
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num" />
@@ -171,7 +174,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
             <button onClick={save} disabled={saving}
               className="mt-4 flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Salvează obiectivele
+              {t("saveGoals")}
             </button>
           </div>
 
@@ -179,12 +182,12 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Shield className="w-4 h-4 text-amber-400" />
-              <h2 className="text-base font-bold text-zinc-200">Monitor Prop Firm</h2>
-              <span className="text-xs text-zinc-600">conturi Challenge & Live</span>
+              <h2 className="text-base font-bold text-zinc-200">{t("propTitle")}</h2>
+              <span className="text-xs text-zinc-600">{t("propSub")}</span>
             </div>
             {propAccounts.length === 0 ? (
               <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-8 text-center">
-                <p className="text-sm text-zinc-500">Niciun cont Challenge sau Live. Adaugă unul pentru monitorizarea regulilor prop firm.</p>
+                <p className="text-sm text-zinc-500">{t("propEmpty")}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -223,8 +226,8 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
                           style={{ width: `${ddUsedPct}%`, background: ddDanger ? "linear-gradient(90deg,#e11d48,#fb7185)" : "linear-gradient(90deg,#f59e0b,#fbbf24)" }} />
                       </div>
                       <div className="flex items-center justify-between mt-3 text-[11px] text-zinc-600">
-                        <span>Sold: <span className="text-zinc-400 num">{money(a.balance, a.currency)}</span></span>
-                        <span>Inițial: <span className="text-zinc-400 num">{money(a.initial, a.currency)}</span></span>
+                        <span>{t("balance")} <span className="text-zinc-400 num">{money(a.balance, a.currency)}</span></span>
+                        <span>{t("initial")} <span className="text-zinc-400 num">{money(a.initial, a.currency)}</span></span>
                       </div>
                     </div>
                   );

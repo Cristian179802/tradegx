@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { CheckSquare, Square, Plus, X, RotateCcw, ShieldCheck, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ function loadItems(): Item[] {
 }
 
 export default function ChecklistPage() {
+  const t = useTranslations("checklistPage");
   const [items, setItems] = React.useState<Item[]>([]);
   const [newText, setNewText] = React.useState("");
   const [mounted, setMounted] = React.useState(false);
@@ -79,9 +81,9 @@ export default function ChecklistPage() {
           <div className="w-7 h-7 rounded-lg bg-sky-500/15 border border-sky-500/25 flex items-center justify-center">
             <ListChecks className="w-4 h-4 text-sky-400" />
           </div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Checklist Pre-Trade</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("title")}</h1>
         </div>
-        <p className="text-sm text-zinc-500">Verifică disciplina înainte de fiecare intrare. Bifările se resetează automat zilnic.</p>
+        <p className="text-sm text-zinc-500">{t("subtitle")}</p>
       </div>
 
       {/* Progres */}
@@ -95,11 +97,11 @@ export default function ChecklistPage() {
               ? <ShieldCheck className="w-5 h-5 text-emerald-400" />
               : <CheckSquare className="w-5 h-5 text-zinc-500" />}
             <span className={cn("text-sm font-bold", allChecked ? "text-emerald-300" : "text-zinc-300")}>
-              {allChecked ? "Ești pregătit să tranzacționezi ✓" : `${checkedCount} din ${total} verificate`}
+              {allChecked ? t("ready") : t("checkedOf", { checked: checkedCount, total })}
             </span>
           </div>
           <button onClick={resetChecks} className="text-xs text-zinc-500 hover:text-zinc-300 flex items-center gap-1 transition-colors">
-            <RotateCcw className="w-3.5 h-3.5" /> Resetează
+            <RotateCcw className="w-3.5 h-3.5" /> {t("reset")}
           </button>
         </div>
         <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
@@ -133,11 +135,11 @@ export default function ChecklistPage() {
             value={newText}
             onChange={(e) => setNewText(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") add(); }}
-            placeholder="Adaugă o regulă personală..."
+            placeholder={t("addPlaceholder")}
             className="flex-1 bg-transparent text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none"
           />
           {newText.trim() && (
-            <button onClick={add} className="text-xs font-semibold text-sky-400 hover:text-sky-300">Adaugă</button>
+            <button onClick={add} className="text-xs font-semibold text-sky-400 hover:text-sky-300">{t("add")}</button>
           )}
         </div>
       </div>
