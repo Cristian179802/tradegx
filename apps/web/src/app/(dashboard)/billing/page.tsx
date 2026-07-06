@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { useTranslations, useLocale } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // ── Abonament & Facturare ───────────────────────────────────────────────────
@@ -37,35 +38,41 @@ interface PlansResponse {
   };
 }
 
-// Matricea de funcții — identică cu gate-urile din server (lib/plan.ts)
+// Matricea de funcții — identică cu gate-urile din server (lib/plan.ts).
+// label + valorile string sunt CHEI în messages → billing.*
 const FEATURES: { label: string; free: string | boolean; pro: string | boolean }[] = [
-  { label: "Jurnal de tranzacții + import CSV", free: true, pro: true },
-  { label: "Academie completă (41 lecții + quiz-uri + certificat)", free: true, pro: true },
-  { label: "Analytics, calculator lot, checklist, calendar, știri", free: true, pro: true },
-  { label: "Conturi de trading", free: "1 cont", pro: "Nelimitate" },
-  { label: "Backtesting pe date reale", free: "3 / lună", pro: "Nelimitat" },
-  { label: "Sincronizare automată broker (EA MT4/MT5 + MetaAPI)", free: false, pro: true },
-  { label: "Semnale AI (HPS) — max 3/zi + difuzare Telegram", free: false, pro: true },
-  { label: "AI Assistant / Coach personal", free: false, pro: true },
-  { label: "Edge Finder — unde câștigi și unde pierzi, statistic", free: false, pro: true },
-  { label: "Simulator Monte Carlo (probabilitate challenge prop firm)", free: false, pro: true },
-  { label: "Raport AI săptămânal (in-app + Telegram)", free: false, pro: true },
-  { label: "Alerte de preț pe watchlist", free: false, pro: true },
-  { label: "Webhook TradingView → alerte instant", free: false, pro: true },
+  { label: "f1", free: true, pro: true },
+  { label: "f2", free: true, pro: true },
+  { label: "f3", free: true, pro: true },
+  { label: "f4", free: "vOneAccount", pro: "vUnlimitedF" },
+  { label: "f5", free: "v3PerMonth", pro: "vUnlimited" },
+  { label: "f6", free: false, pro: true },
+  { label: "f7", free: false, pro: true },
+  { label: "f8", free: false, pro: true },
+  { label: "f9", free: false, pro: true },
+  { label: "f10", free: false, pro: true },
+  { label: "f11", free: false, pro: true },
+  { label: "f12", free: false, pro: true },
+  { label: "f13", free: false, pro: true },
 ];
 
-function fmtDate(iso: string | null) {
+function fmtDate(iso: string | null, locale: string) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" });
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "ro-RO", {
+    day: "numeric", month: "long", year: "numeric",
+  });
 }
 
-function FeatureCell({ v }: { v: string | boolean }) {
+function FeatureCell({ v, tr }: { v: string | boolean; tr: (k: string) => string }) {
   if (v === true) return <Check className="w-4 h-4 text-emerald-400 mx-auto" />;
   if (v === false) return <X className="w-4 h-4 text-zinc-700 mx-auto" />;
-  return <span className="text-xs font-bold text-zinc-300">{v}</span>;
+  return <span className="text-xs font-bold text-zinc-300">{tr(v)}</span>;
 }
 
 export default function BillingPage() {
+  const t = useTranslations("billing");
+  const tc = useTranslations("common");
+  const locale = useLocale();
   const { toast } = useToast();
   const [data, setData] = React.useState<PlansResponse | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -92,7 +99,7 @@ export default function BillingPage() {
         window.location.href = json.url;
         return;
       }
-      toast({ title: "Eroare", description: json.error ?? "Încearcă din nou.", variant: "destructive" });
+      toast({ title: tc("error"), description: json.error ?? tc("retry"), variant: "destructive" });
     } finally {
       setWorking(null);
     }
@@ -107,7 +114,7 @@ export default function BillingPage() {
         window.location.href = json.url;
         return;
       }
-      toast({ title: "Eroare", description: json.error ?? "Încearcă din nou.", variant: "destructive" });
+      toast({ title: tc("error"), description: json.error ?? tc("retry"), variant: "destructive" });
     } finally {
       setWorking(null);
     }
@@ -133,10 +140,10 @@ export default function BillingPage() {
           <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
             <CreditCard className="w-4 h-4 text-indigo-400" />
           </div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Abonament & Facturare</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("title")}</h1>
         </div>
         <p className="text-sm text-zinc-500">
-          Planul tău, ce include fiecare pachet și gestionarea plăților — totul într-un singur loc.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -179,16 +186,16 @@ export default function BillingPage() {
               </div>
               <div>
                 <p className="text-sm font-black text-zinc-100">
-                  {isPaidPro ? "TradeGx PRO" : isTrial ? "PRO Trial" : "Plan Standard (gratuit)"}
+                  {isPaidPro ? t("planPro") : isTrial ? t("planTrial") : t("planFree")}
                 </p>
                 <p className="text-xs text-zinc-500 mt-0.5">
                   {isPaidPro && sub?.cancelAtPeriodEnd
-                    ? `Se încheie pe ${fmtDate(sub.currentPeriodEnd)} — poți reactiva oricând din portal`
+                    ? t("statusEnding", { date: fmtDate(sub.currentPeriodEnd, locale) })
                     : isPaidPro
-                      ? `Activ · se reînnoiește pe ${fmtDate(sub?.currentPeriodEnd ?? null)}`
+                      ? t("statusActive", { date: fmtDate(sub?.currentPeriodEnd ?? null, locale) })
                       : isTrial
-                        ? `Acces PRO complet · mai ai ${trialDaysLeft} ${trialDaysLeft === 1 ? "zi" : "zile"} (până pe ${fmtDate(sub?.trialEnd ?? null)})`
-                        : "Jurnal, academie și analytics de bază — gratuit pentru totdeauna"}
+                        ? t("statusTrial", { days: trialDaysLeft, date: fmtDate(sub?.trialEnd ?? null, locale) })
+                        : t("statusFree")}
                 </p>
               </div>
             </div>
@@ -200,7 +207,7 @@ export default function BillingPage() {
                 className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-xs font-bold text-zinc-200 hover:border-zinc-600 transition-colors disabled:opacity-60"
               >
                 {working === "portal" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5" />}
-                Facturi & metodă de plată
+                {t("portalBtn")}
               </button>
             ) : (
               <button
@@ -209,7 +216,7 @@ export default function BillingPage() {
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-60"
               >
                 {working === "checkout" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                {isTrial ? "Păstrează PRO după trial" : "Activează PRO"}
+                {isTrial ? t("keepPro") : t("activatePro")}
               </button>
             )}
           </div>
@@ -226,7 +233,7 @@ export default function BillingPage() {
                     : "border-zinc-800 bg-zinc-900/60 text-zinc-500 hover:text-zinc-300"
                 )}
               >
-                Lunar — {monthly}$/lună
+                {t("monthlyBtn", { price: monthly })}
               </button>
               <button
                 onClick={() => setPeriod("annual")}
@@ -237,7 +244,7 @@ export default function BillingPage() {
                     : "border-zinc-800 bg-zinc-900/60 text-zinc-500 hover:text-zinc-300"
                 )}
               >
-                Anual — {annualPerMonth}$/lună
+                {t("annualBtn", { price: annualPerMonth })}
                 <span className="absolute -top-2 -right-2 text-[9px] font-black bg-emerald-500 text-zinc-950 rounded-full px-1.5 py-0.5">
                   -{savingsPct}%
                 </span>
@@ -251,14 +258,14 @@ export default function BillingPage() {
               {/* Header */}
               <div className="px-4 sm:px-5 py-4 border-b border-zinc-800" />
               <div className="py-4 border-b border-zinc-800 text-center">
-                <p className="text-xs font-black text-zinc-400">Standard</p>
-                <p className="text-[10px] text-zinc-600 font-bold mt-0.5">Gratuit</p>
+                <p className="text-xs font-black text-zinc-400">{t("colStandard")}</p>
+                <p className="text-[10px] text-zinc-600 font-bold mt-0.5">{t("colFree")}</p>
               </div>
               <div className="py-4 border-b border-indigo-500/30 text-center bg-indigo-500/[0.06] relative">
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/70 to-transparent" />
                 <p className="text-xs font-black text-indigo-300">PRO</p>
                 <p className="text-[10px] text-indigo-400/80 font-bold mt-0.5">
-                  {period === "annual" ? `${annualPerMonth}$/lună` : `${monthly}$/lună`}
+                  {t("perMonth", { price: period === "annual" ? annualPerMonth : monthly })}
                 </p>
               </div>
 
@@ -271,13 +278,13 @@ export default function BillingPage() {
                       i % 2 === 0 && "bg-zinc-950/30"
                     )}
                   >
-                    {f.label}
+                    {t(f.label)}
                   </div>
                   <div className={cn("py-3 flex items-center justify-center", i % 2 === 0 && "bg-zinc-950/30")}>
-                    <FeatureCell v={f.free} />
+                    <FeatureCell v={f.free} tr={t} />
                   </div>
                   <div className={cn("py-3 flex items-center justify-center bg-indigo-500/[0.06]")}>
-                    <FeatureCell v={f.pro} />
+                    <FeatureCell v={f.pro} tr={t} />
                   </div>
                 </React.Fragment>
               ))}
@@ -292,7 +299,7 @@ export default function BillingPage() {
                     disabled={working !== null || !data?.stripeConfigured}
                     className="rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-[11px] font-bold text-white hover:from-indigo-500 hover:to-violet-500 transition-all disabled:opacity-60"
                   >
-                    Alege PRO
+                    {t("choosePro")}
                   </button>
                 )}
                 {isPaidPro && <BadgeCheck className="w-5 h-5 text-emerald-400" />}
@@ -304,26 +311,23 @@ export default function BillingPage() {
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-4">
               <ShieldCheck className="w-4 h-4 text-emerald-400 mb-2" />
-              <p className="text-xs font-bold text-zinc-200 mb-1">Plăți securizate prin Stripe</p>
+              <p className="text-xs font-bold text-zinc-200 mb-1">{t("faq1Title")}</p>
               <p className="text-[11px] text-zinc-500 leading-relaxed">
-                Nu stocăm niciodată datele cardului. Plata, facturile și metoda de plată se
-                gestionează în portalul securizat Stripe.
+                {t("faq1Body")}
               </p>
             </div>
             <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-4">
               <X className="w-4 h-4 text-zinc-500 mb-2" />
-              <p className="text-xs font-bold text-zinc-200 mb-1">Anulezi oricând</p>
+              <p className="text-xs font-bold text-zinc-200 mb-1">{t("faq2Title")}</p>
               <p className="text-[11px] text-zinc-500 leading-relaxed">
-                Fără contracte, fără perioade minime. La anulare păstrezi PRO până la finalul
-                perioadei plătite.
+                {t("faq2Body")}
               </p>
             </div>
             <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-4">
               <Lock className="w-4 h-4 text-indigo-400 mb-2" />
-              <p className="text-xs font-bold text-zinc-200 mb-1">Datele tale rămân intacte</p>
+              <p className="text-xs font-bold text-zinc-200 mb-1">{t("faq3Title")}</p>
               <p className="text-[11px] text-zinc-500 leading-relaxed">
-                La trecerea pe Standard nu se șterge nimic: jurnalul, statisticile și progresul
-                din Academie te așteaptă exact cum le-ai lăsat.
+                {t("faq3Body")}
               </p>
             </div>
           </div>
