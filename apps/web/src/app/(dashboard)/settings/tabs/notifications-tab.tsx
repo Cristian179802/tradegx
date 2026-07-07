@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { Loader2, Save, Send, Check, Trash2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 // ── Secțiune conectare Telegram ───────────────────────────────────────────────
 function TelegramSection() {
+  const t = useTranslations("settings.notifications");
   const { toast } = useToast();
   const [connected, setConnected] = useState(false);
   const [maskedChatId, setMaskedChatId] = useState<string | null>(null);
@@ -41,13 +43,13 @@ function TelegramSection() {
         body: JSON.stringify({ chatId: chatId.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Eroare");
+      if (!res.ok) throw new Error(data.error || t("errFallback"));
       setConnected(true);
       setMaskedChatId(data.maskedChatId);
       setChatId("");
-      toast({ title: "Telegram conectat", description: "Ți-am trimis un mesaj de confirmare pe Telegram." });
+      toast({ title: t("connectedTitle"), description: t("connectedDesc") });
     } catch (e: any) {
-      toast({ title: "Nu s-a putut conecta", description: e.message, variant: "destructive" });
+      toast({ title: t("connectFailTitle"), description: e.message, variant: "destructive" });
     } finally {
       setBusy(false);
     }
@@ -59,7 +61,7 @@ function TelegramSection() {
       await fetch("/api/user/telegram", { method: "DELETE" });
       setConnected(false);
       setMaskedChatId(null);
-      toast({ title: "Telegram deconectat" });
+      toast({ title: t("disconnectedTitle") });
     } finally {
       setBusy(false);
     }
@@ -73,9 +75,9 @@ function TelegramSection() {
             <MessageCircle className="w-4 h-4 text-sky-400" />
           </div>
           <div>
-            <CardTitle className="text-zinc-100 text-base">Alerte pe Telegram</CardTitle>
+            <CardTitle className="text-zinc-100 text-base">{t("cardTitle")}</CardTitle>
             <CardDescription className="text-xs text-zinc-500 mt-0.5">
-              Primește alertele de risc și disciplină direct pe Telegram, în timp real.
+              {t("cardDesc")}
             </CardDescription>
           </div>
         </div>
@@ -85,7 +87,7 @@ function TelegramSection() {
           <div className="h-10 rounded-lg bg-zinc-800/60 animate-pulse" />
         ) : !botConfigured ? (
           <p className="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-            Botul Telegram nu este încă activat pe server. Contactează administratorul.
+            {t("botNotConfigured")}
           </p>
         ) : connected ? (
           <div className="flex items-center justify-between gap-3 bg-zinc-800/40 border border-zinc-700/50 rounded-xl px-4 py-3">
@@ -94,8 +96,8 @@ function TelegramSection() {
                 <Check className="w-4 h-4 text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-zinc-200">Conectat</p>
-                <p className="text-xs text-zinc-500 font-mono">Chat ID: {maskedChatId}</p>
+                <p className="text-sm font-semibold text-zinc-200">{t("connectedLabel")}</p>
+                <p className="text-xs text-zinc-500 font-mono">{t("chatIdLabel", { id: maskedChatId ?? "" })}</p>
               </div>
             </div>
             <Button
@@ -106,21 +108,21 @@ function TelegramSection() {
               className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
             >
               {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5 mr-1.5" />}
-              Deconectează
+              {t("disconnect")}
             </Button>
           </div>
         ) : (
           <div className="space-y-3">
             <ol className="text-xs text-zinc-500 space-y-1 list-decimal list-inside">
-              <li>Deschide Telegram și caută <span className="text-sky-400 font-semibold">@userinfobot</span> — îți trimite Chat ID-ul tău.</li>
-              <li>Caută botul TradeGx și apasă <span className="text-zinc-300 font-semibold">Start</span>.</li>
-              <li>Introdu Chat ID-ul mai jos și conectează.</li>
+              <li>{t.rich("step1", { b: (c) => <span className="text-sky-400 font-semibold">{c}</span> })}</li>
+              <li>{t.rich("step2", { b: (c) => <span className="text-zinc-300 font-semibold">{c}</span> })}</li>
+              <li>{t("step3")}</li>
             </ol>
             <div className="flex items-center gap-2">
               <Input
                 value={chatId}
                 onChange={(e) => setChatId(e.target.value)}
-                placeholder="Chat ID (ex: 123456789)"
+                placeholder={t("chatIdPlaceholder")}
                 className="bg-zinc-800/60 border-zinc-700 text-zinc-200"
                 inputMode="numeric"
               />
@@ -130,7 +132,7 @@ function TelegramSection() {
                 className="bg-sky-600 hover:bg-sky-500 text-white shrink-0"
               >
                 {busy ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Send className="w-4 h-4 mr-1.5" />}
-                Conectează
+                {t("connect")}
               </Button>
             </div>
           </div>
@@ -147,74 +149,24 @@ interface NotificationSetting {
   group: string;
 }
 
+// label/description/group = chei → settings.notifications.* (traduse la randare)
 const NOTIFICATION_SETTINGS: NotificationSetting[] = [
-  // AI Coach alerts
-  {
-    key: "overtrading",
-    label: "Supratranzacționare",
-    description: "Alertă când depășești limita de tranzacții zilnice",
-    group: "AI Coach",
-  },
-  {
-    key: "revenge_trading",
-    label: "Tranzacții din răzbunare",
-    description: "Alertă când deschizi o tranzacție la scurt timp după o pierdere",
-    group: "AI Coach",
-  },
-  {
-    key: "fomo",
-    label: "FOMO",
-    description: "Alertă când intri prea târziu față de zona de setup",
-    group: "AI Coach",
-  },
-  {
-    key: "risk_exceeded",
-    label: "Risc depășit",
-    description: "Alertă când dimensiunea poziției depășește riscul configurat",
-    group: "AI Coach",
-  },
-  {
-    key: "daily_loss_limit",
-    label: "Limită pierdere zilnică",
-    description: "Alertă la 80%, 95% și 100% din limita zilnică",
-    group: "Prop Firm",
-  },
-  {
-    key: "news_impact",
-    label: "Impact știri",
-    description: "Alertă la 15 min înaintea știrilor de mare impact",
-    group: "Prop Firm",
-  },
-  {
-    key: "friday_trading",
-    label: "Tranzacționare vineri",
-    description: "Alertă la tentative de tranzacționare vineri",
-    group: "Reguli personale",
-  },
-  {
-    key: "monday_restriction",
-    label: "Luni înainte de 13:00",
-    description: "Alertă la tentative de tranzacționare luni dimineața",
-    group: "Reguli personale",
-  },
-  // Summaries
-  {
-    key: "daily_review",
-    label: "Revizuire zilnică AI",
-    description: "Rezumat zilnic cu scor disciplină și observații",
-    group: "Rezumate",
-  },
-  {
-    key: "weekly_review",
-    label: "Revizuire săptămânală",
-    description: "Analiza săptămânii cu sugestii de îmbunătățire",
-    group: "Rezumate",
-  },
+  { key: "overtrading",        label: "nOvertrading",       description: "nOvertradingD",       group: "grpAiCoach" },
+  { key: "revenge_trading",    label: "nRevenge",           description: "nRevengeD",           group: "grpAiCoach" },
+  { key: "fomo",               label: "nFomo",              description: "nFomoD",              group: "grpAiCoach" },
+  { key: "risk_exceeded",      label: "nRiskExceeded",      description: "nRiskExceededD",      group: "grpAiCoach" },
+  { key: "daily_loss_limit",   label: "nDailyLoss",         description: "nDailyLossD",         group: "grpPropFirm" },
+  { key: "news_impact",        label: "nNewsImpact",        description: "nNewsImpactD",        group: "grpPropFirm" },
+  { key: "friday_trading",     label: "nFridayTrading",     description: "nFridayTradingD",     group: "grpPersonal" },
+  { key: "monday_restriction", label: "nMondayRestriction", description: "nMondayRestrictionD", group: "grpPersonal" },
+  { key: "daily_review",       label: "nDailyReview",       description: "nDailyReviewD",       group: "grpSummaries" },
+  { key: "weekly_review",      label: "nWeeklyReview",      description: "nWeeklyReviewD",       group: "grpSummaries" },
 ];
 
 const GROUPS = [...new Set(NOTIFICATION_SETTINGS.map((s) => s.group))];
 
 export function NotificationsTab() {
+  const t = useTranslations("settings.notifications");
   const { toast } = useToast();
   const defaults = Object.fromEntries(NOTIFICATION_SETTINGS.map((s) => [s.key, true]));
   const [settings, setSettings] = useState<Record<string, boolean>>(defaults);
@@ -247,9 +199,9 @@ export function NotificationsTab() {
         body: JSON.stringify({ preferences: settings }),
       });
       if (!res.ok) throw new Error();
-      toast({ title: "Salvat", description: "Preferințele de notificări au fost actualizate." });
+      toast({ title: t("savedTitle"), description: t("savedDesc") });
     } catch {
-      toast({ title: "Eroare", description: "Nu s-a putut salva.", variant: "destructive" });
+      toast({ title: t("errTitle"), description: t("errDesc"), variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -266,7 +218,7 @@ export function NotificationsTab() {
       {GROUPS.map((group) => (
         <Card key={group} className="bg-zinc-900/50 border-zinc-800">
           <CardHeader className="pb-3">
-            <CardTitle className="text-zinc-100 text-base">{group}</CardTitle>
+            <CardTitle className="text-zinc-100 text-base">{t(group)}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1">
             {NOTIFICATION_SETTINGS.filter((s) => s.group === group).map((setting) => (
@@ -275,8 +227,8 @@ export function NotificationsTab() {
                 className="flex items-center justify-between py-3 border-b border-zinc-800/50 last:border-0"
               >
                 <div className="flex-1 mr-4">
-                  <p className="text-sm font-medium text-zinc-200">{setting.label}</p>
-                  <p className="text-xs text-zinc-500 mt-0.5">{setting.description}</p>
+                  <p className="text-sm font-medium text-zinc-200">{t(setting.label)}</p>
+                  <p className="text-xs text-zinc-500 mt-0.5">{t(setting.description)}</p>
                 </div>
                 <Switch
                   checked={settings[setting.key] ?? true}
@@ -299,7 +251,7 @@ export function NotificationsTab() {
         ) : (
           <Save className="w-4 h-4 mr-2" />
         )}
-        Salvează notificările
+        {t("save")}
       </Button>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
 import {
   Key, Lock, CheckCircle2, XCircle, ChevronDown, ChevronUp,
@@ -45,18 +46,19 @@ interface TradingAccount {
 
 // ─── Definitions ─────────────────────────────────────────────────────────────
 
+// description = cheie → settings.apiKeys.*; placeholder/hint: cheie dacă începe cu "k:" (tradusă la randare), altfel literal
 const INTEGRATIONS = [
   {
     id: "metaapi",
     name: "MetaAPI",
-    description: "Sincronizare automată tranzacții MT4/MT5 de la broker",
+    description: "descMetaapi",
     icon: "🔄",
     available: true,
     fields: [
       {
         key: "apiKey",
         label: "MetaAPI Token",
-        placeholder: "Introduceți MetaAPI token-ul",
+        placeholder: "k:phMetaapiToken",
         type: "password" as const,
         hint: "dashboard.metaapi.cloud → API tokens",
       },
@@ -66,14 +68,14 @@ const INTEGRATIONS = [
   {
     id: "twelvedata",
     name: "TwelveData",
-    description: "Prețuri live, cotații și date de piață în timp real",
+    description: "descTwelvedata",
     icon: "📊",
     available: true,
     fields: [
       {
         key: "apiKey",
         label: "API Key",
-        placeholder: "Introduceți TwelveData API key",
+        placeholder: "k:phTwelvedataKey",
         type: "password" as const,
         hint: "twelvedata.com/account → API key",
       },
@@ -83,7 +85,7 @@ const INTEGRATIONS = [
   {
     id: "cloudinary",
     name: "Cloudinary",
-    description: "Stocare cloud pentru screenshot-uri tranzacții",
+    description: "descCloudinary",
     icon: "📸",
     available: true,
     fields: [
@@ -106,7 +108,7 @@ const INTEGRATIONS = [
         label: "API Secret",
         placeholder: "••••••••••••••••",
         type: "password" as const,
-        hint: "Nu expune API Secret în cod sau repo public",
+        hint: "k:hintApiSecret",
       },
     ],
     docsUrl: "https://cloudinary.com/documentation",
@@ -114,7 +116,7 @@ const INTEGRATIONS = [
   {
     id: "stripe",
     name: "Stripe",
-    description: "Management abonament — gestionat automat de platformă",
+    description: "descStripe",
     icon: "💳",
     available: false,
     phase: "Phase 5",
@@ -126,6 +128,8 @@ const INTEGRATIONS = [
 // ─── MetaAPI Accounts Panel ───────────────────────────────────────────────────
 
 function MetaApiPanel() {
+  const t = useTranslations("settings.apiKeys");
+  const locale = useLocale();
   const { toast } = useToast();
   const [accounts, setAccounts] = useState<MetaApiAccount[]>([]);
   const [tradingAccounts, setTradingAccounts] = useState<TradingAccount[]>([]);
@@ -150,18 +154,18 @@ function MetaApiPanel() {
       }
       setLinking(initial);
     } catch {
-      toast({ title: "Nu s-au putut încărca conturile MetaAPI", variant: "destructive" });
+      toast({ title: t("loadErr"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => { loadAccounts(); }, [loadAccounts]);
 
   async function handleSync(metaApiAccountId: string) {
     const tradingAccountId = linking[metaApiAccountId];
     if (!tradingAccountId) {
-      toast({ title: "Selectează un cont TradeGX înainte de sync", variant: "destructive" });
+      toast({ title: t("selectAccountFirst"), variant: "destructive" });
       return;
     }
     setSyncing((p) => ({ ...p, [metaApiAccountId]: true }));
@@ -179,9 +183,9 @@ function MetaApiPanel() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setSyncResults((p) => ({ ...p, [metaApiAccountId]: data.message }));
-      toast({ title: "Sincronizare completă", description: data.message });
+      toast({ title: t("syncDone"), description: data.message });
     } catch (err: any) {
-      toast({ title: "Eroare sync", description: err.message, variant: "destructive" });
+      toast({ title: t("syncErr"), description: err.message, variant: "destructive" });
     } finally {
       setSyncing((p) => ({ ...p, [metaApiAccountId]: false }));
     }
@@ -201,9 +205,9 @@ function MetaApiPanel() {
     return (
       <div className="mt-4 flex items-center gap-2 text-zinc-500 text-sm">
         <AlertCircle className="w-4 h-4" />
-        Niciun cont MT4/MT5 găsit în MetaAPI. Adaugă un cont pe{" "}
-        <a href="https://app.metaapi.cloud" target="_blank" rel="noopener noreferrer"
-          className="text-indigo-400 hover:underline">app.metaapi.cloud</a>.
+        {t.rich("noAccounts", {
+          link: (c) => <a href="https://app.metaapi.cloud" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">{c}</a>,
+        })}
       </div>
     );
   }
@@ -212,7 +216,7 @@ function MetaApiPanel() {
     <div className="mt-4 space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-          Conturi MT4/MT5 detectate
+          {t("detectedAccounts")}
         </p>
         <button onClick={loadAccounts} className="text-zinc-600 hover:text-zinc-300 transition-colors">
           <RefreshCw className="w-3.5 h-3.5" />
@@ -232,9 +236,9 @@ function MetaApiPanel() {
                     : "bg-zinc-800 border-zinc-700 text-zinc-500 text-[10px]"
                 }>
                   {acc.connectionStatus === "CONNECTED" ? (
-                    <><Wifi className="w-2.5 h-2.5 mr-1" />Conectat</>
+                    <><Wifi className="w-2.5 h-2.5 mr-1" />{t("connectedBadge")}</>
                   ) : (
-                    <><WifiOff className="w-2.5 h-2.5 mr-1" />Deconectat</>
+                    <><WifiOff className="w-2.5 h-2.5 mr-1" />{t("disconnectedBadge")}</>
                   )}
                 </Badge>
                 <Badge className="bg-zinc-800 border-zinc-700 text-zinc-500 text-[10px]">
@@ -242,12 +246,12 @@ function MetaApiPanel() {
                 </Badge>
               </div>
               <p className="text-xs text-zinc-500 mt-0.5">
-                Login: {acc.login} · {acc.server}
+                {t("loginLine", { login: acc.login, server: acc.server })}
               </p>
             </div>
             <div className="text-right">
               <p className="text-sm font-mono font-bold text-zinc-100">
-                {acc.balance?.toLocaleString("ro-RO", { minimumFractionDigits: 2 })} {acc.currency}
+                {acc.balance?.toLocaleString(locale, { minimumFractionDigits: 2 })} {acc.currency}
               </p>
             </div>
           </div>
@@ -255,14 +259,14 @@ function MetaApiPanel() {
           {/* Link to TradeGX account */}
           <div className="space-y-2">
             <Label className="text-zinc-400 text-xs flex items-center gap-1">
-              <Link2 className="w-3 h-3" /> Leagă de contul TradeGX
+              <Link2 className="w-3 h-3" /> {t("linkToAccount")}
             </Label>
             <select
               value={linking[acc.id] ?? ""}
               onChange={(e) => setLinking((p) => ({ ...p, [acc.id]: e.target.value }))}
               className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
-              <option value="">— Selectează cont —</option>
+              <option value="">{t("selectAccount")}</option>
               {tradingAccounts.map((ta) => (
                 <option key={ta.id} value={ta.id}>
                   {ta.name} ({ta.type})
@@ -274,17 +278,17 @@ function MetaApiPanel() {
           {/* Days back + Sync */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Label className="text-zinc-500 text-xs whitespace-nowrap">Ultimele</Label>
+              <Label className="text-zinc-500 text-xs whitespace-nowrap">{t("last")}</Label>
               <select
                 value={daysBack[acc.id] ?? 90}
                 onChange={(e) => setDaysBack((p) => ({ ...p, [acc.id]: parseInt(e.target.value) }))}
                 className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs rounded-lg px-2 py-1.5 focus:outline-none"
               >
-                <option value={7}>7 zile</option>
-                <option value={30}>30 zile</option>
-                <option value={90}>90 zile</option>
-                <option value={180}>6 luni</option>
-                <option value={365}>1 an</option>
+                <option value={7}>{t("d7")}</option>
+                <option value={30}>{t("d30")}</option>
+                <option value={90}>{t("d90")}</option>
+                <option value={180}>{t("m6")}</option>
+                <option value={365}>{t("y1")}</option>
               </select>
             </div>
 
@@ -295,9 +299,9 @@ function MetaApiPanel() {
               className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs shadow-md shadow-indigo-500/20"
             >
               {syncing[acc.id] ? (
-                <><Loader2 className="w-3 h-3 mr-1.5 animate-spin" />Se sincronizează...</>
+                <><Loader2 className="w-3 h-3 mr-1.5 animate-spin" />{t("syncing")}</>
               ) : (
-                <><RefreshCw className="w-3 h-3 mr-1.5" />Sync acum</>
+                <><RefreshCw className="w-3 h-3 mr-1.5" />{t("syncNow")}</>
               )}
             </Button>
 
@@ -317,6 +321,7 @@ function MetaApiPanel() {
 // ─── TwelveData Status Panel ─────────────────────────────────────────────────
 
 function TwelveDataPanel() {
+  const t = useTranslations("settings.apiKeys");
   const [quote, setQuote] = useState<{ price: string; percent_change: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -337,7 +342,7 @@ function TwelveDataPanel() {
     return (
       <div className="mt-3 text-xs text-zinc-500 flex items-center gap-1.5">
         <AlertCircle className="w-3.5 h-3.5" />
-        Test conexiune eșuat. Verifică API key-ul.
+        {t("testFailed")}
       </div>
     );
   }
@@ -348,7 +353,7 @@ function TwelveDataPanel() {
     <div className="mt-3 flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5">
       <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
       <div>
-        <p className="text-xs text-zinc-400">Conexiune verificată — EUR/USD live</p>
+        <p className="text-xs text-zinc-400">{t("connVerified")}</p>
         <p className="text-sm font-mono font-bold text-zinc-100">
           {parseFloat(quote.price).toFixed(5)}{" "}
           <span className={isPositive ? "text-emerald-400" : "text-rose-400"}>
@@ -373,6 +378,7 @@ function IntegrationCard({
   onSave: (service: string, data: Record<string, string>) => Promise<void>;
   onDisconnect: (service: string) => Promise<void>;
 }) {
+  const t = useTranslations("settings.apiKeys");
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -418,11 +424,11 @@ function IntegrationCard({
               )}
               {isConnected && (
                 <Badge className="bg-emerald-500/10 border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" />Conectat
+                  <CheckCircle2 className="w-3 h-3" />{t("connectedBadge")}
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-zinc-500 mt-0.5">{integration.description}</p>
+            <p className="text-xs text-zinc-500 mt-0.5">{t(integration.description)}</p>
           </div>
         </div>
 
@@ -438,7 +444,7 @@ function IntegrationCard({
               >
                 {disconnecting
                   ? <Loader2 className="w-3 h-3 animate-spin" />
-                  : <><Unplug className="w-3 h-3 mr-1" />Deconectează</>}
+                  : <><Unplug className="w-3 h-3 mr-1" />{t("disconnect")}</>}
               </Button>
             )}
             <Button
@@ -451,7 +457,7 @@ function IntegrationCard({
             </Button>
           </div>
         ) : (
-          <Badge className="bg-zinc-800/50 border-zinc-700/50 text-zinc-600 text-xs">În curând</Badge>
+          <Badge className="bg-zinc-800/50 border-zinc-700/50 text-zinc-600 text-xs">{t("soon")}</Badge>
         )}
       </div>
 
@@ -463,7 +469,7 @@ function IntegrationCard({
           </span>
           {state?.updatedAt && (
             <span className="text-xs text-zinc-600">
-              · {new Date(state.updatedAt).toLocaleDateString("ro-RO")}
+              · {new Date(state.updatedAt).toLocaleDateString()}
             </span>
           )}
         </div>
@@ -492,7 +498,7 @@ function IntegrationCard({
               <div className="relative">
                 <Input
                   type={field.type === "password" && !showPassword[field.key] ? "password" : "text"}
-                  placeholder={field.placeholder}
+                  placeholder={field.placeholder.startsWith("k:") ? t(field.placeholder.slice(2)) : field.placeholder}
                   value={values[field.key] ?? ""}
                   onChange={(e) => setValues((p) => ({ ...p, [field.key]: e.target.value }))}
                   className="bg-zinc-900 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 pr-10"
@@ -507,7 +513,7 @@ function IntegrationCard({
                   </button>
                 )}
               </div>
-              {field.hint && <p className="text-xs text-zinc-600">{field.hint}</p>}
+              {field.hint && <p className="text-xs text-zinc-600">{field.hint.startsWith("k:") ? t(field.hint.slice(2)) : field.hint}</p>}
             </div>
           ))}
 
@@ -519,9 +525,9 @@ function IntegrationCard({
               className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
             >
               {saving ? (
-                <><Loader2 className="w-3 h-3 mr-1.5 animate-spin" />Se verifică...</>
+                <><Loader2 className="w-3 h-3 mr-1.5 animate-spin" />{t("verifying")}</>
               ) : (
-                <><Plug className="w-3 h-3 mr-1.5" />Conectează</>
+                <><Plug className="w-3 h-3 mr-1.5" />{t("connect")}</>
               )}
             </Button>
             <Button
@@ -530,7 +536,7 @@ function IntegrationCard({
               className="text-zinc-500 hover:text-zinc-300"
               onClick={() => { setExpanded(false); setValues({}); }}
             >
-              Anulează
+              {t("cancel")}
             </Button>
             <a
               href={integration.docsUrl}
@@ -538,7 +544,7 @@ function IntegrationCard({
               rel="noopener noreferrer"
               className="ml-auto text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
             >
-              Documentație →
+              {t("docs")}
             </a>
           </div>
         </div>
@@ -550,6 +556,7 @@ function IntegrationCard({
 // ─── Main Tab ────────────────────────────────────────────────────────────────
 
 export function ApiKeysTab() {
+  const t = useTranslations("settings.apiKeys");
   const { toast } = useToast();
   const [integrations, setIntegrations] = useState<IntegrationState[]>([]);
   const [loading, setLoading] = useState(true);
@@ -582,7 +589,7 @@ export function ApiKeysTab() {
     const data = await res.json();
 
     if (!res.ok) {
-      toast({ title: "Eroare conectare", description: data.error, variant: "destructive" });
+      toast({ title: t("saveErr"), description: data.error, variant: "destructive" });
       throw new Error(data.error);
     }
 
@@ -594,8 +601,8 @@ export function ApiKeysTab() {
     });
 
     toast({
-      title: "Conectat cu succes!",
-      description: `${service.charAt(0).toUpperCase() + service.slice(1)} a fost conectat și verificat.`,
+      title: t("connectedTitle"),
+      description: t("connectedDesc", { service: service.charAt(0).toUpperCase() + service.slice(1) }),
     });
   }
 
@@ -606,11 +613,11 @@ export function ApiKeysTab() {
       body: JSON.stringify({ service, disconnect: true }),
     });
     if (!res.ok) {
-      toast({ title: "Eroare la deconectare", variant: "destructive" });
+      toast({ title: t("disconnectErrTitle"), variant: "destructive" });
       return;
     }
     setIntegrations((prev) => prev.filter((i) => i.service !== service));
-    toast({ title: "Deconectat", description: `${service} a fost deconectat.` });
+    toast({ title: t("disconnectedTitle"), description: t("disconnectedDesc", { service }) });
   }
 
   const connectedCount = integrations.filter((i) => i.isActive).length;
@@ -621,10 +628,10 @@ export function ApiKeysTab() {
       <CardHeader>
         <CardTitle className="text-zinc-100 text-base flex items-center gap-2">
           <Key className="w-4 h-4 text-zinc-400" />
-          Chei API și integrări
+          {t("cardTitle")}
         </CardTitle>
         <CardDescription className="text-zinc-500">
-          Conectează-ți brokerii și serviciile externe. Cheile sunt criptate și mascate după salvare.
+          {t("cardDesc")}
         </CardDescription>
       </CardHeader>
 
@@ -632,7 +639,7 @@ export function ApiKeysTab() {
         <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-3">
           <Lock className="w-4 h-4 text-amber-400 shrink-0" />
           <p className="text-amber-300 text-sm">
-            Toate cheile API sunt criptate înainte de stocare și nu sunt vizibile după salvare.
+            {t("encryptNote")}
           </p>
         </div>
 
@@ -660,11 +667,11 @@ export function ApiKeysTab() {
           <div className="flex items-center gap-4 pt-2 border-t border-zinc-800">
             <div className="flex items-center gap-1.5 text-xs text-zinc-500">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-              {connectedCount} din {availableCount} conectate
+              {t("countConnected", { n: connectedCount, total: availableCount })}
             </div>
             {connectedCount === availableCount && (
               <Badge className="bg-emerald-500/10 border-emerald-500/20 text-emerald-400 text-xs">
-                Toate integrările active 🎉
+                {t("allActive")}
               </Badge>
             )}
           </div>

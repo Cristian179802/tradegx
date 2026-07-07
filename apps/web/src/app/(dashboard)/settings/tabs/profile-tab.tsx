@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { profileSchema, type ProfileInput } from "@/lib/validations";
 
 export function ProfileTab({ initialName }: { initialName: string }) {
+  const t = useTranslations("settings.profile");
   const { data: session, update } = useSession();
   const { toast } = useToast();
 
@@ -44,20 +45,20 @@ export function ProfileTab({ initialName }: { initialName: string }) {
     });
 
     if (!res.ok) {
-      toast({ title: "Eroare", description: "Nu s-a putut salva profilul.", variant: "destructive" });
+      toast({ title: t("errTitle"), description: t("errDesc"), variant: "destructive" });
       return;
     }
 
     await update({ name: data.name });
-    toast({ title: "Salvat", description: "Profilul a fost actualizat." });
+    toast({ title: t("savedTitle"), description: t("savedDesc") });
   }
 
   return (
     <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
       <CardHeader>
-        <CardTitle className="text-zinc-100 text-base">Informații personale</CardTitle>
+        <CardTitle className="text-zinc-100 text-base">{t("cardTitle")}</CardTitle>
         <CardDescription className="text-zinc-500">
-          Actualizează numele și preferințele de afișare.
+          {t("cardDesc")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -68,7 +69,7 @@ export function ProfileTab({ initialName }: { initialName: string }) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-300">Nume complet</FormLabel>
+                  <FormLabel className="text-zinc-300">{t("name")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -81,13 +82,13 @@ export function ProfileTab({ initialName }: { initialName: string }) {
             />
 
             <div className="space-y-1.5">
-              <label className="text-sm text-zinc-300">Email</label>
+              <label className="text-sm text-zinc-300">{t("email")}</label>
               <Input
                 value={session?.user?.email ?? ""}
                 disabled
                 className="bg-zinc-950 border-zinc-800 text-zinc-500 cursor-not-allowed"
               />
-              <p className="text-xs text-zinc-600">Emailul nu poate fi modificat.</p>
+              <p className="text-xs text-zinc-600">{t("emailNote")}</p>
             </div>
 
             <div className="pt-2">
@@ -101,7 +102,7 @@ export function ProfileTab({ initialName }: { initialName: string }) {
                 ) : (
                   <Save className="w-4 h-4 mr-2" />
                 )}
-                Salvează
+                {t("save")}
               </Button>
             </div>
           </form>

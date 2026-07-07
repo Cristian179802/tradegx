@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -18,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
 export function PrivacyTab() {
+  const t = useTranslations("settings.privacy");
   const router = useRouter();
   const { toast } = useToast();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -37,16 +39,16 @@ export function PrivacyTab() {
       a.download = `TradeGX-data-${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast({ title: "Export complet", description: "Datele tale au fost descarcate." });
+      toast({ title: t("exportDoneTitle"), description: t("exportDoneDesc") });
     } catch {
-      toast({ title: "Eroare", description: "Nu s-a putut exporta.", variant: "destructive" });
+      toast({ title: t("exportErrTitle"), description: t("exportErrDesc"), variant: "destructive" });
     } finally {
       setIsExporting(false);
     }
   }
 
   async function handleDeleteAccount() {
-    if (deleteConfirmation !== "STERGE CONTUL") return;
+    if (deleteConfirmation !== t("confirmPhrase")) return;
     setIsDeleting(true);
 
     try {
@@ -55,7 +57,7 @@ export function PrivacyTab() {
       await signOut({ redirect: false });
       router.push("/?deleted=true");
     } catch {
-      toast({ title: "Eroare", description: "Nu s-a putut ?terge contul.", variant: "destructive" });
+      toast({ title: t("exportErrTitle"), description: t("deleteErrDesc"), variant: "destructive" });
       setIsDeleting(false);
     }
   }
@@ -65,9 +67,9 @@ export function PrivacyTab() {
       {/* GDPR Export */}
       <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-zinc-100 text-base">Export date (GDPR)</CardTitle>
+          <CardTitle className="text-zinc-100 text-base">{t("exportTitle")}</CardTitle>
           <CardDescription className="text-zinc-500">
-            Descarca toate datele tale conform GDPR. Include tranzac?ii, jurnal, setari ?i contul.
+            {t("exportDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -82,10 +84,10 @@ export function PrivacyTab() {
             ) : (
               <Download className="w-4 h-4 mr-2" />
             )}
-            Descarca datele mele
+            {t("exportBtn")}
           </Button>
           <p className="text-xs text-zinc-600 mt-3">
-            Fi?ierul JSON va con?ine toate datele asociate contului tau.
+            {t("exportNote")}
           </p>
         </CardContent>
       </Card>
@@ -95,18 +97,18 @@ export function PrivacyTab() {
         <CardHeader>
           <CardTitle className="text-rose-400 text-base flex items-center gap-2">
             <AlertTriangle className="w-4 h-4" />
-            Zona periculoasa
+            {t("dangerZone")}
           </CardTitle>
           <CardDescription className="text-zinc-500">
-            Aceste ac?iuni sunt ireversibile. Procedeaza cu aten?ie.
+            {t("dangerDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-zinc-200">?tergere cont</p>
+              <p className="text-sm font-medium text-zinc-200">{t("deleteAccount")}</p>
               <p className="text-xs text-zinc-500 mt-1">
-                ?terge permanent contul tau ?i toate datele asociate. Nu se poate recupera.
+                {t("deleteAccountDesc")}
               </p>
             </div>
             <Button
@@ -115,7 +117,7 @@ export function PrivacyTab() {
               className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/50 shrink-0"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              ?terge cont
+              {t("deleteBtn")}
             </Button>
           </div>
         </CardContent>
@@ -127,22 +129,25 @@ export function PrivacyTab() {
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-400" />
-              Confirmare ?tergere cont
+              {t("dialogTitle")}
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
-              Aceasta va ?terge permanent contul tau, toate tranzac?iile, jurnalul ?i datele asociate.
-              <strong className="text-white block mt-2">Aceasta ac?iune nu poate fi anulata.</strong>
+              {t("dialogDesc")}
+              <strong className="text-white block mt-2">{t("dialogWarn")}</strong>
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
             <p className="text-sm text-zinc-400">
-              Scrie <strong className="text-white">STERGE CONTUL</strong> pentru a confirma:
+              {t.rich("typeToConfirm", {
+                phrase: t("confirmPhrase"),
+                b: (c) => <strong className="text-white">{c}</strong>,
+              })}
             </p>
             <Input
               value={deleteConfirmation}
               onChange={(e) => setDeleteConfirmation(e.target.value)}
-              placeholder="STERGE CONTUL"
+              placeholder={t("confirmPhrase")}
               className="bg-zinc-950 border-zinc-700 text-white"
             />
           </div>
@@ -153,11 +158,11 @@ export function PrivacyTab() {
               onClick={() => setShowDeleteDialog(false)}
               className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
             >
-              Anuleaza
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleDeleteAccount}
-              disabled={deleteConfirmation !== "STERGE CONTUL" || isDeleting}
+              disabled={deleteConfirmation !== t("confirmPhrase") || isDeleting}
               className="bg-rose-600 hover:bg-rose-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isDeleting ? (
@@ -165,7 +170,7 @@ export function PrivacyTab() {
               ) : (
                 <Trash2 className="w-4 h-4 mr-2" />
               )}
-              ?terge permanent
+              {t("deletePermanent")}
             </Button>
           </DialogFooter>
         </DialogContent>

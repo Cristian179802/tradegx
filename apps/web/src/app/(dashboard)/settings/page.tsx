@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -12,22 +13,27 @@ import { ApiKeysTab } from "./tabs/api-keys-tab";
 import { PrivacyTab } from "./tabs/privacy-tab";
 import { BillingTab } from "./tabs/billing-tab";
 
-export const metadata: Metadata = { title: "Setări" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("settings.nav");
+  return { title: t("metaTitle") };
+}
 
 const TABS = [
-  { value: "profile", label: "Profil" },
-  { value: "trading-rules", label: "Reguli Trading" },
-  { value: "appearance", label: "Aspect" },
-  { value: "notifications", label: "Notificări" },
-  { value: "billing", label: "Facturare" },
-  { value: "accounts", label: "Conturi" },
-  { value: "api-keys", label: "Chei API" },
-  { value: "privacy", label: "Confidențialitate" },
-];
+  { value: "profile", key: "profile" },
+  { value: "trading-rules", key: "trading" },
+  { value: "appearance", key: "appearance" },
+  { value: "notifications", key: "notifications" },
+  { value: "billing", key: "billing" },
+  { value: "accounts", key: "accounts" },
+  { value: "api-keys", key: "apiKeys" },
+  { value: "privacy", key: "privacy" },
+] as const;
 
 export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+
+  const t = await getTranslations("settings.nav");
 
   const [user, subscription] = await Promise.all([
     prisma.user.findUnique({
@@ -69,8 +75,8 @@ export default async function SettingsPage() {
 
       <div className="flex items-start justify-between gap-4 relative">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-indigo">Setări</h1>
-          <p className="text-sm text-zinc-500 mt-0.5 leading-relaxed">Gestionează contul, regulile de trading și preferințele tale.</p>
+          <h1 className="text-2xl font-black tracking-tight neon-indigo">{t("title")}</h1>
+          <p className="text-sm text-zinc-500 mt-0.5 leading-relaxed">{t("subtitle")}</p>
         </div>
       </div>
 
@@ -82,7 +88,7 @@ export default async function SettingsPage() {
               value={tab.value}
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/30 text-zinc-500 hover:text-zinc-300 text-sm rounded-xl px-3.5 py-1.5 transition-all font-medium"
             >
-              {tab.label}
+              {t(tab.key)}
             </TabsTrigger>
           ))}
         </TabsList>

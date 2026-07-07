@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { Check, Loader2, Save } from "lucide-react";
@@ -24,34 +25,36 @@ const LANGUAGES = [
   { value: "IT", label: "Italiano" },
 ];
 
+// label = cheie → settings.appearance.* (tradusă la randare)
 const CURRENCIES = [
-  { value: "USD", label: "USD — Dolar american" },
-  { value: "EUR", label: "EUR — Euro" },
-  { value: "GBP", label: "GBP — Lira sterlină" },
-  { value: "RON", label: "RON — Leu românesc" },
-  { value: "CHF", label: "CHF — Franc elvețian" },
-  { value: "JPY", label: "JPY — Yen japonez" },
+  { value: "USD", label: "curUSD" },
+  { value: "EUR", label: "curEUR" },
+  { value: "GBP", label: "curGBP" },
+  { value: "RON", label: "curRON" },
+  { value: "CHF", label: "curCHF" },
+  { value: "JPY", label: "curJPY" },
 ];
 
+// label/desc = chei → settings.appearance.* (traduse la randare)
 const THEMES = [
   {
     value: "DARK",
-    label: "Întunecat",
-    desc: "Tema implicită",
+    label: "thDark",
+    desc: "thDarkDesc",
     preview: "bg-zinc-950 border-zinc-800",
     dot: "bg-zinc-700",
   },
   {
     value: "LIGHT",
-    label: "Luminos",
-    desc: "Fundal deschis",
+    label: "thLight",
+    desc: "thLightDesc",
     preview: "bg-zinc-100 border-zinc-300",
     dot: "bg-zinc-300",
   },
   {
     value: "AMOLED",
-    label: "AMOLED Negru",
-    desc: "Negru pur, OLED",
+    label: "thAmoled",
+    desc: "thAmoledDesc",
     preview: "bg-black border-zinc-900",
     dot: "bg-zinc-900",
   },
@@ -86,6 +89,7 @@ export function AppearanceTab({
   initialTheme = "DARK",
   initialTimezone = "Europe/Bucharest",
 }: AppearanceTabProps) {
+  const t = useTranslations("settings.appearance");
   const { toast } = useToast();
   const { theme: activeTheme, setTheme: applyTheme } = useTheme();
   const [language, setLanguage] = useState(initialLanguage);
@@ -117,9 +121,9 @@ export function AppearanceTab({
       });
 
       if (!res.ok) throw new Error();
-      toast({ title: "Salvat", description: "Preferințele au fost actualizate." });
+      toast({ title: t("savedTitle"), description: t("savedDesc") });
     } catch {
-      toast({ title: "Eroare", description: "Nu s-a putut salva.", variant: "destructive" });
+      toast({ title: t("errTitle"), description: t("errDesc"), variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -130,15 +134,15 @@ export function AppearanceTab({
       {/* Language & Currency */}
       <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-zinc-100 text-base">Limbă și monedă</CardTitle>
+          <CardTitle className="text-zinc-100 text-base">{t("langCardTitle")}</CardTitle>
           <CardDescription className="text-zinc-500">
-            Setează limba interfeței și moneda de afișare.
+            {t("langCardDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-sm text-zinc-300">Limbă</label>
+              <label className="text-sm text-zinc-300">{t("language")}</label>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white">
                   <SelectValue />
@@ -154,7 +158,7 @@ export function AppearanceTab({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm text-zinc-300">Monedă afișare</label>
+              <label className="text-sm text-zinc-300">{t("currency")}</label>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white">
                   <SelectValue />
@@ -162,7 +166,7 @@ export function AppearanceTab({
                 <SelectContent className="bg-zinc-900 border-zinc-700">
                   {CURRENCIES.map((c) => (
                     <SelectItem key={c.value} value={c.value} className="text-zinc-300 focus:text-white focus:bg-zinc-800">
-                      {c.label}
+                      {t(c.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -170,7 +174,7 @@ export function AppearanceTab({
             </div>
 
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-sm text-zinc-300">Fus orar</label>
+              <label className="text-sm text-zinc-300">{t("timezone")}</label>
               <Select value={timezone} onValueChange={setTimezone}>
                 <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white">
                   <SelectValue />
@@ -191,39 +195,39 @@ export function AppearanceTab({
       {/* Theme */}
       <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-zinc-100 text-base">Temă</CardTitle>
+          <CardTitle className="text-zinc-100 text-base">{t("themeTitle")}</CardTitle>
           <CardDescription className="text-zinc-500">
-            Alege aspectul vizual al aplicației.
+            {t("themeDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {THEMES.map((t) => (
+            {THEMES.map((th) => (
               <button
-                key={t.value}
+                key={th.value}
                 type="button"
-                onClick={() => handleThemeChange(t.value)}
+                onClick={() => handleThemeChange(th.value)}
                 className={cn(
                   "relative rounded-xl border-2 p-4 text-left transition-all",
-                  theme === t.value
+                  theme === th.value
                     ? "border-indigo-500 bg-indigo-500/5"
                     : "border-zinc-800 hover:border-zinc-700"
                 )}
               >
-                {theme === t.value && (
+                {theme === th.value && (
                   <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center">
                     <Check className="w-3 h-3 text-white" />
                   </div>
                 )}
-                <div className={`w-full h-10 rounded-lg border mb-3 ${t.preview}`}>
+                <div className={`w-full h-10 rounded-lg border mb-3 ${th.preview}`}>
                   <div className="flex gap-1 p-2">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className={`h-2 rounded ${t.dot} opacity-60`} style={{ width: `${[30, 50, 20][i - 1]}%` }} />
+                      <div key={i} className={`h-2 rounded ${th.dot} opacity-60`} style={{ width: `${[30, 50, 20][i - 1]}%` }} />
                     ))}
                   </div>
                 </div>
-                <p className="text-sm font-medium text-zinc-200">{t.label}</p>
-                <p className="text-xs text-zinc-500">{t.desc}</p>
+                <p className="text-sm font-medium text-zinc-200">{t(th.label)}</p>
+                <p className="text-xs text-zinc-500">{t(th.desc)}</p>
               </button>
             ))}
           </div>
@@ -240,7 +244,7 @@ export function AppearanceTab({
         ) : (
           <Save className="w-4 h-4 mr-2" />
         )}
-        Salvează preferințele
+        {t("save")}
       </Button>
     </div>
   );

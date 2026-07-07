@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
@@ -33,6 +34,7 @@ const TYPE_LABELS: Record<string, string> = { DEMO: "Demo", CHALLENGE: "Challeng
 // ─── MetaAPI Connect Section ──────────────────────────────────────────────────
 
 function MetaApiConnect() {
+  const t = useTranslations("settings.accounts");
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   const [login, setLogin] = React.useState("");
@@ -46,7 +48,7 @@ function MetaApiConnect() {
 
   async function handleConnect() {
     if (!login || !password || !server) {
-      toast({ title: "Câmpuri lipsă", description: "Login, parolă și server sunt obligatorii.", variant: "destructive" });
+      toast({ title: t("missingFieldsTitle"), description: t("missingFieldsDesc"), variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -57,11 +59,11 @@ function MetaApiConnect() {
         body: JSON.stringify({ login, password, server, platform, name: name || undefined }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Eroare la conectare");
+      if (!res.ok) throw new Error(data.error ?? t("connectErrFallback"));
       setConnected({ tradingAccountId: data.tradingAccountId, metaApiAccountId: data.metaApiAccountId, imported: data.imported ?? 0 });
-      toast({ title: "Cont conectat!", description: data.message ?? `${data.imported ?? 0} tranzacții importate.` });
+      toast({ title: t("connectedTitle"), description: data.message ?? t("tradesImported", { n: data.imported ?? 0 }) });
     } catch (err: any) {
-      toast({ title: "Eroare MetaAPI", description: err.message, variant: "destructive" });
+      toast({ title: t("metaApiErrTitle"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -83,10 +85,10 @@ function MetaApiConnect() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Eroare la sincronizare");
-      toast({ title: "Sincronizare completă!", description: data.message ?? `${data.imported ?? 0} tranzacții importate.` });
+      if (!res.ok) throw new Error(data.error ?? t("syncErrFallback"));
+      toast({ title: t("syncDoneTitle"), description: data.message ?? t("tradesImported", { n: data.imported ?? 0 }) });
     } catch (err: any) {
-      toast({ title: "Eroare sincronizare", description: err.message, variant: "destructive" });
+      toast({ title: t("syncErrTitle"), description: err.message, variant: "destructive" });
     } finally {
       setSyncing(false);
     }
@@ -104,8 +106,8 @@ function MetaApiConnect() {
             <Link2 className="h-3.5 w-3.5 text-indigo-400" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-semibold text-zinc-200">Conectare Broker MT4/MT5 (MetaAPI)</p>
-            <p className="text-xs text-zinc-500">Importă tranzacții direct din contul tău live</p>
+            <p className="text-sm font-semibold text-zinc-200">{t("connectHeader")}</p>
+            <p className="text-xs text-zinc-500">{t("connectSub")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -120,7 +122,7 @@ function MetaApiConnect() {
             <>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">Login MT4/MT5</label>
+                  <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">{t("loginLabel")}</label>
                   <input
                     value={login}
                     onChange={(e) => setLogin(e.target.value)}
@@ -129,7 +131,7 @@ function MetaApiConnect() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">Parolă broker</label>
+                  <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">{t("passwordLabel")}</label>
                   <input
                     type="password"
                     value={password}
@@ -140,7 +142,7 @@ function MetaApiConnect() {
                 </div>
               </div>
               <div>
-                <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">Server broker</label>
+                <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">{t("serverLabel")}</label>
                 <input
                   value={server}
                   onChange={(e) => setServer(e.target.value)}
@@ -150,7 +152,7 @@ function MetaApiConnect() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">Platformă</label>
+                  <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">{t("platformLabel")}</label>
                   <select
                     value={platform}
                     onChange={(e) => setPlatform(e.target.value as "mt4" | "mt5")}
@@ -161,7 +163,7 @@ function MetaApiConnect() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">Nume cont (opțional)</label>
+                  <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">{t("nameLabel")}</label>
                   <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -177,13 +179,13 @@ function MetaApiConnect() {
                 className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
               >
                 {loading ? (
-                  <><RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Se conectează...</>
+                  <><RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" /> {t("connecting")}</>
                 ) : (
-                  <><Link2 className="h-3.5 w-3.5 mr-1.5" /> Conectează</>
+                  <><Link2 className="h-3.5 w-3.5 mr-1.5" /> {t("connect")}</>
                 )}
               </Button>
               <p className="text-[10px] text-zinc-600 text-center">
-                Conexiunea se face prin MetaAPI cloud — parola nu este stocată pe serverele noastre.
+                {t("privacyNote")}
               </p>
             </>
           ) : (
@@ -191,8 +193,8 @@ function MetaApiConnect() {
               <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                 <div>
-                  <p className="text-xs font-semibold text-emerald-300">Cont conectat cu succes!</p>
-                  <p className="text-[10px] text-zinc-500">{connected.imported} tranzacții importate · MetaAPI ID: {connected.metaApiAccountId.slice(0, 8)}…</p>
+                  <p className="text-xs font-semibold text-emerald-300">{t("connectedOk")}</p>
+                  <p className="text-[10px] text-zinc-500">{t("connectedStats", { n: connected.imported, id: connected.metaApiAccountId.slice(0, 8) })}</p>
                 </div>
               </div>
               <Button
@@ -203,16 +205,16 @@ function MetaApiConnect() {
                 className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800"
               >
                 {syncing ? (
-                  <><RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Se sincronizează...</>
+                  <><RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" /> {t("syncing")}</>
                 ) : (
-                  <><RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Sincronizează tranzacțiile</>
+                  <><RefreshCw className="h-3.5 w-3.5 mr-1.5" /> {t("syncTrades")}</>
                 )}
               </Button>
               <button
                 onClick={() => setConnected(null)}
                 className="w-full text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors"
               >
-                Conectează alt cont
+                {t("connectAnother")}
               </button>
             </div>
           )}
@@ -225,6 +227,7 @@ function MetaApiConnect() {
 // ─── Main Tab ─────────────────────────────────────────────────────────────────
 
 export function AccountsTab() {
+  const t = useTranslations("settings.accounts");
   const { toast } = useToast();
   const [accounts, setAccounts] = React.useState<Account[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -257,12 +260,11 @@ export function AccountsTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium text-zinc-200">Conturi de trading</h3>
+          <h3 className="text-sm font-medium text-zinc-200">{t("title")}</h3>
           <p className="text-xs text-zinc-500 mt-0.5">
-            Sau gestionează din{" "}
-            <Link href="/accounts" className="text-indigo-400 hover:text-indigo-300">
-              pagina Conturi
-            </Link>
+            {t.rich("manageFrom", {
+              link: (c) => <Link href="/accounts" className="text-indigo-400 hover:text-indigo-300">{c}</Link>,
+            })}
           </p>
         </div>
         <Button
@@ -271,13 +273,13 @@ export function AccountsTab() {
           className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
         >
           <Plus className="h-3.5 w-3.5 mr-1.5" />
-          Adaugă
+          {t("add")}
         </Button>
       </div>
 
       {accounts.length === 0 ? (
         <div className="text-center py-8 rounded-lg border border-dashed border-zinc-800">
-          <p className="text-sm text-zinc-500 mb-3">Niciun cont adăugat</p>
+          <p className="text-sm text-zinc-500 mb-3">{t("noAccounts")}</p>
           <Button
             size="sm"
             variant="outline"
@@ -285,7 +287,7 @@ export function AccountsTab() {
             className="border-zinc-700 text-zinc-400"
           >
             <Plus className="h-3.5 w-3.5 mr-1.5" />
-            Adaugă primul cont
+            {t("addFirst")}
           </Button>
         </div>
       ) : (
@@ -310,7 +312,7 @@ export function AccountsTab() {
                     <span className={cn("num", pnl >= 0 ? "text-emerald-400" : "text-rose-400")}>
                       {pnl >= 0 ? "+" : ""}{formatCurrency(pnl, account.currency)}
                     </span>
-                    <span className="text-zinc-600">{account._count.trades} trades</span>
+                    <span className="text-zinc-600">{t("tradesCount", { n: account._count.trades })}</span>
                   </div>
                 </div>
                 <div className="flex gap-1">

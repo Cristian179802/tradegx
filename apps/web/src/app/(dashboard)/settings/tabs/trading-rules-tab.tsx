@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Save, Info } from "lucide-react";
@@ -19,14 +20,15 @@ import { useToast } from "@/hooks/use-toast";
 import { tradingRulesSchema, type TradingRulesInput } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 
+// label = cheie → settings.trading.* (tradusă la randare)
 const DAYS = [
-  { value: 1, label: "Lu" },
-  { value: 2, label: "Ma" },
-  { value: 3, label: "Mi" },
-  { value: 4, label: "Jo" },
-  { value: 5, label: "Vi" },
-  { value: 6, label: "Sâ" },
-  { value: 0, label: "Du" },
+  { value: 1, label: "dMon" },
+  { value: 2, label: "dTue" },
+  { value: 3, label: "dWed" },
+  { value: 4, label: "dThu" },
+  { value: 5, label: "dFri" },
+  { value: 6, label: "dSat" },
+  { value: 0, label: "dSun" },
 ];
 
 interface TradingRulesTabProps {
@@ -44,6 +46,7 @@ export function TradingRulesTab({
   initialDefaultRiskPct = 1,
   initialNoTradeDays = [5, 0],
 }: TradingRulesTabProps) {
+  const t = useTranslations("settings.trading");
   const { toast } = useToast();
 
   const form = useForm<TradingRulesInput>({
@@ -79,20 +82,20 @@ export function TradingRulesTab({
     });
 
     if (!res.ok) {
-      toast({ title: "Eroare", description: "Nu s-a putut salva.", variant: "destructive" });
+      toast({ title: t("errTitle"), description: t("errDesc"), variant: "destructive" });
       return;
     }
 
-    toast({ title: "Salvat", description: "Regulile de trading au fost actualizate." });
+    toast({ title: t("savedTitle"), description: t("savedDesc") });
   }
 
   return (
     <div className="space-y-4">
       <Card className="bg-zinc-900/80 border-zinc-800/80 rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-zinc-100 text-base">Limite de risc</CardTitle>
+          <CardTitle className="text-zinc-100 text-base">{t("cardTitle")}</CardTitle>
           <CardDescription className="text-zinc-500">
-            Configurează limitele pentru prop firm și protecția contului.
+            {t("cardDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -104,7 +107,7 @@ export function TradingRulesTab({
                   name="defaultRiskPct"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-300">Risc implicit (%)</FormLabel>
+                      <FormLabel className="text-zinc-300">{t("defaultRisk")}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -117,7 +120,7 @@ export function TradingRulesTab({
                         />
                       </FormControl>
                       <FormDescription className="text-zinc-600 text-xs">
-                        Riscul implicit per tranzacție
+                        {t("defaultRiskDesc")}
                       </FormDescription>
                       <FormMessage className="text-rose-400" />
                     </FormItem>
@@ -129,7 +132,7 @@ export function TradingRulesTab({
                   name="maxTradesPerDay"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-300">Max. tranzacții/zi</FormLabel>
+                      <FormLabel className="text-zinc-300">{t("maxTrades")}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -150,7 +153,7 @@ export function TradingRulesTab({
                   name="maxDailyLossPct"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-300">Pierdere zilnică maximă (%)</FormLabel>
+                      <FormLabel className="text-zinc-300">{t("maxDailyLoss")}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -163,7 +166,7 @@ export function TradingRulesTab({
                         />
                       </FormControl>
                       <FormDescription className="text-zinc-600 text-xs">
-                        Ex: 5% pentru regulile FTMO
+                        {t("ftmoLoss")}
                       </FormDescription>
                       <FormMessage className="text-rose-400" />
                     </FormItem>
@@ -175,7 +178,7 @@ export function TradingRulesTab({
                   name="maxDrawdownPct"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-300">Drawdown maxim (%)</FormLabel>
+                      <FormLabel className="text-zinc-300">{t("maxDrawdown")}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -188,7 +191,7 @@ export function TradingRulesTab({
                         />
                       </FormControl>
                       <FormDescription className="text-zinc-600 text-xs">
-                        Ex: 10% pentru regulile FTMO
+                        {t("ftmoDrawdown")}
                       </FormDescription>
                       <FormMessage className="text-rose-400" />
                     </FormItem>
@@ -199,7 +202,7 @@ export function TradingRulesTab({
               {/* No-trade days */}
               <div className="space-y-2">
                 <label className="text-sm text-zinc-300 font-medium">
-                  Zile fără tranzacții
+                  {t("noTradeDays")}
                 </label>
                 <div className="flex gap-2 flex-wrap">
                   {DAYS.map((day) => {
@@ -216,21 +219,21 @@ export function TradingRulesTab({
                             : "bg-zinc-900/80 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-200"
                         )}
                       >
-                        {day.label}
+                        {t(day.label)}
                       </button>
                     );
                   })}
                 </div>
                 <p className="text-xs text-zinc-600 flex items-center gap-1">
                   <Info className="w-3 h-3" />
-                  Zilele marcate cu roșu declanșează alerte dacă încerci să tranzacționezi.
+                  {t("noTradeDaysHint")}
                 </p>
               </div>
 
               {/* No-trade hours */}
               <div className="space-y-2">
                 <label className="text-sm text-zinc-300 font-medium">
-                  Ore fără tranzacții
+                  {t("noTradeHours")}
                 </label>
                 <div className="flex items-center gap-3">
                   <FormField
@@ -251,7 +254,7 @@ export function TradingRulesTab({
                       </FormItem>
                     )}
                   />
-                  <span className="text-zinc-500 text-sm shrink-0">până la</span>
+                  <span className="text-zinc-500 text-sm shrink-0">{t("until")}</span>
                   <FormField
                     control={form.control}
                     name="noTradeHoursEnd"
@@ -272,7 +275,7 @@ export function TradingRulesTab({
                   />
                 </div>
                 <p className="text-xs text-zinc-600">
-                  Fus orar: Europe/Bucharest (ora locală)
+                  {t("tzNote")}
                 </p>
               </div>
 
@@ -286,7 +289,7 @@ export function TradingRulesTab({
                 ) : (
                   <Save className="w-4 h-4 mr-2" />
                 )}
-                Salvează regulile
+                {t("save")}
               </Button>
             </form>
           </Form>
