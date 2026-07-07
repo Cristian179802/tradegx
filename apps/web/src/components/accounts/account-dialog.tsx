@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,6 +56,7 @@ const ACCOUNT_TYPES = [
 // ─── Copy button ──────────────────────────────────────────────────────────────
 
 function CopyBtn({ text, className }: { text: string; className?: string }) {
+  const t = useTranslations("accountDialog");
   const [copied, setCopied] = React.useState(false);
   return (
     <button
@@ -68,7 +70,7 @@ function CopyBtn({ text, className }: { text: string; className?: string }) {
       )}
     >
       {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-      {copied ? "Copiat!" : "Copiază codul EA"}
+      {copied ? t("copied") : t("copyEaCode")}
     </button>
   );
 }
@@ -76,6 +78,7 @@ function CopyBtn({ text, className }: { text: string; className?: string }) {
 // ─── Step: Choose Method ──────────────────────────────────────────────────────
 
 function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
+  const t = useTranslations("accountDialog");
   return (
     <div className="space-y-3">
       {/* EA — PRIMARY */}
@@ -88,12 +91,12 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className="font-bold text-white text-base">MT4 / MT5 / cTrader</span>
-            <Badge className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] px-1.5 py-0">Recomandat</Badge>
-            <Badge className="bg-zinc-700/60 border border-zinc-700 text-zinc-400 text-[10px] px-1.5 py-0">Gratuit</Badge>
+            <span className="font-bold text-white text-base">{t("eaTitle")}</span>
+            <Badge className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] px-1.5 py-0">{t("recommended")}</Badge>
+            <Badge className="bg-zinc-700/60 border border-zinc-700 text-zinc-400 text-[10px] px-1.5 py-0">{t("free")}</Badge>
           </div>
           <p className="text-sm text-zinc-400 leading-relaxed">
-            Descarcă un fișier mic, pune-l în MT4/MT5 — tranzacțiile se sincronizează automat.
+            {t("eaDesc")}
           </p>
         </div>
         <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-indigo-400 transition-colors shrink-0 mt-1" />
@@ -109,11 +112,11 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className="font-bold text-white text-base">Conectare automată (MT4/MT5)</span>
-            <Badge className="bg-sky-500/20 border border-sky-500/30 text-sky-300 text-[10px] px-1.5 py-0">Cloud 24/7</Badge>
+            <span className="font-bold text-white text-base">{t("metaapiTitle")}</span>
+            <Badge className="bg-sky-500/20 border border-sky-500/30 text-sky-300 text-[10px] px-1.5 py-0">{t("cloud247")}</Badge>
           </div>
           <p className="text-sm text-zinc-400 leading-relaxed">
-            Conectează contul cu login + parolă + server. Sincronizare automată în cloud, fără terminal deschis.
+            {t("metaapiDesc")}
           </p>
         </div>
         <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-sky-400 transition-colors shrink-0 mt-1" />
@@ -127,8 +130,8 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
         >
           <div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0 text-lg">📄</div>
           <div>
-            <p className="font-semibold text-zinc-300 text-sm">Import CSV</p>
-            <p className="text-[11px] text-zinc-600 mt-0.5">Fișier din MT4/MT5</p>
+            <p className="font-semibold text-zinc-300 text-sm">{t("csvTitle")}</p>
+            <p className="text-[11px] text-zinc-600 mt-0.5">{t("csvSub")}</p>
           </div>
         </button>
 
@@ -138,8 +141,8 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
         >
           <div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0 text-lg">✏️</div>
           <div>
-            <p className="font-semibold text-zinc-300 text-sm">Manual</p>
-            <p className="text-[11px] text-zinc-600 mt-0.5">Adaugă tranzacții</p>
+            <p className="font-semibold text-zinc-300 text-sm">{t("manualTitle")}</p>
+            <p className="text-[11px] text-zinc-600 mt-0.5">{t("manualSub")}</p>
           </div>
         </button>
       </div>
@@ -152,6 +155,7 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
 interface EAData { eaMQ4: string; eaMQ5: string; appDomain: string; webhookUrl: string; token: string; }
 
 function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+  const t = useTranslations("accountDialog");
   const [platform, setPlatform]   = React.useState<"mt4" | "mt5">("mt5");
   const [ea, setEa]               = React.useState<EAData | null>(null);
   const [loading, setLoading]     = React.useState(true);
@@ -176,7 +180,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
       if (res.ok && data.ok) {
         setTestState("ok");
         const s = data.body?.status;
-        setTestMsg(`✅ Webhook OK! ${s === "created" ? "Cont + tranzacție create." : s === "updated" ? "Tranzacție actualizată." : `Status ${data.status}`}`);
+        setTestMsg(t("webhookOk", { detail: s === "created" ? t("wCreated") : s === "updated" ? t("wUpdated") : t("wStatus", { status: data.status }) }));
       } else {
         setTestState("error");
         const detail = data.error ?? data.body?.error ?? JSON.stringify(data.body ?? data);
@@ -184,7 +188,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
       }
     } catch (e) {
       setTestState("error");
-      setTestMsg(`❌ ${e instanceof Error ? e.message : "eroare necunoscută"}`);
+      setTestMsg(`❌ ${e instanceof Error ? e.message : t("errUnknown")}`);
     }
   }
 
@@ -215,29 +219,17 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
   }
 
   const fileLabel = hasCompiled ? `TradeGx.${cext}` : `TradeGx.${ext}`;
-  const fileNote  = hasCompiled
-    ? "fișier gata — nu necesită compilare"
-    : "sursă — necesită compilare în MetaEditor (F7)";
+  const fileNote  = hasCompiled ? t("fileNoteReady") : t("fileNoteSource");
 
+  const richTags = {
+    b: (c: React.ReactNode) => <b>{c}</b>,
+    s: (c: React.ReactNode) => <span className="text-zinc-500 text-[10px]">{c}</span>,
+  };
   const steps = [
-    {
-      icon: "📂",
-      text: platform === "mt4"
-        ? <>Pune <b>{fileLabel}</b> în folderul <b>MQL4 → Experts</b> <span className="text-zinc-500 text-[10px]">(MT4 → File → Open Data Folder)</span></>
-        : <>Pune <b>{fileLabel}</b> în folderul <b>MQL5 → Experts</b> <span className="text-zinc-500 text-[10px]">(MT5 → File → Open Data Folder)</span></>,
-    },
-    {
-      icon: "🔄",
-      text: <>În <b>Navigator</b>, click dreapta pe <b>"Expert Advisors" → Refresh</b> — "TradeGx" apare în listă</>,
-    },
-    {
-      icon: "⚙️",
-      text: <><b>Tools → Options → Expert Advisors</b> → bifează <b>"Allow WebRequest"</b> → adaugă <b>tradegx.com</b></>,
-    },
-    {
-      icon: "🖱️",
-      text: <>Trage <b>"TradeGx"</b> din Navigator pe orice grafic → apare un dialog → click tab <b>"Inputs"</b> → lipește <b>WebhookURL</b> și <b>AuthToken</b> din câmpurile de mai sus → <b>OK</b></>,
-    },
+    { icon: "📂", text: t.rich(platform === "mt4" ? "step1Mt4" : "step1Mt5", { file: fileLabel, ...richTags }) },
+    { icon: "🔄", text: t.rich("step2", richTags) },
+    { icon: "⚙️", text: t.rich("step3", richTags) },
+    { icon: "🖱️", text: t.rich("step4", richTags) },
   ];
 
   return (
@@ -245,7 +237,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
       {/* Back + tabs on same row */}
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors text-xs shrink-0">
-          <ChevronLeft className="w-3.5 h-3.5" />Înapoi
+          <ChevronLeft className="w-3.5 h-3.5" />{t("back")}
         </button>
         <div className="flex-1 grid grid-cols-2 gap-1.5">
           {(["mt4", "mt5"] as const).map(p => (
@@ -269,7 +261,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
         {/* ── Credentials ─────────────────────────────────────────── */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-2">
           <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
-            Datele tale — copiază în {platform.toUpperCase()} Inputs
+            {t("yourData", { platform: platform.toUpperCase() })}
           </p>
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] text-zinc-600 w-14 shrink-0">URL</span>
@@ -299,7 +291,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
           )}
         >
           {testState === "testing" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plug className="w-3.5 h-3.5" />}
-          {testState === "testing" ? "Se testează..." : testState === "idle" ? "Testează conexiunea" : testMsg}
+          {testState === "testing" ? t("testing") : testState === "idle" ? t("testConn") : testMsg}
         </button>
 
         {/* ── Download ─────────────────────────────────────────────── */}
@@ -313,13 +305,13 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
           )}
         >
           {downloaded ? <CheckCircle2 className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-          {downloaded ? "Descărcat!" : `Descarcă ${fileLabel}`}
+          {downloaded ? t("downloaded") : t("downloadFile", { file: fileLabel })}
           <span className="text-[10px] font-normal opacity-50 ml-1">{fileNote}</span>
         </button>
 
         {/* ── Steps ────────────────────────────────────────────────── */}
         <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 space-y-2">
-          <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Instalare — 4 pași</p>
+          <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{t("install4")}</p>
           {steps.map((s, i) => (
             <div key={i} className="flex items-start gap-2">
               <span className="text-sm leading-none mt-0.5 shrink-0">{s.icon}</span>
@@ -329,17 +321,17 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
         </div>
 
       </>) : (
-        <div className="text-center py-4 text-sm text-rose-400">Eroare. Reîncarcă pagina.</div>
+        <div className="text-center py-4 text-sm text-rose-400">{t("errReload")}</div>
       )}
 
       <Button onClick={onDone}
         className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold h-9 text-sm">
         <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-        Am instalat — Gata!
+        {t("installed")}
       </Button>
 
       <p className="text-center text-[10px] text-zinc-600">
-        Contul apare automat după prima tranzacție închisă în {platform.toUpperCase()}.
+        {t("appearsAuto", { platform: platform.toUpperCase() })}
       </p>
     </div>
   );
@@ -348,6 +340,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
 // ─── Step: MetaAPI Connect (login/parolă/server) ─────────────────────────────
 
 function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess: () => void; onClose: () => void }) {
+  const t = useTranslations("accountDialog");
   const { toast } = useToast();
   const [platform, setPlatform] = React.useState<"mt4" | "mt5">("mt5");
   const [login, setLogin]       = React.useState("");
@@ -361,7 +354,7 @@ function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuc
 
   async function connect() {
     if (!login.trim() || !password || !server.trim()) {
-      setError("Login, parolă și server sunt obligatorii.");
+      setError(t("credsRequired"));
       return;
     }
     setLoading(true); setError("");
@@ -375,11 +368,11 @@ function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuc
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Eroare la conectare."); return; }
-      toast({ title: "✅ Cont conectat!", description: data.message ?? "Tranzacțiile se sincronizează." });
+      if (!res.ok) { setError(data.error ?? t("connectErr")); return; }
+      toast({ title: t("connectedTitle"), description: data.message ?? t("syncingDesc") });
       onSuccess(); onClose();
     } catch {
-      setError("Eroare de rețea. Încearcă din nou.");
+      setError(t("netErr"));
     } finally {
       setLoading(false);
     }
@@ -388,7 +381,7 @@ function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuc
   return (
     <div className="space-y-4">
       <button onClick={onBack} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
-        <ChevronLeft className="w-4 h-4" />Înapoi
+        <ChevronLeft className="w-4 h-4" />{t("back")}
       </button>
 
       {/* Platformă */}
@@ -407,31 +400,31 @@ function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuc
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Login (număr cont)</label>
+            <label className="text-xs text-zinc-400 block mb-1">{t("loginLabel")}</label>
             <Input value={login} onChange={e => setLogin(e.target.value)} inputMode="numeric"
               placeholder="12345678" className="bg-zinc-800 border-zinc-700 text-zinc-100 font-mono placeholder:text-zinc-600" />
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Parolă (investor sau master)</label>
+            <label className="text-xs text-zinc-400 block mb-1">{t("passwordLabel")}</label>
             <Input type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder="••••••••" className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
           </div>
         </div>
         <div>
-          <label className="text-xs text-zinc-400 block mb-1">Server broker</label>
+          <label className="text-xs text-zinc-400 block mb-1">{t("serverLabel")}</label>
           <Input value={server} onChange={e => setServer(e.target.value)}
-            placeholder="Ex: ICMarketsSC-Demo, FTMO-Server, Exness-Real"
+            placeholder={t("serverPlaceholder")}
             className="bg-zinc-800 border-zinc-700 text-zinc-100 font-mono placeholder:text-zinc-600" />
-          <p className="text-[10px] text-zinc-600 mt-1">Îl găsești în MT4/MT5 → File → Login to Trade Account (numele exact al serverului).</p>
+          <p className="text-[10px] text-zinc-600 mt-1">{t("serverHint")}</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Nume cont (opțional)</label>
+            <label className="text-xs text-zinc-400 block mb-1">{t("nameLabel")}</label>
             <Input value={name} onChange={e => setName(e.target.value)}
-              placeholder="Ex: FTMO $100K" className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
+              placeholder={t("namePlaceholderMeta")} className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Monedă</label>
+            <label className="text-xs text-zinc-400 block mb-1">{t("currencyLabel")}</label>
             <select value={currency} onChange={e => setCurrency(e.target.value)}
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-sky-500">
               {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -454,7 +447,7 @@ function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuc
       <div className="flex items-start gap-2 bg-sky-500/8 border border-sky-500/20 rounded-xl px-3 py-2.5">
         <AlertCircle className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
         <p className="text-[11px] text-zinc-400 leading-relaxed">
-          Pentru siguranță maximă folosește <b className="text-sky-300">parola investor</b> (read-only) — permite citirea tranzacțiilor fără a permite tranzacționare. Conexiunea poate dura 10–30 secunde.
+          {t.rich("securityNote", { b: (c) => <b className="text-sky-300">{c}</b> })}
         </p>
       </div>
 
@@ -468,8 +461,8 @@ function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuc
       <Button onClick={connect} disabled={loading}
         className="w-full bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-semibold h-10 shadow-lg shadow-sky-500/20">
         {loading
-          ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se conectează... (până la 30s)</>
-          : <><Plug className="w-4 h-4 mr-2" />Conectează contul</>}
+          ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("connecting")}</>
+          : <><Plug className="w-4 h-4 mr-2" />{t("connectAccount")}</>}
       </Button>
     </div>
   );
@@ -478,6 +471,7 @@ function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuc
 // ─── Step: CSV Import ─────────────────────────────────────────────────────────
 
 function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess: () => void; onClose: () => void }) {
+  const t = useTranslations("accountDialog");
   const { toast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [file, setFile]         = React.useState<File | null>(null);
@@ -504,11 +498,11 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
       fd.append("broker", broker);
       const res = await fetch("/api/accounts/import", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Eroare la import"); return; }
+      if (!res.ok) { setError(data.error ?? t("importErr")); return; }
       setDone(true);
-      toast({ title: `✅ ${data.imported} tranzacții importate!` });
+      toast({ title: t("importedToast", { n: data.imported }) });
       setTimeout(() => { onSuccess(); onClose(); }, 1500);
-    } catch { setError("Eroare de rețea."); }
+    } catch { setError(t("netErrShort")); }
     finally { setLoading(false); }
   }
 
@@ -518,21 +512,21 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
         <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center">
           <CheckCircle2 className="w-7 h-7 text-emerald-400" />
         </div>
-        <p className="font-bold text-zinc-100">Import realizat cu succes!</p>
+        <p className="font-bold text-zinc-100">{t("importDone")}</p>
       </div>
     );
   }
 
   const hint: Record<typeof platform, string> = {
-    mt4: 'MT4 → Account History → click dreapta → "Save as Report" → HTML sau CSV',
-    mt5: 'MT5 → History → click dreapta → "Save as Report" → HTML sau CSV',
-    ctrader: "cTrader → History → Closed Positions → Export → CSV",
+    mt4: t("hintMt4"),
+    mt5: t("hintMt5"),
+    ctrader: t("hintCtrader"),
   };
 
   return (
     <div className="space-y-4">
       <button onClick={onBack} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
-        <ChevronLeft className="w-4 h-4" />Înapoi
+        <ChevronLeft className="w-4 h-4" />{t("back")}
       </button>
 
       <div className="grid grid-cols-3 gap-2">
@@ -558,8 +552,8 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
           className={cn("border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all",
             dragging ? "border-indigo-500/60 bg-indigo-500/10" : "border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800/30")}>
           <Upload className="w-6 h-6 text-zinc-600 mx-auto mb-2" />
-          <p className="text-sm text-zinc-300">Trage fișierul sau <span className="text-indigo-400">apasă</span></p>
-          <p className="text-xs text-zinc-600 mt-1">.html · .htm · .csv</p>
+          <p className="text-sm text-zinc-300">{t.rich("dropOrClick", { a: (c) => <span className="text-indigo-400">{c}</span> })}</p>
+          <p className="text-xs text-zinc-600 mt-1">{t("fileTypes")}</p>
           <input ref={fileInputRef} type="file" className="hidden" accept=".html,.htm,.csv,.txt"
             onChange={e => { const f = e.target.files?.[0]; if (f) setFile(f); }} />
         </div>
@@ -577,12 +571,12 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
       {/* Optional extras */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <label className="text-xs text-zinc-400">Broker <span className="text-zinc-600">(opțional)</span></label>
-          <Input placeholder="Ex: FTMO" value={broker} onChange={e => setBroker(e.target.value)}
+          <label className="text-xs text-zinc-400">{t("brokerLabel")} <span className="text-zinc-600">{t("optional")}</span></label>
+          <Input placeholder={t("brokerPlaceholder")} value={broker} onChange={e => setBroker(e.target.value)}
             className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs text-zinc-400">Monedă</label>
+          <label className="text-xs text-zinc-400">{t("currency")}</label>
           <select value={currency} onChange={e => setCur(e.target.value)}
             className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
             {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -609,7 +603,7 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
 
       <Button onClick={handleImport} disabled={!file || loading}
         className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold h-10 shadow-lg shadow-indigo-500/20">
-        {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se procesează...</> : <><Upload className="w-4 h-4 mr-2" />Importă</>}
+        {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("processing")}</> : <><Upload className="w-4 h-4 mr-2" />{t("importBtn")}</>}
       </Button>
     </div>
   );
@@ -621,6 +615,7 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
   prefill?: Partial<TradingAccountInput & { id?: string }>;
   isEdit: boolean; locked?: boolean; onBack?: () => void; onClose: () => void; onSuccess: () => void;
 }) {
+  const t = useTranslations("accountDialog");
   const { toast } = useToast();
   const form = useForm<TradingAccountInput>({
     resolver: zodResolver(tradingAccountSchema),
@@ -648,10 +643,10 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      toast({ title: "Eroare", description: err.error ?? "A apărut o eroare", variant: "destructive" });
+      toast({ title: t("errTitle"), description: err.error ?? t("errGeneric"), variant: "destructive" });
       return;
     }
-    toast({ title: isEdit ? "Cont actualizat" : "Cont creat!", description: data.name });
+    toast({ title: isEdit ? t("accUpdated") : t("accCreated"), description: data.name });
     onSuccess(); onClose();
   }
 
@@ -661,13 +656,13 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
         {onBack && (
           <button type="button" onClick={onBack}
             className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
-            <ChevronLeft className="w-4 h-4" />Înapoi
+            <ChevronLeft className="w-4 h-4" />{t("back")}
           </button>
         )}
 
         <FormField control={form.control} name="type" render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-zinc-300 text-xs uppercase tracking-wider">Tip cont</FormLabel>
+            <FormLabel className="text-zinc-300 text-xs uppercase tracking-wider">{t("accountType")}</FormLabel>
             <div className="grid grid-cols-3 gap-2">
               {ACCOUNT_TYPES.map(t => (
                 <button key={t.value} type="button" onClick={() => field.onChange(t.value)}
@@ -682,10 +677,10 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
 
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-zinc-300">Nume cont</FormLabel>
+            <FormLabel className="text-zinc-300">{t("accountName")}</FormLabel>
             <FormControl>
               <Input
-                placeholder={watchType === "CHALLENGE" ? "Ex: FTMO $25K" : watchType === "LIVE" ? "Ex: IC Markets Live" : "Ex: Cont Demo"}
+                placeholder={watchType === "CHALLENGE" ? t("namePhChallenge") : watchType === "LIVE" ? t("namePhLive") : t("namePhDemo")}
                 className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" {...field} />
             </FormControl>
             <FormMessage />
@@ -695,15 +690,15 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
         <div className="grid grid-cols-2 gap-3">
           <FormField control={form.control} name="broker" render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-300">Broker</FormLabel>
+              <FormLabel className="text-zinc-300">{t("broker")}</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: FTMO" className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" {...field} />
+                <Input placeholder={t("brokerPh")} className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" {...field} />
               </FormControl>
             </FormItem>
           )} />
           <FormField control={form.control} name="accountNumber" render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-300">Nr. cont</FormLabel>
+              <FormLabel className="text-zinc-300">{t("accountNumber")}</FormLabel>
               <FormControl>
                 <Input placeholder="12345678" className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 font-mono" {...field} />
               </FormControl>
@@ -712,7 +707,7 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
           <FormField control={form.control} name="balance" render={({ field }) => (
             <FormItem>
               <FormLabel className="text-zinc-300 flex items-center gap-1.5">
-                Balanță
+                {t("balance")}
                 {locked && <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/25 rounded px-1.5 py-0.5">AUTO</span>}
               </FormLabel>
               <FormControl>
@@ -725,14 +720,14 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
               </FormControl>
               {locked && (
                 <p className="text-[10px] text-zinc-500 mt-1 leading-relaxed">
-                  Sincronizat automat din MT4/MT5 — balanța vine de la broker și nu poate fi editată.
+                  {t("balanceLocked")}
                 </p>
               )}
             </FormItem>
           )} />
           <FormField control={form.control} name="currency" render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-300">Monedă</FormLabel>
+              <FormLabel className="text-zinc-300">{t("currency")}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100"><SelectValue /></SelectTrigger>
@@ -745,7 +740,7 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
           )} />
           <FormField control={form.control} name="leverage" render={({ field }) => (
             <FormItem className="col-span-2">
-              <FormLabel className="text-zinc-300">Levier</FormLabel>
+              <FormLabel className="text-zinc-300">{t("leverage")}</FormLabel>
               <Select onValueChange={v => field.onChange(parseInt(v))} defaultValue={String(field.value)}>
                 <FormControl>
                   <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100"><SelectValue /></SelectTrigger>
@@ -762,11 +757,11 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
 
         {watchType === "CHALLENGE" && (
           <div className="border border-amber-500/20 bg-amber-500/5 rounded-xl p-4 space-y-3">
-            <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Reguli Prop Firm</p>
+            <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">{t("propRules")}</p>
             <div className="grid grid-cols-2 gap-3">
               <FormField control={form.control} name="maxDailyLossPct" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-300 text-xs">Pierdere zilnică max (%)</FormLabel>
+                  <FormLabel className="text-zinc-300 text-xs">{t("maxDailyLoss")}</FormLabel>
                   <FormControl>
                     <Input type="number" step="0.1" placeholder="5"
                       className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600"
@@ -777,7 +772,7 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
               )} />
               <FormField control={form.control} name="maxDrawdownPct" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-300 text-xs">Drawdown max (%)</FormLabel>
+                  <FormLabel className="text-zinc-300 text-xs">{t("maxDrawdown")}</FormLabel>
                   <FormControl>
                     <Input type="number" step="0.1" placeholder="10"
                       className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600"
@@ -793,13 +788,13 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
         <div className="flex gap-3 pt-1">
           {onBack && (
             <Button type="button" variant="outline" onClick={onBack}
-              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">Anulează</Button>
+              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">{t("cancel")}</Button>
           )}
           <Button type="submit" disabled={isSubmitting}
             className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20">
             {isSubmitting
-              ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Se salvează...</>
-              : isEdit ? "Salvează modificările" : "Creează cont"}
+              ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />{t("saving")}</>
+              : isEdit ? t("saveChanges") : t("createAccount")}
           </Button>
         </div>
       </form>
@@ -816,6 +811,7 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
     account.lastSyncedAt != null ||
     (account.brokerSource != null && account.brokerSource !== "MANUAL")
   );
+  const t = useTranslations("accountDialog");
   const [step, setStep] = React.useState<Step>(isEdit ? "form" : "method");
 
   React.useEffect(() => {
@@ -823,11 +819,11 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
   }, [open, isEdit]);
 
   const TITLES: Record<Step, string> = {
-    method:  "Adaugă cont de trading",
-    ea:      "Conectare MT4 / MT5 (EA)",
-    metaapi: "Conectare automată (MT4 / MT5)",
-    csv:     "Import fișier",
-    form:    isEdit ? "Editează cont" : "Cont manual",
+    method:  t("titleMethod"),
+    ea:      t("titleEa"),
+    metaapi: t("titleMetaapi"),
+    csv:     t("titleCsv"),
+    form:    isEdit ? t("titleFormEdit") : t("titleFormNew"),
   };
 
   return (
