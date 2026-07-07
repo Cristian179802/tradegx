@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -12,212 +13,74 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HeroTilt } from "@/components/landing/hero-tilt";
 
-export const metadata: Metadata = {
-  title: "TradeGx — Jurnal de Trading Profesional",
-  description: "Jurnalul de trading profesional pentru traderii SMC și ICT. AI Coach, analiză instituțională și sincronizare broker în timp real.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("landing");
+  return { title: t("metaTitle"), description: t("metaDesc") };
+}
 
+// title/description = chei → landing.* (traduse la randare)
 const FEATURES = [
-  {
-    icon: BarChart3,
-    title: "Analiză Instituțională",
-    description: "Win rate, profit factor, expectancy, Sharpe ratio și 40+ metrici. Vizualizează curba equity în timp real.",
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10",
-    border: "border-indigo-500/20 hover:border-indigo-500/40",
-    glow: "group-hover:shadow-[0_0_30px_rgba(99,102,241,0.12)]",
-    topLine: "via-indigo-500/50",
-  },
-  {
-    icon: Brain,
-    title: "AI Trading Coach",
-    description: "Monitorizare psihologică în timp real. Detectează revenge trading, FOMO și supratranzacționarea instant.",
-    color: "text-violet-400",
-    bg: "bg-violet-500/10",
-    border: "border-violet-500/20 hover:border-violet-500/40",
-    glow: "group-hover:shadow-[0_0_30px_rgba(139,92,246,0.12)]",
-    topLine: "via-violet-500/50",
-  },
-  {
-    icon: BookOpen,
-    title: "Jurnal SMC / ICT",
-    description: "Etichetează fiecare setup cu tip (OB, FVG, BOS, CHoCH), killzone, sesiune și timeframe. Găsește edge-ul real.",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20 hover:border-emerald-500/40",
-    glow: "group-hover:shadow-[0_0_30px_rgba(52,211,153,0.12)]",
-    topLine: "via-emerald-500/50",
-  },
-  {
-    icon: Wifi,
-    title: "Conectare directă broker",
-    description: "Introdu login-ul, parola de investitor și serverul MT4/MT5. Import automat al ultimelor 90 de zile.",
-    color: "text-amber-400",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/20 hover:border-amber-500/40",
-    glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.12)]",
-    topLine: "via-amber-500/50",
-  },
-  {
-    icon: Shield,
-    title: "Reguli Prop Firm",
-    description: "Configurează limite FTMO, GoatFunded, E8. Alerte automate înainte să atingi limita de pierdere zilnică.",
-    color: "text-rose-400",
-    bg: "bg-rose-500/10",
-    border: "border-rose-500/20 hover:border-rose-500/40",
-    glow: "group-hover:shadow-[0_0_30px_rgba(244,63,94,0.12)]",
-    topLine: "via-rose-500/50",
-  },
-  {
-    icon: Calculator,
-    title: "Calculator Lot Universal",
-    description: "Calculează dimensiunea poziției pentru Forex, Metale, Indici, Crypto, CFD. Risc precis la fiecare intrare.",
-    color: "text-sky-400",
-    bg: "bg-sky-500/10",
-    border: "border-sky-500/20 hover:border-sky-500/40",
-    glow: "group-hover:shadow-[0_0_30px_rgba(14,165,233,0.12)]",
-    topLine: "via-sky-500/50",
-  },
-  {
-    icon: GraduationCap,
-    title: "Academie de Trading",
-    description: "Curs complet RO/EN cu diagrame interactive: de la prima lumânare la SMC, risk management și sisteme profesionale.",
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10",
-    border: "border-indigo-500/20 hover:border-indigo-500/40",
-    glow: "group-hover:shadow-[0_0_30px_rgba(99,102,241,0.12)]",
-    topLine: "via-indigo-500/50",
-  },
-  {
-    icon: FlaskConical,
-    title: "Backtesting cu Date Reale",
-    description: "Testează 5 strategii gata făcute sau construiește-ți propria strategie din 15+ indicatori, pe date istorice reale.",
-    color: "text-rose-400",
-    bg: "bg-rose-500/10",
-    border: "border-rose-500/20 hover:border-rose-500/40",
-    glow: "group-hover:shadow-[0_0_30px_rgba(244,63,94,0.12)]",
-    topLine: "via-rose-500/50",
-  },
-  {
-    icon: Target,
-    title: "Semnale AI (HPS)",
-    description: "Maximum 3 semnale de înaltă probabilitate pe zi, generate de AI pe structura pieței. Cu difuzare pe Telegram.",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20 hover:border-emerald-500/40",
-    glow: "group-hover:shadow-[0_0_30px_rgba(52,211,153,0.12)]",
-    topLine: "via-emerald-500/50",
-  },
+  { icon: BarChart3, title: "f1T", description: "f1D", color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20 hover:border-indigo-500/40", glow: "group-hover:shadow-[0_0_30px_rgba(99,102,241,0.12)]", topLine: "via-indigo-500/50" },
+  { icon: Brain, title: "f2T", description: "f2D", color: "text-violet-400", bg: "bg-violet-500/10", border: "border-violet-500/20 hover:border-violet-500/40", glow: "group-hover:shadow-[0_0_30px_rgba(139,92,246,0.12)]", topLine: "via-violet-500/50" },
+  { icon: BookOpen, title: "f3T", description: "f3D", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20 hover:border-emerald-500/40", glow: "group-hover:shadow-[0_0_30px_rgba(52,211,153,0.12)]", topLine: "via-emerald-500/50" },
+  { icon: Wifi, title: "f4T", description: "f4D", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20 hover:border-amber-500/40", glow: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.12)]", topLine: "via-amber-500/50" },
+  { icon: Shield, title: "f5T", description: "f5D", color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20 hover:border-rose-500/40", glow: "group-hover:shadow-[0_0_30px_rgba(244,63,94,0.12)]", topLine: "via-rose-500/50" },
+  { icon: Calculator, title: "f6T", description: "f6D", color: "text-sky-400", bg: "bg-sky-500/10", border: "border-sky-500/20 hover:border-sky-500/40", glow: "group-hover:shadow-[0_0_30px_rgba(14,165,233,0.12)]", topLine: "via-sky-500/50" },
+  { icon: GraduationCap, title: "f7T", description: "f7D", color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20 hover:border-indigo-500/40", glow: "group-hover:shadow-[0_0_30px_rgba(99,102,241,0.12)]", topLine: "via-indigo-500/50" },
+  { icon: FlaskConical, title: "f8T", description: "f8D", color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20 hover:border-rose-500/40", glow: "group-hover:shadow-[0_0_30px_rgba(244,63,94,0.12)]", topLine: "via-rose-500/50" },
+  { icon: Target, title: "f9T", description: "f9D", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20 hover:border-emerald-500/40", glow: "group-hover:shadow-[0_0_30px_rgba(52,211,153,0.12)]", topLine: "via-emerald-500/50" },
 ];
 
+// title/description/text/label = chei → landing.*
 const STEPS = [
-  {
-    step: "01",
-    title: "Conectează brokerul",
-    description: "Leagă contul MT4/MT5 direct — login + parolă investitor + server. Import automat, fără fișiere CSV.",
-    icon: Wifi,
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10 border-indigo-500/20",
-    numColor: "text-indigo-500/20",
-  },
-  {
-    step: "02",
-    title: "Jurnalizează fiecare trade",
-    description: "Etichetează setup-urile SMC/ICT, adaugă emoțiile și screenshot-urile. AI Coach analizează instant.",
-    icon: BookOpen,
-    color: "text-violet-400",
-    bg: "bg-violet-500/10 border-violet-500/20",
-    numColor: "text-violet-500/20",
-  },
-  {
-    step: "03",
-    title: "Descoperă-ți edge-ul",
-    description: "Analytics-ul arată exact ce setup-uri, sesiuni și timeframe-uri îți aduc profit consistent. Date — nu ghiceli.",
-    icon: Target,
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10 border-emerald-500/20",
-    numColor: "text-emerald-500/20",
-  },
+  { step: "01", title: "s1T", description: "s1D", icon: Wifi, color: "text-indigo-400", bg: "bg-indigo-500/10 border-indigo-500/20", numColor: "text-indigo-500/20" },
+  { step: "02", title: "s2T", description: "s2D", icon: BookOpen, color: "text-violet-400", bg: "bg-violet-500/10 border-violet-500/20", numColor: "text-violet-500/20" },
+  { step: "03", title: "s3T", description: "s3D", icon: Target, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", numColor: "text-emerald-500/20" },
 ];
 
-// Angajamente verificabile — fără testimoniale inventate sau cifre umflate.
 const COMMITMENTS = [
-  {
-    icon: Lock,
-    title: "Datele tale rămân ale tale",
-    text: "Găzduire în UE (Frankfurt). Conectarea la broker se face DOAR cu parola de investitor (read-only): TradeGx nu poate deschide sau închide tranzacții și nu are niciodată acces la fondurile tale.",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10 border-emerald-500/20",
-  },
-  {
-    icon: Shield,
-    title: "Zero promisiuni de îmbogățire",
-    text: "TradeGx este un instrument de analiză și disciplină, nu o schemă de profit. Semnalele și statisticile au scop educațional, nu constituie consultanță financiară. Tradingul implică risc real de pierdere.",
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10 border-indigo-500/20",
-  },
-  {
-    icon: Users,
-    title: "Construit în public, cu feedback real",
-    text: "Produs nou, dezvoltat activ, cu actualizări săptămânale. Sugestiile și problemele raportate ajung direct la fondator — ne poți scrie oricând prin pagina de contact.",
-    color: "text-violet-400",
-    bg: "bg-violet-500/10 border-violet-500/20",
-  },
+  { icon: Lock, title: "c1T", text: "c1Text", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
+  { icon: Shield, title: "c2T", text: "c2Text", color: "text-indigo-400", bg: "bg-indigo-500/10 border-indigo-500/20" },
+  { icon: Users, title: "c3T", text: "c3Text", color: "text-violet-400", bg: "bg-violet-500/10 border-violet-500/20" },
 ];
 
 const STATS = [
-  { value: "40+", label: "Metrici profesionale", icon: BarChart3, color: "text-indigo-400", bg: "bg-indigo-500/10 border-indigo-500/20" },
-  { value: "99.9%", label: "Uptime garantat", icon: Activity, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
-  { value: "< 2s", label: "Sincronizare live", icon: Zap, color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
-  { value: "E2E", label: "Criptare completă", icon: Lock, color: "text-rose-400", bg: "bg-rose-500/10 border-rose-500/20" },
+  { value: "40+", label: "stat1", icon: BarChart3, color: "text-indigo-400", bg: "bg-indigo-500/10 border-indigo-500/20" },
+  { value: "99.9%", label: "stat2", icon: Activity, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
+  { value: "< 2s", label: "stat3", icon: Zap, color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
+  { value: "E2E", label: "stat4", icon: Lock, color: "text-rose-400", bg: "bg-rose-500/10 border-rose-500/20" },
 ];
 
 // Mock dashboard demonstrativ — valori REALISTE, nu de marketing.
 const HERO_STATS = [
   { label: "Win Rate", value: "56.8%", trend: "+2.1%", up: true, color: "emerald" },
   { label: "Profit Factor", value: "1.68", trend: "+0.14", up: true, color: "indigo" },
-  { label: "Net P&L", value: "+$1,940", trend: "30 zile", up: true, color: "emerald" },
+  { label: "Net P&L", value: "+$1,940", trend: "days30", up: true, color: "emerald" },
   { label: "Max DD", value: "8.2%", trend: "-1.3%", up: true, color: "violet" },
 ];
 
-// Integrări REALE, disponibile azi — fără promisiuni goale.
+// desc = cheie → landing.* (numele integrărilor raman universale)
 const INTEGRATIONS = [
-  { name: "MetaTrader 4 / 5", desc: "EA gratuit — sincronizare automată a tranzacțiilor", status: "live" },
-  { name: "MetaAPI Cloud", desc: "Sincronizare 24/7 fără terminal deschis", status: "live" },
-  { name: "TradingView", desc: "Alertele tale ajung instant în TradeGx", status: "live" },
-  { name: "Import CSV / HTML", desc: "Extrase MT4, MT5, cTrader", status: "live" },
-  { name: "Telegram", desc: "Alerte, semnale și rapoarte pe telefon", status: "live" },
-  { name: "cTrader · TradeLocker", desc: "Următorii pe listă", status: "soon" },
+  { name: "MetaTrader 4 / 5", desc: "int1", status: "live" },
+  { name: "MetaAPI Cloud", desc: "int2", status: "live" },
+  { name: "TradingView", desc: "int3", status: "live" },
+  { name: "Import CSV / HTML", desc: "int4", status: "live" },
+  { name: "Telegram", desc: "int5", status: "live" },
+  { name: "cTrader · TradeLocker", desc: "int6", status: "soon" },
 ];
 
+// q/a = chei → landing.*
 const LANDING_FAQ = [
-  {
-    q: "Ce se întâmplă după cele 14 zile de probă PRO?",
-    a: "Treci automat pe planul Standard (gratuit pentru totdeauna): jurnal nelimitat, Academia completă, analytics de bază, un cont de trading și 3 backteste pe lună. Nicio taxă fără acordul tău explicit — nu îți cerem cardul la înregistrare.",
-  },
-  {
-    q: "TradeGx are acces la banii mei?",
-    a: "Nu, niciodată. Conectarea la broker se face exclusiv cu parola de investitor (read-only): putem citi istoricul tranzacțiilor, dar este imposibil să deschidem, închidem sau modificăm poziții. Fondurile rămân 100% la brokerul tău.",
-  },
-  {
-    q: "Semnalele AI sunt recomandări de investiții?",
-    a: "Nu. Toate funcțiile AI au scop educațional și informativ — nu constituie consultanță financiară. Deciziile îți aparțin, iar tradingul implică risc real de pierdere a capitalului.",
-  },
-  {
-    q: "Ce brokeri pot conecta?",
-    a: "Orice broker MT4 sau MT5 — prin EA-ul nostru gratuit sau prin MetaAPI (sincronizare cloud 24/7, inclusiv FTMO, IC Markets, Pepperstone și sute de alții). Alternativ: import CSV/HTML sau adăugare manuală.",
-  },
-  {
-    q: "Unde sunt stocate datele mele?",
-    a: "În Uniunea Europeană (Frankfurt), criptate în tranzit și la stocare, conform GDPR. Nu vindem datele nimănui, iar la ștergerea contului dispar și ele. Detalii complete în Politica de Confidențialitate.",
-  },
-  {
-    q: "Pot anula abonamentul PRO oricând?",
-    a: "Da, dintr-un click, fără telefoane și fără condiții. Păstrezi accesul PRO până la finalul perioadei plătite, iar datele tale rămân intacte pe planul gratuit.",
-  },
+  { q: "faq1Q", a: "faq1A" },
+  { q: "faq2Q", a: "faq2A" },
+  { q: "faq3Q", a: "faq3A" },
+  { q: "faq4Q", a: "faq4A" },
+  { q: "faq5Q", a: "faq5A" },
+  { q: "faq6Q", a: "faq6A" },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const t = await getTranslations("landing");
   return (
     <div className="min-h-screen bg-[#09090b] text-white overflow-x-hidden">
 
@@ -238,9 +101,9 @@ export default function LandingPage() {
 
           <div className="hidden md:flex items-center gap-7 text-sm text-zinc-500">
             {[
-              { href: "#features", label: "Funcționalități" },
-              { href: "#how-it-works", label: "Cum funcționează" },
-              { href: "/pricing", label: "Prețuri" },
+              { href: "#features", label: t("navFeatures") },
+              { href: "#how-it-works", label: t("navHow") },
+              { href: "/pricing", label: t("navPricing") },
             ].map((l) => (
               <Link key={l.href} href={l.href}
                 className="hover:text-zinc-200 transition-colors duration-200 font-medium">
@@ -252,13 +115,13 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white hover:bg-zinc-800/80 text-[13px] font-medium">
-                Autentificare
+                {t("login")}
               </Button>
             </Link>
             <Link href="/register">
               <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25 text-[13px] font-bold gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" />
-                Încearcă gratuit
+                {t("tryFree")}
               </Button>
             </Link>
           </div>
@@ -282,16 +145,16 @@ export default function LandingPage() {
           {/* Live badge */}
           <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/8 backdrop-blur-sm">
             <span className="live-dot-indigo" />
-            <span className="text-indigo-300 text-sm font-semibold">14 zile PRO gratuit — fără card de credit</span>
+            <span className="text-indigo-300 text-sm font-semibold">{t("heroBadge")}</span>
           </div>
 
           {/* Headline */}
           <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.03] mb-6">
-            Jurnal de trading
+            {t("heroTitle1")}
             <br />
             <span className="relative inline-block">
               <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
-                la nivel instituțional
+                {t("heroTitle2")}
               </span>
               {/* Underline glow */}
               <span className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
@@ -299,8 +162,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
-            Construit pentru traderii <strong className="text-zinc-200">SMC și ICT</strong>. Conectare directă la broker, AI Coach,
-            analiză avansată și alertă prop firm — tot ce ai nevoie.
+            {t.rich("heroSubtitle", { b: (c) => <strong className="text-zinc-200">{c}</strong> })}
           </p>
 
           {/* CTAs */}
@@ -308,26 +170,21 @@ export default function LandingPage() {
             <Link href="/register">
               <Button size="lg"
                 className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2 transition-all duration-300 hover:scale-[1.02]">
-                Începe gratuit — 14 zile PRO
+                {t("ctaStart")}
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
             <Link href="/pricing">
               <Button size="lg" variant="outline"
                 className="border-zinc-700/80 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/80 hover:text-white h-12 px-8 text-base backdrop-blur-sm transition-all duration-300">
-                Compară planurile
+                {t("ctaCompare")}
               </Button>
             </Link>
           </div>
 
           {/* Social proof */}
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-500">
-            {[
-              "Fără card de credit",
-              "Conectare directă MT4/MT5",
-              "AI Coach inclus",
-              "Anulare oricând",
-            ].map((item) => (
+            {[t("proof1"), t("proof2"), t("proof3"), t("proof4")].map((item) => (
               <span key={item} className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500/80" />
                 {item}
@@ -353,7 +210,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-wider border border-zinc-700/50 rounded px-1.5 py-0.5">
-                Demo
+                {t("demoBadge")}
               </span>
             </div>
 
@@ -381,7 +238,7 @@ export default function LandingPage() {
                     <p className={`text-[9px] font-bold mt-0.5 ${
                       stat.up ? "text-emerald-500" : "text-rose-400"
                     }`}>
-                      {stat.up ? "↑" : "↓"} {stat.trend}
+                      {stat.up ? "↑" : "↓"} {t.has(stat.trend) ? t(stat.trend) : stat.trend}
                     </p>
                   </div>
                 ))}
@@ -390,7 +247,7 @@ export default function LandingPage() {
               {/* Mock equity chart */}
               <div className="bg-zinc-900/60 border border-zinc-800/40 rounded-xl p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold text-zinc-400">Curbă Equity — 30 zile</span>
+                  <span className="text-[10px] font-bold text-zinc-400">{t("demoEquity")}</span>
                   <span className="text-[10px] font-black text-emerald-400 num">+12.84%</span>
                 </div>
                 <svg viewBox="0 0 400 60" className="w-full h-12">
@@ -436,7 +293,7 @@ export default function LandingPage() {
                     <Icon className={`w-4 h-4 ${s.color}`} />
                   </div>
                   <p className={`text-2xl font-black num ${s.color}`}>{s.value}</p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">{s.label}</p>
+                  <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">{t(s.label)}</p>
                 </div>
               );
             })}
@@ -453,13 +310,13 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
               <Layers className="w-3 h-3" />
-              Funcționalități
+              {t("featuresBadge")}
             </div>
             <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">
-              Tot ce are nevoie un trader serios
+              {t("featuresTitle")}
             </h2>
             <p className="text-zinc-400 text-lg max-w-xl mx-auto leading-relaxed">
-              Construit de la zero pentru traderii SMC, ICT și concepte instituționale moderne.
+              {t("featuresSub")}
             </p>
           </div>
 
@@ -480,8 +337,8 @@ export default function LandingPage() {
                   <div className={`relative w-11 h-11 rounded-xl ${f.bg} border ${f.border} flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110`}>
                     <Icon className={`w-5 h-5 ${f.color}`} />
                   </div>
-                  <h3 className="font-bold text-zinc-100 mb-2.5 text-[15px]">{f.title}</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed">{f.description}</p>
+                  <h3 className="font-bold text-zinc-100 mb-2.5 text-[15px]">{t(f.title)}</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed">{t(f.description)}</p>
                 </div>
               );
             })}
@@ -496,13 +353,13 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
               <ChevronRight className="w-3 h-3" />
-              Cum funcționează
+              {t("howBadge")}
             </div>
             <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">
-              Gata în câteva minute
+              {t("howTitle")}
             </h2>
             <p className="text-zinc-400 text-lg">
-              Trei pași pentru a tranzacționa cu claritate bazată pe date.
+              {t("howSub")}
             </p>
           </div>
 
@@ -527,8 +384,8 @@ export default function LandingPage() {
                         <Icon className={`w-4.5 h-4.5 ${s.color}`} />
                       </div>
                     </div>
-                    <h3 className="font-bold text-zinc-100 mb-2 text-[15px]">{s.title}</h3>
-                    <p className="text-zinc-500 text-sm leading-relaxed">{s.description}</p>
+                    <h3 className="font-bold text-zinc-100 mb-2 text-[15px]">{t(s.title)}</h3>
+                    <p className="text-zinc-500 text-sm leading-relaxed">{t(s.description)}</p>
                   </div>
                 </div>
               );
@@ -543,13 +400,13 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
               <Shield className="w-3 h-3" />
-              Transparență
+              {t("transpBadge")}
             </div>
             <h2 className="text-3xl font-black mb-3 tracking-tight">
-              Angajamentele noastre, negru pe alb
+              {t("transpTitle")}
             </h2>
             <p className="text-zinc-500">
-              Fără testimoniale inventate și fără cifre umflate — doar ce garantăm concret.
+              {t("transpSub")}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -566,8 +423,8 @@ export default function LandingPage() {
                   <div className={`w-10 h-10 rounded-xl border flex items-center justify-center mb-4 ${c.bg}`}>
                     <Icon className={`w-5 h-5 ${c.color}`} />
                   </div>
-                  <h3 className="text-zinc-100 text-sm font-black mb-2">{c.title}</h3>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{c.text}</p>
+                  <h3 className="text-zinc-100 text-sm font-black mb-2">{t(c.title)}</h3>
+                  <p className="text-zinc-400 text-sm leading-relaxed">{t(c.text)}</p>
                 </div>
               );
             })}
@@ -581,10 +438,10 @@ export default function LandingPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
               <Wifi className="w-3 h-3" />
-              Integrări
+              {t("intBadge")}
             </div>
-            <h2 className="text-3xl font-black mb-3 tracking-tight">Se conectează la ce folosești deja</h2>
-            <p className="text-zinc-500">Doar integrări funcționale azi — fără logo-uri de decor.</p>
+            <h2 className="text-3xl font-black mb-3 tracking-tight">{t("intTitle")}</h2>
+            <p className="text-zinc-500">{t("intSub")}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {INTEGRATIONS.map((it) => (
@@ -607,10 +464,10 @@ export default function LandingPage() {
                         : "text-zinc-500 bg-zinc-800/60 border-zinc-700"
                     }`}
                   >
-                    {it.status === "live" ? "Activ" : "În curând"}
+                    {it.status === "live" ? t("statusLive") : t("statusSoon")}
                   </span>
                 </div>
-                <p className="text-xs text-zinc-500">{it.desc}</p>
+                <p className="text-xs text-zinc-500">{t(it.desc)}</p>
               </div>
             ))}
           </div>
@@ -623,26 +480,20 @@ export default function LandingPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
               <Zap className="w-3 h-3" />
-              Prețuri
+              {t("priceBadge")}
             </div>
-            <h2 className="text-3xl font-black mb-3 tracking-tight">Simplu: gratuit sau PRO</h2>
-            <p className="text-zinc-500">14 zile PRO cadou la înregistrare — fără card. Apoi alegi.</p>
+            <h2 className="text-3xl font-black mb-3 tracking-tight">{t("priceTitle")}</h2>
+            <p className="text-zinc-500">{t("priceSub")}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             {/* Standard */}
             <div className="rounded-3xl border border-zinc-800/80 bg-zinc-900/50 p-7">
-              <p className="text-sm font-black text-zinc-300 mb-1">Standard</p>
+              <p className="text-sm font-black text-zinc-300 mb-1">{t("standardName")}</p>
               <p className="text-4xl font-black mb-1">0$</p>
-              <p className="text-xs text-zinc-600 mb-5">gratuit pentru totdeauna</p>
+              <p className="text-xs text-zinc-600 mb-5">{t("freeForever")}</p>
               <ul className="space-y-2.5 mb-7">
-                {[
-                  "Jurnal de tranzacții nelimitat + import CSV",
-                  "Academia completă: 41 lecții, quiz-uri, certificat",
-                  "Analytics de bază, calculator lot, checklist",
-                  "Calendar economic + știri cu impact",
-                  "1 cont de trading · 3 backteste/lună",
-                ].map((f) => (
+                {[t("std1"), t("std2"), t("std3"), t("std4"), t("std5")].map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm text-zinc-400">
                     <CheckCircle2 className="w-4 h-4 text-zinc-600 shrink-0 mt-0.5" />
                     {f}
@@ -653,7 +504,7 @@ export default function LandingPage() {
                 href="/register"
                 className="block text-center rounded-xl border border-zinc-700 py-3 text-sm font-bold text-zinc-300 hover:border-zinc-600 hover:text-white transition-colors"
               >
-                Începe gratuit
+                {t("startFree")}
               </Link>
             </div>
 
@@ -661,24 +512,17 @@ export default function LandingPage() {
             <div className="relative rounded-3xl border border-indigo-500/40 bg-gradient-to-b from-indigo-500/[0.08] to-zinc-900/50 p-7 overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/70 to-transparent" />
               <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-black text-indigo-300">PRO</p>
+                <p className="text-sm font-black text-indigo-300">{t("proName")}</p>
                 <span className="text-[9px] font-black uppercase tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/40 rounded-full px-2 py-0.5">
-                  Recomandat
+                  {t("recommended")}
                 </span>
               </div>
               <p className="text-4xl font-black mb-1">
-                12$<span className="text-base font-bold text-zinc-500">/lună</span>
+                12$<span className="text-base font-bold text-zinc-500">{t("perMonth")}</span>
               </p>
-              <p className="text-xs text-zinc-600 mb-5">plătit anual · sau 19$ lunar · anulezi oricând</p>
+              <p className="text-xs text-zinc-600 mb-5">{t("proPriceNote")}</p>
               <ul className="space-y-2.5 mb-7">
-                {[
-                  "Tot ce e în Standard, plus:",
-                  "Sincronizare automată broker (EA MT4/MT5 + MetaAPI)",
-                  "Semnale AI (HPS) + AI Coach personal",
-                  "Edge Finder + Simulator Monte Carlo",
-                  "Raport AI săptămânal · alerte preț · TradingView",
-                  "Backtesting nelimitat · conturi nelimitate",
-                ].map((f, i) => (
+                {[t("pro1"), t("pro2"), t("pro3"), t("pro4"), t("pro5"), t("pro6")].map((f, i) => (
                   <li key={f} className="flex items-start gap-2 text-sm text-zinc-300">
                     <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${i === 0 ? "text-zinc-600" : "text-emerald-400"}`} />
                     {f}
@@ -689,14 +533,14 @@ export default function LandingPage() {
                 href="/register"
                 className="block text-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all"
               >
-                Începe cu 14 zile PRO gratuit
+                {t("proCta")}
               </Link>
             </div>
           </div>
 
           <p className="text-center mt-6">
             <Link href="/pricing" className="text-sm text-zinc-500 hover:text-zinc-300 underline underline-offset-4 transition-colors">
-              Vezi comparația completă a planurilor →
+              {t("compareFull")}
             </Link>
           </p>
         </div>
@@ -708,9 +552,9 @@ export default function LandingPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
               <Sparkles className="w-3 h-3" />
-              Întrebări frecvente
+              {t("faqBadge")}
             </div>
-            <h2 className="text-3xl font-black tracking-tight">Răspunsuri directe, fără ocolișuri</h2>
+            <h2 className="text-3xl font-black tracking-tight">{t("faqTitle")}</h2>
           </div>
           <div className="space-y-3">
             {LANDING_FAQ.map((item) => (
@@ -719,10 +563,10 @@ export default function LandingPage() {
                 className="group rounded-2xl border border-zinc-800/80 bg-zinc-900/50 open:border-indigo-500/30 transition-colors"
               >
                 <summary className="flex items-center justify-between cursor-pointer list-none px-5 py-4 text-sm font-bold text-zinc-200 [&::-webkit-details-marker]:hidden">
-                  {item.q}
+                  {t(item.q)}
                   <ChevronRight className="w-4 h-4 text-zinc-600 group-open:rotate-90 transition-transform shrink-0 ml-3" />
                 </summary>
-                <p className="px-5 pb-5 text-sm leading-relaxed text-zinc-400">{item.a}</p>
+                <p className="px-5 pb-5 text-sm leading-relaxed text-zinc-400">{t(item.a)}</p>
               </details>
             ))}
           </div>
@@ -747,24 +591,23 @@ export default function LandingPage() {
             <div className="relative p-12">
               <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold">
                 <Zap className="w-3 h-3" />
-                Fără card de credit necesar
+                {t("ctaBadge")}
               </div>
               <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">
-                Gata să tranzacționezi<br />cu un
-                <span className="gradient-text-indigo"> edge real?</span>
+                {t("ctaTitle1")}
+                <span className="gradient-text-indigo">{t("ctaTitle2")}</span>
               </h2>
               <p className="text-zinc-400 mb-8 leading-relaxed">
-                Alătură-te miilor de traderi care folosesc <strong className="text-zinc-200">TradeGx</strong> pentru
-                a jurnaliza mai inteligent și a se îmbunătăți mai rapid.
+                {t.rich("ctaSub", { b: (c) => <strong className="text-zinc-200">{c}</strong> })}
               </p>
               <Link href="/register">
                 <Button size="lg"
                   className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-10 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2 transition-all duration-300 hover:scale-[1.02]">
                   <Sparkles className="w-4 h-4" />
-                  Începe perioada de probă gratuită
+                  {t("ctaBtn")}
                 </Button>
               </Link>
-              <p className="text-zinc-600 text-sm mt-5">14 zile PRO complet · Anulare oricând · Fără surprize</p>
+              <p className="text-zinc-600 text-sm mt-5">{t("ctaNote")}</p>
             </div>
           </div>
         </div>
@@ -783,21 +626,21 @@ export default function LandingPage() {
                 Trade<span className="gradient-text-indigo">Gx</span>
               </span>
               <span className="text-[9px] font-bold text-zinc-700 tracking-widest uppercase hidden sm:block">
-                Pro Trading Journal
+                {t("footerTagline")}
               </span>
             </Link>
 
             <div className="flex flex-wrap items-center gap-6 text-sm text-zinc-600">
               {[
-                { href: "/pricing",  label: "Prețuri" },
-                { href: "/login",    label: "Autentificare" },
-                { href: "/register", label: "Înregistrare" },
-                { href: "#features", label: "Funcționalități" },
-                { href: "/about",    label: "Despre" },
-                { href: "/roadmap",  label: "Roadmap" },
-                { href: "/terms",    label: "Termeni" },
-                { href: "/privacy",  label: "Confidențialitate" },
-                { href: "/contact",  label: "Contact" },
+                { href: "/pricing",  label: t("navPricing") },
+                { href: "/login",    label: t("login") },
+                { href: "/register", label: t("fRegister") },
+                { href: "#features", label: t("navFeatures") },
+                { href: "/about",    label: t("fAbout") },
+                { href: "/roadmap",  label: t("fRoadmap") },
+                { href: "/terms",    label: t("fTerms") },
+                { href: "/privacy",  label: t("fPrivacy") },
+                { href: "/contact",  label: t("fContact") },
               ].map((link) => (
                 <Link key={link.href} href={link.href}
                   className="hover:text-zinc-400 transition-colors font-medium">
@@ -807,18 +650,13 @@ export default function LandingPage() {
             </div>
 
             <p className="text-zinc-700 text-xs">
-              &copy; {new Date().getFullYear()} TradeGx · Toate drepturile rezervate.
+              &copy; {new Date().getFullYear()} TradeGx · {t("copyright")}
             </p>
           </div>
 
           {/* Disclaimer de risc */}
           <p className="mt-8 pt-6 border-t border-zinc-800/40 text-[11px] leading-relaxed text-zinc-700 max-w-4xl">
-            <strong className="text-zinc-600">Avertisment de risc:</strong> TradeGx este un instrument de
-            jurnalizare, analiză și educație — nu este broker, nu execută tranzacții și nu oferă consultanță
-            financiară sau de investiții. Tranzacționarea instrumentelor financiare (forex, CFD-uri, crypto)
-            implică un risc semnificativ de pierdere a capitalului și nu este potrivită pentru oricine.
-            Statisticile afișate în materialele de prezentare sunt demonstrative. Performanța trecută nu
-            garantează rezultate viitoare.
+            <strong className="text-zinc-600">{t("riskLabel")}</strong> {t("riskText")}
           </p>
         </div>
       </footer>

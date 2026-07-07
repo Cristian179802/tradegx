@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -17,56 +18,39 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
-// Matricea REALĂ — identică cu gate-urile din server (lib/plan.ts) și /billing.
+// label/free/pro = chei → pricing.* (traduse la randare; valorile bool raman)
 const FEATURES = [
-  { label: "Jurnal de tranzacții (nelimitat) + etichetare SMC/ICT", free: true, pro: true },
-  { label: "Import CSV (MT4/MT5/cTrader)", free: true, pro: true },
-  { label: "Academie completă — 41 lecții, quiz-uri, certificat", free: true, pro: true },
-  { label: "Dashboard analiză + calculator lot + checklist", free: true, pro: true },
-  { label: "Calendar economic + știri cu impact", free: true, pro: true },
-  { label: "Acces comunitate", free: true, pro: true },
-  { label: "Conturi de trading", free: "1", pro: "Nelimitate" },
-  { label: "Backtesting pe date istorice reale", free: "3 / lună", pro: "Nelimitat" },
-  { label: "Sincronizare automată broker (EA MT4/MT5 + MetaAPI)", free: false, pro: true },
-  { label: "Semnale AI (HPS) — max 3/zi + Telegram", free: false, pro: true },
-  { label: "AI Trading Coach / Assistant", free: false, pro: true },
-  { label: "Edge Finder — statistica edge-urilor și leak-urilor tale", free: false, pro: true },
-  { label: "Simulator Monte Carlo (probabilitate challenge)", free: false, pro: true },
-  { label: "Raport AI săptămânal (in-app + Telegram)", free: false, pro: true },
-  { label: "Alerte de preț pe watchlist", free: false, pro: true },
-  { label: "Webhook TradingView → alerte instant", free: false, pro: true },
-  { label: "Alerte reguli prop firm (daily loss, drawdown)", free: false, pro: true },
-  { label: "Export PDF rapoarte", free: false, pro: true },
+  { label: "pf1", free: true, pro: true },
+  { label: "pf2", free: true, pro: true },
+  { label: "pf3", free: true, pro: true },
+  { label: "pf4", free: true, pro: true },
+  { label: "pf5", free: true, pro: true },
+  { label: "pf6", free: true, pro: true },
+  { label: "pf7", free: "1", pro: "valUnlimitedF" },
+  { label: "pf8", free: "val3PerMonth", pro: "valUnlimited" },
+  { label: "pf9", free: false, pro: true },
+  { label: "pf10", free: false, pro: true },
+  { label: "pf11", free: false, pro: true },
+  { label: "pf12", free: false, pro: true },
+  { label: "pf13", free: false, pro: true },
+  { label: "pf14", free: false, pro: true },
+  { label: "pf15", free: false, pro: true },
+  { label: "pf16", free: false, pro: true },
+  { label: "pf17", free: false, pro: true },
+  { label: "pf18", free: false, pro: true },
 ];
 
 const FAQ = [
-  {
-    q: "Ce se întâmplă după cele 14 zile de probă?",
-    a: "După perioada de probă, vei fi mutat automat pe planul GRATUIT dacă nu faci upgrade. Nicio taxă fără acordul tău.",
-  },
-  {
-    q: "Pot anula oricând?",
-    a: "Da. Poți anula abonamentul PRO oricând. Păstrezi accesul PRO până la sfârșitul perioadei de facturare.",
-  },
-  {
-    q: "Susțineți regulile prop firm?",
-    a: "Da. Poți configura pierderea zilnică maximă, drawdown maxim și ore fără tranzacții per cont. TradeGX te alertează înainte să spargi o regulă.",
-  },
-  {
-    q: "Ce brokeri sunt suportați pentru sincronizarea MT5?",
-    a: "Orice broker MT5 suportat de MetaAPI — inclusiv FTMO, MyForexFunds, GoatFunded, IC Markets, Pepperstone și sute de alții.",
-  },
-  {
-    q: "Există un plan gratuit permanent?",
-    a: "Da. Planul GRATUIT include jurnal nelimitat, import CSV, Academia completă (41 de lecții cu quiz-uri și certificat), analytics de bază, un cont de trading și 3 backteste pe lună. Fără limită de timp.",
-  },
-  {
-    q: "Semnalele AI sunt recomandări de investiții?",
-    a: "Nu. Semnalele și toate funcțiile AI au exclusiv scop educațional și informativ — nu constituie consultanță financiară. Deciziile de tranzacționare îți aparțin în totalitate, iar tradingul implică risc real de pierdere.",
-  },
+  { q: "fq1Q", a: "fq1A" },
+  { q: "fq2Q", a: "fq2A" },
+  { q: "fq3Q", a: "fq3A" },
+  { q: "fq4Q", a: "fq4A" },
+  { q: "fq5Q", a: "fq5A" },
+  { q: "fq6Q", a: "fq6A" },
 ];
 
 export default function PricingPage() {
+  const t = useTranslations("pricing");
   const [annual, setAnnual] = useState(false);
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const { data: session } = useSession();
@@ -123,7 +107,7 @@ export default function PricingPage() {
                 size="sm"
                 className="text-zinc-400 hover:text-white hover:bg-zinc-800"
               >
-                Autentificare
+                {t("navLogin")}
               </Button>
             </Link>
             <Link href="/register">
@@ -131,7 +115,7 @@ export default function PricingPage() {
                 size="sm"
                 className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
               >
-                Perioadă de probă gratuită
+                {t("navTrial")}
               </Button>
             </Link>
           </div>
@@ -142,15 +126,15 @@ export default function PricingPage() {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-black mb-4">
-            Prețuri simple și transparente
+            {t("title")}
           </h1>
           <p className="text-zinc-400 text-lg mb-8">
-            Începe gratuit. Fă upgrade când ești pregătit. Anulare oricând.
+            {t("subtitle")}
           </p>
 
           <div className="flex items-center justify-center gap-3">
             <span className={cn("text-sm", !annual ? "text-white font-medium" : "text-zinc-500")}>
-              Lunar
+              {t("monthly")}
             </span>
             <Switch
               checked={annual}
@@ -158,11 +142,11 @@ export default function PricingPage() {
               className="data-[state=checked]:bg-indigo-600"
             />
             <span className={cn("text-sm", annual ? "text-white font-medium" : "text-zinc-500")}>
-              Anual
+              {t("annual")}
             </span>
             {annual && (
               <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
-                Economisești {savings}%
+                {t("savings", { n: savings })}
               </Badge>
             )}
           </div>
@@ -173,52 +157,52 @@ export default function PricingPage() {
           {/* Free */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-zinc-100 mb-1">Gratuit</h3>
-              <p className="text-zinc-500 text-sm">Pentru traderii la început de drum</p>
+              <h3 className="text-xl font-bold text-zinc-100 mb-1">{t("freeName")}</h3>
+              <p className="text-zinc-500 text-sm">{t("freeDesc")}</p>
             </div>
             <div className="mb-6">
               <span className="text-4xl font-black text-white">$0</span>
-              <span className="text-zinc-500 text-sm ml-2">permanent</span>
+              <span className="text-zinc-500 text-sm ml-2">{t("forever")}</span>
             </div>
             <Link href="/register">
               <Button
                 variant="outline"
                 className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white mb-6"
               >
-                Începe gratuit
+                {t("startFree")}
               </Button>
             </Link>
             <ul className="space-y-3 text-sm text-zinc-400">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                50 tranzacții/lună
+                {t("frf1")}
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />1 cont de trading
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Analiză completă
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />{t("frf2")}
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Etichetare SMC/ICT
+                {t("frf3")}
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Calculator lot
+                {t("frf4")}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                {t("frf5")}
               </li>
               <li className="flex items-center gap-2">
                 <XCircle className="w-4 h-4 text-zinc-700 shrink-0" />
-                AI Trading Coach
+                {t("frf6")}
               </li>
               <li className="flex items-center gap-2">
                 <XCircle className="w-4 h-4 text-zinc-700 shrink-0" />
-                Sincronizare MT5
+                {t("frf7")}
               </li>
               <li className="flex items-center gap-2">
                 <XCircle className="w-4 h-4 text-zinc-700 shrink-0" />
-                Alerte prop firm
+                {t("frf8")}
               </li>
             </ul>
           </div>
@@ -227,21 +211,21 @@ export default function PricingPage() {
           <div className="relative bg-gradient-to-br from-indigo-500/5 via-violet-500/5 to-purple-500/5 border border-indigo-500/30 rounded-2xl p-8">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
               <Badge className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-0 px-4 py-1 shadow-lg shadow-indigo-500/30">
-                Cel mai popular
+                {t("mostPopular")}
               </Badge>
             </div>
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-zinc-100 mb-1">PRO</h3>
+              <h3 className="text-xl font-bold text-zinc-100 mb-1">{t("proName")}</h3>
               <p className="text-zinc-400 text-sm">
-                Pentru traderii serioși și prop firm
+                {t("proDesc")}
               </p>
             </div>
             <div className="mb-6">
               <span className="text-4xl font-black text-white num">${displayPrice}</span>
-              <span className="text-zinc-500 text-sm ml-2">/ lună</span>
+              <span className="text-zinc-500 text-sm ml-2">{t("perMonth")}</span>
               {annual && (
                 <p className="text-xs text-zinc-500 mt-1">
-                  Facturat anual (${annualMonthly * 12}/an)
+                  {t("billedAnnual", { x: annualMonthly * 12 })}
                 </p>
               )}
             </div>
@@ -252,41 +236,41 @@ export default function PricingPage() {
             >
               {loadingCheckout
                 ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <>{session ? "Fă upgrade la PRO" : "Probă gratuită 14 zile"}<ArrowRight className="ml-2 w-4 h-4" /></>
+                : <>{session ? t("upgradeBtn") : t("trialBtn")}<ArrowRight className="ml-2 w-4 h-4" /></>
               }
             </Button>
             <ul className="space-y-3 text-sm text-zinc-300">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Tranzacții nelimitate
+                {t("prf1")}
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Conturi nelimitate
+                {t("prf2")}
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                AI Trading Coach
+                {t("prf3")}
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Sincronizare broker MT5
+                {t("prf4")}
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Alerte reguli prop firm
+                {t("prf5")}
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Backtesting strategie
+                {t("prf6")}
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Export PDF rapoarte
+                {t("prf7")}
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Suport prioritar
+                {t("prf8")}
               </li>
             </ul>
           </div>
@@ -295,13 +279,13 @@ export default function PricingPage() {
         {/* Feature comparison */}
         <div className="mb-20">
           <h2 className="text-2xl font-bold text-center mb-8">
-            Comparație completă funcționalități
+            {t("compTitle")}
           </h2>
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
             <div className="grid grid-cols-3 text-sm font-semibold text-zinc-400 border-b border-zinc-800 px-6 py-3">
-              <span>Funcționalitate</span>
-              <span className="text-center">Gratuit</span>
-              <span className="text-center text-indigo-400">PRO</span>
+              <span>{t("colFeature")}</span>
+              <span className="text-center">{t("colFree")}</span>
+              <span className="text-center text-indigo-400">{t("colPro")}</span>
             </div>
             {FEATURES.map((f, i) => (
               <div
@@ -311,7 +295,7 @@ export default function PricingPage() {
                   i % 2 === 0 ? "bg-zinc-900/30" : ""
                 )}
               >
-                <span className="text-zinc-300">{f.label}</span>
+                <span className="text-zinc-300">{t(f.label)}</span>
                 <span className="text-center">
                   {typeof f.free === "boolean" ? (
                     f.free ? (
@@ -320,7 +304,7 @@ export default function PricingPage() {
                       <XCircle className="w-4 h-4 text-zinc-700 mx-auto" />
                     )
                   ) : (
-                    <span className="text-zinc-400">{f.free}</span>
+                    <span className="text-zinc-400">{t.has(f.free) ? t(f.free) : f.free}</span>
                   )}
                 </span>
                 <span className="text-center">
@@ -331,7 +315,7 @@ export default function PricingPage() {
                       <XCircle className="w-4 h-4 text-zinc-700 mx-auto" />
                     )
                   ) : (
-                    <span className="text-indigo-300 font-medium">{f.pro}</span>
+                    <span className="text-indigo-300 font-medium">{t.has(f.pro) ? t(f.pro) : f.pro}</span>
                   )}
                 </span>
               </div>
@@ -341,7 +325,7 @@ export default function PricingPage() {
 
         {/* FAQ */}
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">Întrebări frecvente</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">{t("faqTitle")}</h2>
           <div className="space-y-4">
             {FAQ.map((item) => (
               <div
@@ -351,8 +335,8 @@ export default function PricingPage() {
                 <div className="flex items-start gap-3">
                   <HelpCircle className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-zinc-100 mb-2">{item.q}</h3>
-                    <p className="text-zinc-400 text-sm leading-relaxed">{item.a}</p>
+                    <h3 className="font-semibold text-zinc-100 mb-2">{t(item.q)}</h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed">{t(item.a)}</p>
                   </div>
                 </div>
               </div>
