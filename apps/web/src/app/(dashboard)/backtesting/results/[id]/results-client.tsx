@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -87,11 +88,12 @@ const STRATEGY_TYPE_LABELS: Record<string, string> = {
   TREND_FOLLOWING:  "Trend Following",
 };
 
+// SIGNAL tradus la randare (cheie exitSignal); restul universale
 const EXIT_REASON_LABELS: Record<string, string> = {
   TP:        "Take Profit",
   SL:        "Stop Loss",
   TRAILING:  "Trailing Stop",
-  SIGNAL:    "Semnal opus",
+  SIGNAL:    "SIGNAL",
   EOD:       "End of Data",
 };
 
@@ -99,11 +101,11 @@ const TRADES_PER_PAGE = 20;
 
 /* ─── Helpers ───────────────────────────────────────────────── */
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("ro-RO", { day: "2-digit", month: "short", year: "2-digit" });
+function fmtDate(iso: string, locale = "ro-RO") {
+  return new Date(iso).toLocaleDateString(locale, { day: "2-digit", month: "short", year: "2-digit" });
 }
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" });
+function fmtTime(iso: string, locale = "ro-RO") {
+  return new Date(iso).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
 }
 function fmtPrice(s: string, symbol: string) {
   const n = parseFloat(s);
@@ -208,6 +210,8 @@ function MonthlyTooltip({ active, payload, label }: { active?: boolean; payload?
 /* ─── Main Component ────────────────────────────────────────── */
 
 export function ResultsClient({ backtest }: { backtest: BacktestData }) {
+  const t = useTranslations("backtesting");
+  const locale = useLocale();
   const router = useRouter();
   const { toast } = useToast();
   const [page, setPage] = React.useState(0);
@@ -261,11 +265,11 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
     setDeleting(true);
     const res = await fetch(`/api/backtesting/${backtest.id}`, { method: "DELETE" });
     if (res.ok) {
-      toast({ title: "Backtest șters" });
+      toast({ title: t("deletedToast") });
       router.push("/backtesting");
       router.refresh();
     } else {
-      toast({ title: "Eroare la ștergere", variant: "destructive" });
+      toast({ title: t("deleteErr"), variant: "destructive" });
       setDeleting(false);
     }
   }
@@ -277,16 +281,16 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
         <div className="w-14 h-14 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto">
           <AlertTriangle className="h-7 w-7 text-rose-400" />
         </div>
-        <h2 className="text-xl font-bold text-zinc-100">Backtestul a eșuat</h2>
+        <h2 className="text-xl font-bold text-zinc-100">{t("failedTitle2")}</h2>
         <p className="text-sm text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3">
-          {backtest.errorMessage ?? "Eroare necunoscută"}
+          {backtest.errorMessage ?? t("errUnknown")}
         </p>
         <div className="flex gap-3 justify-center pt-2">
           <Button asChild variant="outline" className="border-zinc-700 text-zinc-400">
-            <Link href="/backtesting"><ArrowLeft className="h-4 w-4 mr-1.5" />Înapoi</Link>
+            <Link href="/backtesting"><ArrowLeft className="h-4 w-4 mr-1.5" />{t("backLink")}</Link>
           </Button>
           <Button asChild className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20">
-            <Link href={`/backtesting/new?strategyId=${backtest.strategy.id}`}>Încearcă din nou</Link>
+            <Link href={`/backtesting/new?strategyId=${backtest.strategy.id}`}>{t("tryAgainLink")}</Link>
           </Button>
         </div>
       </div>
@@ -300,8 +304,8 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
         <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto animate-pulse">
           <Activity className="h-7 w-7 text-amber-400" />
         </div>
-        <h2 className="text-xl font-bold text-zinc-100">Backtestul rulează...</h2>
-        <p className="text-sm text-zinc-500">Vei fi redirecționat automat.</p>
+        <h2 className="text-xl font-bold text-zinc-100">{t("runningTitle")}</h2>
+        <p className="text-sm text-zinc-500">{t("redirecting")}</p>
       </div>
     );
   }
@@ -326,12 +330,12 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
           </div>
           <div>
             <p className={cn("text-sm font-bold", netPnl >= 0 ? "text-emerald-300" : "text-rose-300")}>
-              {netPnl >= 0 ? "Strategie profitabilă" : "Strategie în pierdere"}
+              {netPnl >= 0 ? t("profitable") : t("losing")}
             </p>
             <p className="text-xs text-zinc-500">
               {netPnl >= 0
-                ? `Returnul total a fost ${pnlPct !== null ? `+${pnlPct.toFixed(2)}%` : "pozitiv"} față de balanța inițială`
-                : `Strategia a generat ${pnlPct !== null ? `${pnlPct.toFixed(2)}%` : "o pierdere"} față de balanța inițială`}
+                ? t("returnPos", { val: pnlPct !== null ? `+${pnlPct.toFixed(2)}%` : t("posWord") })
+                : t("returnNeg", { val: pnlPct !== null ? `${pnlPct.toFixed(2)}%` : t("lossWord") })}
             </p>
           </div>
           <div className="ml-auto text-right">
@@ -362,7 +366,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
             <p className="text-xs text-zinc-500">
               {STRATEGY_TYPE_LABELS[backtest.strategy.type] ?? backtest.strategy.type}
               {" · "}{backtest.symbol} {backtest.timeframe}
-              {" · "}{fmtDate(backtest.startDate)} → {fmtDate(backtest.endDate)}
+              {" · "}{fmtDate(backtest.startDate, locale)} → {fmtDate(backtest.endDate, locale)}
             </p>
           </div>
         </div>
@@ -374,7 +378,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
             className="border-zinc-700 text-zinc-400 hover:text-zinc-200"
           >
             <Link href={`/backtesting/new?strategyId=${backtest.strategy.id}`}>
-              Rulează din nou
+              {t("runAgain")}
             </Link>
           </Button>
           <Button
@@ -392,7 +396,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
       {/* ── KPI Grid ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard
-          label="P&L Net"
+          label={t("kNetPnl")}
           value={netPnl !== null ? `${netPnl >= 0 ? "+" : ""}${netPnl.toFixed(2)}$` : "—"}
           sub={pnlPct !== null ? `${pnlPct >= 0 ? "+" : ""}${pnlPct.toFixed(2)}%` : undefined}
           accent={netPnl !== null && netPnl >= 0 ? "green" : "red"}
@@ -401,7 +405,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
           neon={netPnl !== null ? (netPnl >= 0 ? "emerald" : "rose") : undefined}
         />
         <KpiCard
-          label="Win Rate"
+          label={t("kWinRate")}
           value={winRate !== null ? `${winRate.toFixed(1)}%` : "—"}
           sub={`${winners}W / ${losers}L`}
           accent={winRate !== null && winRate >= 50 ? "green" : "amber"}
@@ -409,44 +413,44 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
           neon={winRate !== null && winRate >= 50 ? "emerald" : undefined}
         />
         <KpiCard
-          label="Profit Factor"
+          label={t("kProfitFactor")}
           value={pf !== null ? pf.toFixed(2) : "—"}
-          sub={pf !== null ? (pf >= 1.5 ? "Excelent" : pf >= 1 ? "Bun" : "Slab") : undefined}
+          sub={pf !== null ? (pf >= 1.5 ? t("rExcellent") : pf >= 1 ? t("rGood") : t("rWeak")) : undefined}
           accent={pf !== null && pf >= 1 ? "green" : "red"}
           icon={Award}
           neon={pf !== null && pf >= 1.5 ? "amber" : undefined}
         />
         <KpiCard
-          label="Max Drawdown"
+          label={t("kMaxDd")}
           value={maxDdPct !== null ? `-${maxDdPct.toFixed(2)}%` : "—"}
           sub={backtest.maxDrawdown ? `-${parseFloat(backtest.maxDrawdown).toFixed(2)}$` : undefined}
           accent="red"
           icon={AlertTriangle}
         />
         <KpiCard
-          label="Sharpe Ratio"
+          label={t("kSharpe")}
           value={sharpe !== null ? sharpe.toFixed(2) : "—"}
-          sub={sharpe !== null ? (sharpe >= 1.5 ? "Excelent" : sharpe >= 1 ? "Bun" : "Slab") : undefined}
+          sub={sharpe !== null ? (sharpe >= 1.5 ? t("rExcellent") : sharpe >= 1 ? t("rGood") : t("rWeak")) : undefined}
           accent={sharpe !== null && sharpe >= 1 ? "green" : "amber"}
           icon={BarChart2}
         />
         <KpiCard
-          label="Sortino Ratio"
+          label={t("kSortino")}
           value={sortino !== null ? sortino.toFixed(2) : "—"}
           accent={sortino !== null && sortino >= 1 ? "green" : "amber"}
           icon={Activity}
         />
         <KpiCard
-          label="Expectanță"
+          label={t("kExpectancy")}
           value={expectancy !== null ? `${expectancy >= 0 ? "+" : ""}${expectancy.toFixed(2)}$` : "—"}
-          sub="per trade"
+          sub={t("perTrade")}
           accent={expectancy !== null && expectancy >= 0 ? "green" : "red"}
           icon={Zap}
         />
         <KpiCard
-          label="Avg R:R"
+          label={t("kAvgRR")}
           value={avgRR !== null ? `1 : ${avgRR.toFixed(2)}` : "—"}
-          sub={`${totalTrades} total trades`}
+          sub={t("totalTradesSub", { n: totalTrades })}
           accent="indigo"
           icon={BarChart2}
         />
@@ -457,7 +461,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
         {/* Equity Curve — spans 2 cols */}
         <div className="lg:col-span-2 cyber-card rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-zinc-200">Curbă de capital</h3>
+            <h3 className="text-sm font-bold text-zinc-200">{t("chartEquity")}</h3>
             <div className="flex items-center gap-3 text-xs text-zinc-500">
               <span className="num">${initBal.toFixed(0)} → ${(finalBal ?? initBal).toFixed(0)}</span>
             </div>
@@ -491,23 +495,23 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[220px] flex items-center justify-center text-zinc-600 text-sm">
-              Date insuficiente
+              {t("insufficientData")}
             </div>
           )}
         </div>
 
         {/* Win/Loss Donut */}
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-          <h3 className="text-sm font-semibold text-zinc-300 mb-4">Distribuție trade-uri</h3>
+          <h3 className="text-sm font-semibold text-zinc-300 mb-4">{t("chartDist")}</h3>
           {totalTrades > 0 ? (
             <>
               <ResponsiveContainer width="100%" height={160}>
                 <PieChart>
                   <Pie
                     data={[
-                      { name: "Câștiguri", value: winners },
-                      { name: "Pierderi",  value: losers },
-                      { name: "Break-even", value: totalTrades - winners - losers },
+                      { name: t("pieWin"), value: winners },
+                      { name: t("pieLoss"),  value: losers },
+                      { name: t("pieBreakeven"), value: totalTrades - winners - losers },
                     ].filter((d) => d.value > 0)}
                     cx="50%"
                     cy="50%"
@@ -530,17 +534,17 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
               <div className="flex justify-center gap-4 text-xs mt-2">
                 <span className="flex items-center gap-1.5 text-zinc-400">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-                  {winners} câștig ({winRate !== null ? winRate.toFixed(1) : "—"}%)
+                  {t("legendWin", { n: winners, rate: winRate !== null ? winRate.toFixed(1) : "—" })}
                 </span>
                 <span className="flex items-center gap-1.5 text-zinc-400">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
-                  {losers} pierdere
+                  {t("legendLoss", { n: losers })}
                 </span>
               </div>
             </>
           ) : (
             <div className="h-[160px] flex items-center justify-center text-zinc-600 text-sm">
-              Niciun trade
+              {t("noTrade")}
             </div>
           )}
         </div>
@@ -550,7 +554,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Monthly P&L */}
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-          <h3 className="text-sm font-semibold text-zinc-300 mb-4">P&L lunar</h3>
+          <h3 className="text-sm font-semibold text-zinc-300 mb-4">{t("chartMonthly")}</h3>
           {backtest.monthlyPnl && backtest.monthlyPnl.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={backtest.monthlyPnl} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
@@ -569,14 +573,14 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[200px] flex items-center justify-center text-zinc-600 text-sm">
-              Date insuficiente
+              {t("insufficientData")}
             </div>
           )}
         </div>
 
         {/* P&L Distribution */}
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-          <h3 className="text-sm font-semibold text-zinc-300 mb-4">Distribuție P&L</h3>
+          <h3 className="text-sm font-semibold text-zinc-300 mb-4">{t("chartDistPnl")}</h3>
           {pnlDistribution.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={pnlDistribution} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
@@ -586,7 +590,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
                 <Tooltip
                   contentStyle={{ background: "#27272a", border: "1px solid #3f3f46", borderRadius: 8, fontSize: 12 }}
                   itemStyle={{ color: "#d4d4d8" }}
-                  formatter={(v: number) => [v, "trades"]}
+                  formatter={(v: number) => [v, t("tipTrades")]}
                 />
                 <Bar dataKey="count" radius={[3, 3, 0, 0]}>
                   {pnlDistribution.map((entry, i) => (
@@ -597,7 +601,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[200px] flex items-center justify-center text-zinc-600 text-sm">
-              Niciun trade
+              {t("noTrade")}
             </div>
           )}
         </div>
@@ -605,17 +609,17 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
 
       {/* ── Config Summary ── */}
       <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-4">
-        <h3 className="text-sm font-semibold text-zinc-400 mb-3">Parametri simulare</h3>
+        <h3 className="text-sm font-semibold text-zinc-400 mb-3">{t("simParams")}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {[
             { label: "Symbol",           value: backtest.symbol },
             { label: "Timeframe",        value: backtest.timeframe },
-            { label: "Perioadă",         value: `${fmtDate(backtest.startDate)} – ${fmtDate(backtest.endDate)}` },
-            { label: "Balanță inițială", value: `$${initBal.toFixed(0)}` },
-            { label: "Risk / trade",     value: backtest.riskPerTrade ? `${backtest.riskPerTrade}%` : "—" },
-            { label: "Comision",         value: `$${backtest.commission}/lot` },
+            { label: t("pPeriod"),       value: `${fmtDate(backtest.startDate, locale)} – ${fmtDate(backtest.endDate, locale)}` },
+            { label: t("pInitBal"),      value: `$${initBal.toFixed(0)}` },
+            { label: t("pRisk"),         value: backtest.riskPerTrade ? `${backtest.riskPerTrade}%` : "—" },
+            { label: t("pCommission"),   value: `$${backtest.commission}/lot` },
             { label: "Spread",           value: backtest.spread },
-            { label: "Lumânări analizate", value: backtest.totalBars?.toLocaleString() ?? "—" },
+            { label: t("pBars"),         value: backtest.totalBars?.toLocaleString() ?? "—" },
           ].map((item) => (
             <div key={item.label}>
               <p className="text-[10px] text-zinc-600 font-medium uppercase tracking-wide">{item.label}</p>
@@ -629,7 +633,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
       <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
           <h3 className="text-sm font-bold text-zinc-200">
-            Trade-uri ({backtest.trades.length})
+            {t("tradesTitle", { n: backtest.trades.length })}
           </h3>
           {totalPages > 1 && (
             <div className="flex items-center gap-2 text-xs text-zinc-500">
@@ -659,7 +663,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-zinc-800">
-                  {["#", "Dir", "Entry", "Exit", "Entry $", "Exit $", "SL", "TP", "Lots", "R:R", "Motiv", "P&L"].map((h) => (
+                  {["#", "Dir", "Entry", "Exit", "Entry $", "Exit $", "SL", "TP", "Lots", "R:R", t("thReason"), "P&L"].map((h) => (
                     <th key={h} className="px-3 py-2.5 text-left font-medium text-zinc-500 whitespace-nowrap">
                       {h}
                     </th>
@@ -667,56 +671,56 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
                 </tr>
               </thead>
               <tbody>
-                {pageTrades.map((t, i) => {
-                  const pnl = parseFloat(t.pnl);
-                  const comm = parseFloat(t.commission);
+                {pageTrades.map((tr, i) => {
+                  const pnl = parseFloat(tr.pnl);
+                  const comm = parseFloat(tr.commission);
                   const netTrade = pnl - comm;
                   const tradeNum = page * TRADES_PER_PAGE + i + 1;
                   return (
-                    <tr key={t.id} className="cyber-row border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                    <tr key={tr.id} className="cyber-row border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
                       <td className="px-3 py-2.5 text-zinc-600 num">{tradeNum}</td>
                       <td className="px-3 py-2.5">
                         <span className={cn(
                           "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold",
-                          t.direction === "BUY"
+                          tr.direction === "BUY"
                             ? "bg-emerald-500/15 text-emerald-400"
                             : "bg-rose-500/15 text-rose-400"
                         )}>
-                          {t.direction === "BUY"
+                          {tr.direction === "BUY"
                             ? <ArrowUpRight className="h-3 w-3" />
                             : <ArrowDownRight className="h-3 w-3" />}
-                          {t.direction}
+                          {tr.direction}
                         </span>
                       </td>
                       <td className="px-3 py-2.5 text-zinc-400">
-                        <div>{fmtDate(t.entryTime)}</div>
-                        <div className="text-zinc-600">{fmtTime(t.entryTime)}</div>
+                        <div>{fmtDate(tr.entryTime, locale)}</div>
+                        <div className="text-zinc-600">{fmtTime(tr.entryTime, locale)}</div>
                       </td>
                       <td className="px-3 py-2.5 text-zinc-400">
-                        <div>{fmtDate(t.exitTime)}</div>
-                        <div className="text-zinc-600">{fmtTime(t.exitTime)}</div>
+                        <div>{fmtDate(tr.exitTime, locale)}</div>
+                        <div className="text-zinc-600">{fmtTime(tr.exitTime, locale)}</div>
                       </td>
-                      <td className="px-3 py-2.5 text-zinc-300 num font-mono">{fmtPrice(t.entryPrice, backtest.symbol)}</td>
-                      <td className="px-3 py-2.5 text-zinc-300 num font-mono">{fmtPrice(t.exitPrice, backtest.symbol)}</td>
+                      <td className="px-3 py-2.5 text-zinc-300 num font-mono">{fmtPrice(tr.entryPrice, backtest.symbol)}</td>
+                      <td className="px-3 py-2.5 text-zinc-300 num font-mono">{fmtPrice(tr.exitPrice, backtest.symbol)}</td>
                       <td className="px-3 py-2.5 text-zinc-500 num font-mono">
-                        {t.stopLoss ? fmtPrice(t.stopLoss, backtest.symbol) : "—"}
+                        {tr.stopLoss ? fmtPrice(tr.stopLoss, backtest.symbol) : "—"}
                       </td>
                       <td className="px-3 py-2.5 text-zinc-500 num font-mono">
-                        {t.takeProfit ? fmtPrice(t.takeProfit, backtest.symbol) : "—"}
+                        {tr.takeProfit ? fmtPrice(tr.takeProfit, backtest.symbol) : "—"}
                       </td>
-                      <td className="px-3 py-2.5 text-zinc-400 num">{parseFloat(t.lotSize).toFixed(2)}</td>
+                      <td className="px-3 py-2.5 text-zinc-400 num">{parseFloat(tr.lotSize).toFixed(2)}</td>
                       <td className="px-3 py-2.5 text-zinc-400 num">
-                        {t.riskRewardRatio ? `1:${parseFloat(t.riskRewardRatio).toFixed(2)}` : "—"}
+                        {tr.riskRewardRatio ? `1:${parseFloat(tr.riskRewardRatio).toFixed(2)}` : "—"}
                       </td>
                       <td className="px-3 py-2.5 text-zinc-500">
-                        {t.exitReason ? (EXIT_REASON_LABELS[t.exitReason] ?? t.exitReason) : "—"}
+                        {tr.exitReason ? (tr.exitReason === "SIGNAL" ? t("exitSignal") : (EXIT_REASON_LABELS[tr.exitReason] ?? tr.exitReason)) : "—"}
                       </td>
                       <td className="px-3 py-2.5">
                         <div className={cn("font-bold num", netTrade >= 0 ? "text-emerald-400" : "text-rose-400")}>
                           {netTrade >= 0 ? "+" : ""}{netTrade.toFixed(2)}$
                         </div>
                         {comm > 0 && (
-                          <div className="text-[10px] text-zinc-600 num">-{comm.toFixed(2)}$ com.</div>
+                          <div className="text-[10px] text-zinc-600 num">-{comm.toFixed(2)}$ {t("comShort")}</div>
                         )}
                       </td>
                     </tr>

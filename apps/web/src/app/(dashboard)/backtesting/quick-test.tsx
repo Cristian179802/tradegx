@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -26,7 +27,7 @@ const PRESETS = [
     name: "EMA Crossover",
     icon: TrendingUp,
     color: "#6366f1",
-    desc: "Intersecția mediilor 9/21 cu filtru de trend 200. Clasicul care prinde tendințele.",
+    desc: "descEma",
     rules: {
       fastPeriod: 9, slowPeriod: 21, trendPeriod: 200,
       atrPeriod: 14, slMultiplier: 1.5, rrRatio: 2.0,
@@ -38,7 +39,7 @@ const PRESETS = [
     name: "RSI Reversal",
     icon: Activity,
     color: "#a78bfa",
-    desc: "Cumpără oversold, vinde overbought — cu filtru EMA 50. Pentru piețe în range.",
+    desc: "descRsi",
     rules: {
       rsiPeriod: 14, oversold: 30, overbought: 70, emaFilter: 50,
       atrPeriod: 14, slMultiplier: 1.5, rrRatio: 2.0,
@@ -51,7 +52,7 @@ const PRESETS = [
     name: "London Breakout",
     icon: Zap,
     color: "#f59e0b",
-    desc: "Sparge range-ul sesiunii Asia la deschiderea Londrei. Preferatul intraday.",
+    desc: "descSession",
     rules: {
       session: "LONDON", slMultiplier: 1.0, rrRatio: 2.0,
       atrPeriod: 14, minRangePips: 0, retestEntry: false, rsiFilter: 0,
@@ -62,7 +63,7 @@ const PRESETS = [
     name: "Trend Following",
     icon: BarChart2,
     color: "#34d399",
-    desc: "Pullback la EMA 50 în trend confirmat de ADX. Intră doar când trendul e real.",
+    desc: "descTrend",
     rules: {
       emaPeriod: 50, emaSlow: 0, adxPeriod: 14, adxThreshold: 25, pullbackBars: 3,
       atrPeriod: 14, slMultiplier: 1.5, rrRatio: 2.0,
@@ -73,36 +74,37 @@ const PRESETS = [
 
 const QUICK_SYMBOLS = ["EURUSD", "XAUUSD", "GBPUSD", "USDJPY", "BTCUSD", "US30"];
 
+// group = cheie → backtesting.* (tradusă la randare)
 const ALL_SYMBOLS: { group: string; symbols: string[] }[] = [
-  { group: "Forex Majors", symbols: ["EURUSD","GBPUSD","USDJPY","USDCHF","AUDUSD","NZDUSD","USDCAD"] },
-  { group: "Forex Minors", symbols: ["EURGBP","EURJPY","GBPJPY","EURCAD","EURCHF","GBPCHF","EURAUD","GBPAUD","AUDCAD","AUDNZD","CADJPY","CHFJPY","NZDJPY","GBPNZD"] },
-  { group: "Metale", symbols: ["XAUUSD","XAGUSD","XPTUSD"] },
-  { group: "Indici", symbols: ["US30","NAS100","SP500","US2000"] },
-  { group: "Crypto", symbols: ["BTCUSD","ETHUSD","BNBUSD","SOLUSD","XRPUSD"] },
-  { group: "Energie", symbols: ["CRUDE","BRENT","NATGAS"] },
+  { group: "grpForexMajors", symbols: ["EURUSD","GBPUSD","USDJPY","USDCHF","AUDUSD","NZDUSD","USDCAD"] },
+  { group: "grpForexMinors", symbols: ["EURGBP","EURJPY","GBPJPY","EURCAD","EURCHF","GBPCHF","EURAUD","GBPAUD","AUDCAD","AUDNZD","CADJPY","CHFJPY","NZDJPY","GBPNZD"] },
+  { group: "grpMetals", symbols: ["XAUUSD","XAGUSD","XPTUSD"] },
+  { group: "grpIndices", symbols: ["US30","NAS100","SP500","US2000"] },
+  { group: "grpCrypto", symbols: ["BTCUSD","ETHUSD","BNBUSD","SOLUSD","XRPUSD"] },
+  { group: "grpEnergy", symbols: ["CRUDE","BRENT","NATGAS"] },
 ];
 
-// Perioade VALIDE per timeframe (limitele reale ale datelor Yahoo)
+// Perioade VALIDE per timeframe (limitele reale ale datelor Yahoo). label = cheie → backtesting.*
 const TF_PERIODS: Record<string, { days: number; label: string }[]> = {
   M15: [
-    { days: 30, label: "1 lună" },
-    { days: 55, label: "2 luni" },
+    { days: 30, label: "perMonth1" },
+    { days: 55, label: "perMonths2" },
   ],
   H1: [
-    { days: 90, label: "3 luni" },
-    { days: 180, label: "6 luni" },
-    { days: 365, label: "1 an" },
-    { days: 690, label: "2 ani" },
+    { days: 90, label: "perMonths3" },
+    { days: 180, label: "perMonths6" },
+    { days: 365, label: "perYear1" },
+    { days: 690, label: "perYears2" },
   ],
   H4: [
-    { days: 180, label: "6 luni" },
-    { days: 365, label: "1 an" },
-    { days: 690, label: "2 ani" },
+    { days: 180, label: "perMonths6" },
+    { days: 365, label: "perYear1" },
+    { days: 690, label: "perYears2" },
   ],
   D1: [
-    { days: 365, label: "1 an" },
-    { days: 1095, label: "3 ani" },
-    { days: 1825, label: "5 ani" },
+    { days: 365, label: "perYear1" },
+    { days: 1095, label: "perYears3" },
+    { days: 1825, label: "perYears5" },
   ],
 };
 
@@ -115,6 +117,7 @@ interface ExistingStrategy {
 }
 
 export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
+  const t = useTranslations("backtesting");
   const router = useRouter();
   const { toast } = useToast();
 
@@ -148,14 +151,14 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: `⚡ ${preset.name} — Test rapid`,
+            name: t("quickName", { name: preset.name }),
             type: preset.type,
             color: preset.color,
             description: preset.desc,
             rules: preset.rules,
           }),
         });
-        if (!createRes.ok) throw new Error("Nu am putut crea strategia.");
+        if (!createRes.ok) throw new Error(t("createErr"));
         const created = await createRes.json();
         strategyId = created.id as string;
       }
@@ -183,7 +186,7 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
 
       if (result.error) {
         toast({
-          title: "Backtest eșuat",
+          title: t("failedTitle"),
           description: String(result.error),
           variant: "destructive",
         });
@@ -194,8 +197,8 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
       router.push(`/backtesting/results/${result.backtestId}`);
     } catch (err) {
       toast({
-        title: "Eroare",
-        description: err instanceof Error ? err.message : "Încearcă din nou.",
+        title: t("errTitle"),
+        description: err instanceof Error ? err.message : t("tryAgain"),
         variant: "destructive",
       });
     } finally {
@@ -211,14 +214,14 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
       <div className="flex items-center gap-2 mb-1">
         <Zap className="w-4 h-4 text-indigo-400" />
         <h2 className="text-sm font-black text-zinc-100 uppercase tracking-wide">
-          Testează instant
+          {t("testInstant")}
         </h2>
         <span className="text-[10px] font-bold text-indigo-400/80 border border-indigo-500/30 rounded-full px-2 py-0.5">
-          fără configurare
+          {t("noConfig")}
         </span>
       </div>
       <p className="text-xs text-zinc-500 mb-4">
-        Alege o strategie, un simbol și o perioadă — rulăm pe date istorice reale în câteva secunde.
+        {t("qtSubtitle")}
       </p>
 
       {/* 1. Strategia */}
@@ -248,7 +251,7 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
                   {p.name}
                 </span>
               </div>
-              <p className="text-[10px] leading-relaxed text-zinc-500 line-clamp-2">{p.desc}</p>
+              <p className="text-[10px] leading-relaxed text-zinc-500 line-clamp-2">{t(p.desc)}</p>
             </button>
           );
         })}
@@ -257,7 +260,7 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
       {/* 2. Simbol + Timeframe + Perioadă */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-1.5">Simbol</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-1.5">{t("symbol")}</p>
           <div className="flex flex-wrap items-center gap-1.5">
             {QUICK_SYMBOLS.map((s) => (
               <button
@@ -283,9 +286,9 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
                   : "border-zinc-800 text-zinc-500"
               )}
             >
-              <option value="">altele…</option>
+              <option value="">{t("other")}</option>
               {ALL_SYMBOLS.map((g) => (
-                <optgroup key={g.group} label={g.group}>
+                <optgroup key={g.group} label={t(g.group)}>
                   {g.symbols.filter((s) => !QUICK_SYMBOLS.includes(s)).map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
@@ -296,7 +299,7 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
         </div>
 
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-1.5">Timeframe</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-1.5">{t("timeframe")}</p>
           <div className="flex gap-1.5">
             {TFS.map((t) => (
               <button
@@ -316,7 +319,7 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
         </div>
 
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-1.5">Perioadă</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-1.5">{t("period")}</p>
           <div className="flex gap-1.5">
             {periods.map((p) => (
               <button
@@ -329,7 +332,7 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
                     : "border-zinc-800 bg-zinc-950/40 text-zinc-500 hover:text-zinc-300"
                 )}
               >
-                {p.label}
+                {t(p.label)}
               </button>
             ))}
           </div>
@@ -339,8 +342,12 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
       {/* 3. Rulează */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[10px] text-zinc-600">
-          {preset.name} · {symbol} · {tf} · {periods.find((p) => p.days === days)?.label} ·
-          cont 10.000$ · risc 1%/trade — poți rafina totul din builderul complet.
+          {t("qtSummary", {
+            preset: preset.name,
+            symbol,
+            tf,
+            period: (() => { const l = periods.find((p) => p.days === days)?.label; return l ? t(l) : ""; })(),
+          })}
         </p>
         <button
           onClick={run}
@@ -350,12 +357,12 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
           {running ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Rulează pe date reale…
+              {t("running")}
             </>
           ) : (
             <>
               <Play className="w-4 h-4" />
-              Rulează backtest-ul
+              {t("runBtn")}
             </>
           )}
         </button>

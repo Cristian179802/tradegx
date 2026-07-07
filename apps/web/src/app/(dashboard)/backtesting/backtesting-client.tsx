@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,12 +14,13 @@ import {
 } from "lucide-react";
 import { QuickTest } from "./quick-test";
 
+// EMA/Session/RSI/Trend = universale; doar CUSTOM tradus la randare (cheie stCustom)
 const STRATEGY_TYPE_LABELS: Record<string, string> = {
   EMA_CROSSOVER:    "EMA Crossover",
   SESSION_BREAKOUT: "Session Breakout",
   RSI_REVERSAL:     "RSI Reversal",
   TREND_FOLLOWING:  "Trend Following",
-  CUSTOM:           "Personalizată",
+  CUSTOM:           "CUSTOM",
 };
 
 const STRATEGY_TYPE_COLORS: Record<string, string> = {
@@ -36,11 +38,12 @@ const STATUS_COLORS: Record<string, string> = {
   PENDING:   "bg-zinc-700 text-zinc-400 border-zinc-600",
 };
 
+// chei → backtesting.* (traduse la randare)
 const STATUS_LABELS: Record<string, string> = {
-  COMPLETED: "Finalizat",
-  RUNNING:   "Rulează",
-  FAILED:    "Eroare",
-  PENDING:   "În așteptare",
+  COMPLETED: "stCompleted",
+  RUNNING:   "stRunning",
+  FAILED:    "stFailed",
+  PENDING:   "stPending",
 };
 
 interface Strategy {
@@ -64,6 +67,7 @@ export function BacktestingClient({
   strategies: Strategy[];
   recentBacktests: BacktestRow[];
 }) {
+  const t = useTranslations("backtesting");
   const router = useRouter();
   const { toast } = useToast();
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
@@ -72,10 +76,10 @@ export function BacktestingClient({
     setDeletingId(id);
     const res = await fetch(`/api/backtesting/strategies/${id}`, { method: "DELETE" });
     if (res.ok) {
-      toast({ title: "Strategie ștearsă" });
+      toast({ title: t("deletedStrategy") });
       router.refresh();
     } else {
-      toast({ title: "Eroare la ștergere", variant: "destructive" });
+      toast({ title: t("deleteErr"), variant: "destructive" });
     }
     setDeletingId(null);
   }
@@ -85,15 +89,15 @@ export function BacktestingClient({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-violet">Backtesting</h1>
+          <h1 className="text-2xl font-black tracking-tight neon-violet">{t("title")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            Testează strategii pe date istorice reale — Yahoo Finance live data
+            {t("subtitle")}
           </p>
         </div>
         <Button asChild variant="outline" className="border-zinc-700 text-zinc-300 hover:border-indigo-500/50 hover:text-indigo-300 gap-2">
           <Link href="/backtesting/new">
             <Plus className="h-4 w-4" />
-            Builder avansat
+            {t("advancedBuilder")}
           </Link>
         </Button>
       </div>
@@ -105,15 +109,15 @@ export function BacktestingClient({
         {/* Strategy List — Left Column */}
         <div className="lg:col-span-2 space-y-3">
           <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
-            Strategii salvate ({strategies.length})
+            {t("savedStrategies", { n: strategies.length })}
           </h2>
 
           {strategies.length === 0 ? (
             <div className="rounded-xl border border-dashed border-zinc-800 p-8 text-center">
               <FlaskConical className="h-8 w-8 text-zinc-700 mx-auto mb-3" />
-              <p className="text-sm text-zinc-500 mb-3">Nicio strategie creată</p>
+              <p className="text-sm text-zinc-500 mb-3">{t("noStrategy")}</p>
               <Button asChild size="sm" variant="outline" className="border-zinc-700 text-zinc-400">
-                <Link href="/backtesting/new"><Plus className="h-3.5 w-3.5 mr-1" />Crează prima strategie</Link>
+                <Link href="/backtesting/new"><Plus className="h-3.5 w-3.5 mr-1" />{t("createFirst")}</Link>
               </Button>
             </div>
           ) : (
@@ -134,7 +138,7 @@ export function BacktestingClient({
                           "text-[10px] px-1.5 py-0.5 rounded border",
                           STRATEGY_TYPE_COLORS[s.type] ?? "bg-zinc-800 text-zinc-400 border-zinc-700"
                         )}>
-                          {STRATEGY_TYPE_LABELS[s.type] ?? s.type}
+                          {s.type === "CUSTOM" ? t("stCustom") : (STRATEGY_TYPE_LABELS[s.type] ?? s.type)}
                         </span>
                       </div>
                     </div>
@@ -166,13 +170,13 @@ export function BacktestingClient({
                       )}
                     </div>
                   ) : (
-                    <p className="text-xs text-zinc-600 mb-3">Niciun backtest rulat</p>
+                    <p className="text-xs text-zinc-600 mb-3">{t("noBacktest")}</p>
                   )}
 
                   <Button asChild size="sm" className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white gap-1.5 h-8 text-xs shadow-lg shadow-indigo-500/25">
                     <Link href={`/backtesting/new?strategyId=${s.id}`}>
                       <Play className="h-3 w-3" />
-                      Rulează Backtest
+                      {t("runBacktest")}
                     </Link>
                   </Button>
                 </div>
@@ -184,14 +188,14 @@ export function BacktestingClient({
         {/* Recent Backtests — Right Column */}
         <div className="lg:col-span-3 space-y-3">
           <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
-            Backteste recente ({recentBacktests.length})
+            {t("recentBacktests", { n: recentBacktests.length })}
           </h2>
 
           {recentBacktests.length === 0 ? (
             <div className="rounded-xl border border-dashed border-zinc-800 p-8 text-center">
               <Activity className="h-8 w-8 text-zinc-700 mx-auto mb-3" />
               <p className="text-sm text-zinc-500">
-                Niciun backtest rulat. Crează o strategie și testează-o!
+                {t("noBacktestRun")}
               </p>
             </div>
           ) : (
@@ -219,7 +223,7 @@ export function BacktestingClient({
 
                     {/* Status */}
                     <span className={cn("text-[10px] px-2 py-0.5 rounded border shrink-0", STATUS_COLORS[b.status])}>
-                      {STATUS_LABELS[b.status]}
+                      {t(STATUS_LABELS[b.status])}
                     </span>
 
                     {b.status === "COMPLETED" ? (
@@ -227,26 +231,26 @@ export function BacktestingClient({
                         {/* Trades */}
                         <div className="text-center w-12 shrink-0">
                           <p className="text-xs font-semibold text-zinc-200 num">{b.totalTrades ?? "—"}</p>
-                          <p className="text-[9px] text-zinc-600">trades</p>
+                          <p className="text-[9px] text-zinc-600">{t("trades")}</p>
                         </div>
                         {/* Win Rate */}
                         <div className="text-center w-14 shrink-0">
                           <p className="text-xs font-semibold text-zinc-200 num">{wr ? `${wr.toFixed(1)}%` : "—"}</p>
-                          <p className="text-[9px] text-zinc-600">win rate</p>
+                          <p className="text-[9px] text-zinc-600">{t("winRateShort")}</p>
                         </div>
                         {/* PF */}
                         <div className="text-center w-10 shrink-0">
                           <p className={cn("text-xs font-semibold num", pf && pf >= 1 ? "text-emerald-400" : "text-rose-400")}>
                             {pf ? pf.toFixed(2) : "—"}
                           </p>
-                          <p className="text-[9px] text-zinc-600">PF</p>
+                          <p className="text-[9px] text-zinc-600">{t("pfShort")}</p>
                         </div>
                         {/* DD */}
                         <div className="text-center w-12 shrink-0">
                           <p className="text-xs font-semibold text-rose-400 num">
                             {dd ? `-${dd.toFixed(1)}%` : "—"}
                           </p>
-                          <p className="text-[9px] text-zinc-600">drawdown</p>
+                          <p className="text-[9px] text-zinc-600">{t("drawdownShort")}</p>
                         </div>
                         {/* P&L */}
                         <div className="ml-auto text-right shrink-0">
@@ -267,7 +271,7 @@ export function BacktestingClient({
                     ) : (
                       <div className="flex-1 flex items-center justify-end">
                         {b.status === "FAILED" && (
-                          <span className="text-xs text-rose-400">Rulare eșuată</span>
+                          <span className="text-xs text-rose-400">{t("runFailed")}</span>
                         )}
                       </div>
                     )}
@@ -286,13 +290,13 @@ export function BacktestingClient({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-zinc-800">
           {[
             {
-              label: "Backteste totale",
+              label: t("statTotalBacktests"),
               value: recentBacktests.length,
               icon: BarChart2,
               color: "text-indigo-400",
             },
             {
-              label: "Win rate mediu",
+              label: t("statAvgWinRate"),
               value: (() => {
                 const wrs = recentBacktests.filter((b) => b.winRate).map((b) => parseFloat(b.winRate!));
                 return wrs.length ? `${(wrs.reduce((a, b) => a + b, 0) / wrs.length).toFixed(1)}%` : "—";
@@ -301,7 +305,7 @@ export function BacktestingClient({
               color: "text-emerald-400",
             },
             {
-              label: "Profit Factor mediu",
+              label: t("statAvgPf"),
               value: (() => {
                 const pfs = recentBacktests.filter((b) => b.profitFactor).map((b) => parseFloat(b.profitFactor!));
                 return pfs.length ? (pfs.reduce((a, b) => a + b, 0) / pfs.length).toFixed(2) : "—";
@@ -310,7 +314,7 @@ export function BacktestingClient({
               color: "text-amber-400",
             },
             {
-              label: "P&L total generat",
+              label: t("statTotalPnl"),
               value: (() => {
                 const pnls = recentBacktests.filter((b) => b.netPnl).map((b) => parseFloat(b.netPnl!));
                 const total = pnls.reduce((a, b) => a + b, 0);
