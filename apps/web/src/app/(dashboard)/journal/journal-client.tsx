@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -65,39 +66,40 @@ interface JournalClientProps {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+// color = clasă, label = cheie → journalPage.* (tradusă la randare)
 const EMOTIONAL_STATES: Record<string, { label: string; color: string }> = {
-  CONFIDENT: { label: "Încrezător", color: "text-emerald-400" },
-  CALM: { label: "Calm", color: "text-blue-400" },
-  ANXIOUS: { label: "Anxios", color: "text-amber-400" },
-  FEARFUL: { label: "Frică", color: "text-rose-400" },
-  GREEDY: { label: "Lacom", color: "text-orange-400" },
-  NEUTRAL: { label: "Neutru", color: "text-zinc-400" },
-  FRUSTRATED: { label: "Frustrat", color: "text-red-400" },
-  EXCITED: { label: "Entuziasmat", color: "text-purple-400" },
+  CONFIDENT: { label: "esConfident", color: "text-emerald-400" },
+  CALM: { label: "esCalm", color: "text-blue-400" },
+  ANXIOUS: { label: "esAnxious", color: "text-amber-400" },
+  FEARFUL: { label: "esFearful", color: "text-rose-400" },
+  GREEDY: { label: "esGreedy", color: "text-orange-400" },
+  NEUTRAL: { label: "esNeutral", color: "text-zinc-400" },
+  FRUSTRATED: { label: "esFrustrated", color: "text-red-400" },
+  EXCITED: { label: "esExcited", color: "text-purple-400" },
 };
 
 const MISTAKE_LABELS: Record<string, string> = {
-  EARLY_EXIT: "Ieșire prematură",
-  LATE_ENTRY: "Intrare târzie",
-  REVENGE_TRADE: "Revenge Trade",
-  FOMO: "FOMO",
-  NO_STOP_LOSS: "Fără SL",
-  OVERSIZED: "Lot prea mare",
-  MOVED_SL: "SL mutat",
-  IGNORED_NEWS: "News ignorat",
-  OVERTRADED: "Supratranzacționare",
+  EARLY_EXIT: "mkEarlyExit",
+  LATE_ENTRY: "mkLateEntry",
+  REVENGE_TRADE: "mkRevenge",
+  FOMO: "mkFomo",
+  NO_STOP_LOSS: "mkNoSl",
+  OVERSIZED: "mkOversized",
+  MOVED_SL: "mkMovedSl",
+  IGNORED_NEWS: "mkIgnoredNews",
+  OVERTRADED: "mkOvertraded",
 };
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("ro-RO", {
+function fmtDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
 }
 
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("ro-RO", {
+function fmtTime(iso: string, locale: string) {
+  return new Date(iso).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -132,6 +134,8 @@ function StatCard({
 // ─── Trade Row ────────────────────────────────────────────────────────────────
 
 function TradeRow({ trade }: { trade: JournalTrade }) {
+  const t = useTranslations("journalPage");
+  const locale = useLocale();
   const [expanded, setExpanded] = useState(false);
   const positive = (trade.pnlMoney ?? 0) >= 0;
   const hasJournal = !!trade.journal;
@@ -170,8 +174,8 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
             ))}
           </div>
           <p className="text-[11px] text-zinc-600 mt-0.5">
-            {fmtDate(trade.entryTime)} • {fmtTime(trade.entryTime)}
-            {trade.exitTime && ` → ${fmtTime(trade.exitTime)}`}
+            {fmtDate(trade.entryTime, locale)} • {fmtTime(trade.entryTime, locale)}
+            {trade.exitTime && ` → ${fmtTime(trade.exitTime, locale)}`}
           </p>
         </div>
 
@@ -207,9 +211,9 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
         {/* Journal indicator */}
         <div className="flex items-center gap-2">
           {hasJournal ? (
-            <span className="w-2 h-2 rounded-full bg-indigo-400" title="Jurnalizat" />
+            <span className="w-2 h-2 rounded-full bg-indigo-400" title={t("journaledTip")} />
           ) : (
-            <span className="w-2 h-2 rounded-full bg-zinc-700" title="Fără jurnal" />
+            <span className="w-2 h-2 rounded-full bg-zinc-700" title={t("noJournalTip")} />
           )}
           {expanded ? (
             <ChevronUp className="w-4 h-4 text-zinc-600" />
@@ -224,22 +228,22 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
         <div className="px-4 py-4 bg-zinc-950/80 border-t border-zinc-800/80 grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Trade details */}
           <div className="space-y-3">
-            <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.08em]">Detalii Tranzacție</h4>
+            <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.08em]">{t("tradeDetails")}</h4>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
-                <p className="text-zinc-600">Intrare</p>
+                <p className="text-zinc-600">{t("entry")}</p>
                 <p className="text-zinc-300 num">{trade.entryPrice.toFixed(5)}</p>
               </div>
               <div>
-                <p className="text-zinc-600">Ieșire</p>
+                <p className="text-zinc-600">{t("exit")}</p>
                 <p className="text-zinc-300 num">{trade.exitPrice?.toFixed(5) ?? "—"}</p>
               </div>
               <div>
-                <p className="text-zinc-600">Lot</p>
+                <p className="text-zinc-600">{t("lot")}</p>
                 <p className="text-zinc-300 num">{trade.lotSize.toFixed(2)}</p>
               </div>
               <div>
-                <p className="text-zinc-600">Timeframe</p>
+                <p className="text-zinc-600">{t("timeframe")}</p>
                 <p className="text-zinc-300">{trade.timeframe ?? "—"}</p>
               </div>
             </div>
@@ -247,7 +251,7 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
             {/* Pre-trade */}
             {trade.journal?.preNotes && (
               <div>
-                <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Note Pre-Trade</p>
+                <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">{t("preNotesLabel")}</p>
                 <p className="text-xs text-zinc-400 leading-relaxed bg-zinc-900 rounded-lg p-2.5 border border-zinc-800">
                   {trade.journal.preNotes}
                 </p>
@@ -257,27 +261,27 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
 
           {/* Journal data */}
           <div className="space-y-3">
-            <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.08em]">Jurnal</h4>
+            <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.08em]">{t("journalTitle")}</h4>
 
             {trade.journal ? (
               <>
                 {/* Emotions */}
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <p className="text-zinc-600 mb-0.5">Stare pre-trade</p>
+                    <p className="text-zinc-600 mb-0.5">{t("statePre")}</p>
                     <p className={EMOTIONAL_STATES[trade.journal.preEmotionalState ?? ""]?.color ?? "text-zinc-400"}>
-                      {EMOTIONAL_STATES[trade.journal.preEmotionalState ?? ""]?.label ?? "—"}
+                      {EMOTIONAL_STATES[trade.journal.preEmotionalState ?? ""] ? t(EMOTIONAL_STATES[trade.journal.preEmotionalState ?? ""].label) : "—"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-zinc-600 mb-0.5">Stare post-trade</p>
+                    <p className="text-zinc-600 mb-0.5">{t("statePost")}</p>
                     <p className={EMOTIONAL_STATES[trade.journal.postEmotionalState ?? ""]?.color ?? "text-zinc-400"}>
-                      {EMOTIONAL_STATES[trade.journal.postEmotionalState ?? ""]?.label ?? "—"}
+                      {EMOTIONAL_STATES[trade.journal.postEmotionalState ?? ""] ? t(EMOTIONAL_STATES[trade.journal.postEmotionalState ?? ""].label) : "—"}
                     </p>
                   </div>
                   {trade.journal.preConfidence && (
                     <div>
-                      <p className="text-zinc-600 mb-0.5">Confidență</p>
+                      <p className="text-zinc-600 mb-0.5">{t("confidence")}</p>
                       <div className="flex gap-0.5">
                         {Array.from({ length: 10 }).map((_, i) => (
                           <div
@@ -294,7 +298,7 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
                   )}
                   {trade.journal.aiScore !== null && (
                     <div>
-                      <p className="text-zinc-600 mb-0.5">Scor AI</p>
+                      <p className="text-zinc-600 mb-0.5">{t("aiScore")}</p>
                       <p className={`font-bold ${trade.journal.aiScore >= 70 ? "text-emerald-400" : trade.journal.aiScore >= 40 ? "text-amber-400" : "text-rose-400"}`}>
                         {trade.journal.aiScore}/100
                       </p>
@@ -305,11 +309,11 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
                 {/* Mistakes */}
                 {trade.journal.postMistakeTypes.length > 0 && (
                   <div>
-                    <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Greșeli</p>
+                    <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">{t("mistakesLabel")}</p>
                     <div className="flex flex-wrap gap-1">
                       {trade.journal.postMistakeTypes.map((m) => (
                         <span key={m} className="text-[10px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded px-1.5 py-0.5">
-                          {MISTAKE_LABELS[m] ?? m}
+                          {MISTAKE_LABELS[m] ? t(MISTAKE_LABELS[m]) : m}
                         </span>
                       ))}
                     </div>
@@ -319,7 +323,7 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
                 {/* Post notes */}
                 {trade.journal.postNotes && (
                   <div>
-                    <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Note Post-Trade</p>
+                    <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">{t("postNotesLabel")}</p>
                     <p className="text-xs text-zinc-400 leading-relaxed bg-zinc-900 rounded-lg p-2.5 border border-zinc-800">
                       {trade.journal.postNotes}
                     </p>
@@ -329,7 +333,7 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
                 {/* Lessons */}
                 {trade.journal.postLessons && (
                   <div>
-                    <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Lecții Învățate</p>
+                    <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">{t("lessonsLabel")}</p>
                     <p className="text-xs text-emerald-400/80 leading-relaxed">
                       {trade.journal.postLessons}
                     </p>
@@ -340,14 +344,14 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
               <div className="flex flex-col items-center justify-center py-6 gap-2">
                 <StickyNote className="w-8 h-8 text-zinc-700" />
                 <p className="text-xs text-zinc-600 text-center">
-                  Nicio intrare de jurnal pentru această tranzacție.
+                  {t("noJournal")}
                 </p>
                 <Link
                   href={`/trades/${trade.id}`}
                   className="text-xs text-indigo-400 hover:text-indigo-300 border border-indigo-500/25 bg-indigo-500/8 hover:bg-indigo-500/15 rounded-xl px-4 py-2 mt-1 transition-all"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  Adaugă jurnal →
+                  {t("addJournal")}
                 </Link>
               </div>
             )}
@@ -361,6 +365,7 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function JournalClient({ trades, stats }: JournalClientProps) {
+  const t = useTranslations("journalPage");
   const [search, setSearch] = useState("");
   const [dirFilter, setDirFilter] = useState<"ALL" | "BUY" | "SELL">("ALL");
   const [journaledFilter, setJournaledFilter] = useState<"ALL" | "YES" | "NO">("ALL");
@@ -392,9 +397,9 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-emerald">Jurnal de Trading</h1>
+          <h1 className="text-2xl font-black tracking-tight neon-emerald">{t("pageTitle")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            Analizează-ți tranzacțiile, emoțiile și lecțiile învățate.
+            {t("pageSub")}
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-900/80 border border-zinc-800/80 rounded-xl px-3 py-2">
@@ -403,7 +408,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
           </div>
           <span>
             <span className="text-indigo-300 font-bold">{stats.journaled}</span>
-            <span className="text-zinc-600">/{stats.totalTrades} jurnalizate</span>
+            <span className="text-zinc-600">/{stats.totalTrades} {t("journaledWord")}</span>
             <span className="text-indigo-400 font-semibold ml-1">({journaledPct}%)</span>
           </span>
         </div>
@@ -412,35 +417,35 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
       {/* KPI Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <StatCard
-          label="Tranzacții"
+          label={t("kTrades")}
           value={String(stats.totalTrades)}
-          sub={`${stats.journaled} jurnalizate`}
+          sub={t("subJournaled", { n: stats.journaled })}
         />
         <StatCard
-          label="Win Rate"
+          label={t("kWinRate")}
           value={stats.winRate !== null ? `${stats.winRate.toFixed(1)}%` : "—"}
           positive={stats.winRate !== null ? stats.winRate >= 50 : undefined}
-          sub={`${stats.wins}W / ${stats.losses}L`}
+          sub={t("subWL", { w: stats.wins, l: stats.losses })}
         />
         <StatCard
-          label="Profit Net"
+          label={t("kNetProfit")}
           value={stats.netPnl >= 0 ? `+${stats.netPnl.toFixed(2)}` : stats.netPnl.toFixed(2)}
           positive={stats.netPnl >= 0}
           sub={stats.currency}
         />
         <StatCard
-          label="Avg R:R"
+          label={t("kAvgRR")}
           value={stats.avgRR !== null ? `1:${stats.avgRR.toFixed(2)}` : "—"}
           positive={stats.avgRR !== null ? stats.avgRR >= 1.5 : undefined}
-          sub={stats.avgRR !== null ? (stats.avgRR >= 2 ? "excelent" : "de îmbunătățit") : "—"}
+          sub={stats.avgRR !== null ? (stats.avgRR >= 2 ? t("excellent") : t("toImprove")) : "—"}
         />
-        <StatCard label="Câștiguri" value={String(stats.wins)} positive={stats.wins > 0} />
-        <StatCard label="Pierderi" value={String(stats.losses)} positive={stats.losses === 0} />
+        <StatCard label={t("kWins")} value={String(stats.wins)} positive={stats.wins > 0} />
+        <StatCard label={t("kLosses")} value={String(stats.losses)} positive={stats.losses === 0} />
         <StatCard
-          label="Jurnalizate"
+          label={t("kJournaled")}
           value={`${journaledPct}%`}
           positive={journaledPct >= 80}
-          sub={journaledPct >= 80 ? "excelent" : "mai adaugă"}
+          sub={journaledPct >= 80 ? t("excellent") : t("addMore")}
         />
       </div>
 
@@ -451,7 +456,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
           <input
             type="text"
-            placeholder="Caută simbol sau setup..."
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500/50 transition-colors"
@@ -475,7 +480,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
                   : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              {d === "ALL" ? "Toate" : d}
+              {d === "ALL" ? t("fAll") : d}
             </button>
           ))}
         </div>
@@ -496,7 +501,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
                   : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              {r === "ALL" ? "Toate" : r === "WIN" ? "Câștigate" : "Pierdute"}
+              {r === "ALL" ? t("fAll") : r === "WIN" ? t("fWin") : t("fLoss")}
             </button>
           ))}
         </div>
@@ -511,7 +516,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
                 journaledFilter === j ? "bg-zinc-700 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              {j === "ALL" ? "Jurnal: Toate" : j === "YES" ? "Cu jurnal" : "Fără jurnal"}
+              {j === "ALL" ? t("fJournalAll") : j === "YES" ? t("fWithJournal") : t("fWithoutJournal")}
             </button>
           ))}
         </div>
@@ -524,9 +529,9 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
             className="bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-400 px-2 py-2 focus:outline-none"
           >
-            <option value="date">Sortare: Dată</option>
-            <option value="pnl">Sortare: PnL</option>
-            <option value="rr">Sortare: R:R</option>
+            <option value="date">{t("sortDate")}</option>
+            <option value="pnl">{t("sortPnl")}</option>
+            <option value="rr">{t("sortRR")}</option>
           </select>
         </div>
       </div>
@@ -538,20 +543,20 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
             <BookOpen className="w-6 h-6 text-zinc-500" />
           </div>
           <div>
-            <p className="text-zinc-300 font-semibold">Nicio tranzacție găsită</p>
-            <p className="text-zinc-500 text-sm mt-1">Încearcă să schimbi filtrele sau adaugă tranzacții noi.</p>
+            <p className="text-zinc-300 font-semibold">{t("emptyTitle")}</p>
+            <p className="text-zinc-500 text-sm mt-1">{t("emptySub")}</p>
           </div>
           <button
             onClick={() => { setSearch(""); setDirFilter("ALL"); setResultFilter("ALL"); setJournaledFilter("ALL"); }}
             className="text-sm text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/20"
           >
-            Resetează filtrele
+            {t("resetFilters")}
           </button>
         </div>
       ) : (
         <div className="space-y-2">
           <p className="text-xs text-zinc-600">
-            {filtered.length} tranzacții afișate
+            {t("countShown", { n: filtered.length })}
           </p>
           {filtered.map((trade) => (
             <TradeRow key={trade.id} trade={trade} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,34 +45,36 @@ interface JournalEntryFormProps {
   onSave?: () => void;
 }
 
+// label = cheie → journal.* (tradusă la randare)
 const EMOTIONAL_STATES = [
-  { value: "CALM",       label: "Calm",          emoji: "😌", color: "emerald" },
-  { value: "CONFIDENT",  label: "Încrezător",    emoji: "💪", color: "indigo"  },
-  { value: "ANXIOUS",    label: "Anxios",        emoji: "😰", color: "amber"   },
-  { value: "FEARFUL",    label: "Fricos",        emoji: "😨", color: "amber"   },
-  { value: "GREEDY",     label: "Lacom",         emoji: "🤑", color: "rose"    },
-  { value: "REVENGE",    label: "Revenge trade", emoji: "😤", color: "rose"    },
-  { value: "FOMO",       label: "FOMO",          emoji: "🔥", color: "rose"    },
-  { value: "NEUTRAL",    label: "Neutru",        emoji: "😐", color: "zinc"    },
+  { value: "CALM",       label: "esCalm",      emoji: "😌", color: "emerald" },
+  { value: "CONFIDENT",  label: "esConfident", emoji: "💪", color: "indigo"  },
+  { value: "ANXIOUS",    label: "esAnxious",   emoji: "😰", color: "amber"   },
+  { value: "FEARFUL",    label: "esFearful",   emoji: "😨", color: "amber"   },
+  { value: "GREEDY",     label: "esGreedy",    emoji: "🤑", color: "rose"    },
+  { value: "REVENGE",    label: "esRevenge",   emoji: "😤", color: "rose"    },
+  { value: "FOMO",       label: "esFomo",      emoji: "🔥", color: "rose"    },
+  { value: "NEUTRAL",    label: "esNeutral",   emoji: "😐", color: "zinc"    },
 ] as const;
 
 const MISTAKE_TYPES = [
-  { value: "OVERTRADING",   label: "Overtrading",        icon: "⚡" },
-  { value: "REVENGE_TRADE", label: "Revenge trade",      icon: "😤" },
-  { value: "FOMO_ENTRY",    label: "FOMO entry",         icon: "🔥" },
-  { value: "MOVED_SL",      label: "Stop loss mutat",    icon: "🚫" },
-  { value: "NO_SL",         label: "Fără stop loss",     icon: "⚠️" },
-  { value: "WRONG_SIZE",    label: "Volum greșit",       icon: "📏" },
-  { value: "EARLY_EXIT",    label: "Ieșire prematură",   icon: "🏃" },
-  { value: "LATE_ENTRY",    label: "Intrare târzie",     icon: "🐢" },
-  { value: "IGNORED_RULES", label: "Reguli ignorate",    icon: "🙈" },
-  { value: "OTHER",         label: "Altul",              icon: "📌" },
+  { value: "OVERTRADING",   label: "mkOvertrading",  icon: "⚡" },
+  { value: "REVENGE_TRADE", label: "mkRevenge",      icon: "😤" },
+  { value: "FOMO_ENTRY",    label: "mkFomo",         icon: "🔥" },
+  { value: "MOVED_SL",      label: "mkMovedSl",      icon: "🚫" },
+  { value: "NO_SL",         label: "mkNoSl",         icon: "⚠️" },
+  { value: "WRONG_SIZE",    label: "mkWrongSize",    icon: "📏" },
+  { value: "EARLY_EXIT",    label: "mkEarlyExit",    icon: "🏃" },
+  { value: "LATE_ENTRY",    label: "mkLateEntry",    icon: "🐢" },
+  { value: "IGNORED_RULES", label: "mkIgnoredRules", icon: "🙈" },
+  { value: "OTHER",         label: "mkOther",        icon: "📌" },
 ] as const;
 
 function ConfidenceBar({ value }: { value: number | null }) {
+  const t = useTranslations("journal");
   const score = value ?? 0;
   const color = score >= 8 ? "emerald" : score >= 5 ? "indigo" : score >= 3 ? "amber" : "rose";
-  const label = score >= 8 ? "Foarte ridicat" : score >= 5 ? "Moderat" : score >= 3 ? "Scăzut" : "Nesigur";
+  const label = score >= 8 ? t("confVeryHigh") : score >= 5 ? t("confModerate") : score >= 3 ? t("confLow") : t("confUncertain");
 
   return (
     <div className="flex items-center gap-1.5 mt-1">
@@ -101,6 +104,7 @@ function ConfidenceBar({ value }: { value: number | null }) {
 }
 
 export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryFormProps) {
+  const t = useTranslations("journal");
   const { toast } = useToast();
 
   const form = useForm<JournalEntryInput>({
@@ -129,11 +133,11 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
     });
 
     if (!res.ok) {
-      toast({ title: "Eroare", description: "Nu s-a putut salva", variant: "destructive" });
+      toast({ title: t("errTitle"), description: t("errDesc"), variant: "destructive" });
       return;
     }
 
-    toast({ title: "✅ Jurnal salvat", description: "Notițele au fost actualizate cu succes." });
+    toast({ title: t("savedTitle"), description: t("savedDesc") });
     onSave?.();
   }
 
@@ -157,8 +161,8 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
               <Brain className="w-3.5 h-3.5 text-indigo-400" />
             </div>
             <div>
-              <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider">Pasul 1</p>
-              <h3 className="text-sm font-bold text-zinc-200">Înainte de trade</h3>
+              <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider">{t("step1")}</p>
+              <h3 className="text-sm font-bold text-zinc-200">{t("beforeTrade")}</h3>
             </div>
           </div>
 
@@ -170,12 +174,12 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
-                    Stare emoțională
+                    {t("emotionalState")}
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
                     <FormControl>
                       <SelectTrigger className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 rounded-xl focus:ring-indigo-500/50">
-                        <SelectValue placeholder="Cum te simțeai?" />
+                        <SelectValue placeholder={t("emotionalPlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-zinc-900 border-zinc-800 rounded-xl">
@@ -183,7 +187,7 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
                         <SelectItem key={s.value} value={s.value} className="text-zinc-100 rounded-lg">
                           <span className="flex items-center gap-2">
                             <span>{s.emoji}</span>
-                            <span>{s.label}</span>
+                            <span>{t(s.label)}</span>
                           </span>
                         </SelectItem>
                       ))}
@@ -201,7 +205,7 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
-                    Încredere:{" "}
+                    {t("confidence")}{" "}
                     <span className={cn(
                       "font-black",
                       (confidence ?? 0) >= 8 ? "text-emerald-400"
@@ -235,12 +239,12 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
-                  Note pre-trade
+                  {t("preNotes")}
                 </FormLabel>
                 <FormControl>
                   <textarea
                     rows={3}
-                    placeholder="De ce ai intrat în acest trade? Ce setup ai văzut? Care era confluența?"
+                    placeholder={t("preNotesPlaceholder")}
                     className="w-full rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-zinc-100 px-3.5 py-2.5 text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 resize-none transition-all"
                     {...field}
                     value={field.value ?? ""}
@@ -260,8 +264,8 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
               <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
             </div>
             <div>
-              <p className="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Pasul 2</p>
-              <h3 className="text-sm font-bold text-zinc-200">După trade</h3>
+              <p className="text-xs text-emerald-400 font-semibold uppercase tracking-wider">{t("step2")}</p>
+              <h3 className="text-sm font-bold text-zinc-200">{t("afterTrade")}</h3>
             </div>
           </div>
 
@@ -272,12 +276,12 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
-                  Stare emoțională după
+                  {t("emotionalStateAfter")}
                 </FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
                   <FormControl>
                     <SelectTrigger className="bg-zinc-800/60 border-zinc-700/80 text-zinc-100 rounded-xl focus:ring-emerald-500/50">
-                      <SelectValue placeholder="Cum te-ai simțit după?" />
+                      <SelectValue placeholder={t("emotionalAfterPlaceholder")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="bg-zinc-900 border-zinc-800 rounded-xl">
@@ -301,11 +305,11 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
             <div className="flex items-center justify-between mb-2.5">
               <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                Greșeli comise
+                {t("mistakes")}
               </label>
               {mistakeCount > 0 && (
                 <span className="text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-full px-2 py-0.5">
-                  {mistakeCount} selectate
+                  {t("selected", { n: mistakeCount })}
                 </span>
               )}
             </div>
@@ -330,7 +334,7 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
                     ) : (
                       <Square className="h-3.5 w-3.5 shrink-0 text-zinc-600" />
                     )}
-                    <span className="text-xs">{m.label}</span>
+                    <span className="text-xs">{t(m.label)}</span>
                   </button>
                 );
               })}
@@ -344,12 +348,12 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
-                  Note post-trade
+                  {t("postNotes")}
                 </FormLabel>
                 <FormControl>
                   <textarea
                     rows={3}
-                    placeholder="Ce s-a întâmplat? Cum s-a mișcat piața? A respectat setup-ul planul inițial?"
+                    placeholder={t("postNotesPlaceholder")}
                     className="w-full rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-zinc-100 px-3.5 py-2.5 text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 resize-none transition-all"
                     {...field}
                     value={field.value ?? ""}
@@ -368,12 +372,12 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
               <FormItem>
                 <FormLabel className="text-xs font-semibold text-zinc-400 uppercase tracking-wide flex items-center gap-1.5">
                   <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-                  Lecții învățate
+                  {t("lessons")}
                 </FormLabel>
                 <FormControl>
                   <textarea
                     rows={2}
-                    placeholder="Ce ai învățat din acest trade? Ce vei face diferit data viitoare?"
+                    placeholder={t("lessonsPlaceholder")}
                     className="w-full rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-zinc-100 px-3.5 py-2.5 text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 resize-none transition-all"
                     {...field}
                     value={field.value ?? ""}
@@ -393,9 +397,9 @@ export function JournalEntryForm({ tradeId, existing, onSave }: JournalEntryForm
         >
           <span className="absolute inset-0 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] bg-white/10 transition-transform duration-700" />
           {isSubmitting ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Se salvează...</>
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("saving")}</>
           ) : (
-            <><Save className="w-4 h-4 mr-2" />Salvează jurnal</>
+            <><Save className="w-4 h-4 mr-2" />{t("saveBtn")}</>
           )}
         </Button>
       </form>

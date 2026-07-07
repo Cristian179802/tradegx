@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import {
   AreaChart,
@@ -115,13 +116,14 @@ const darkTooltipStyle = {
 };
 
 export function AnalyticsClient({ data }: { data: AnalyticsData }) {
+  const t = useTranslations("analytics");
   if (data.empty) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <BarChart3 className="h-12 w-12 text-zinc-700 mb-4" />
-        <p className="text-zinc-400 font-medium">Nicio tranzacție închisă încă</p>
+        <p className="text-zinc-400 font-medium">{t("emptyTitle")}</p>
         <p className="text-zinc-600 text-sm mt-1">
-          Adaugă și închide tranzacții pentru a vedea analiza performanței.
+          {t("emptySub")}
         </p>
       </div>
     );
@@ -137,43 +139,43 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <StatCard
-          label="Win Rate"
+          label={t("kWinRate")}
           value={`${summary.winRate}%`}
-          sub={`${summary.totalTrades} trades`}
+          sub={t("subTrades", { n: summary.totalTrades })}
           positive={summary.winRate >= 50}
           icon={Target}
         />
         <StatCard
-          label="P&L Net"
+          label={t("kNetPnl")}
           value={fmt(summary.totalPnl)}
           positive={summary.totalPnl >= 0}
           icon={summary.totalPnl >= 0 ? TrendingUp : TrendingDown}
         />
         <StatCard
-          label="Profit Factor"
+          label={t("kProfitFactor")}
           value={summary.profitFactor !== null ? String(summary.profitFactor) : "—"}
           positive={summary.profitFactor !== null ? summary.profitFactor >= 1 : undefined}
-          sub={summary.profitFactor !== null ? (summary.profitFactor >= 1.5 ? "excelent" : summary.profitFactor >= 1 ? "bun" : "slab") : undefined}
+          sub={summary.profitFactor !== null ? (summary.profitFactor >= 1.5 ? t("pfExcellent") : summary.profitFactor >= 1 ? t("pfGood") : t("pfWeak")) : undefined}
           icon={BarChart3}
         />
         <StatCard
-          label="Avg Win / Avg Loss"
+          label={t("kAvgWinLoss")}
           value={`${fmt(summary.avgWin)} / ${fmt(summary.avgLoss)}`}
-          sub={`RR mediu: ${summary.avgRR}x`}
+          sub={t("subAvgRR", { rr: summary.avgRR })}
           icon={Trophy}
         />
         <StatCard
-          label="Max Drawdown"
+          label={t("kMaxDD")}
           value={`${summary.maxDrawdown.toFixed(1)}%`}
           positive={summary.maxDrawdown < 10}
-          sub={`Cel mai rău trade: ${fmt(summary.worstTrade)}`}
+          sub={t("subWorst", { v: fmt(summary.worstTrade) })}
           icon={AlertTriangle}
         />
       </div>
 
       {/* Equity curve */}
       <div className="rounded-xl border border-indigo-500/20 bg-zinc-900/80 p-4 cyber-card">
-        <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />Curbă de capitaluri</h2>
+        <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />{t("chartEquity")}</h2>
         <ResponsiveContainer width="100%" height={150}>
           <AreaChart data={equityCurve} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
@@ -199,7 +201,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
             />
             <Tooltip
               {...darkTooltipStyle}
-              formatter={(val: number) => [fmt(val), "Sold"]}
+              formatter={(val: number) => [fmt(val), t("tipBalance")]}
             />
             <ReferenceLine y={Number(equityCurve?.[0]?.balance ?? 0)} stroke="#3f3f46" strokeDasharray="4 2" />
             <Area
@@ -217,7 +219,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       {/* Monthly P&L + Win rate by day */}
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-xl border border-violet-500/20 bg-zinc-900/80 p-4 relative overflow-hidden">
-          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />P&L lunar</h2>
+          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />{t("chartMonthly")}</h2>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={monthlyPnl} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -225,7 +227,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
               <YAxis tick={{ fill: "#71717a", fontSize: 11 }} tickLine={false} axisLine={false} width={60} tickFormatter={(v) => `${v}`} />
               <Tooltip
                 {...darkTooltipStyle}
-                formatter={(val: number) => [fmt(val), "P&L"]}
+                formatter={(val: number) => [fmt(val), t("tipPnl")]}
               />
               <ReferenceLine y={0} stroke="#3f3f46" />
               <Bar dataKey="pnl" radius={[4, 4, 0, 0]}>
@@ -238,7 +240,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
         </div>
 
         <div className="rounded-xl border border-emerald-500/20 bg-zinc-900/80 p-4 relative overflow-hidden">
-          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />Rată câștig pe zi</h2>
+          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />{t("chartWinDay")}</h2>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={winRateByDay} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -247,8 +249,8 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
               <Tooltip
                 {...darkTooltipStyle}
                 formatter={(val: number, _: string, props: { payload?: { total?: number } }) => [
-                  `${val}% (${props.payload?.total ?? 0} trades)`,
-                  "Win Rate",
+                  t("winDayTip", { val, total: props.payload?.total ?? 0 }),
+                  t("tipWinRate"),
                 ]}
               />
               <ReferenceLine y={50} stroke="#3f3f46" strokeDasharray="4 2" />
@@ -265,7 +267,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       {/* P&L distribution + Instrument performance */}
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-xl border border-amber-500/20 bg-zinc-900/80 p-4">
-          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />Distribuție P&L</h2>
+          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />{t("chartDist")}</h2>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={pnlDistribution} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -273,7 +275,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
               <YAxis tick={{ fill: "#71717a", fontSize: 11 }} tickLine={false} axisLine={false} width={30} />
               <Tooltip
                 {...darkTooltipStyle}
-                formatter={(val: number) => [val, "Trades"]}
+                formatter={(val: number) => [val, t("tipTradesLabel")]}
               />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                 {pnlDistribution?.map((entry, i) => (
@@ -285,7 +287,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
         </div>
 
         <div className="rounded-xl border border-rose-500/20 bg-zinc-900/80 p-4">
-          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />Performanță pe instrument</h2>
+          <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />{t("chartInstrument")}</h2>
           <div className="space-y-2 mt-1">
             {winRateByInstrument?.map((item) => (
               <div key={item.instrument} className="flex items-center gap-3">
@@ -318,12 +320,12 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       {setupPerformance && setupPerformance.length > 0 && (
         <div className="rounded-xl border border-zinc-700/60 bg-zinc-900/80 overflow-hidden relative">
           <div className="p-4 border-b border-zinc-800">
-            <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />Performanță pe setup</h2>
+            <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />{t("chartSetup")}</h2>
           </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-800">
-                {["Setup", "Trades", "Win Rate", "P&L Total", "Avg P&L"].map((h) => (
+                {[t("colSetup"), t("colTrades"), t("colWinRate"), t("colPnlTotal"), t("colAvgPnl")].map((h) => (
                   <th key={h} className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
                     {h}
                   </th>
@@ -334,7 +336,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
               {setupPerformance.map((s) => (
                 <tr key={s.setup} className="border-b border-zinc-800/50 hover:bg-indigo-500/5 transition-colors">
                   <td className="px-4 py-3 text-zinc-200 text-xs font-medium">
-                    {SETUP_LABELS[s.setup] ?? s.setup}
+                    {s.setup === "OTHER" ? t("setupOther") : (SETUP_LABELS[s.setup] ?? s.setup)}
                   </td>
                   <td className="px-4 py-3 text-zinc-400 num text-xs">{s.total}</td>
                   <td className="px-4 py-3">
