@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import { Gauge, Dices, RefreshCw, TrendingUp, TrendingDown, AlertTriangle, Activity, Grid3x3 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,8 @@ const CCY_FLAGS: Record<string, string> = {
 };
 
 function CurrencyStrength() {
+  const t = useTranslations("tools");
+  const locale = useLocale();
   const [strengths, setStrengths] = React.useState<{ ccy: string; value: number }[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [updated, setUpdated] = React.useState<string>("");
@@ -47,12 +50,12 @@ function CurrencyStrength() {
 
       if (result.some((r) => r.value !== 0)) {
         setStrengths(result);
-        setUpdated(new Date().toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" }));
+        setUpdated(new Date().toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }));
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [locale]);
 
   React.useEffect(() => {
     load();
@@ -70,11 +73,11 @@ function CurrencyStrength() {
             <Gauge className="w-4 h-4 text-emerald-400" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-zinc-200">Forța Valutelor</h2>
-            <p className="text-[11px] text-zinc-600">Ce monede sunt puternice/slabe acum</p>
+            <h2 className="text-sm font-bold text-zinc-200">{t("csTitle")}</h2>
+            <p className="text-[11px] text-zinc-600">{t("csSub")}</p>
           </div>
         </div>
-        <button onClick={load} disabled={loading} className="text-zinc-500 hover:text-zinc-300 transition-colors" title="Reîmprospătează">
+        <button onClick={load} disabled={loading} className="text-zinc-500 hover:text-zinc-300 transition-colors" title={t("refresh")}>
           <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
         </button>
       </div>
@@ -82,7 +85,7 @@ function CurrencyStrength() {
       {loading && strengths.length === 0 ? (
         <div className="space-y-2">{[...Array(8)].map((_, i) => <div key={i} className="h-7 bg-zinc-800/50 rounded animate-pulse" />)}</div>
       ) : strengths.length === 0 ? (
-        <p className="text-sm text-zinc-500 text-center py-8">Date indisponibile momentan.</p>
+        <p className="text-sm text-zinc-500 text-center py-8">{t("noData")}</p>
       ) : (
         <div className="space-y-2">
           {strengths.map((s, i) => {
@@ -111,7 +114,7 @@ function CurrencyStrength() {
           })}
         </div>
       )}
-      {updated && <p className="text-[10px] text-zinc-600 mt-3 text-right">Actualizat {updated} · scor relativ pe variația zilei</p>}
+      {updated && <p className="text-[10px] text-zinc-600 mt-3 text-right">{t("updated", { time: updated })}</p>}
     </div>
   );
 }
@@ -137,6 +140,7 @@ function simulateRoR(winRate: number, riskPct: number, rr: number, drawdownPct: 
 }
 
 function RiskOfRuin() {
+  const t = useTranslations("tools");
   const [winRate, setWinRate] = React.useState(50);
   const [riskPct, setRiskPct] = React.useState(1);
   const [rr, setRr] = React.useState(2);
@@ -153,7 +157,7 @@ function RiskOfRuin() {
   const edgeColor = expectancy > 0 ? "text-emerald-400" : expectancy < 0 ? "text-rose-400" : "text-zinc-400";
 
   const rorColor = ror < 1 ? "text-emerald-400" : ror < 10 ? "text-amber-400" : "text-rose-400";
-  const rorLabel = ror < 1 ? "Foarte scăzut — sustenabil" : ror < 10 ? "Moderat — atenție la sizing" : ror < 30 ? "Ridicat — reduce riscul" : "Periculos — vei pierde contul";
+  const rorLabel = ror < 1 ? t("rorVeryLow") : ror < 10 ? t("rorModerate") : ror < 30 ? t("rorHigh") : t("rorDanger");
 
   const Field = ({ label, value, min, max, step, suffix, onChange }: {
     label: string; value: number; min: number; max: number; step: number; suffix?: string; onChange: (v: number) => void;
@@ -176,34 +180,34 @@ function RiskOfRuin() {
           <Dices className="w-4 h-4 text-rose-400" />
         </div>
         <div>
-          <h2 className="text-sm font-bold text-zinc-200">Risc de Ruină</h2>
-          <p className="text-[11px] text-zinc-600">Probabilitatea de a-ți distruge contul</p>
+          <h2 className="text-sm font-bold text-zinc-200">{t("rrTitle")}</h2>
+          <p className="text-[11px] text-zinc-600">{t("rrSub")}</p>
         </div>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-x-5 gap-y-4 mb-5">
-        <Field label="Win Rate" value={winRate} min={10} max={90} step={1} suffix="%" onChange={setWinRate} />
-        <Field label="Risc per trade" value={riskPct} min={0.25} max={10} step={0.25} suffix="%" onChange={setRiskPct} />
-        <Field label="Risk:Reward" value={rr} min={0.5} max={5} step={0.25} suffix="R" onChange={setRr} />
-        <Field label="Prag ruină (drawdown)" value={drawdown} min={20} max={100} step={5} suffix="%" onChange={setDrawdown} />
-        <Field label="Orizont (nr. tranzacții)" value={trades} min={50} max={1000} step={50} onChange={setTrades} />
+        <Field label={t("fWinRate")} value={winRate} min={10} max={90} step={1} suffix="%" onChange={setWinRate} />
+        <Field label={t("fRisk")} value={riskPct} min={0.25} max={10} step={0.25} suffix="%" onChange={setRiskPct} />
+        <Field label={t("fRR")} value={rr} min={0.5} max={5} step={0.25} suffix="R" onChange={setRr} />
+        <Field label={t("fDrawdown")} value={drawdown} min={20} max={100} step={5} suffix="%" onChange={setDrawdown} />
+        <Field label={t("fHorizon")} value={trades} min={50} max={1000} step={50} onChange={setTrades} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-zinc-800/40 border border-zinc-700/40 p-4 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Expectanță / trade</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">{t("expectancy")}</p>
           <p className={cn("text-2xl font-black num", edgeColor)}>{expectancy >= 0 ? "+" : ""}{expectancy.toFixed(2)}R</p>
-          <p className="text-[10px] text-zinc-600 mt-1">{expectancy > 0 ? "Ai avantaj statistic" : "Fără avantaj — strategie pierzătoare"}</p>
+          <p className="text-[10px] text-zinc-600 mt-1">{expectancy > 0 ? t("hasEdge") : t("noEdge")}</p>
         </div>
         <div className={cn("rounded-xl border p-4 text-center",
           ror < 1 ? "bg-emerald-500/8 border-emerald-500/20" : ror < 10 ? "bg-amber-500/8 border-amber-500/20" : "bg-rose-500/8 border-rose-500/20")}>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Risc de ruină</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">{t("rorTitle")}</p>
           <p className={cn("text-2xl font-black num", rorColor)}>{ror < 0.1 && ror > 0 ? "<0.1" : ror.toFixed(1)}%</p>
           <p className={cn("text-[10px] mt-1", rorColor)}>{rorLabel}</p>
         </div>
       </div>
       <p className="text-[10px] text-zinc-600 mt-3 flex items-center gap-1.5">
-        <AlertTriangle className="w-3 h-3" /> Simulare Monte Carlo (5000 scenarii) cu sizing procentual din cont. Orientativ.
+        <AlertTriangle className="w-3 h-3" /> {t("mcNote")}
       </p>
     </div>
   );
@@ -214,6 +218,7 @@ function RiskOfRuin() {
 // ════════════════════════════════════════════════════════════════════════════
 
 export function ToolsClient() {
+  const t = useTranslations("tools");
   return (
     <div className="space-y-6 pb-8">
       <div>
@@ -221,9 +226,9 @@ export function ToolsClient() {
           <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
             <Activity className="w-4 h-4 text-indigo-400" />
           </div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Unelte Pro</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("pageTitle")}</h1>
         </div>
-        <p className="text-sm text-zinc-500">Analiză de piață și management al riscului pentru decizii mai bune.</p>
+        <p className="text-sm text-zinc-500">{t("pageSub")}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -234,7 +239,7 @@ export function ToolsClient() {
       {/* Heatmap corelații — lățime completă */}
       <div className="flex items-center gap-2 pt-2">
         <Grid3x3 className="w-4 h-4 text-violet-400" />
-        <h2 className="text-base font-bold text-zinc-200">Corelații valutare</h2>
+        <h2 className="text-base font-bold text-zinc-200">{t("correlations")}</h2>
       </div>
       <CorrelationHeatmap />
     </div>

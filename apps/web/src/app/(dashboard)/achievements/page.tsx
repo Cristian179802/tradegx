@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Flame, Medal, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -64,6 +65,7 @@ function AchievementCard({ a }: { a: Achievement }) {
 }
 
 export default function AchievementsPage() {
+  const t = useTranslations("achievements");
   const [data, setData] = React.useState<GamificationData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const { done } = useAcademyProgress();
@@ -86,21 +88,28 @@ export default function AchievementsPage() {
   const academyAchievements: Achievement[] = [
     {
       id: "student", emoji: "📚",
-      title: "Student",
-      description: "10 lecții finalizate în Academia TradeGx.",
+      title: t("studentTitle"),
+      description: t("studentDesc"),
       unlocked: lessonsDone >= 10,
       progress: Math.min(lessonsDone, 10), target: 10,
     },
     {
       id: "absolvent", emoji: "🎓",
-      title: "Absolvent",
-      description: `Toate cele ${totalQuizzes} quiz-uri promovate cu minim ${PASS_THRESHOLD}%.`,
+      title: t("gradTitle"),
+      description: t("gradDesc", { total: totalQuizzes, threshold: PASS_THRESHOLD }),
       unlocked: quizzesPassed >= totalQuizzes,
       progress: quizzesPassed, target: totalQuizzes,
     },
   ];
 
-  const all = [...(data?.achievements ?? []), ...academyAchievements];
+  // Traduce realizările de la server (titluri RO din API) după id
+  const serverAchievements = (data?.achievements ?? []).map((a) =>
+    t.has(`sv.${a.id}.title`)
+      ? { ...a, title: t(`sv.${a.id}.title`), description: t(`sv.${a.id}.description`) }
+      : a
+  );
+
+  const all = [...serverAchievements, ...academyAchievements];
   const unlockedCount = all.filter((a) => a.unlocked).length;
 
   return (
@@ -111,10 +120,10 @@ export default function AchievementsPage() {
           <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
             <Medal className="w-4 h-4 text-amber-400" />
           </div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Realizări</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("title")}</h1>
         </div>
         <p className="text-sm text-zinc-500">
-          Câștigate din date reale — jurnalizare, disciplină, statistică. Nu se cumpără, se fac.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -137,7 +146,7 @@ export default function AchievementsPage() {
                 <CountUp value={data?.streak.current ?? 0} />
               </p>
               <p className="text-[11px] font-bold text-zinc-500 mt-1">
-                zile streak curent de jurnalizare
+                {t("streakCurrent")}
               </p>
             </div>
             <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 text-center">
@@ -145,7 +154,7 @@ export default function AchievementsPage() {
               <p className="text-3xl font-black text-zinc-200 num">
                 <CountUp value={data?.streak.best ?? 0} />
               </p>
-              <p className="text-[11px] font-bold text-zinc-500 mt-1">recordul tău de streak</p>
+              <p className="text-[11px] font-bold text-zinc-500 mt-1">{t("streakBest")}</p>
             </div>
             <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/[0.08] to-zinc-900/80 p-5 text-center">
               <Medal className="w-6 h-6 text-amber-400 mx-auto mb-2" />
@@ -153,7 +162,7 @@ export default function AchievementsPage() {
                 <CountUp value={unlockedCount} />
                 <span className="text-lg text-zinc-500">/{all.length}</span>
               </p>
-              <p className="text-[11px] font-bold text-zinc-500 mt-1">realizări deblocate</p>
+              <p className="text-[11px] font-bold text-zinc-500 mt-1">{t("unlocked")}</p>
             </div>
           </div>
 
@@ -165,8 +174,7 @@ export default function AchievementsPage() {
           </div>
 
           <p className="text-[10px] text-zinc-600">
-            Realizările din Academie (Student, Absolvent) se calculează pe acest dispozitiv —
-            progresul lecțiilor și quiz-urilor e stocat local.
+            {t("academyNote")}
           </p>
         </>
       )}

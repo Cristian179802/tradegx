@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import {
   TrendingUp, TrendingDown, Target, Shield, Crosshair, ChevronDown,
@@ -37,14 +38,15 @@ const SETUP_LABELS: Record<string, string> = {
   MITIGATION: "Mitigation", REJECTION: "Rejection", TREND_FOLLOW: "Trend Follow",
   SCALP: "Scalp", OTHER: "Setup",
 };
+// label = cheie → signals.* (tradusă la randare)
 const SESSION_LABELS: Record<string, string> = {
-  ASIAN: "Sesiune Asia", LONDON: "Sesiune Londra", NEW_YORK: "Sesiune New York", OVERLAP: "Overlap LDN/NY",
+  ASIAN: "sesAsian", LONDON: "sesLondon", NEW_YORK: "sesNewYork", OVERLAP: "sesOverlap",
 };
 const STATUS_CFG: Record<string, { label: string; cls: string }> = {
-  ACTIVE: { label: "Activ", cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
-  TP_HIT: { label: "TP atins", cls: "bg-emerald-600/20 text-emerald-300 border-emerald-500/40" },
-  SL_HIT: { label: "SL atins", cls: "bg-rose-500/15 text-rose-400 border-rose-500/30" },
-  EXPIRED: { label: "Expirat", cls: "bg-zinc-700/40 text-zinc-500 border-zinc-600/40" },
+  ACTIVE: { label: "stActive", cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
+  TP_HIT: { label: "stTpHit", cls: "bg-emerald-600/20 text-emerald-300 border-emerald-500/40" },
+  SL_HIT: { label: "stSlHit", cls: "bg-rose-500/15 text-rose-400 border-rose-500/30" },
+  EXPIRED: { label: "stExpired", cls: "bg-zinc-700/40 text-zinc-500 border-zinc-600/40" },
 };
 
 function fmtPrice(n: number) {
@@ -53,6 +55,7 @@ function fmtPrice(n: number) {
 }
 
 function SignalCard({ s }: { s: Signal }) {
+  const t = useTranslations("signals");
   const [open, setOpen] = React.useState(false);
   const isBuy = s.direction === "BUY";
   const statusCfg = STATUS_CFG[s.status] ?? STATUS_CFG.ACTIVE;
@@ -89,21 +92,21 @@ function SignalCard({ s }: { s: Signal }) {
                 )}
                 {s.session && (
                   <span className="text-[10px] text-zinc-500 flex items-center gap-1">
-                    <Clock className="w-2.5 h-2.5" />{SESSION_LABELS[s.session] ?? s.session}
+                    <Clock className="w-2.5 h-2.5" />{SESSION_LABELS[s.session] ? t(SESSION_LABELS[s.session]) : s.session}
                   </span>
                 )}
               </div>
             </div>
           </div>
           <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0", statusCfg.cls)}>
-            {statusCfg.label}
+            {t(statusCfg.label)}
           </span>
         </div>
 
         {/* Încredere */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Încredere AI</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">{t("confidence")}</span>
             <span className={cn("text-xs font-black num", confColor)}>{s.confidence}%</span>
           </div>
           <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
@@ -142,7 +145,7 @@ function SignalCard({ s }: { s: Signal }) {
           onClick={() => setOpen((v) => !v)}
           className="mt-4 w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/8 hover:bg-indigo-500/15 border border-indigo-500/20 rounded-xl py-2 transition-all"
         >
-          {open ? "Ascunde analiza" : "Vezi analiza completă"}
+          {open ? t("hideAnalysis") : t("viewAnalysis")}
           <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", open && "rotate-180")} />
         </button>
       </div>
@@ -152,20 +155,20 @@ function SignalCard({ s }: { s: Signal }) {
         <div className="px-5 pb-5 space-y-3 border-t border-zinc-800/60 pt-4 animate-fade-in">
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-              <Brain className="w-3 h-3 text-indigo-400" /> Analiză & raționament
+              <Brain className="w-3 h-3 text-indigo-400" /> {t("analysisTitle")}
             </div>
             <p className="text-xs text-zinc-300 leading-relaxed">{s.rationale}</p>
           </div>
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Confirmare înainte de intrare
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> {t("confirmTitle")}
             </div>
             <p className="text-xs text-zinc-300 leading-relaxed">{s.confirmation}</p>
           </div>
           {s.invalidation && (
             <div>
               <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                <AlertTriangle className="w-3 h-3 text-amber-400" /> Invalidare
+                <AlertTriangle className="w-3 h-3 text-amber-400" /> {t("invalidationTitle")}
               </div>
               <p className="text-xs text-zinc-300 leading-relaxed">{s.invalidation}</p>
             </div>
@@ -177,6 +180,8 @@ function SignalCard({ s }: { s: Signal }) {
 }
 
 export function SignalsClient({ initialSignals, date }: { initialSignals: Signal[]; date: string }) {
+  const t = useTranslations("signals");
+  const locale = useLocale();
   const [signals, setSignals] = React.useState<Signal[]>(initialSignals);
   const [generating, setGenerating] = React.useState(false);
   const triggered = React.useRef(false);
@@ -201,7 +206,7 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
     if (initialSignals.length === 0) generate();
   }, [initialSignals.length, generate]);
 
-  const dateLabel = new Date(date).toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "long" });
+  const dateLabel = new Date(date).toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" });
 
   return (
     <div className="space-y-5 pb-8">
@@ -212,12 +217,12 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-indigo-400" />
             </div>
-            <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Semnale AI</h1>
+            <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("title")}</h1>
             <span className="text-[10px] font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full">
               HPS
             </span>
           </div>
-          <p className="text-sm text-zinc-500 capitalize">{dateLabel} · maxim 3 setup-uri de înaltă probabilitate</p>
+          <p className="text-sm text-zinc-500 capitalize">{t("subtitle", { date: dateLabel })}</p>
         </div>
         {signals.length > 0 && (
           <button
@@ -226,7 +231,7 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
             className="flex items-center gap-2 text-xs text-zinc-400 hover:text-zinc-200 bg-zinc-900 border border-zinc-700/60 rounded-xl px-3 py-2 transition-colors"
           >
             <RefreshCw className={cn("w-3.5 h-3.5", generating && "animate-spin")} />
-            Reîmprospătează
+            {t("refresh")}
           </button>
         )}
       </div>
@@ -236,15 +241,12 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
         <div className="flex gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-bold text-amber-300 mb-1">Atenție — acestea nu sunt sfaturi financiare</p>
+            <p className="text-sm font-bold text-amber-300 mb-1">{t("disclaimerTitle")}</p>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Semnalele sunt generate de inteligență artificială pe baza analizei tehnice și au caracter pur
-              <span className="text-zinc-300 font-medium"> educativ și informativ</span>. Nu constituie consiliere
-              financiară, de investiții sau o recomandare de a tranzacționa. Tranzacționarea pe piețele financiare implică
-              un <span className="text-amber-300 font-medium">risc ridicat de pierdere a capitalului</span>. Niciun semnal nu
-              are o rată de succes de 100% — performanțele trecute nu garantează rezultate viitoare. Fă-ți propria analiză,
-              gestionează-ți riscul și nu tranzacționa niciodată cu bani pe care nu îți permiți să îi pierzi. Deciziile de
-              tranzacționare îți aparțin în totalitate.
+              {t.rich("disclaimerBody", {
+                edu: (c) => <span className="text-zinc-300 font-medium">{c}</span>,
+                risk: (c) => <span className="text-amber-300 font-medium">{c}</span>,
+              })}
             </p>
           </div>
         </div>
@@ -263,8 +265,8 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
             <Loader2 className="w-5 h-5 text-indigo-400 animate-spin absolute -bottom-1 -right-1" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-semibold text-zinc-200">AI-ul analizează piețele...</p>
-            <p className="text-xs text-zinc-500 mt-1">Identifică cele mai bune setup-uri ale zilei. Durează ~10-20 secunde.</p>
+            <p className="text-sm font-semibold text-zinc-200">{t("analyzing")}</p>
+            <p className="text-xs text-zinc-500 mt-1">{t("analyzingSub")}</p>
           </div>
         </div>
       ) : signals.length === 0 ? (
@@ -273,16 +275,16 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
             <Activity className="w-6 h-6 text-zinc-500" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-zinc-300">Niciun setup de înaltă probabilitate astăzi</p>
+            <p className="text-sm font-semibold text-zinc-300">{t("emptyTitle")}</p>
             <p className="text-xs text-zinc-500 mt-1 max-w-md">
-              AI-ul nu a identificat condiții de piață suficient de clare. Calitate peste cantitate — uneori cea mai bună tranzacție e să aștepți.
+              {t("emptyBody")}
             </p>
           </div>
           <button
             onClick={() => { triggered.current = false; generate(); }}
             className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5"
           >
-            <RefreshCw className="w-3.5 h-3.5" /> Încearcă din nou
+            <RefreshCw className="w-3.5 h-3.5" /> {t("tryAgain")}
           </button>
         </div>
       ) : (

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Newspaper, ExternalLink, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,21 +14,22 @@ interface NewsItem {
   impact?: "HIGH" | "MEDIUM" | "LOW";
 }
 
+// label = cheie → news.* (tradusă la randare)
 const IMPACT_CFG: Record<string, { label: string; cls: string; dot: string }> = {
-  HIGH:   { label: "Impact ridicat", cls: "text-rose-400 bg-rose-500/10 border-rose-500/25",     dot: "bg-rose-500" },
-  MEDIUM: { label: "Impact mediu",   cls: "text-amber-400 bg-amber-500/10 border-amber-500/25",  dot: "bg-amber-500" },
-  LOW:    { label: "Impact scăzut",  cls: "text-zinc-500 bg-zinc-800/60 border-zinc-700/40",     dot: "bg-zinc-600" },
+  HIGH:   { label: "impactHigh",   cls: "text-rose-400 bg-rose-500/10 border-rose-500/25",     dot: "bg-rose-500" },
+  MEDIUM: { label: "impactMedium", cls: "text-amber-400 bg-amber-500/10 border-amber-500/25",  dot: "bg-amber-500" },
+  LOW:    { label: "impactLow",    cls: "text-zinc-500 bg-zinc-800/60 border-zinc-700/40",     dot: "bg-zinc-600" },
 };
 
-function timeAgo(iso: string) {
-  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (diff < 60) return "acum";
-  if (diff < 3600) return `acum ${Math.floor(diff / 60)}m`;
-  if (diff < 86400) return `acum ${Math.floor(diff / 3600)}h`;
-  return `acum ${Math.floor(diff / 86400)}z`;
-}
-
 export function ForexNews({ className }: { className?: string }) {
+  const t = useTranslations("news");
+  const timeAgo = React.useCallback((iso: string) => {
+    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if (diff < 60) return t("timeNow");
+    if (diff < 3600) return t("timeMin", { n: Math.floor(diff / 60) });
+    if (diff < 86400) return t("timeHour", { n: Math.floor(diff / 3600) });
+    return t("timeDay", { n: Math.floor(diff / 86400) });
+  }, [t]);
   const [items, setItems] = React.useState<NewsItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(false);
@@ -62,14 +64,14 @@ export function ForexNews({ className }: { className?: string }) {
           <div className="w-7 h-7 rounded-lg bg-sky-500/12 border border-sky-500/20 flex items-center justify-center">
             <Newspaper className="w-3.5 h-3.5 text-sky-400" />
           </div>
-          <h2 className="text-sm font-bold text-zinc-200">Știri de Piață</h2>
+          <h2 className="text-sm font-bold text-zinc-200">{t("title")}</h2>
           <span className="live-dot" />
         </div>
         <button
           onClick={load}
           disabled={loading}
           className="text-zinc-500 hover:text-zinc-300 transition-colors"
-          title="Reîmprospătează"
+          title={t("refresh")}
         >
           <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
         </button>
@@ -89,9 +91,9 @@ export function ForexNews({ className }: { className?: string }) {
         ) : error && items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-2 text-center px-4">
             <Newspaper className="w-7 h-7 text-zinc-700" />
-            <p className="text-sm text-zinc-500">Știrile nu sunt disponibile momentan</p>
+            <p className="text-sm text-zinc-500">{t("unavailable")}</p>
             <button onClick={load} className="text-xs text-sky-400 hover:text-sky-300 mt-1">
-              Încearcă din nou
+              {t("tryAgain")}
             </button>
           </div>
         ) : (
@@ -117,7 +119,7 @@ export function ForexNews({ className }: { className?: string }) {
                       IMPACT_CFG[item.impact].cls
                     )}>
                       <span className={cn("w-1.5 h-1.5 rounded-full", IMPACT_CFG[item.impact].dot)} />
-                      {IMPACT_CFG[item.impact].label}
+                      {t(IMPACT_CFG[item.impact].label)}
                     </span>
                   )}
                   <span className="text-[10px] font-semibold text-sky-500/80">{item.source}</span>

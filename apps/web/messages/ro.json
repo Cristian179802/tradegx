@@ -1043,5 +1043,135 @@
     "colWinRate": "Win Rate",
     "colPnlTotal": "P&L Total",
     "colAvgPnl": "Avg P&L"
+  },
+  "signals": {
+    "sesAsian": "Sesiune Asia",
+    "sesLondon": "Sesiune Londra",
+    "sesNewYork": "Sesiune New York",
+    "sesOverlap": "Overlap LDN/NY",
+    "stActive": "Activ",
+    "stTpHit": "TP atins",
+    "stSlHit": "SL atins",
+    "stExpired": "Expirat",
+    "setupOther": "Setup",
+    "confidence": "Încredere AI",
+    "hideAnalysis": "Ascunde analiza",
+    "viewAnalysis": "Vezi analiza completă",
+    "analysisTitle": "Analiză & raționament",
+    "confirmTitle": "Confirmare înainte de intrare",
+    "invalidationTitle": "Invalidare",
+    "title": "Semnale AI",
+    "subtitle": "{date} · maxim 3 setup-uri de înaltă probabilitate",
+    "refresh": "Reîmprospătează",
+    "disclaimerTitle": "Atenție — acestea nu sunt sfaturi financiare",
+    "disclaimerBody": "Semnalele sunt generate de inteligență artificială pe baza analizei tehnice și au caracter pur <edu>educativ și informativ</edu>. Nu constituie consiliere financiară, de investiții sau o recomandare de a tranzacționa. Tranzacționarea pe piețele financiare implică un <risk>risc ridicat de pierdere a capitalului</risk>. Niciun semnal nu are o rată de succes de 100% — performanțele trecute nu garantează rezultate viitoare. Fă-ți propria analiză, gestionează-ți riscul și nu tranzacționa niciodată cu bani pe care nu îți permiți să îi pierzi. Deciziile de tranzacționare îți aparțin în totalitate.",
+    "analyzing": "AI-ul analizează piețele...",
+    "analyzingSub": "Identifică cele mai bune setup-uri ale zilei. Durează ~10-20 secunde.",
+    "emptyTitle": "Niciun setup de înaltă probabilitate astăzi",
+    "emptyBody": "AI-ul nu a identificat condiții de piață suficient de clare. Calitate peste cantitate — uneori cea mai bună tranzacție e să aștepți.",
+    "tryAgain": "Încearcă din nou"
+  },
+  "tools": {
+    "csTitle": "Forța Valutelor",
+    "csSub": "Ce monede sunt puternice/slabe acum",
+    "refresh": "Reîmprospătează",
+    "noData": "Date indisponibile momentan.",
+    "updated": "Actualizat {time} · scor relativ pe variația zilei",
+    "rrTitle": "Risc de Ruină",
+    "rrSub": "Probabilitatea de a-ți distruge contul",
+    "fWinRate": "Win Rate",
+    "fRisk": "Risc per trade",
+    "fRR": "Risk:Reward",
+    "fDrawdown": "Prag ruină (drawdown)",
+    "fHorizon": "Orizont (nr. tranzacții)",
+    "rorVeryLow": "Foarte scăzut — sustenabil",
+    "rorModerate": "Moderat — atenție la sizing",
+    "rorHigh": "Ridicat — reduce riscul",
+    "rorDanger": "Periculos — vei pierde contul",
+    "expectancy": "Expectanță / trade",
+    "hasEdge": "Ai avantaj statistic",
+    "noEdge": "Fără avantaj — strategie pierzătoare",
+    "rorTitle": "Risc de ruină",
+    "mcNote": "Simulare Monte Carlo (5000 scenarii) cu sizing procentual din cont. Orientativ.",
+    "pageTitle": "Unelte Pro",
+    "pageSub": "Analiză de piață și management al riscului pentru decizii mai bune.",
+    "correlations": "Corelații valutare"
+  },
+  "achievements": {
+    "title": "Realizări",
+    "subtitle": "Câștigate din date reale — jurnalizare, disciplină, statistică. Nu se cumpără, se fac.",
+    "streakCurrent": "zile streak curent de jurnalizare",
+    "streakBest": "recordul tău de streak",
+    "unlocked": "realizări deblocate",
+    "academyNote": "Realizările din Academie (Student, Absolvent) se calculează pe acest dispozitiv — progresul lecțiilor și quiz-urilor e stocat local.",
+    "studentTitle": "Student",
+    "studentDesc": "10 lecții finalizate în Academia TradeGx.",
+    "gradTitle": "Absolvent",
+    "gradDesc": "Toate cele {total} quiz-uri promovate cu minim {threshold}%.",
+    "sv": {
+      "primul-pas": {
+        "title": "Primul pas",
+        "description": "Ai jurnalizat prima tranzacție. De aici începe totul."
+      },
+      "conectat": {
+        "title": "Conectat",
+        "description": "Primul cont sincronizat automat cu brokerul."
+      },
+      "disciplinat": {
+        "title": "Disciplinat",
+        "description": "7 zile consecutive cu activitate jurnalizată."
+      },
+      "de-neoprit": {
+        "title": "De neoprit",
+        "description": "30 de zile consecutive cu activitate jurnalizată."
+      },
+      "centurion": {
+        "title": "Centurion",
+        "description": "100 de tranzacții jurnalizate — ai date reale de analizat."
+      },
+      "manager-de-risc": {
+        "title": "Manager de risc",
+        "description": "Stop Loss setat pe 20 de tranzacții consecutive."
+      },
+      "zen": {
+        "title": "Zen",
+        "description": "30 de zile activ, fără nicio alertă de revenge trading sau overtrading."
+      },
+      "sniper": {
+        "title": "Sniper",
+        "description": "Win rate de minim 60% pe ultimele 20 de tranzacții."
+      },
+      "luna-verde": {
+        "title": "Lună verde",
+        "description": "O lună calendaristică pe profit, cu minim 10 tranzacții."
+      },
+      "analist": {
+        "title": "Analist",
+        "description": "Primul backtest rulat pe date istorice reale."
+      },
+      "om-de-stiinta": {
+        "title": "Om de știință",
+        "description": "10 backteste rulate — deciziile tale au bază statistică."
+      },
+      "edge-gasit": {
+        "title": "Edge găsit",
+        "description": "50 de tranzacții închise — Edge Finder are eșantion serios."
+      }
+    }
+  },
+  "news": {
+    "metaTitle": "Știri de Piață",
+    "title": "Știri de Piață",
+    "subtitle": "Cele mai recente știri financiare, clasificate după impact. Reîmprospătare automată la 5 minute.",
+    "impactHigh": "Impact ridicat",
+    "impactMedium": "Impact mediu",
+    "impactLow": "Impact scăzut",
+    "timeNow": "acum",
+    "timeMin": "acum {n}m",
+    "timeHour": "acum {n}h",
+    "timeDay": "acum {n}z",
+    "refresh": "Reîmprospătează",
+    "unavailable": "Știrile nu sunt disponibile momentan",
+    "tryAgain": "Încearcă din nou"
   }
 }
