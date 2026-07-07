@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { X, Loader2, PlayCircle } from "lucide-react";
 
@@ -11,6 +12,7 @@ interface ReplayData {
 }
 
 export function TradeReplay({ tradeId, open, onClose }: { tradeId: string; open: boolean; onClose: () => void }) {
+  const t = useTranslations("tradeReplay");
   const [data, setData] = React.useState<ReplayData | null>(null);
   const [loading, setLoading] = React.useState(false);
 
@@ -38,7 +40,7 @@ export function TradeReplay({ tradeId, open, onClose }: { tradeId: string; open:
           <div className="flex items-center gap-2.5">
             <PlayCircle className="w-5 h-5 text-indigo-400" />
             <div>
-              <h3 className="text-sm font-bold text-zinc-200">Replay tranzacție</h3>
+              <h3 className="text-sm font-bold text-zinc-200">{t("title")}</h3>
               {data && <p className="text-[11px] text-zinc-500">{data.symbol} · {data.direction} · {data.timeframe}</p>}
             </div>
           </div>
@@ -52,13 +54,13 @@ export function TradeReplay({ tradeId, open, onClose }: { tradeId: string; open:
           {loading ? (
             <div className="h-80 flex flex-col items-center justify-center gap-3">
               <Loader2 className="w-7 h-7 text-indigo-400 animate-spin" />
-              <p className="text-sm text-zinc-500">Se încarcă datele istorice...</p>
+              <p className="text-sm text-zinc-500">{t("loading")}</p>
             </div>
           ) : !data || data.dataError || data.candles.length < 3 ? (
             <div className="h-80 flex flex-col items-center justify-center gap-2 text-center">
-              <p className="text-sm text-zinc-400">Nu am putut încărca graficul pentru această tranzacție.</p>
+              <p className="text-sm text-zinc-400">{t("loadFail")}</p>
               <p className="text-xs text-zinc-600 max-w-sm">
-                {data?.dataError ?? "Date istorice indisponibile pentru acest simbol/perioadă."} Replay-ul funcționează pentru simbolurile standard (forex major, metale, indici, crypto).
+                {data?.dataError ?? t("noData")} {t("worksFor")}
               </p>
             </div>
           ) : (
@@ -71,6 +73,7 @@ export function TradeReplay({ tradeId, open, onClose }: { tradeId: string; open:
 }
 
 function ReplayChart({ data }: { data: ReplayData }) {
+  const t = useTranslations("tradeReplay");
   const W = 760, H = 380, padL = 8, padR = 64, padT = 16, padB = 24;
   const { candles } = data;
 
@@ -148,7 +151,7 @@ function ReplayChart({ data }: { data: ReplayData }) {
         <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-rose-500" style={{ borderTop: "1px dashed" }} /> Stop Loss</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-emerald-400" /> Take Profit</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-zinc-500" /> Exit</span>
-        <span className="text-zinc-600">· zona albastră = durata tranzacției</span>
+        <span className="text-zinc-600">{t("legendZone")}</span>
       </div>
     </div>
   );

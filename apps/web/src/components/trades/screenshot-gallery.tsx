@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import Image from "next/image";
 import { Upload, Trash2, ZoomIn, X, ImageIcon, Loader2, Camera } from "lucide-react";
@@ -14,10 +15,11 @@ interface Screenshot {
   type: string;
 }
 
+// chei → screenshots.* (traduse la randare)
 const TYPE_LABELS: Record<string, string> = {
-  ENTRY:    "Intrare",
-  EXIT:     "Ieșire",
-  ANALYSIS: "Analiză",
+  ENTRY:    "typeEntry",
+  EXIT:     "typeExit",
+  ANALYSIS: "typeAnalysis",
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -39,6 +41,7 @@ export function ScreenshotGallery({
   tradeId: string;
   initial: Screenshot[];
 }) {
+  const t = useTranslations("screenshots");
   const { toast } = useToast();
   const [screenshots, setScreenshots] = React.useState<Screenshot[]>(initial);
   const [uploading, setUploading] = React.useState(false);
@@ -48,15 +51,15 @@ export function ScreenshotGallery({
 
   async function handleFile(file: File) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      toast({ title: "Format neacceptat", description: "Folosește JPEG, PNG sau WEBP", variant: "destructive" });
+      toast({ title: t("errFormatTitle"), description: t("errFormatDesc"), variant: "destructive" });
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
-      toast({ title: "Fișier prea mare", description: "Maxim 8 MB", variant: "destructive" });
+      toast({ title: t("errSizeTitle"), description: t("errSizeDesc"), variant: "destructive" });
       return;
     }
     if (screenshots.length >= 5) {
-      toast({ title: "Maxim 5 screenshot-uri per trade", variant: "destructive" });
+      toast({ title: t("errMax"), variant: "destructive" });
       return;
     }
 
@@ -72,10 +75,10 @@ export function ScreenshotGallery({
       if (res.ok) {
         const shot = await res.json();
         setScreenshots((prev) => [...prev, shot]);
-        toast({ title: "✅ Screenshot adăugat" });
+        toast({ title: t("added") });
       } else {
         const err = await res.json();
-        toast({ title: "Eroare upload", description: err.error, variant: "destructive" });
+        toast({ title: t("errUpload"), description: err.error, variant: "destructive" });
       }
     } finally {
       setUploading(false);
@@ -87,7 +90,7 @@ export function ScreenshotGallery({
     const res = await fetch(`/api/trades/${tradeId}/screenshots/${id}`, { method: "DELETE" });
     if (res.ok) {
       setScreenshots((prev) => prev.filter((s) => s.id !== id));
-      toast({ title: "Screenshot șters" });
+      toast({ title: t("deleted") });
     }
   }
 
@@ -97,19 +100,19 @@ export function ScreenshotGallery({
       <div className="flex items-center gap-2 flex-wrap">
         {/* Type selector as pill buttons */}
         <div className="flex items-center bg-zinc-900/80 border border-zinc-800/80 rounded-xl p-0.5 gap-0.5">
-          {(["ENTRY", "EXIT", "ANALYSIS"] as const).map((t) => (
+          {(["ENTRY", "EXIT", "ANALYSIS"] as const).map((pill) => (
             <button
-              key={t}
+              key={pill}
               type="button"
-              onClick={() => setUploadType(t)}
+              onClick={() => setUploadType(pill)}
               className={cn(
                 "text-xs px-2.5 py-1 rounded-lg font-medium transition-all",
-                uploadType === t
-                  ? TYPE_SELECT_ACTIVE[t]
+                uploadType === pill
+                  ? TYPE_SELECT_ACTIVE[pill]
                   : "text-zinc-500 hover:text-zinc-300"
               )}
             >
-              {TYPE_LABELS[t]}
+              {t(TYPE_LABELS[pill])}
             </button>
           ))}
         </div>
@@ -126,7 +129,7 @@ export function ScreenshotGallery({
           ) : (
             <Upload className="h-3.5 w-3.5 mr-1.5" />
           )}
-          {uploading ? "Se încarcă..." : "Adaugă screenshot"}
+          {uploading ? t("uploading") : t("addBtn")}
         </Button>
 
         <input
@@ -157,9 +160,9 @@ export function ScreenshotGallery({
             <Camera className="h-5 w-5 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
           </div>
           <p className="text-xs font-medium text-zinc-600 group-hover:text-zinc-400 transition-colors">
-            Niciun screenshot. Click pentru a adăuga.
+            {t("emptyTitle")}
           </p>
-          <p className="text-[10px] text-zinc-700 mt-1">JPEG, PNG sau WEBP · max 8 MB</p>
+          <p className="text-[10px] text-zinc-700 mt-1">{t("emptyHint")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -193,7 +196,7 @@ export function ScreenshotGallery({
               {/* Badge */}
               <div className="absolute top-1.5 left-1.5">
                 <Badge className={cn("text-[9px] py-0 px-1.5 border backdrop-blur-sm", TYPE_COLORS[shot.type] ?? TYPE_COLORS.ENTRY)}>
-                  {TYPE_LABELS[shot.type] ?? shot.type}
+                  {TYPE_LABELS[shot.type] ? t(TYPE_LABELS[shot.type]) : shot.type}
                 </Badge>
               </div>
             </div>
@@ -205,7 +208,7 @@ export function ScreenshotGallery({
               onClick={() => fileRef.current?.click()}
             >
               <Upload className="h-4 w-4 text-zinc-700 group-hover:text-zinc-500 transition-colors mb-1" />
-              <span className="text-[10px] text-zinc-700 group-hover:text-zinc-500 transition-colors">Adaugă</span>
+              <span className="text-[10px] text-zinc-700 group-hover:text-zinc-500 transition-colors">{t("addMore")}</span>
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import {
   Dialog,
@@ -33,6 +34,7 @@ interface ImportDialogProps {
 }
 
 export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccountId }: ImportDialogProps) {
+  const t = useTranslations("importDialog");
   const { toast } = useToast();
   const [accountId, setAccountId] = React.useState(defaultAccountId ?? accounts[0]?.id ?? "");
 
@@ -59,9 +61,7 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
     // Block non-CSV files
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (ext !== "csv" && ext !== "txt") {
-      setFileError(
-        `Fișierul „${file.name}" nu este suportat. Ai nevoie de un fișier .CSV exportat din MT4 sau MT5.`
-      );
+      setFileError(t("fileNotSupported", { name: file.name }));
       setFileName("");
       setCsvContent("");
       // Reset input
@@ -75,7 +75,7 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
       const content = ev.target?.result as string;
       // Quick sanity check — if it looks like binary/PDF, reject
       if (content.startsWith("%PDF") || content.includes("\x00")) {
-        setFileError("Fișierul pare a fi un PDF sau binar, nu CSV. Exportă din MT4/MT5 ca fișier .CSV.");
+        setFileError(t("filePdfBinary"));
         setFileName("");
         setCsvContent("");
         if (fileRef.current) fileRef.current.value = "";
@@ -97,8 +97,8 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
   async function handleImport() {
     if (!accountId || !csvContent) {
       toast({
-        title: "Eroare",
-        description: "Selectează un cont și un fișier CSV valid",
+        title: t("errTitle"),
+        description: t("errSelect"),
         variant: "destructive",
       });
       return;
@@ -114,15 +114,19 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
       const data = await res.json();
 
       if (!res.ok) {
-        toast({ title: "Eroare import", description: data.error, variant: "destructive" });
+        toast({ title: t("errImportTitle"), description: data.error, variant: "destructive" });
         return;
       }
 
       setResult({ imported: data.imported, errors: data.errors });
       if (data.imported > 0) {
         toast({
-          title: "Import complet",
-          description: `${data.imported} trade-uri importate${data.errors > 0 ? `, ${data.errors} omise` : ""}.`,
+          title: t("importDone"),
+          description: t("importDoneDesc", {
+            imported: data.imported,
+            errors: data.errors,
+            hasErrors: data.errors > 0 ? "true" : "false",
+          }),
         });
         onSuccess();
       }
@@ -143,14 +147,14 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent className="bg-zinc-900 border-zinc-800 sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-zinc-100">Import CSV</DialogTitle>
+          <DialogTitle className="text-zinc-100">{t("title")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Account selector */}
           <div className="bg-zinc-800/60 border border-zinc-700 rounded-lg p-3">
             <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-2">
-              Trade-urile vor fi importate în contul:
+              {t("accountLabel")}
             </label>
             <Select value={accountId} onValueChange={setAccountId}>
               <SelectTrigger className="bg-zinc-900 border-zinc-600 text-zinc-100 font-medium">
@@ -165,7 +169,7 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
               </SelectContent>
             </Select>
             <p className="text-[10px] text-zinc-500 mt-1.5">
-              ⚠️ Asigură-te că selectezi contul corect înainte de import.
+              {t("accountWarn")}
             </p>
           </div>
 
@@ -173,24 +177,26 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
           <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-lg p-3 space-y-1.5">
             <div className="flex items-center gap-1.5 mb-1">
               <Info className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-              <span className="text-xs font-semibold text-indigo-300">Cum exporti din MT4/MT5?</span>
+              <span className="text-xs font-semibold text-indigo-300">{t("howTitle")}</span>
             </div>
             <ol className="text-xs text-zinc-400 space-y-1 pl-4 list-decimal">
-              <li>Deschide <span className="text-zinc-200 font-medium">MetaTrader 5</span></li>
-              <li>View → Terminal → tab <span className="text-zinc-200 font-medium">„History"</span></li>
-              <li>Click dreapta → <span className="text-zinc-200 font-medium">„Report"</span> → <span className="text-zinc-200 font-medium">„Open XML (Excel)"</span></li>
-              <li>În Excel: File → Save As → alege tipul <span className="text-zinc-200 font-medium">CSV (Comma delimited)</span></li>
-              <li>Uploadează fișierul <span className="text-zinc-200 font-medium">.csv</span> rezultat</li>
+              {(["step1", "step2", "step3", "step4", "step5"] as const).map((k) => (
+                <li key={k}>
+                  {t.rich(k, {
+                    b: (chunks) => <span className="text-zinc-200 font-medium">{chunks}</span>,
+                  })}
+                </li>
+              ))}
             </ol>
             <p className="text-[10px] text-amber-500/80 mt-1.5">
-              ⚠️ „Save as Report" generează un fișier HTML interactiv fără trade-uri individuale — nu funcționează pentru import.
+              {t("reportWarn")}
             </p>
           </div>
 
           {/* File upload */}
           <div>
             <label className="text-sm font-medium text-zinc-300 block mb-2">
-              Fișier CSV (MT4/MT5/cTrader)
+              {t("fileLabel")}
             </label>
 
             {fileName ? (
@@ -207,8 +213,8 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
                 className="border-2 border-dashed border-zinc-700 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500/60 transition-colors"
               >
                 <Upload className="h-8 w-8 text-zinc-600 mx-auto mb-2" />
-                <p className="text-sm text-zinc-500">Click pentru a selecta fișierul CSV</p>
-                <p className="text-xs text-zinc-600 mt-1">Acceptat: .csv, .txt — NU pdf, html, xlsx</p>
+                <p className="text-sm text-zinc-500">{t("clickSelect")}</p>
+                <p className="text-xs text-zinc-600 mt-1">{t("accepted")}</p>
               </div>
             )}
 
@@ -244,22 +250,22 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
               <div className="text-sm">
                 {result.imported > 0 ? (
                   <span className="text-emerald-400 font-medium">
-                    {result.imported} trade-uri importate cu succes
+                    {t("successCount", { n: result.imported })}
                   </span>
                 ) : (
                   <span className="text-rose-400 font-medium">
-                    0 trade-uri importate — fișierul nu este în format MT4/MT5
+                    {t("failMsg")}
                   </span>
                 )}
                 {result.errors > 0 && (
-                  <span className="text-zinc-500 ml-2 text-xs">{result.errors} rânduri omise</span>
+                  <span className="text-zinc-500 ml-2 text-xs">{t("skippedRows", { n: result.errors })}</span>
                 )}
               </div>
             </div>
           )}
 
           <p className="text-xs text-zinc-600">
-            Trade-urile deja importate (după Ticket ID) vor fi omise automat.
+            {t("dedupeNote")}
           </p>
         </div>
 
@@ -269,7 +275,7 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
             onClick={handleClose}
             className="border-zinc-700 text-zinc-300"
           >
-            {result?.imported ? "Închide" : "Anulează"}
+            {result?.imported ? t("close") : t("cancel")}
           </Button>
           {!result?.imported && (
             <Button
@@ -277,7 +283,7 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
               disabled={isLoading || !csvContent || !!fileError}
               className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
             >
-              {isLoading ? "Se importă..." : "Importă"}
+              {isLoading ? t("importing") : t("importBtn")}
             </Button>
           )}
         </DialogFooter>

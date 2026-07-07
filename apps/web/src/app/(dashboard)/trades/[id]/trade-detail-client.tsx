@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -102,6 +103,7 @@ function StatRow({ label, value, mono, accent }: {
 }
 
 export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareToken: string }) {
+  const t = useTranslations("tradeDetail");
   const router = useRouter();
   const { toast } = useToast();
   const [shared, setShared] = React.useState(false);
@@ -146,11 +148,11 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
       }),
     });
     if (res.ok) {
-      toast({ title: "Trade închis" });
+      toast({ title: t("toastClosed") });
       setCloseOpen(false);
       router.refresh();
     } else {
-      toast({ title: "Eroare", variant: "destructive" });
+      toast({ title: t("toastErr"), variant: "destructive" });
     }
     setIsClosing(false);
   }
@@ -161,10 +163,10 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
     if (res.ok) {
       const data = await res.json();
       setAiResult({ analysis: data.analysis, score: data.score });
-      toast({ title: "Analiză completă" });
+      toast({ title: t("toastAnalyzed") });
     } else {
       const err = await res.json().catch(() => ({}));
-      toast({ title: "Eroare AI", description: err.error ?? "Încearcă din nou", variant: "destructive" });
+      toast({ title: t("toastAiErr"), description: err.error ?? t("toastRetry"), variant: "destructive" });
     }
     setAnalyzing(false);
   }
@@ -174,11 +176,11 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
     try {
       await navigator.clipboard.writeText(url);
       setShared(true);
-      toast({ title: "Link copiat", description: "Linkul public de partajare a fost copiat în clipboard." });
+      toast({ title: t("toastLinkCopied"), description: t("toastLinkDesc") });
       setTimeout(() => setShared(false), 2500);
     } catch {
       // Fallback dacă clipboard nu e disponibil
-      window.prompt("Copiază linkul de partajare:", url);
+      window.prompt(t("promptCopy"), url);
     }
   }
 
@@ -186,11 +188,11 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
     setIsDeleting(true);
     const res = await fetch(`/api/trades/${trade.id}`, { method: "DELETE" });
     if (res.ok) {
-      toast({ title: "Trade șters" });
+      toast({ title: t("toastDeleted") });
       router.push("/trades");
       router.refresh();
     } else {
-      toast({ title: "Eroare", description: "Nu s-a putut șterge", variant: "destructive" });
+      toast({ title: t("toastErr"), description: t("toastDeleteErr"), variant: "destructive" });
     }
     setIsDeleting(false);
   }
@@ -202,7 +204,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
       <div className="flex items-center gap-2 text-sm text-zinc-500">
         <Link href="/trades" className="hover:text-zinc-300 transition-colors flex items-center gap-1">
           <ArrowLeft className="h-3.5 w-3.5" />
-          Tranzacții
+          {t("breadcrumb")}
         </Link>
         <ChevronRight className="h-3.5 w-3.5" />
         <span className="text-zinc-300 font-medium">{trade.symbol}</span>
@@ -260,7 +262,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                     ? "bg-zinc-700/50 text-zinc-400 border-zinc-600/30"
                     : "bg-zinc-800/50 text-zinc-500 border-zinc-700/30"
                 )}>
-                  {trade.status === "OPEN" ? "● Deschis" : trade.status === "CLOSED" ? "Închis" : "Anulat"}
+                  {trade.status === "OPEN" ? t("stOpen") : trade.status === "CLOSED" ? t("stClosed") : t("stCancelled")}
                 </span>
               </div>
               <div className="flex items-center gap-3 text-xs text-zinc-500">
@@ -311,7 +313,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
               className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 gap-1.5"
             >
               <XCircle className="h-3.5 w-3.5" />
-              Închide trade
+              {t("closeTrade")}
             </Button>
           )}
           <Button
@@ -322,7 +324,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           >
             <Link href={`/trades/${trade.id}/edit`}>
               <Pencil className="h-3.5 w-3.5 mr-1.5" />
-              Editează
+              {t("edit")}
             </Link>
           </Button>
           <Button
@@ -341,7 +343,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
             className="border-zinc-700 text-zinc-400 hover:text-indigo-300 hover:border-indigo-500/40"
           >
             {shared ? <Check className="h-3.5 w-3.5 mr-1.5 text-emerald-400" /> : <Share2 className="h-3.5 w-3.5 mr-1.5" />}
-            {shared ? "Copiat" : "Partajează"}
+            {shared ? t("copied") : t("share")}
           </Button>
           <Button
             variant="outline"
@@ -366,28 +368,28 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               {
-                label: "Preț Intrare",
+                label: t("mEntry"),
                 value: Number(trade.entryPrice).toFixed(5),
                 icon: <Activity className="h-3.5 w-3.5" />,
                 color: "text-indigo-400",
                 bg: "bg-indigo-500/8 border-indigo-500/15",
               },
               {
-                label: "Preț Ieșire",
+                label: t("mExit"),
                 value: trade.exitPrice ? Number(trade.exitPrice).toFixed(5) : "—",
                 icon: <Target className="h-3.5 w-3.5" />,
                 color: pnl !== null ? (isProfit ? "text-emerald-400" : "text-rose-400") : "text-zinc-400",
                 bg: pnl !== null ? (isProfit ? "bg-emerald-500/8 border-emerald-500/15" : "bg-rose-500/8 border-rose-500/15") : "bg-zinc-800/50 border-zinc-700/50",
               },
               {
-                label: "Volum",
+                label: t("mVolume"),
                 value: `${Number(trade.lotSize).toFixed(2)} lot`,
                 icon: <DollarSign className="h-3.5 w-3.5" />,
                 color: "text-amber-400",
                 bg: "bg-amber-500/8 border-amber-500/15",
               },
               {
-                label: "Durată",
+                label: t("mDuration"),
                 value: formatDuration(trade.durationMinutes),
                 icon: <Clock className="h-3.5 w-3.5" />,
                 color: "text-violet-400",
@@ -406,51 +408,51 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
 
           {/* Detailed stats */}
           <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-            <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Parametri Complet</h2>
+            <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">{t("fullParams")}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
               <div>
-                <StatRow label="Cont" value={trade.account.name} />
-                <StatRow label="Instrument" value={trade.instrumentType} />
+                <StatRow label={t("rAccount")} value={trade.account.name} />
+                <StatRow label={t("rInstrument")} value={trade.instrumentType} />
                 <StatRow
-                  label="Stop Loss"
+                  label={t("rStopLoss")}
                   value={trade.stopLoss ? Number(trade.stopLoss).toFixed(5) : "—"}
                   mono
                   accent="rose"
                 />
                 <StatRow
-                  label="Take Profit"
+                  label={t("rTakeProfit")}
                   value={trade.takeProfit ? Number(trade.takeProfit).toFixed(5) : "—"}
                   mono
                   accent="emerald"
                 />
                 <StatRow
-                  label="Risc $"
+                  label={t("rRiskMoney")}
                   value={trade.riskMoney ? formatCurrency(Number(trade.riskMoney), trade.account.currency) : "—"}
                   mono
                 />
                 <StatRow
-                  label="Risc %"
+                  label={t("rRiskPct")}
                   value={trade.riskPercent ? `${Number(trade.riskPercent).toFixed(2)}%` : "—"}
                   mono
                 />
               </div>
               <div>
                 <StatRow
-                  label="Comision"
+                  label={t("rCommission")}
                   value={trade.commission ? formatCurrency(Number(trade.commission), trade.account.currency) : "—"}
                   mono
                 />
                 <StatRow
-                  label="Swap"
+                  label={t("rSwap")}
                   value={trade.swap ? formatCurrency(Number(trade.swap), trade.account.currency) : "—"}
                   mono
                 />
-                <StatRow label="Data intrare" value={formatDate(new Date(trade.entryTime))} />
+                <StatRow label={t("rEntryDate")} value={formatDate(new Date(trade.entryTime))} />
                 {trade.exitTime && (
-                  <StatRow label="Data ieșire" value={formatDate(new Date(trade.exitTime))} />
+                  <StatRow label={t("rExitDate")} value={formatDate(new Date(trade.exitTime))} />
                 )}
                 {trade.brokerSource && (
-                  <StatRow label="Broker" value={trade.brokerSource} />
+                  <StatRow label={t("rBroker")} value={trade.brokerSource} />
                 )}
               </div>
             </div>
@@ -459,12 +461,12 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           {/* Setup & Tags */}
           {(trade.setupType || trade.killzone || trade.tags.length > 0) && (
             <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
-              <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Setup & Etichete</h2>
+              <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">{t("setupTags")}</h2>
               <div className="flex flex-wrap gap-2">
                 {trade.setupType && (
                   <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 font-semibold">
                     <Activity className="h-3 w-3" />
-                    {SETUP_LABELS[trade.setupType] ?? trade.setupType}
+                    {trade.setupType === "OTHER" ? t("setupOther") : (SETUP_LABELS[trade.setupType] ?? trade.setupType)}
                   </span>
                 )}
                 {trade.killzone && (
@@ -487,7 +489,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
             <div className="flex items-center gap-2 mb-4">
               <Camera className="h-4 w-4 text-indigo-400" />
-              <h2 className="text-sm font-bold text-zinc-200">Screenshot-uri</h2>
+              <h2 className="text-sm font-bold text-zinc-200">{t("screenshotsTitle")}</h2>
             </div>
             <ScreenshotGallery tradeId={trade.id} initial={trade.screenshots} />
           </div>
@@ -503,8 +505,8 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                 <Sparkles className="h-4 w-4 text-violet-400" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-violet-300">AI Coach</h2>
-                <p className="text-[10px] text-zinc-600">Analiză inteligentă</p>
+                <h2 className="text-sm font-bold text-violet-300">{t("aiCoach")}</h2>
+                <p className="text-[10px] text-zinc-600">{t("aiSubtitle")}</p>
               </div>
             </div>
 
@@ -523,12 +525,12 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
               {analyzing ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Se analizează...
+                  {t("analyzing")}
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" />
-                  Analizează cu AI
+                  {t("analyzeBtn")}
                 </>
               )}
             </Button>
@@ -537,7 +539,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
               <div className="mt-4 space-y-3">
                 {aiResult.score !== null && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-zinc-500">Scor AI</span>
+                    <span className="text-xs text-zinc-500">{t("aiScore")}</span>
                     <div className="flex items-center gap-2">
                       {[1,2,3,4,5,6,7,8,9,10].map(i => (
                         <div key={i} className={cn(
@@ -568,7 +570,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
             <div className="flex items-center gap-2 mb-4">
               <BookOpen className="h-4 w-4 text-indigo-400" />
-              <h2 className="text-sm font-bold text-zinc-200">Jurnal</h2>
+              <h2 className="text-sm font-bold text-zinc-200">{t("journalTitle")}</h2>
             </div>
             <JournalEntryForm
               key={journalKey}
@@ -586,13 +588,13 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           <DialogHeader>
             <DialogTitle className="text-zinc-100 flex items-center gap-2">
               <XCircle className="h-5 w-5 text-emerald-400" />
-              Închide — {trade.symbol}
+              {t("closeTitle", { symbol: trade.symbol })}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-zinc-400 block mb-1.5">Preț ieșire *</label>
+                <label className="text-xs font-medium text-zinc-400 block mb-1.5">{t("lExitPrice")}</label>
                 <input
                   type="number"
                   step="0.00001"
@@ -603,7 +605,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 block mb-1.5">P&L *</label>
+                <label className="text-xs font-medium text-zinc-400 block mb-1.5">{t("lPnl")}</label>
                 <input
                   type="number"
                   step="0.01"
@@ -615,7 +617,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
               </div>
             </div>
             <div>
-              <label className="text-xs font-medium text-zinc-400 block mb-1.5">Data / ora ieșire</label>
+              <label className="text-xs font-medium text-zinc-400 block mb-1.5">{t("lExitTime")}</label>
               <input
                 type="datetime-local"
                 className="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -625,7 +627,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-zinc-400 block mb-1.5">Comision</label>
+                <label className="text-xs font-medium text-zinc-400 block mb-1.5">{t("lCommission")}</label>
                 <input
                   type="number"
                   step="0.01"
@@ -635,7 +637,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 block mb-1.5">Swap</label>
+                <label className="text-xs font-medium text-zinc-400 block mb-1.5">{t("lSwap")}</label>
                 <input
                   type="number"
                   step="0.01"
@@ -648,7 +650,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCloseOpen(false)} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-              Anulează
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleCloseTrade}
@@ -656,7 +658,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
               className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
             >
               {isClosing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Confirmă
+              {t("confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -668,16 +670,19 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           <DialogHeader>
             <DialogTitle className="text-zinc-100 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-rose-400" />
-              Șterge trade
+              {t("deleteTitle")}
             </DialogTitle>
           </DialogHeader>
           <p className="text-zinc-400 text-sm leading-relaxed">
-            Ești sigur că vrei să ștergi trade-ul <span className="text-zinc-200 font-semibold">{trade.symbol} {trade.direction}</span>?
-            Această acțiune este ireversibilă.
+            {t.rich("deleteConfirm", {
+              symbol: trade.symbol,
+              direction: trade.direction,
+              b: (chunks) => <span className="text-zinc-200 font-semibold">{chunks}</span>,
+            })}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteOpen(false)} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-              Anulează
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleDelete}
@@ -685,7 +690,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
               className="bg-rose-600 hover:bg-rose-500 text-white"
             >
               {isDeleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Șterge
+              {t("deleteBtn")}
             </Button>
           </DialogFooter>
         </DialogContent>
