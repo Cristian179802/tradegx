@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import Link from "next/link";
 import {
@@ -60,6 +61,7 @@ function CreateTeamModal({
   onClose: () => void;
   onCreated: (team: TeamSummary) => void;
 }) {
+  const t = useTranslations("community");
   const { toast } = useToast();
   const [submitting, setSubmitting] = React.useState(false);
   const [form, setForm] = React.useState({ name: "", description: "", isPublic: true });
@@ -95,10 +97,10 @@ function CreateTeamModal({
       onCreated(team);
       reset();
       onClose();
-      toast({ title: `Comunitatea "${team.name}" a fost creată! 🎉` });
+      toast({ title: t("createdToast", { name: team.name }) });
     } else {
       const err = await res.json().catch(() => ({}));
-      toast({ title: err.error ?? "Eroare la creare", variant: "destructive" });
+      toast({ title: err.error ?? t("createErr"), variant: "destructive" });
     }
     setSubmitting(false);
   }
@@ -107,19 +109,19 @@ function CreateTeamModal({
     <Dialog open={open} onOpenChange={(v) => { if (!v) { onClose(); reset(); } }}>
       <DialogContent className="bg-zinc-950 border-zinc-800 max-w-md gap-0 p-0 overflow-hidden">
         <div className="border-b border-zinc-800 px-6 py-4">
-          <DialogTitle className="text-zinc-100 font-bold text-base">🏘️ Creează comunitate</DialogTitle>
-          <p className="text-[11px] text-zinc-600 mt-0.5">Construiește-ți propriul grup de traderi</p>
+          <DialogTitle className="text-zinc-100 font-bold text-base">{t("modalTitle")}</DialogTitle>
+          <p className="text-[11px] text-zinc-600 mt-0.5">{t("modalSub")}</p>
         </div>
 
         <div className="px-6 py-5 space-y-4">
           {/* Name */}
           <div>
             <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide block mb-1.5">
-              Numele comunității *
+              {t("nameLabel")}
             </label>
             <input
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
-              placeholder="Ex: SMC Traders Romania"
+              placeholder={t("namePlaceholder")}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               maxLength={50}
@@ -130,11 +132,11 @@ function CreateTeamModal({
           {/* Description */}
           <div>
             <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide block mb-1.5">
-              Descriere (opțional)
+              {t("descLabel")}
             </label>
             <textarea
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
-              placeholder="Descrie scopul comunității, strategiile folosite, regulile de postare..."
+              placeholder={t("descPlaceholder")}
               rows={3}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -155,8 +157,8 @@ function CreateTeamModal({
             >
               <Globe className="h-4 w-4 shrink-0" />
               <div>
-                <p className="text-xs font-bold">Publică</p>
-                <p className="text-[10px] opacity-70">Oricine poate intra</p>
+                <p className="text-xs font-bold">{t("public")}</p>
+                <p className="text-[10px] opacity-70">{t("publicHint")}</p>
               </div>
               {form.isPublic && <Check className="h-3.5 w-3.5 ml-auto text-indigo-400" />}
             </button>
@@ -171,8 +173,8 @@ function CreateTeamModal({
             >
               <Lock className="h-4 w-4 shrink-0" />
               <div>
-                <p className="text-xs font-bold">Privată</p>
-                <p className="text-[10px] opacity-70">Doar cu cod de invitație</p>
+                <p className="text-xs font-bold">{t("private")}</p>
+                <p className="text-[10px] opacity-70">{t("privateHint")}</p>
               </div>
               {!form.isPublic && <Check className="h-3.5 w-3.5 ml-auto text-indigo-400" />}
             </button>
@@ -182,7 +184,7 @@ function CreateTeamModal({
             <div className="flex items-start gap-2 bg-amber-500/8 border border-amber-500/20 rounded-xl px-3.5 py-2.5">
               <Lock className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
               <p className="text-[11px] text-amber-300/80 leading-relaxed">
-                Un cod de invitație unic va fi generat automat. Partajează-l cu traderii pe care vrei să îi adaugi.
+                {t("inviteNote")}
               </p>
             </div>
           )}
@@ -190,7 +192,7 @@ function CreateTeamModal({
 
         <div className="border-t border-zinc-800 px-6 py-4 flex items-center justify-end gap-3">
           <Button variant="ghost" size="sm" onClick={() => { onClose(); reset(); }} className="text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800">
-            Anulează
+            {t("cancel")}
           </Button>
           <Button
             onClick={submit}
@@ -199,7 +201,7 @@ function CreateTeamModal({
             className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold px-5 shadow-lg shadow-indigo-500/20 disabled:opacity-50"
           >
             {submitting && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
-            Creează comunitatea
+            {t("createBtn")}
           </Button>
         </div>
       </DialogContent>
@@ -218,6 +220,7 @@ function TeamCard({
   onJoin?: (teamId: string) => void;
   joining?: boolean;
 }) {
+  const t = useTranslations("community");
   const [copied, setCopied] = React.useState(false);
   const grad = teamColor(team.name);
 
@@ -229,9 +232,9 @@ function TeamCard({
   }
 
   const roleBadge = team.myRole === "OWNER"
-    ? <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full"><Crown className="h-2.5 w-2.5" />Owner</span>
+    ? <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full"><Crown className="h-2.5 w-2.5" />{t("owner")}</span>
     : team.myRole === "ADMIN"
-    ? <span className="inline-flex items-center gap-1 text-[9px] font-bold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-full"><Shield className="h-2.5 w-2.5" />Admin</span>
+    ? <span className="inline-flex items-center gap-1 text-[9px] font-bold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-full"><Shield className="h-2.5 w-2.5" />{t("admin")}</span>
     : null;
 
   return (
@@ -258,7 +261,7 @@ function TeamCard({
                   : "text-zinc-500 bg-zinc-800 border border-zinc-700"
               )}>
                 {team.isPublic ? <Globe className="h-2.5 w-2.5" /> : <Lock className="h-2.5 w-2.5" />}
-                {team.isPublic ? "Publică" : "Privată"}
+                {team.isPublic ? t("publicBadge") : t("privateBadge")}
               </span>
             </div>
             {team.description && (
@@ -267,11 +270,11 @@ function TeamCard({
             <div className="flex items-center gap-3 mt-2">
               <span className="flex items-center gap-1 text-[10px] text-zinc-600">
                 <Users className="h-3 w-3" />
-                {team._count.members} {team._count.members === 1 ? "membru" : "membri"}
+                {t("memberCount", { n: team._count.members })}
               </span>
               <span className="flex items-center gap-1 text-[10px] text-zinc-600">
                 <MessageSquare className="h-3 w-3" />
-                {team._count.posts} {team._count.posts === 1 ? "postare" : "postări"}
+                {t("postCount", { n: team._count.posts })}
               </span>
             </div>
           </div>
@@ -285,7 +288,7 @@ function TeamCard({
             <button
               onClick={copyCode}
               className="text-zinc-600 hover:text-indigo-400 transition-colors"
-              title="Copiază codul"
+              title={t("copyCode")}
             >
               {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
             </button>
@@ -299,7 +302,7 @@ function TeamCard({
               href={`/community/teams/${team.id}`}
               className="flex items-center justify-center gap-1.5 w-full text-xs font-semibold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 rounded-xl py-2 transition-all"
             >
-              Intră în comunitate
+              {t("enterCommunity")}
               <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           ) : (
@@ -309,7 +312,7 @@ function TeamCard({
               className="flex items-center justify-center gap-1.5 w-full text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 rounded-xl py-2 transition-all disabled:opacity-60"
             >
               {joining ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogIn className="h-3.5 w-3.5" />}
-              {joining ? "Se alătură..." : "Alătură-te"}
+              {joining ? t("joining") : t("join")}
             </button>
           )}
         </div>
@@ -331,6 +334,7 @@ export function CommunityClient({
   myTeams: TeamSummary[];
   publicTeams: TeamSummary[];
 }) {
+  const t = useTranslations("community");
   const { toast } = useToast();
   const [createOpen, setCreateOpen] = React.useState(false);
   const [codeInput, setCodeInput] = React.useState("");
@@ -352,10 +356,10 @@ export function CommunityClient({
         setMyTeams((prev) => [...prev, { ...joined, myRole: "MEMBER" as const, inviteCode: null }]);
         setPublicTeams((prev) => prev.filter((t) => t.id !== teamId));
       }
-      toast({ title: "Te-ai alăturat comunității! 🎉" });
+      toast({ title: t("joinedToast") });
     } else {
       const err = await res.json().catch(() => ({}));
-      toast({ title: err.error ?? "Eroare la alăturare", variant: "destructive" });
+      toast({ title: err.error ?? t("joinErr"), variant: "destructive" });
     }
     setJoiningId(null);
   }
@@ -384,10 +388,10 @@ export function CommunityClient({
       setMyTeams((prev) => prev.some((t) => t.id === data.id) ? prev : [...prev, asMyTeam]);
       setPublicTeams((prev) => prev.filter((t) => t.id !== data.id));
       setCodeInput("");
-      toast({ title: `Te-ai alăturat comunității "${data.name}"! 🎉` });
+      toast({ title: t("joinedCodeToast", { name: data.name }) });
     } else {
       const err = await res.json().catch(() => ({}));
-      toast({ title: err.error ?? "Cod invalid sau comunitate negăsită", variant: "destructive" });
+      toast({ title: err.error ?? t("codeInvalid"), variant: "destructive" });
     }
     setJoinByCodeLoading(false);
   }
@@ -410,23 +414,23 @@ export function CommunityClient({
           <div>
             <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-full mb-3">
               <span>🌍</span>
-              Disponibilă tuturor utilizatorilor TradeGX
+              {t("heroBadge")}
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight mb-1">Comunitate</h1>
+            <h1 className="text-2xl font-black text-white tracking-tight mb-1">{t("heroTitle")}</h1>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
-              Creează sau alătură-te unei comunități de traderi — partajează analize, setup-uri și strategii
+              {t("heroSub")}
             </p>
             <div className="flex items-center gap-5 mt-4">
               <div className="flex items-center gap-1.5 text-xs">
                 <Users className="h-3.5 w-3.5 text-indigo-400" />
                 <span className="text-zinc-300 font-semibold">{stats.totalUsers.toLocaleString()}</span>
-                <span className="text-zinc-600">traderi</span>
+                <span className="text-zinc-600">{t("tradersLabel")}</span>
               </div>
               {stats.totalTeams > 0 && (
                 <div className="flex items-center gap-1.5 text-xs">
                   <Sparkles className="h-3.5 w-3.5 text-violet-400" />
                   <span className="text-zinc-300 font-semibold">{stats.totalTeams}</span>
-                  <span className="text-zinc-600">comunități active</span>
+                  <span className="text-zinc-600">{t("communitiesActive")}</span>
                 </div>
               )}
             </div>
@@ -437,7 +441,7 @@ export function CommunityClient({
             className="shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/20 border-0"
           >
             <Plus className="h-4 w-4 mr-1.5" />
-            Creează comunitate
+            {t("createHeroBtn")}
           </Button>
         </div>
       </div>
@@ -447,7 +451,7 @@ export function CommunityClient({
         <Hash className="h-4 w-4 text-zinc-600 shrink-0" />
         <input
           className="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none font-mono tracking-widest uppercase"
-          placeholder="COD DE INVITAȚIE (ex: AB3X9K2M)"
+          placeholder={t("codePlaceholder")}
           value={codeInput}
           onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
           onKeyDown={(e) => e.key === "Enter" && joinByCode()}
@@ -459,7 +463,7 @@ export function CommunityClient({
           className="flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
         >
           {joinByCodeLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogIn className="h-3.5 w-3.5" />}
-          Intră cu cod
+          {t("joinWithCode")}
         </button>
       </div>
 
@@ -467,7 +471,7 @@ export function CommunityClient({
       {myTeams.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-sm font-bold text-zinc-200">Comunitățile mele</h2>
+            <h2 className="text-sm font-bold text-zinc-200">{t("myCommunities")}</h2>
             <span className="text-[10px] font-semibold text-zinc-600 bg-zinc-800 border border-zinc-700 px-1.5 py-0.5 rounded-full">
               {myTeams.length}
             </span>
@@ -485,7 +489,7 @@ export function CommunityClient({
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Globe className="h-4 w-4 text-emerald-400" />
-            <h2 className="text-sm font-bold text-zinc-200">Descoperă comunități</h2>
+            <h2 className="text-sm font-bold text-zinc-200">{t("discover")}</h2>
             <span className="text-[10px] font-semibold text-zinc-600 bg-zinc-800 border border-zinc-700 px-1.5 py-0.5 rounded-full">
               {publicTeams.length}
             </span>
@@ -507,16 +511,16 @@ export function CommunityClient({
       {myTeams.length === 0 && publicTeams.length === 0 && (
         <div className="rounded-2xl border border-dashed border-zinc-800 py-28 text-center">
           <div className="text-6xl mb-4">🏘️</div>
-          <p className="text-zinc-400 font-semibold text-xl">Nicio comunitate încă</p>
+          <p className="text-zinc-400 font-semibold text-xl">{t("emptyTitle")}</p>
           <p className="text-zinc-600 text-sm mt-2 mb-8 max-w-xs mx-auto leading-relaxed">
-            Creează prima comunitate sau introdu un cod de invitație primit de la un trader.
+            {t("emptyBody")}
           </p>
           <Button
             onClick={() => setCreateOpen(true)}
             className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/20"
           >
             <Plus className="h-4 w-4 mr-1.5" />
-            Creează prima comunitate
+            {t("createFirst")}
           </Button>
         </div>
       )}
