@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import {
   Brain, Send, BarChart3, Shield, TrendingUp, BookOpen,
@@ -23,59 +24,20 @@ type CoachMode = "general" | "performance" | "risk" | "psychology" | "strategy";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+// label/desc/category/prompts = chei → aiChat.* (traduse la randare)
 const MODES: { id: CoachMode; label: string; icon: React.ElementType; color: string; desc: string }[] = [
-  { id: "general",     label: "Coach General",    icon: Brain,     color: "violet",  desc: "Analiză completă și sfaturi generale" },
-  { id: "performance", label: "Performanță",       icon: BarChart3, color: "indigo",  desc: "Deep dive în statisticile tale" },
-  { id: "risk",        label: "Risk Management",   icon: Shield,    color: "amber",   desc: "Position sizing și protecția capitalului" },
-  { id: "psychology",  label: "Psihologie",        icon: Brain,     color: "purple",  desc: "Disciplină, FOMO, revenge trading" },
-  { id: "strategy",    label: "Strategii SMC",     icon: TrendingUp,color: "emerald", desc: "Order Blocks, FVG, Liquidity" },
+  { id: "general",     label: "mGeneral", icon: Brain,     color: "violet",  desc: "mGeneralD" },
+  { id: "performance", label: "mPerf",    icon: BarChart3, color: "indigo",  desc: "mPerfD" },
+  { id: "risk",        label: "mRisk",    icon: Shield,    color: "amber",   desc: "mRiskD" },
+  { id: "psychology",  label: "mPsych",   icon: Brain,     color: "purple",  desc: "mPsychD" },
+  { id: "strategy",    label: "mStrat",   icon: TrendingUp,color: "emerald", desc: "mStratD" },
 ];
 
 const QUICK_PROMPTS: { category: string; icon: React.ElementType; color: string; prompts: string[] }[] = [
-  {
-    category: "Analiză",
-    icon: BarChart3,
-    color: "indigo",
-    prompts: [
-      "Analizează complet performanța mea din ultimele 30 de zile",
-      "Care este cel mai slab aspect al trading-ului meu?",
-      "De ce profit factor-ul meu este scăzut?",
-      "Compară câștigurile cu pierderile mele",
-    ],
-  },
-  {
-    category: "Risk",
-    icon: Shield,
-    color: "amber",
-    prompts: [
-      "Cum să îmbunătățesc managementul riscului?",
-      "Calculează risk-ul optim per trade pentru contul meu",
-      "Analizează distribuția pierderilor mele",
-      "Sunt over-leveraged pe vreun instrument?",
-    ],
-  },
-  {
-    category: "Psihologie",
-    icon: Brain,
-    color: "purple",
-    prompts: [
-      "Ce greșeli psihologice fac cel mai des?",
-      "Cum să evit revenge trading?",
-      "De ce tai profiturile prea devreme?",
-      "Cum îmbunătățesc disciplina și răbdarea?",
-    ],
-  },
-  {
-    category: "Strategie",
-    icon: TrendingUp,
-    color: "emerald",
-    prompts: [
-      "Care este cel mai profitabil setup al meu?",
-      "La ce ore și sesiuni obțin cele mai bune rezultate?",
-      "Ce instrumente ar trebui să evit?",
-      "Analizează setups-urile mele SMC/ICT",
-    ],
-  },
+  { category: "qcAnaliza", icon: BarChart3, color: "indigo", prompts: ["qa1", "qa2", "qa3", "qa4"] },
+  { category: "qcRisk",    icon: Shield,    color: "amber",  prompts: ["qr1", "qr2", "qr3", "qr4"] },
+  { category: "qcPsih",    icon: Brain,     color: "purple", prompts: ["qp1", "qp2", "qp3", "qp4"] },
+  { category: "qcStrat",   icon: TrendingUp,color: "emerald",prompts: ["qs1", "qs2", "qs3", "qs4"] },
 ];
 
 // ─── Markdown Renderer ────────────────────────────────────────────────────────
@@ -141,6 +103,8 @@ function MessageBubble({ msg, onCopy, onRegenerate }: {
   onCopy: (text: string) => void;
   onRegenerate?: () => void;
 }) {
+  const t = useTranslations("aiChat");
+  const locale = useLocale();
   const [copied, setCopied] = React.useState(false);
   const isAI = msg.role === "assistant";
 
@@ -185,7 +149,7 @@ function MessageBubble({ msg, onCopy, onRegenerate }: {
               className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
             >
               {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-              {copied ? "Copiat" : "Copiază"}
+              {copied ? t("copied") : t("copy")}
             </button>
             {onRegenerate && (
               <button
@@ -193,20 +157,20 @@ function MessageBubble({ msg, onCopy, onRegenerate }: {
                 className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
               >
                 <RefreshCw className="w-3 h-3" />
-                Regenerează
+                {t("regenerate")}
               </button>
             )}
           </div>
         )}
 
         <span className="text-[9px] text-zinc-600 px-1">
-          {msg.timestamp.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" })}
+          {msg.timestamp.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
         </span>
       </div>
 
       {!isAI && (
         <div className="w-8 h-8 rounded-xl bg-zinc-700 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold text-zinc-300">
-          TU
+          {t("you")}
         </div>
       )}
     </div>
@@ -215,57 +179,13 @@ function MessageBubble({ msg, onCopy, onRegenerate }: {
 
 // ─── Mode-specific suggested prompts ─────────────────────────────────────────
 
+// prompts = chei → aiChat.* (traduse la randare/trimitere)
 const MODE_PROMPTS: Record<CoachMode, { icon: React.ElementType; prompts: string[] }> = {
-  general: {
-    icon: Brain,
-    prompts: [
-      "Analizează complet profilul meu de trader și spune-mi unde stau",
-      "Care este cel mai important lucru pe care trebuie să-l îmbunătățesc acum?",
-      "Rezumă-mi performanța și dă-mi un plan de acțiune pentru această săptămână",
-      "Ce pattern de greșeli se repetă cel mai des în trading-ul meu?",
-      "Sunt pregătit să trec la un cont live sau mai am de lucrat?",
-    ],
-  },
-  performance: {
-    icon: BarChart3,
-    prompts: [
-      "Fă un breakdown detaliat al statisticilor mele — ce funcționează și ce nu",
-      "Pe ce instrument și sesiune obțin cele mai bune rezultate?",
-      "Compară win rate-ul cu R:R-ul meu — sunt echilibrate?",
-      "Care sunt cele mai profitabile setup-uri ale mele și de ce?",
-      "Analizează distribuția P&L-ului — am câștiguri constante sau sporadice?",
-    ],
-  },
-  risk: {
-    icon: Shield,
-    prompts: [
-      "Calculează risk-ul optim per trade în funcție de contul meu actual",
-      "Sunt over-leveraged pe vreun instrument din istoricul meu?",
-      "Cum să setez un stop-loss mai bun fără să fiu oprit prematur?",
-      "Analizează cele mai mari drawdown-uri ale mele — ce a mers prost?",
-      "Care este dimensiunea maximă de poziție recomandată pentru contul meu?",
-    ],
-  },
-  psychology: {
-    icon: Brain,
-    prompts: [
-      "Ce greșeli psihologice fac cel mai des în trading-ul meu?",
-      "Cum să recunosc și să opresc revenge trading în timp real?",
-      "De ce tai profiturile prea devreme și cum să remediez asta?",
-      "Cum să gestionez o serie de pierderi fără să îmi afecteze disciplina?",
-      "Creează-mi un ritual de pre-trading pentru a intra cu mintea clară",
-    ],
-  },
-  strategy: {
-    icon: TrendingUp,
-    prompts: [
-      "Analizează setup-urile mele SMC/ICT — care au confluențe mai bune?",
-      "Cum să identific Order Block-uri valide vs. invalide pe grafic?",
-      "La ce killzone ar trebui să tranzacționez în funcție de simbolurile mele?",
-      "Explică-mi cum să folosesc Fair Value Gap-urile ca entry mai precis",
-      "Cum să combin BOS + ChoCH + OB pentru un setup de înaltă probabilitate?",
-    ],
-  },
+  general:     { icon: Brain,      prompts: ["mpGen1", "mpGen2", "mpGen3", "mpGen4", "mpGen5"] },
+  performance: { icon: BarChart3,  prompts: ["mpPerf1", "mpPerf2", "mpPerf3", "mpPerf4", "mpPerf5"] },
+  risk:        { icon: Shield,     prompts: ["mpRisk1", "mpRisk2", "mpRisk3", "mpRisk4", "mpRisk5"] },
+  psychology:  { icon: Brain,      prompts: ["mpPsych1", "mpPsych2", "mpPsych3", "mpPsych4", "mpPsych5"] },
+  strategy:    { icon: TrendingUp, prompts: ["mpStrat1", "mpStrat2", "mpStrat3", "mpStrat4", "mpStrat5"] },
 };
 
 // ─── Welcome Screen ───────────────────────────────────────────────────────────
@@ -275,6 +195,7 @@ function WelcomeScreen({ stats, onPrompt, onModeSelect }: {
   onPrompt: (p: string) => void;
   onModeSelect: (m: CoachMode) => void;
 }) {
+  const t = useTranslations("aiChat");
   const [activeMode, setActiveMode] = React.useState<CoachMode>("general");
 
   const handleModeClick = (id: CoachMode) => {
@@ -298,18 +219,18 @@ function WelcomeScreen({ stats, onPrompt, onModeSelect }: {
           </div>
         </div>
         <div className="text-center">
-          <h2 className="text-xl font-bold text-zinc-100">Bună, {stats.userName}!</h2>
-          <p className="text-sm text-zinc-500 mt-0.5">TradeGX AI Coach — pregătit să te ajut</p>
+          <h2 className="text-xl font-bold text-zinc-100">{t("greeting", { name: stats.userName })}</h2>
+          <p className="text-sm text-zinc-500 mt-0.5">{t("subtitle")}</p>
         </div>
       </div>
 
       {/* Quick stats bar */}
       <div className="grid grid-cols-4 gap-2 w-full max-w-lg">
         {[
-          { label: "Win Rate",     value: `${stats.winRate}%`, ok: parseFloat(stats.winRate) >= 50, icon: Target },
-          { label: "Profit Factor",value: stats.profitFactor,  ok: parseFloat(stats.profitFactor) >= 1.2, icon: Zap },
-          { label: "P&L Cont",     value: `${stats.accountPnl >= 0 ? "+" : ""}$${stats.accountPnl.toFixed(0)}`, ok: stats.accountPnl >= 0, icon: TrendingUp },
-          { label: "Total Trades", value: String(stats.totalTrades), ok: true, icon: BarChart3 },
+          { label: t("kWinRate"),     value: `${stats.winRate}%`, ok: parseFloat(stats.winRate) >= 50, icon: Target },
+          { label: t("kProfitFactor"),value: stats.profitFactor,  ok: parseFloat(stats.profitFactor) >= 1.2, icon: Zap },
+          { label: t("kPnlAccount"),     value: `${stats.accountPnl >= 0 ? "+" : ""}$${stats.accountPnl.toFixed(0)}`, ok: stats.accountPnl >= 0, icon: TrendingUp },
+          { label: t("kTotalTrades"), value: String(stats.totalTrades), ok: true, icon: BarChart3 },
         ].map(({ label, value, ok, icon: Icon }) => (
           <div key={label} className={cn(
             "rounded-xl p-3 border text-center",
@@ -324,7 +245,7 @@ function WelcomeScreen({ stats, onPrompt, onModeSelect }: {
 
       {/* Coaching modes */}
       <div className="w-full max-w-lg">
-        <p className="text-[11px] text-zinc-600 uppercase tracking-widest font-semibold mb-2 text-center">Alege modul de coaching</p>
+        <p className="text-[11px] text-zinc-600 uppercase tracking-widest font-semibold mb-2 text-center">{t("chooseMode")}</p>
         <div className="grid grid-cols-5 gap-2">
           {MODES.map((m) => {
             const Icon = m.icon;
@@ -350,7 +271,7 @@ function WelcomeScreen({ stats, onPrompt, onModeSelect }: {
                   "text-[10px] transition-colors leading-tight",
                   isActive ? "text-zinc-200 font-medium" : "text-zinc-500 group-hover:text-zinc-300"
                 )}>
-                  {m.label}
+                  {t(m.label)}
                 </span>
                 {isActive && (
                   <div className={cn("w-1 h-1 rounded-full", `bg-${m.color}-400`)} />
@@ -365,21 +286,21 @@ function WelcomeScreen({ stats, onPrompt, onModeSelect }: {
       <div className="w-full max-w-lg">
         <div className="flex items-center justify-between mb-2">
           <p className="text-[11px] text-zinc-600 uppercase tracking-widest font-semibold">
-            Întrebări — {activeModeData.label}
+            {t("questionsFor", { mode: t(activeModeData.label) })}
           </p>
           <div className={cn(
             "flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide",
             `bg-${activeModeData.color}-500/10 text-${activeModeData.color}-400`
           )}>
             <activeModeData.icon className="w-2.5 h-2.5" />
-            {activeModeData.desc}
+            {t(activeModeData.desc)}
           </div>
         </div>
         <div className="space-y-1.5">
           {modePrompts.map((p) => (
             <button
               key={p}
-              onClick={() => onPrompt(p)}
+              onClick={() => onPrompt(t(p))}
               className={cn(
                 "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-zinc-900/80 border transition-all text-left group",
                 `border-indigo-500/20 hover:border-indigo-500/50 hover:bg-indigo-500/5`,
@@ -387,7 +308,7 @@ function WelcomeScreen({ stats, onPrompt, onModeSelect }: {
               )}
             >
               <Sparkles className={cn("w-3.5 h-3.5 shrink-0", `text-${activeModeData.color}-500`)} />
-              <span className="text-xs text-zinc-400 group-hover:text-zinc-200 transition-colors">{p}</span>
+              <span className="text-xs text-zinc-400 group-hover:text-zinc-200 transition-colors">{t(p)}</span>
               <ChevronRight className={cn("w-3 h-3 text-zinc-700 ml-auto transition-colors", `group-hover:text-${activeModeData.color}-400`)} />
             </button>
           ))}
@@ -404,6 +325,7 @@ function StatsSidebar({ stats, mode, onModeChange }: {
   mode: CoachMode;
   onModeChange: (m: CoachMode) => void;
 }) {
+  const t = useTranslations("aiChat");
   const pf = parseFloat(stats.profitFactor);
   const wr = parseFloat(stats.winRate);
   const pnlOk = stats.accountPnl >= 0;
@@ -412,7 +334,7 @@ function StatsSidebar({ stats, mode, onModeChange }: {
     <div className="space-y-3">
       {/* Mode selector */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Modul de coaching</p>
+        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">{t("coachModeLabel")}</p>
         <div className="space-y-1">
           {MODES.map((m) => {
             const Icon = m.icon;
@@ -425,8 +347,8 @@ function StatsSidebar({ stats, mode, onModeChange }: {
                 )}>
                 <Icon className={cn("w-3.5 h-3.5 shrink-0", active ? `text-${m.color}-400` : "text-zinc-600")} />
                 <div className="min-w-0">
-                  <p className={cn("text-xs font-medium", active ? "text-zinc-100" : "text-zinc-400")}>{m.label}</p>
-                  {active && <p className="text-[10px] text-zinc-600 truncate">{m.desc}</p>}
+                  <p className={cn("text-xs font-medium", active ? "text-zinc-100" : "text-zinc-400")}>{t(m.label)}</p>
+                  {active && <p className="text-[10px] text-zinc-600 truncate">{t(m.desc)}</p>}
                 </div>
                 {active && <div className={cn("w-1.5 h-1.5 rounded-full ml-auto shrink-0", `bg-${m.color}-400`)} />}
               </button>
@@ -439,17 +361,17 @@ function StatsSidebar({ stats, mode, onModeChange }: {
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
         <div className="flex items-center gap-1.5 mb-3">
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Context AI</p>
+          <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">{t("contextAi")}</p>
         </div>
         <div className="space-y-2">
           {[
-            { label: "Win Rate",      value: `${stats.winRate}%`,  good: wr >= 50,  warn: wr >= 45 },
-            { label: "Profit Factor", value: stats.profitFactor,   good: pf >= 1.5, warn: pf >= 1.0 },
-            { label: "P&L Cont",      value: `${pnlOk ? "+" : ""}$${stats.accountPnl.toFixed(0)} (${stats.accountPnlPct}%)`, good: pnlOk, warn: false },
-            { label: "R:R Mediu",     value: stats.avgRR,          good: parseFloat(stats.avgRR) >= 1.5, warn: parseFloat(stats.avgRR) >= 1.0 },
-            { label: "Tranzacții",    value: String(stats.totalTrades), good: true, warn: false },
-            { label: "Top Symbol",    value: stats.topSymbol,      good: true, warn: false },
-            { label: "Best Setup",    value: stats.bestSetup,      good: true, warn: false },
+            { label: t("kWinRate"),      value: `${stats.winRate}%`,  good: wr >= 50,  warn: wr >= 45 },
+            { label: t("kProfitFactor"), value: stats.profitFactor,   good: pf >= 1.5, warn: pf >= 1.0 },
+            { label: t("kPnlAccount"),      value: `${pnlOk ? "+" : ""}$${stats.accountPnl.toFixed(0)} (${stats.accountPnlPct}%)`, good: pnlOk, warn: false },
+            { label: t("kRRAvg"),     value: stats.avgRR,          good: parseFloat(stats.avgRR) >= 1.5, warn: parseFloat(stats.avgRR) >= 1.0 },
+            { label: t("kTrades"),    value: String(stats.totalTrades), good: true, warn: false },
+            { label: t("kTopSymbol"),    value: stats.topSymbol,      good: true, warn: false },
+            { label: t("kBestSetup"),    value: stats.bestSetup,      good: true, warn: false },
           ].map(({ label, value, good, warn }) => (
             <div key={label} className="flex items-center justify-between">
               <span className="text-[11px] text-zinc-500">{label}</span>
@@ -461,7 +383,7 @@ function StatsSidebar({ stats, mode, onModeChange }: {
           ))}
         </div>
         <p className="text-[10px] text-zinc-700 mt-3 leading-relaxed">
-          AI are acces la toate aceste date în timp real.
+          {t("aiRealtime")}
         </p>
       </div>
 
@@ -470,12 +392,12 @@ function StatsSidebar({ stats, mode, onModeChange }: {
         <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-4">
           <div className="flex items-center gap-1.5 mb-2">
             <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-            <p className="text-[10px] font-semibold text-rose-400 uppercase tracking-wider">Atenție</p>
+            <p className="text-[10px] font-semibold text-rose-400 uppercase tracking-wider">{t("attention")}</p>
           </div>
           <div className="space-y-1">
-            {wr < 45 && <p className="text-[11px] text-rose-300">Win rate sub 45% — analizează cu AI</p>}
-            {pf < 1.0 && <p className="text-[11px] text-rose-300">Profit factor sub 1.0 — piezi bani</p>}
-            {stats.accountPnl < 0 && <p className="text-[11px] text-rose-300">Cont în pierdere față de depozit</p>}
+            {wr < 45 && <p className="text-[11px] text-rose-300">{t("wrLow")}</p>}
+            {pf < 1.0 && <p className="text-[11px] text-rose-300">{t("pfLow")}</p>}
+            {stats.accountPnl < 0 && <p className="text-[11px] text-rose-300">{t("accLoss")}</p>}
           </div>
         </div>
       )}
@@ -485,9 +407,9 @@ function StatsSidebar({ stats, mode, onModeChange }: {
         <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
           <div className="flex items-center gap-1.5 mb-1">
             <Trophy className="w-3.5 h-3.5 text-amber-400" />
-            <p className="text-[10px] font-semibold text-amber-400">Serie câștigătoare</p>
+            <p className="text-[10px] font-semibold text-amber-400">{t("winStreak")}</p>
           </div>
-          <p className="text-[11px] text-zinc-400">Cea mai bună serie: <span className="text-amber-300 font-bold">{stats.longestWinStreak} trade-uri</span></p>
+          <p className="text-[11px] text-zinc-400">{t.rich("bestStreak", { n: stats.longestWinStreak, b: (c) => <span className="text-amber-300 font-bold">{c}</span> })}</p>
         </div>
       )}
 
@@ -495,14 +417,10 @@ function StatsSidebar({ stats, mode, onModeChange }: {
       <div className="bg-violet-500/5 border border-violet-500/20 rounded-xl p-4">
         <div className="flex items-center gap-1.5 mb-2">
           <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-          <p className="text-[10px] font-semibold text-violet-400 uppercase tracking-wider">Sfat sesiune</p>
+          <p className="text-[10px] font-semibold text-violet-400 uppercase tracking-wider">{t("sessionTip")}</p>
         </div>
         <p className="text-[11px] text-zinc-400 leading-relaxed">
-          {pf < 1.2
-            ? "Profit factor scăzut sugerează că lași pierderile să crească sau tai câștigurile prea devreme. Întreabă AI despre trailing stop."
-            : wr < 50
-            ? "Win rate sub 50% e OK dacă R:R e mare. Cere AI să analizeze distribuția R:R-ului tău."
-            : "Performanță solidă! Cere AI să identifice ce setup-uri trebuie scalate mai agresiv."}
+          {pf < 1.2 ? t("tipPf") : wr < 50 ? t("tipWr") : t("tipSolid")}
         </p>
       </div>
     </div>
@@ -512,6 +430,7 @@ function StatsSidebar({ stats, mode, onModeChange }: {
 // ─── Main Chat Client ─────────────────────────────────────────────────────────
 
 export function AIChatClient({ stats }: { stats: TraderStatsType }) {
+  const t = useTranslations("aiChat");
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [input, setInput] = React.useState("");
   const [isStreaming, setIsStreaming] = React.useState(false);
@@ -551,7 +470,7 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Eroare necunoscută" }));
+        const err = await res.json().catch(() => ({ error: t("errUnknown") }));
         setMessages(prev => prev.map(m => m.id === aiId
           ? { ...m, content: `⚠️ ${err.error}`, streaming: false }
           : m));
@@ -573,7 +492,7 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
         setMessages(prev => prev.map(m => m.id === aiId
-          ? { ...m, content: "⚠️ Conexiunea a eșuat. Verifică cheia API Anthropic.", streaming: false }
+          ? { ...m, content: t("connFailed"), streaming: false }
           : m));
       }
     } finally {
@@ -612,16 +531,16 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
             <Brain className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold gradient-text-cyber">🤖 TradeGx AI</p>
+            <p className="text-sm font-bold gradient-text-cyber">{t("aiTitle")}</p>
             <p className="text-[10px] text-zinc-500">
               {isStreaming ? (
                 <span className="text-violet-400 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce inline-block" style={{ animationDelay: "0ms" }} />
                   <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce inline-block" style={{ animationDelay: "150ms" }} />
                   <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce inline-block" style={{ animationDelay: "300ms" }} />
-                  <span className="ml-1">Generează răspuns...</span>
+                  <span className="ml-1">{t("generating")}</span>
                 </span>
-              ) : "Online · Claude Opus"}
+              ) : t("online")}
             </p>
           </div>
 
@@ -631,13 +550,13 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
             `bg-${activeMode.color}-500/10 border-${activeMode.color}-500/20 text-${activeMode.color}-300`
           )}>
             <activeMode.icon className="w-3.5 h-3.5" />
-            {activeMode.label}
+            {t(activeMode.label)}
           </div>
 
           {messages.length > 0 && (
             <button onClick={() => setMessages([])}
               className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors text-[10px] border border-zinc-800 hover:border-zinc-600 ml-1">
-              New chat
+              {t("newChat")}
             </button>
           )}
         </div>
@@ -672,14 +591,14 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
                 return (
                   <div key={cat.category} className="shrink-0">
                     <p className={cn("text-[9px] font-semibold uppercase tracking-wide mb-1.5", `text-${cat.color}-400`)}>
-                      {cat.category}
+                      {t(cat.category)}
                     </p>
                     <div className="space-y-1">
                       {cat.prompts.map((p) => (
-                        <button key={p} onClick={() => sendMessage(p)}
+                        <button key={p} onClick={() => sendMessage(t(p))}
                           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 text-[11px] text-zinc-400 hover:text-zinc-200 transition-all whitespace-nowrap max-w-[220px] truncate">
                           <Icon className={cn("w-3 h-3 shrink-0", `text-${cat.color}-500`)} />
-                          {p}
+                          {t(p)}
                         </button>
                       ))}
                     </div>
@@ -711,7 +630,7 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Întreabă ceva despre trading-ul tău... (Enter = trimite)"
+                placeholder={t("inputPlaceholder")}
                 disabled={isStreaming}
                 rows={1}
                 className="w-full bg-transparent text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none resize-none px-4 py-3 max-h-32 overflow-y-auto"
@@ -738,8 +657,8 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
           </div>
 
           <div className="flex items-center justify-between mt-2 px-1">
-            <p className="text-[10px] text-zinc-700">Shift+Enter = linie nouă</p>
-            <p className="text-[10px] text-zinc-700">Powered by Claude Opus</p>
+            <p className="text-[10px] text-zinc-700">{t("shiftEnter")}</p>
+            <p className="text-[10px] text-zinc-700">{t("poweredBy")}</p>
           </div>
         </div>
       </div>
