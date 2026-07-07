@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,13 +21,8 @@ const STRATEGY_TYPES = [
     icon: TrendingUp,
     color: "#6366f1",
     badgeClass: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
-    desc: "Fast/Slow EMA crossover cu filtru de trend pe EMA lungă. Semnale clare, potrivit pentru trending markets.",
-    details: [
-      "Fast EMA (9) peste Slow EMA (21) → BUY",
-      "Filtru opțional EMA 200 pentru direcție trend",
-      "Filtru RSI pentru evitarea zone extreme",
-      "Confirmare MACD opțională, Stop Loss ATR",
-    ],
+    desc: "stEmaDesc",
+    details: ["stEmaD1", "stEmaD2", "stEmaD3", "stEmaD4"],
   },
   {
     id: "SESSION_BREAKOUT",
@@ -34,13 +30,8 @@ const STRATEGY_TYPES = [
     icon: Activity,
     color: "#f59e0b",
     badgeClass: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-    desc: "Break al range-ului sesiunii (Asian/London/NY). Clasic SMC — tranzacționează breakout-ul cu bias directional.",
-    details: [
-      "Calculează high/low sesiunii selectate",
-      "Filtru range minim (pips) pentru sesiuni liniștite",
-      "Opțiune retest al nivelului de breakout",
-      "Filtru RSI pentru confirmare impuls",
-    ],
+    desc: "stSessionDesc",
+    details: ["stSessionD1", "stSessionD2", "stSessionD3", "stSessionD4"],
   },
   {
     id: "RSI_REVERSAL",
@@ -48,13 +39,8 @@ const STRATEGY_TYPES = [
     icon: RefreshCw,
     color: "#a78bfa",
     badgeClass: "bg-violet-500/20 text-violet-300 border-violet-500/30",
-    desc: "Mean reversion pe RSI oversold/overbought. RSI iese din zone extreme → entry în direcția revenirii.",
-    details: [
-      "RSI (14) iese din zona oversold (<30) → BUY",
-      "Confirmare Stochastic pentru filtrare semnale false",
-      "Filtru Bollinger Bands — intrare la extreme",
-      "Filtru EMA opțional pentru direcție",
-    ],
+    desc: "stRsiDesc",
+    details: ["stRsiD1", "stRsiD2", "stRsiD3", "stRsiD4"],
   },
   {
     id: "TREND_FOLLOWING",
@@ -62,47 +48,38 @@ const STRATEGY_TYPES = [
     icon: BarChart2,
     color: "#34d399",
     badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    desc: "Urmărire trend cu pullback la EMA + confirmare ADX. Entry la revenirea prețului la EMA în trend puternic.",
-    details: [
-      "ADX > 25 → trend puternic confirmat",
-      "Confluență DI+ / DI− pentru direcție",
-      "A doua EMA lentă pentru confluență",
-      "Confirmare MACD opțională",
-    ],
+    desc: "stTrendDesc",
+    details: ["stTrendD1", "stTrendD2", "stTrendD3", "stTrendD4"],
   },
   {
     id: "CUSTOM",
-    name: "Personalizată",
+    name: "stCustomName",
     icon: Wand2,
     color: "#ec4899",
     badgeClass: "bg-pink-500/20 text-pink-300 border-pink-500/30",
-    desc: "Construiești tu regulile. Combini orice indicatori după logica ta — EMA, MACD, Stochastic, Bollinger, RSI, ATR, ADX, DI+/DI−.",
-    details: [
-      "EMA, SMA, RSI, ATR, MACD, Bollinger Bands",
-      "Stochastic %K/%D, ADX, DI+, DI−",
-      "Operatori: crossover, above/below, procent",
-      "Filtru trend, SL/TP configurabile",
-    ],
+    desc: "stCustomDesc",
+    details: ["stCustomD1", "stCustomD2", "stCustomD3", "stCustomD4"],
   },
 ] as const;
 
+// group/label = chei → backtestNew.* (traduse la randare)
 const SYMBOL_GROUPS: { group: string; symbols: string[] }[] = [
-  { group: "Forex Majors", symbols: ["EURUSD","GBPUSD","USDJPY","USDCHF","AUDUSD","NZDUSD","USDCAD"] },
-  { group: "Forex Minors", symbols: ["EURGBP","EURJPY","GBPJPY","EURCAD","EURCHF","GBPCHF","EURAUD","GBPAUD","AUDCAD","AUDNZD","CADJPY","CHFJPY","NZDJPY","GBPNZD"] },
-  { group: "Metale", symbols: ["XAUUSD","XAGUSD","XPTUSD"] },
-  { group: "Indici", symbols: ["US30","NAS100","SP500","US2000"] },
-  { group: "Crypto", symbols: ["BTCUSD","ETHUSD","BNBUSD","SOLUSD","XRPUSD"] },
-  { group: "Energie", symbols: ["CRUDE","BRENT","NATGAS"] },
+  { group: "grpForexMajors", symbols: ["EURUSD","GBPUSD","USDJPY","USDCHF","AUDUSD","NZDUSD","USDCAD"] },
+  { group: "grpForexMinors", symbols: ["EURGBP","EURJPY","GBPJPY","EURCAD","EURCHF","GBPCHF","EURAUD","GBPAUD","AUDCAD","AUDNZD","CADJPY","CHFJPY","NZDJPY","GBPNZD"] },
+  { group: "grpMetals", symbols: ["XAUUSD","XAGUSD","XPTUSD"] },
+  { group: "grpIndices", symbols: ["US30","NAS100","SP500","US2000"] },
+  { group: "grpCrypto", symbols: ["BTCUSD","ETHUSD","BNBUSD","SOLUSD","XRPUSD"] },
+  { group: "grpEnergy", symbols: ["CRUDE","BRENT","NATGAS"] },
 ];
 
 const TIMEFRAMES = [
-  { value: "M5",  label: "M5 — 5 minute" },
-  { value: "M15", label: "M15 — 15 minute" },
-  { value: "M30", label: "M30 — 30 minute" },
-  { value: "H1",  label: "H1 — 1 oră" },
-  { value: "H4",  label: "H4 — 4 ore" },
-  { value: "D1",  label: "D1 — Zilnic" },
-  { value: "W1",  label: "W1 — Săptămânal" },
+  { value: "M5",  label: "tfM5" },
+  { value: "M15", label: "tfM15" },
+  { value: "M30", label: "tfM30" },
+  { value: "H1",  label: "tfH1" },
+  { value: "H4",  label: "tfH4" },
+  { value: "D1",  label: "tfD1" },
+  { value: "W1",  label: "tfW1" },
 ];
 
 const COLORS = ["#6366f1","#f59e0b","#a78bfa","#34d399","#f43f5e","#38bdf8","#fb923c","#ec4899"];
@@ -160,45 +137,46 @@ interface IndicatorOpt {
 
 const INDICATOR_OPTS: IndicatorOpt[] = [
   // Moving averages
-  { value: "EMA",        label: "EMA",        group: "Medii",    hasPeriod: true, period1Label: "Perioadă", period1Default: 14 },
-  { value: "SMA",        label: "SMA",        group: "Medii",    hasPeriod: true, period1Label: "Perioadă", period1Default: 14 },
+  { value: "EMA",        label: "EMA",        group: "grpMedii",    hasPeriod: true, period1Label: "period", period1Default: 14 },
+  { value: "SMA",        label: "SMA",        group: "grpMedii",    hasPeriod: true, period1Label: "period", period1Default: 14 },
   // Oscillators
-  { value: "RSI",        label: "RSI",        group: "Oscilatori", hasPeriod: true, period1Label: "Perioadă", period1Default: 14 },
-  { value: "STOCH_K",   label: "Stoch %K",   group: "Oscilatori", hasPeriod: true, period1Label: "%K", period1Default: 14, hasPeriod2: true, period2Label: "%D", period2Default: 3, period2Min: 1, period2Max: 20, period2Step: 1 },
-  { value: "STOCH_D",   label: "Stoch %D",   group: "Oscilatori", hasPeriod: true, period1Label: "%K", period1Default: 14, hasPeriod2: true, period2Label: "%D", period2Default: 3, period2Min: 1, period2Max: 20, period2Step: 1 },
+  { value: "RSI",        label: "RSI",        group: "grpOscilatori", hasPeriod: true, period1Label: "period", period1Default: 14 },
+  { value: "STOCH_K",   label: "Stoch %K",   group: "grpOscilatori", hasPeriod: true, period1Label: "%K", period1Default: 14, hasPeriod2: true, period2Label: "%D", period2Default: 3, period2Min: 1, period2Max: 20, period2Step: 1 },
+  { value: "STOCH_D",   label: "Stoch %D",   group: "grpOscilatori", hasPeriod: true, period1Label: "%K", period1Default: 14, hasPeriod2: true, period2Label: "%D", period2Default: 3, period2Min: 1, period2Max: 20, period2Step: 1 },
   // Trend
-  { value: "ADX",       label: "ADX",        group: "Trend",    hasPeriod: true, period1Label: "Perioadă", period1Default: 14 },
-  { value: "DI_PLUS",   label: "DI+",        group: "Trend",    hasPeriod: true, period1Label: "Perioadă", period1Default: 14 },
-  { value: "DI_MINUS",  label: "DI−",        group: "Trend",    hasPeriod: true, period1Label: "Perioadă", period1Default: 14 },
+  { value: "ADX",       label: "ADX",        group: "grpTrend",    hasPeriod: true, period1Label: "period", period1Default: 14 },
+  { value: "DI_PLUS",   label: "DI+",        group: "grpTrend",    hasPeriod: true, period1Label: "period", period1Default: 14 },
+  { value: "DI_MINUS",  label: "DI−",        group: "grpTrend",    hasPeriod: true, period1Label: "period", period1Default: 14 },
   // MACD
-  { value: "MACD_LINE", label: "MACD Linie", group: "MACD",     hasPeriod: true, period1Label: "Fast", period1Default: 12, hasPeriod2: true, period2Label: "Slow", period2Default: 26, period2Min: 5, period2Max: 200, period2Step: 1, hasPeriod3: true, period3Label: "Signal", period3Default: 9 },
-  { value: "MACD_SIGNAL",label:"MACD Signal",group: "MACD",     hasPeriod: true, period1Label: "Fast", period1Default: 12, hasPeriod2: true, period2Label: "Slow", period2Default: 26, period2Min: 5, period2Max: 200, period2Step: 1, hasPeriod3: true, period3Label: "Signal", period3Default: 9 },
-  { value: "MACD_HIST", label: "MACD Hist",  group: "MACD",     hasPeriod: true, period1Label: "Fast", period1Default: 12, hasPeriod2: true, period2Label: "Slow", period2Default: 26, period2Min: 5, period2Max: 200, period2Step: 1, hasPeriod3: true, period3Label: "Signal", period3Default: 9 },
+  { value: "MACD_LINE", label: "macdLine", group: "grpMACD",     hasPeriod: true, period1Label: "Fast", period1Default: 12, hasPeriod2: true, period2Label: "Slow", period2Default: 26, period2Min: 5, period2Max: 200, period2Step: 1, hasPeriod3: true, period3Label: "Signal", period3Default: 9 },
+  { value: "MACD_SIGNAL",label:"MACD Signal",group: "grpMACD",     hasPeriod: true, period1Label: "Fast", period1Default: 12, hasPeriod2: true, period2Label: "Slow", period2Default: 26, period2Min: 5, period2Max: 200, period2Step: 1, hasPeriod3: true, period3Label: "Signal", period3Default: 9 },
+  { value: "MACD_HIST", label: "MACD Hist",  group: "grpMACD",     hasPeriod: true, period1Label: "Fast", period1Default: 12, hasPeriod2: true, period2Label: "Slow", period2Default: 26, period2Min: 5, period2Max: 200, period2Step: 1, hasPeriod3: true, period3Label: "Signal", period3Default: 9 },
   // Bollinger
-  { value: "BOLL_UPPER",label: "Boll Sus",   group: "Bollinger", hasPeriod: true, period1Label: "Perioadă", period1Default: 20, hasPeriod2: true, period2Label: "StdDev", period2Default: 2, period2Min: 0.5, period2Max: 5, period2Step: 0.1 },
-  { value: "BOLL_MIDDLE",label:"Boll Mid",   group: "Bollinger", hasPeriod: true, period1Label: "Perioadă", period1Default: 20, hasPeriod2: true, period2Label: "StdDev", period2Default: 2, period2Min: 0.5, period2Max: 5, period2Step: 0.1 },
-  { value: "BOLL_LOWER",label: "Boll Jos",   group: "Bollinger", hasPeriod: true, period1Label: "Perioadă", period1Default: 20, hasPeriod2: true, period2Label: "StdDev", period2Default: 2, period2Min: 0.5, period2Max: 5, period2Step: 0.1 },
+  { value: "BOLL_UPPER",label: "bollUpper",  group: "grpBollinger", hasPeriod: true, period1Label: "period", period1Default: 20, hasPeriod2: true, period2Label: "StdDev", period2Default: 2, period2Min: 0.5, period2Max: 5, period2Step: 0.1 },
+  { value: "BOLL_MIDDLE",label:"bollMid",    group: "grpBollinger", hasPeriod: true, period1Label: "period", period1Default: 20, hasPeriod2: true, period2Label: "StdDev", period2Default: 2, period2Min: 0.5, period2Max: 5, period2Step: 0.1 },
+  { value: "BOLL_LOWER",label: "bollLower",  group: "grpBollinger", hasPeriod: true, period1Label: "period", period1Default: 20, hasPeriod2: true, period2Label: "StdDev", period2Default: 2, period2Min: 0.5, period2Max: 5, period2Step: 0.1 },
   // Volatility
-  { value: "ATR",       label: "ATR",        group: "Volatilitate", hasPeriod: true, period1Label: "Perioadă", period1Default: 14 },
+  { value: "ATR",       label: "ATR",        group: "grpVolatilitate", hasPeriod: true, period1Label: "period", period1Default: 14 },
   // Price
-  { value: "CLOSE",     label: "Close",      group: "Preț" },
-  { value: "HIGH",      label: "High",       group: "Preț" },
-  { value: "LOW",       label: "Low",        group: "Preț" },
-  { value: "OPEN",      label: "Open",       group: "Preț" },
-  { value: "PREV_CLOSE",label: "Prev Close", group: "Preț anterior" },
-  { value: "PREV_HIGH", label: "Prev High",  group: "Preț anterior" },
-  { value: "PREV_LOW",  label: "Prev Low",   group: "Preț anterior" },
+  { value: "CLOSE",     label: "Close",      group: "grpPret"},
+  { value: "HIGH",      label: "High",       group: "grpPret"},
+  { value: "LOW",       label: "Low",        group: "grpPret"},
+  { value: "OPEN",      label: "Open",       group: "grpPret"},
+  { value: "PREV_CLOSE",label: "Prev Close", group: "grpPretAnt" },
+  { value: "PREV_HIGH", label: "Prev High",  group: "grpPretAnt" },
+  { value: "PREV_LOW",  label: "Prev Low",   group: "grpPretAnt" },
   // Constant
-  { value: "VALUE",     label: "Valoare fixă", group: "Constant", hasValue: true },
+  { value: "VALUE",     label: "valueFixed", group: "grpConstant", hasValue: true },
 ];
 
+// label = cheie → backtestNew.* (tradusă la randare)
 const OPERATOR_OPTS: { value: ConditionOperator; label: string; hasPct?: boolean }[] = [
-  { value: "crosses_above",  label: "încrucișează ↑" },
-  { value: "crosses_below",  label: "încrucișează ↓" },
-  { value: "is_above",       label: "este >" },
-  { value: "is_below",       label: "este <" },
-  { value: "is_above_by_pct",label: "este > cu %", hasPct: true },
-  { value: "is_below_by_pct",label: "este < cu %", hasPct: true },
+  { value: "crosses_above",  label: "opCrossUp" },
+  { value: "crosses_below",  label: "opCrossDown" },
+  { value: "is_above",       label: "opAbove" },
+  { value: "is_below",       label: "opBelow" },
+  { value: "is_above_by_pct",label: "opAbovePct", hasPct: true },
+  { value: "is_below_by_pct",label: "opBelowPct", hasPct: true },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -255,14 +233,16 @@ function Toggle({ label, value, onChange, description }: {
   );
 }
 
-function AdvancedSection({ children, label = "Filtre avansate" }: { children: React.ReactNode; label?: string }) {
+function AdvancedSection({ children, label }: { children: React.ReactNode; label?: string }) {
+  const t = useTranslations("backtestNew");
+  const resolvedLabel = label ?? t("advancedFilters");
   const [open, setOpen] = React.useState(false);
   return (
     <div className="border-t border-zinc-800 pt-3">
       <button onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors w-full mb-0">
         {open ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-        <span className="font-medium uppercase tracking-wide">{label}</span>
+        <span className="font-medium uppercase tracking-wide">{resolvedLabel}</span>
       </button>
       {open && <div className="mt-3 space-y-4">{children}</div>}
     </div>
@@ -273,34 +253,35 @@ function AdvancedSection({ children, label = "Filtre avansate" }: { children: Re
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function EmaCrossoverForm({ rules, onChange }: { rules: Record<string, any>; onChange: (r: Record<string, any>) => void }) {
+  const t = useTranslations("backtestNew");
   const set = (k: string, v: number | boolean) => onChange({ ...rules, [k]: v });
   return (
     <div className="space-y-5">
-      <Slider label="EMA Rapidă" name="fastPeriod" value={rules.fastPeriod} min={3} max={50} step={1}
-        description="Semnale pe încrucișare cu EMA lentă" onChange={(v) => set("fastPeriod", v)} />
-      <Slider label="EMA Lentă" name="slowPeriod" value={rules.slowPeriod} min={10} max={200} step={1}
-        description="Definește trendul pe termen mediu" onChange={(v) => set("slowPeriod", v)} />
-      <Slider label="Filtru Trend EMA (0 = off)" name="trendPeriod" value={rules.trendPeriod} min={0} max={500} step={10}
-        description="0 = dezactivat; intră BUY doar dacă Close > EMA(trendPeriod)" onChange={(v) => set("trendPeriod", v)} />
-      <Slider label="Multiplicator SL (ATR)" name="slMultiplier" value={rules.slMultiplier} min={0.5} max={4} step={0.5}
+      <Slider label={t("emaFast")} name="fastPeriod" value={rules.fastPeriod} min={3} max={50} step={1}
+        description={t("emaFastD")} onChange={(v) => set("fastPeriod", v)} />
+      <Slider label={t("emaSlowL")} name="slowPeriod" value={rules.slowPeriod} min={10} max={200} step={1}
+        description={t("emaSlowD")} onChange={(v) => set("slowPeriod", v)} />
+      <Slider label={t("emaTrendFilter")} name="trendPeriod" value={rules.trendPeriod} min={0} max={500} step={10}
+        description={t("emaTrendFilterD")} onChange={(v) => set("trendPeriod", v)} />
+      <Slider label={t("slMult")} name="slMultiplier" value={rules.slMultiplier} min={0.5} max={4} step={0.5}
         onChange={(v) => set("slMultiplier", v)} />
-      <Slider label="Risk:Reward Ratio" name="rrRatio" value={rules.rrRatio} min={1} max={5} step={0.5}
+      <Slider label={t("rrRatio")} name="rrRatio" value={rules.rrRatio} min={1} max={5} step={0.5}
         onChange={(v) => set("rrRatio", v)} />
 
       <AdvancedSection>
-        <Slider label="Perioadă ATR" name="atrPeriod" value={rules.atrPeriod ?? 14} min={5} max={50} step={1}
-          description="ATR pentru calculul Stop Loss" onChange={(v) => set("atrPeriod", v)} />
-        <Slider label="Filtru RSI (0 = off)" name="rsiFilter" value={rules.rsiFilter ?? 0} min={0} max={50} step={5}
-          description="Intră BUY doar dacă RSI < X (evită zone supraevaluate)" onChange={(v) => set("rsiFilter", v)} />
+        <Slider label={t("atrPeriod")} name="atrPeriod" value={rules.atrPeriod ?? 14} min={5} max={50} step={1}
+          description={t("atrForSl")} onChange={(v) => set("atrPeriod", v)} />
+        <Slider label={t("rsiFilter")} name="rsiFilter" value={rules.rsiFilter ?? 0} min={0} max={50} step={5}
+          description={t("emaRsiFilterD")} onChange={(v) => set("rsiFilter", v)} />
         {(rules.rsiFilter ?? 0) > 0 && (
-          <Slider label="Perioadă RSI" name="rsiPeriod" value={rules.rsiPeriod ?? 14} min={5} max={30} step={1}
+          <Slider label={t("rsiPeriod")} name="rsiPeriod" value={rules.rsiPeriod ?? 14} min={5} max={30} step={1}
             onChange={(v) => set("rsiPeriod", v)} />
         )}
-        <Toggle label="Confirmare MACD" value={!!rules.macdConfirm}
-          description="Intră BUY doar dacă MACD(12,26,9) > linia de semnal"
+        <Toggle label={t("macdConfirm")} value={!!rules.macdConfirm}
+          description={t("macdConfirmD")}
           onChange={(v) => set("macdConfirm", v)} />
-        <Toggle label="Trailing Stop" value={!!rules.trailingStop}
-          description="Stop Loss se mișcă cu prețul în loc de SL fix"
+        <Toggle label={t("trailingStop")} value={!!rules.trailingStop}
+          description={t("trailingStopD")}
           onChange={(v) => set("trailingStop", v)} />
       </AdvancedSection>
     </div>
@@ -309,38 +290,39 @@ function EmaCrossoverForm({ rules, onChange }: { rules: Record<string, any>; onC
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function SessionBreakoutForm({ rules, onChange }: { rules: Record<string, any>; onChange: (r: Record<string, any>) => void }) {
+  const t = useTranslations("backtestNew");
   const set = (k: string, v: number | string | boolean) => onChange({ ...rules, [k]: v });
   return (
     <div className="space-y-5">
       <div>
-        <label className="text-sm text-zinc-300 font-medium block mb-2">Sesiune</label>
+        <label className="text-sm text-zinc-300 font-medium block mb-2">{t("session")}</label>
         <div className="grid grid-cols-2 gap-2">
           {(["ASIAN","LONDON","NEW_YORK","ALL"] as const).map((s) => (
             <button key={s} onClick={() => set("session", s)}
               className={cn("py-2 rounded-lg border text-xs font-medium transition-colors", rules.session === s
                 ? "border-indigo-500 bg-indigo-500/20 text-indigo-300"
                 : "border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600")}>
-              {s === "NEW_YORK" ? "NEW YORK" : s === "ALL" ? "TOATE" : s}
+              {s === "NEW_YORK" ? t("sessNewYork") : s === "ALL" ? t("sessAll") : s}
             </button>
           ))}
         </div>
-        <p className="text-[11px] text-zinc-600 mt-1.5">Asian: 00-09 UTC · London: 07-16 UTC · NY: 12-21 UTC</p>
+        <p className="text-[11px] text-zinc-600 mt-1.5">{t("sessNote")}</p>
       </div>
-      <Slider label="Multiplicator SL (ATR)" name="slMultiplier" value={Number(rules.slMultiplier)} min={0.5} max={4} step={0.5}
+      <Slider label={t("slMult")} name="slMultiplier" value={Number(rules.slMultiplier)} min={0.5} max={4} step={0.5}
         onChange={(v) => set("slMultiplier", v)} />
-      <Slider label="Risk:Reward Ratio" name="rrRatio" value={Number(rules.rrRatio)} min={1} max={5} step={0.5}
+      <Slider label={t("rrRatio")} name="rrRatio" value={Number(rules.rrRatio)} min={1} max={5} step={0.5}
         onChange={(v) => set("rrRatio", v)} />
 
       <AdvancedSection>
-        <Slider label="Perioadă ATR" name="atrPeriod" value={rules.atrPeriod ?? 14} min={5} max={50} step={1}
-          description="Folosit pentru dimensionarea SL" onChange={(v) => set("atrPeriod", v)} />
-        <Slider label="Range minim sesiune (pips, 0 = off)" name="minRangePips" value={rules.minRangePips ?? 0} min={0} max={100} step={5}
-          description="Sari sesiunile cu range prea mic (volatilitate redusă)" onChange={(v) => set("minRangePips", v)} />
-        <Toggle label="Retest la intrare" value={!!rules.retestEntry}
-          description="Așteaptă retestul nivelului de breakout înainte de entry"
+        <Slider label={t("atrPeriod")} name="atrPeriod" value={rules.atrPeriod ?? 14} min={5} max={50} step={1}
+          description={t("atrForSize")} onChange={(v) => set("atrPeriod", v)} />
+        <Slider label={t("minRange")} name="minRangePips" value={rules.minRangePips ?? 0} min={0} max={100} step={5}
+          description={t("minRangeD")} onChange={(v) => set("minRangePips", v)} />
+        <Toggle label={t("retestEntry")} value={!!rules.retestEntry}
+          description={t("retestEntryD")}
           onChange={(v) => set("retestEntry", v)} />
-        <Slider label="Filtru RSI (0 = off)" name="rsiFilter" value={rules.rsiFilter ?? 0} min={0} max={50} step={5}
-          description="Intră BUY dacă RSI > (100-X), SELL dacă RSI < X" onChange={(v) => set("rsiFilter", v)} />
+        <Slider label={t("rsiFilter")} name="rsiFilter" value={rules.rsiFilter ?? 0} min={0} max={50} step={5}
+          description={t("sessRsiFilterD")} onChange={(v) => set("rsiFilter", v)} />
       </AdvancedSection>
     </div>
   );
@@ -348,46 +330,47 @@ function SessionBreakoutForm({ rules, onChange }: { rules: Record<string, any>; 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function RsiReversalForm({ rules, onChange }: { rules: Record<string, any>; onChange: (r: Record<string, any>) => void }) {
+  const t = useTranslations("backtestNew");
   const set = (k: string, v: number | boolean) => onChange({ ...rules, [k]: v });
   return (
     <div className="space-y-5">
-      <Slider label="Perioadă RSI" name="rsiPeriod" value={rules.rsiPeriod} min={5} max={30} step={1}
+      <Slider label={t("rsiPeriod")} name="rsiPeriod" value={rules.rsiPeriod} min={5} max={30} step={1}
         onChange={(v) => set("rsiPeriod", v)} />
-      <Slider label="Nivel Oversold" name="oversold" value={rules.oversold} min={10} max={45} step={5}
-        description="Sub acest nivel RSI → oversold (semnale BUY)" onChange={(v) => set("oversold", v)} />
-      <Slider label="Nivel Overbought" name="overbought" value={rules.overbought} min={55} max={90} step={5}
-        description="Peste acest nivel RSI → overbought (semnale SELL)" onChange={(v) => set("overbought", v)} />
-      <Slider label="Filtru EMA (0 = off)" name="emaFilter" value={rules.emaFilter} min={0} max={200} step={10}
-        description="Tranzacționează BUY doar dacă Close > EMA(n)" onChange={(v) => set("emaFilter", v)} />
-      <Slider label="Multiplicator SL (ATR)" name="slMultiplier" value={rules.slMultiplier} min={0.5} max={4} step={0.5}
+      <Slider label={t("oversold")} name="oversold" value={rules.oversold} min={10} max={45} step={5}
+        description={t("oversoldD")} onChange={(v) => set("oversold", v)} />
+      <Slider label={t("overbought")} name="overbought" value={rules.overbought} min={55} max={90} step={5}
+        description={t("overboughtD")} onChange={(v) => set("overbought", v)} />
+      <Slider label={t("emaFilter")} name="emaFilter" value={rules.emaFilter} min={0} max={200} step={10}
+        description={t("emaFilterD")} onChange={(v) => set("emaFilter", v)} />
+      <Slider label={t("slMult")} name="slMultiplier" value={rules.slMultiplier} min={0.5} max={4} step={0.5}
         onChange={(v) => set("slMultiplier", v)} />
-      <Slider label="Risk:Reward Ratio" name="rrRatio" value={rules.rrRatio} min={1} max={5} step={0.5}
+      <Slider label={t("rrRatio")} name="rrRatio" value={rules.rrRatio} min={1} max={5} step={0.5}
         onChange={(v) => set("rrRatio", v)} />
 
       <AdvancedSection>
-        <Slider label="Perioadă ATR" name="atrPeriod" value={rules.atrPeriod ?? 14} min={5} max={50} step={1}
+        <Slider label={t("atrPeriod")} name="atrPeriod" value={rules.atrPeriod ?? 14} min={5} max={50} step={1}
           onChange={(v) => set("atrPeriod", v)} />
-        <Toggle label="Confirmare Stochastic" value={!!rules.stochConfirm}
-          description="Necesită Stochastic în zona corespunzătoare pentru confirmare"
+        <Toggle label={t("stochConfirm")} value={!!rules.stochConfirm}
+          description={t("stochConfirmD")}
           onChange={(v) => set("stochConfirm", v)} />
         {!!rules.stochConfirm && (
           <div className="grid grid-cols-2 gap-4 pl-2 border-l-2 border-zinc-700">
-            <Slider label="Stoch %K" name="stochK" value={rules.stochK ?? 14} min={3} max={30} step={1}
+            <Slider label={t("stochK")} name="stochK" value={rules.stochK ?? 14} min={3} max={30} step={1}
               onChange={(v) => set("stochK", v)} />
-            <Slider label="Stoch %D" name="stochD" value={rules.stochD ?? 3} min={1} max={10} step={1}
+            <Slider label={t("stochD")} name="stochD" value={rules.stochD ?? 3} min={1} max={10} step={1}
               onChange={(v) => set("stochD", v)} />
-            <Slider label="Stoch Oversold" name="stochOversold" value={rules.stochOversold ?? 20} min={5} max={35} step={5}
+            <Slider label={t("stochOversold")} name="stochOversold" value={rules.stochOversold ?? 20} min={5} max={35} step={5}
               onChange={(v) => set("stochOversold", v)} />
-            <Slider label="Stoch Overbought" name="stochOverbought" value={rules.stochOverbought ?? 80} min={65} max={95} step={5}
+            <Slider label={t("stochOverbought")} name="stochOverbought" value={rules.stochOverbought ?? 80} min={65} max={95} step={5}
               onChange={(v) => set("stochOverbought", v)} />
           </div>
         )}
-        <Toggle label="Filtru Bollinger Bands" value={!!rules.bollFilter}
-          description="Intră BUY numai când prețul este sub banda inferioară BB"
+        <Toggle label={t("bollFilter")} value={!!rules.bollFilter}
+          description={t("bollFilterD")}
           onChange={(v) => set("bollFilter", v)} />
         {!!rules.bollFilter && (
-          <Slider label="Perioadă Bollinger" name="bollPeriod" value={rules.bollPeriod ?? 20} min={10} max={50} step={5}
-            description="Perioadă SMA pentru calculul benzilor Bollinger"
+          <Slider label={t("bollPeriod")} name="bollPeriod" value={rules.bollPeriod ?? 20} min={10} max={50} step={5}
+            description={t("bollPeriodD")}
             onChange={(v) => set("bollPeriod", v)} />
         )}
       </AdvancedSection>
@@ -397,40 +380,41 @@ function RsiReversalForm({ rules, onChange }: { rules: Record<string, any>; onCh
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function TrendFollowingForm({ rules, onChange }: { rules: Record<string, any>; onChange: (r: Record<string, any>) => void }) {
+  const t = useTranslations("backtestNew");
   const set = (k: string, v: number | boolean) => onChange({ ...rules, [k]: v });
   return (
     <div className="space-y-5">
-      <Slider label="Perioadă EMA" name="emaPeriod" value={rules.emaPeriod} min={10} max={200} step={5}
-        description="EMA principală — pullback-ul la aceasta declanșează entry" onChange={(v) => set("emaPeriod", v)} />
-      <Slider label="Perioadă ADX" name="adxPeriod" value={rules.adxPeriod} min={5} max={30} step={1}
+      <Slider label={t("emaPeriodL")} name="emaPeriod" value={rules.emaPeriod} min={10} max={200} step={5}
+        description={t("emaPeriodD")} onChange={(v) => set("emaPeriod", v)} />
+      <Slider label={t("adxPeriod")} name="adxPeriod" value={rules.adxPeriod} min={5} max={30} step={1}
         onChange={(v) => set("adxPeriod", v)} />
-      <Slider label="Prag ADX (trend minim)" name="adxThreshold" value={rules.adxThreshold} min={15} max={50} step={5}
-        description="Intră doar dacă ADX > acest prag (trend puternic)" onChange={(v) => set("adxThreshold", v)} />
-      <Slider label="Bare pullback maxime" name="pullbackBars" value={rules.pullbackBars} min={1} max={15} step={1}
-        description="Numărul de lumânări din ultimul pullback spre EMA" onChange={(v) => set("pullbackBars", v)} />
-      <Slider label="Multiplicator SL (ATR)" name="slMultiplier" value={rules.slMultiplier} min={0.5} max={4} step={0.5}
+      <Slider label={t("adxThreshold")} name="adxThreshold" value={rules.adxThreshold} min={15} max={50} step={5}
+        description={t("adxThresholdD")} onChange={(v) => set("adxThreshold", v)} />
+      <Slider label={t("pullbackBars")} name="pullbackBars" value={rules.pullbackBars} min={1} max={15} step={1}
+        description={t("pullbackBarsD")} onChange={(v) => set("pullbackBars", v)} />
+      <Slider label={t("slMult")} name="slMultiplier" value={rules.slMultiplier} min={0.5} max={4} step={0.5}
         onChange={(v) => set("slMultiplier", v)} />
-      <Slider label="Risk:Reward Ratio" name="rrRatio" value={rules.rrRatio} min={1} max={5} step={0.5}
+      <Slider label={t("rrRatio")} name="rrRatio" value={rules.rrRatio} min={1} max={5} step={0.5}
         onChange={(v) => set("rrRatio", v)} />
 
       <AdvancedSection>
-        <Slider label="EMA Lentă pentru confluență (0 = off)" name="emaSlow" value={rules.emaSlow ?? 0} min={0} max={500} step={10}
-          description="A doua EMA mai lentă — prețul trebuie să fie și deasupra acesteia" onChange={(v) => set("emaSlow", v)} />
-        <Slider label="Perioadă ATR" name="atrPeriod" value={rules.atrPeriod ?? 14} min={5} max={50} step={1}
+        <Slider label={t("emaSlowConfluence")} name="emaSlow" value={rules.emaSlow ?? 0} min={0} max={500} step={10}
+          description={t("emaSlowConfluenceD")} onChange={(v) => set("emaSlow", v)} />
+        <Slider label={t("atrPeriod")} name="atrPeriod" value={rules.atrPeriod ?? 14} min={5} max={50} step={1}
           onChange={(v) => set("atrPeriod", v)} />
-        <Toggle label="Necesită DI+ > DI− pentru BUY" value={!!rules.requireDiCross}
-          description="Adaugă confirmare direcțională din sistemul Directional Index"
+        <Toggle label={t("requireDiCross")} value={!!rules.requireDiCross}
+          description={t("requireDiCrossD")}
           onChange={(v) => set("requireDiCross", v)} />
-        <Toggle label="Filtru MACD" value={!!rules.macdFilter}
-          description="Necesită ca MACD Linie să fie deasupra/sub linia de semnal"
+        <Toggle label={t("macdFilter")} value={!!rules.macdFilter}
+          description={t("macdFilterD")}
           onChange={(v) => set("macdFilter", v)} />
         {!!rules.macdFilter && (
           <div className="grid grid-cols-3 gap-4 pl-2 border-l-2 border-zinc-700">
-            <Slider label="MACD Fast" name="macdFast" value={rules.macdFast ?? 12} min={3} max={30} step={1}
+            <Slider label={t("macdFast")} name="macdFast" value={rules.macdFast ?? 12} min={3} max={30} step={1}
               onChange={(v) => set("macdFast", v)} />
-            <Slider label="MACD Slow" name="macdSlow" value={rules.macdSlow ?? 26} min={10} max={100} step={1}
+            <Slider label={t("macdSlow")} name="macdSlow" value={rules.macdSlow ?? 26} min={10} max={100} step={1}
               onChange={(v) => set("macdSlow", v)} />
-            <Slider label="MACD Signal" name="macdSignal" value={rules.macdSignal ?? 9} min={3} max={20} step={1}
+            <Slider label={t("macdSignal")} name="macdSignal" value={rules.macdSignal ?? 9} min={3} max={20} step={1}
               onChange={(v) => set("macdSignal", v)} />
           </div>
         )}
@@ -459,7 +443,9 @@ function IndicatorEditor({
   ref: IndicatorRef;
   onChange: (r: IndicatorRef) => void;
 }) {
+  const t = useTranslations("backtestNew");
   const opt = INDICATOR_OPTS.find((o) => o.value === ref_.type);
+  const tr = (s?: string) => (s ? (t.has(s) ? t(s) : s) : s);
 
   return (
     <div className="flex items-center gap-1 flex-wrap">
@@ -472,9 +458,9 @@ function IndicatorEditor({
         >
           {/* Group by category */}
           {Array.from(new Set(INDICATOR_OPTS.map((o) => o.group))).map((grp) => (
-            <optgroup key={grp} label={grp}>
+            <optgroup key={grp} label={tr(grp)}>
               {INDICATOR_OPTS.filter((o) => o.group === grp).map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+                <option key={o.value} value={o.value}>{tr(o.label)}</option>
               ))}
             </optgroup>
           ))}
@@ -485,7 +471,7 @@ function IndicatorEditor({
       {/* Period 1 */}
       {opt?.hasPeriod && (
         <div className="flex flex-col items-center">
-          <span className="text-[9px] text-zinc-600 mb-0.5">{opt.period1Label}</span>
+          <span className="text-[9px] text-zinc-600 mb-0.5">{tr(opt.period1Label)}</span>
           <input
             type="number"
             value={ref_.period ?? opt.period1Default ?? 14}
@@ -551,6 +537,7 @@ function ConditionRow({
   onChange: (c: CustomCondition) => void;
   onRemove: () => void;
 }) {
+  const t = useTranslations("backtestNew");
   const opDef = OPERATOR_OPTS.find((o) => o.value === condition.op);
 
   return (
@@ -560,7 +547,7 @@ function ConditionRow({
 
       {/* Operator */}
       <div className="flex flex-col items-center">
-        <span className="text-[9px] text-zinc-600 mb-0.5">operator</span>
+        <span className="text-[9px] text-zinc-600 mb-0.5">{t("operator")}</span>
         <div className="relative">
           <select
             value={condition.op}
@@ -572,7 +559,7 @@ function ConditionRow({
             className="appearance-none bg-zinc-900 border border-zinc-600 rounded-md px-2 py-1.5 text-xs font-medium text-zinc-300 focus:outline-none focus:border-pink-500 pr-5 cursor-pointer"
           >
             {OPERATOR_OPTS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
+              <option key={o.value} value={o.value}>{t(o.label)}</option>
             ))}
           </select>
           <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-500 pointer-events-none" />
@@ -582,7 +569,7 @@ function ConditionRow({
       {/* Pct value (shown when pct operator) */}
       {opDef?.hasPct && (
         <div className="flex flex-col items-center">
-          <span className="text-[9px] text-zinc-600 mb-0.5">% val</span>
+          <span className="text-[9px] text-zinc-600 mb-0.5">{t("pctVal")}</span>
           <div className="flex items-center gap-1">
             <input
               type="number"
@@ -628,6 +615,7 @@ function CustomStrategyForm({
   rules: CustomRulesState;
   onChange: (r: CustomRulesState) => void;
 }) {
+  const t = useTranslations("backtestNew");
   const addLong = () =>
     onChange({
       ...rules,
@@ -657,16 +645,16 @@ function CustomStrategyForm({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wide">Condiții BUY</span>
-            <span className="text-[10px] text-zinc-600">toate (AND)</span>
+            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wide">{t("condBuy")}</span>
+            <span className="text-[10px] text-zinc-600">{t("allAnd")}</span>
           </div>
           <button onClick={addLong} className="flex items-center gap-1 text-[11px] text-emerald-500 hover:text-emerald-300 transition-colors">
-            <Plus className="h-3 w-3" /> Adaugă
+            <Plus className="h-3 w-3" /> {t("add")}
           </button>
         </div>
         {rules.entryLong.length === 0 ? (
           <div className="text-center py-4 text-xs text-zinc-600 border border-dashed border-zinc-700/50 rounded-lg">
-            Nicio condiție — nu va genera semnale BUY
+            {t("noCondBuy")}
           </div>
         ) : (
           rules.entryLong.map((c, i) => (
@@ -680,16 +668,16 @@ function CustomStrategyForm({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
-            <span className="text-xs font-semibold text-rose-400 uppercase tracking-wide">Condiții SELL</span>
-            <span className="text-[10px] text-zinc-600">toate (AND)</span>
+            <span className="text-xs font-semibold text-rose-400 uppercase tracking-wide">{t("condSell")}</span>
+            <span className="text-[10px] text-zinc-600">{t("allAnd")}</span>
           </div>
           <button onClick={addShort} className="flex items-center gap-1 text-[11px] text-rose-500 hover:text-rose-300 transition-colors">
-            <Plus className="h-3 w-3" /> Adaugă
+            <Plus className="h-3 w-3" /> {t("add")}
           </button>
         </div>
         {rules.entryShort.length === 0 ? (
           <div className="text-center py-4 text-xs text-zinc-600 border border-dashed border-zinc-700/50 rounded-lg">
-            Nicio condiție — nu va genera semnale SELL
+            {t("noCondSell")}
           </div>
         ) : (
           rules.entryShort.map((c, i) => (
@@ -700,22 +688,22 @@ function CustomStrategyForm({
 
       {/* Exit & Risk */}
       <div className="rounded-xl border border-zinc-700/50 bg-zinc-800/40 p-4 space-y-4">
-        <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Exit & Risk</span>
+        <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">{t("exitRisk")}</span>
         <div className="grid grid-cols-2 gap-4">
-          <Slider label="Multiplicator SL (ATR)" name="slMultiplier" value={rules.slMultiplier} min={0.5} max={4} step={0.5}
-            description="Stop Loss = ATR × multiplicator" onChange={(v) => onChange({ ...rules, slMultiplier: v })} />
-          <Slider label="Risk:Reward Ratio" name="rrRatio" value={rules.rrRatio} min={1} max={5} step={0.5}
-            description="Take Profit = Risk × R:R" onChange={(v) => onChange({ ...rules, rrRatio: v })} />
+          <Slider label={t("slMult")} name="slMultiplier" value={rules.slMultiplier} min={0.5} max={4} step={0.5}
+            description={t("slEqAtr")} onChange={(v) => onChange({ ...rules, slMultiplier: v })} />
+          <Slider label={t("rrRatio")} name="rrRatio" value={rules.rrRatio} min={1} max={5} step={0.5}
+            description={t("tpEqRisk")} onChange={(v) => onChange({ ...rules, rrRatio: v })} />
         </div>
-        <Slider label="Perioadă ATR" name="atrPeriod" value={rules.atrPeriod} min={5} max={50} step={1}
-          description="ATR pentru calculul SL dinamic" onChange={(v) => onChange({ ...rules, atrPeriod: v })} />
+        <Slider label={t("atrPeriod")} name="atrPeriod" value={rules.atrPeriod} min={5} max={50} step={1}
+          description={t("atrDynamic")} onChange={(v) => onChange({ ...rules, atrPeriod: v })} />
 
         {/* Trend filter */}
         <div className="border-t border-zinc-700/50 pt-3 space-y-2">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-sm text-zinc-300 font-medium">Filtru de trend</span>
-              <p className="text-[11px] text-zinc-600">Tranzacționează BUY/SELL numai în direcția trending</p>
+              <span className="text-sm text-zinc-300 font-medium">{t("trendFilterL")}</span>
+              <p className="text-[11px] text-zinc-600">{t("trendFilterD")}</p>
             </div>
             <button
               onClick={() => onChange({ ...rules, trendFilter: { ...rules.trendFilter, enabled: !rules.trendFilter.enabled } })}
@@ -748,7 +736,7 @@ function CustomStrategyForm({
                 onChange={(e) => onChange({ ...rules, trendFilter: { ...rules.trendFilter, period: parseInt(e.target.value) || 200 } })}
                 className="w-20 bg-zinc-800 border border-zinc-700 rounded-lg px-2.5 py-1 text-xs text-zinc-100 focus:outline-none focus:border-pink-500 num text-center" />
               <span className="text-xs text-zinc-600">
-                {rules.trendFilter.type}({rules.trendFilter.period}) — Close trebuie să fie deasupra/sub MA
+                {rules.trendFilter.type}({rules.trendFilter.period}) — {t("closeMustBe")}
               </span>
             </div>
           )}
@@ -757,17 +745,17 @@ function CustomStrategyForm({
 
       {/* Strategy preview */}
       <div className="rounded-lg bg-zinc-900/60 border border-zinc-800 p-3 text-[11px] text-zinc-500 leading-relaxed">
-        <span className="text-zinc-400 font-medium">Rezumat: </span>
+        <span className="text-zinc-400 font-medium">{t("summary")}</span>
         {rules.entryLong.length > 0
-          ? `BUY când ${rules.entryLong.map(c =>
-              `${c.left.type}${c.left.period ? `(${c.left.period})` : ""} ${c.op.replace(/_/g," ")} ${c.right.type}${c.right.period ? `(${c.right.period})` : c.right.value != null ? `=${c.right.value}` : ""}${c.pctValue != null ? ` cu ${c.pctValue}%` : ""}`
-            ).join(" ȘI ")}`
-          : "Niciun semnal BUY"}
+          ? t("buyWhen", { cond: rules.entryLong.map(c =>
+              `${c.left.type}${c.left.period ? `(${c.left.period})` : ""} ${c.op.replace(/_/g," ")} ${c.right.type}${c.right.period ? `(${c.right.period})` : c.right.value != null ? `=${c.right.value}` : ""}${c.pctValue != null ? ` ${t("withWord")} ${c.pctValue}%` : ""}`
+            ).join(` ${t("andWord")} `) })
+          : t("noBuy")}
         {rules.entryShort.length > 0
-          ? ` · SELL când ${rules.entryShort.map(c =>
-              `${c.left.type}${c.left.period ? `(${c.left.period})` : ""} ${c.op.replace(/_/g," ")} ${c.right.type}${c.right.period ? `(${c.right.period})` : c.right.value != null ? `=${c.right.value}` : ""}${c.pctValue != null ? ` cu ${c.pctValue}%` : ""}`
-            ).join(" ȘI ")}`
-          : " · Niciun semnal SELL"}
+          ? t("sellWhen", { cond: rules.entryShort.map(c =>
+              `${c.left.type}${c.left.period ? `(${c.left.period})` : ""} ${c.op.replace(/_/g," ")} ${c.right.type}${c.right.period ? `(${c.right.period})` : c.right.value != null ? `=${c.right.value}` : ""}${c.pctValue != null ? ` ${t("withWord")} ${c.pctValue}%` : ""}`
+            ).join(` ${t("andWord")} `) })
+          : t("noSell")}
         {" · "}<span className="text-zinc-400">SL: {rules.slMultiplier}×ATR({rules.atrPeriod}), TP: {rules.rrRatio}×Risk</span>
         {rules.trendFilter.enabled && (
           <span className="text-zinc-400"> · Trend: {rules.trendFilter.type}({rules.trendFilter.period})</span>
@@ -780,6 +768,7 @@ function CustomStrategyForm({
 // ─── Main Wizard ──────────────────────────────────────────────────────────────
 
 export default function NewStrategyPage() {
+  const t = useTranslations("backtestNew");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -809,19 +798,20 @@ export default function NewStrategyPage() {
     setSelectedType(id);
     setRules(DEFAULT_RULES[id] ?? {});
     const typeDef = STRATEGY_TYPES.find((s) => s.id === id);
-    setStrategyName(`${typeDef?.name ?? id} Strategy`);
+    const typeName = typeDef ? (typeDef.id === "CUSTOM" ? t("stCustomName") : typeDef.name) : id;
+    setStrategyName(`${typeName} Strategy`);
     if (typeDef) setSelectedColor(typeDef.color);
   }
 
   async function saveAndContinue() {
     if (!strategyName.trim()) {
-      toast({ title: "Adaugă un nume strategiei", variant: "destructive" });
+      toast({ title: t("addName"), variant: "destructive" });
       return;
     }
     if (selectedType === "CUSTOM") {
       const r = rules as unknown as CustomRulesState;
       if (r.entryLong.length === 0 && r.entryShort.length === 0) {
-        toast({ title: "Adaugă cel puțin o condiție BUY sau SELL", variant: "destructive" });
+        toast({ title: t("addCondition"), variant: "destructive" });
         return;
       }
     }
@@ -832,12 +822,12 @@ export default function NewStrategyPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: strategyName, type: selectedType, color: selectedColor, rules }),
       });
-      if (!res.ok) throw new Error("Eroare la salvare");
+      if (!res.ok) throw new Error(t("saveErrThrow"));
       const data = await res.json();
       setSavedStrategyId(data.id);
       setStep(3);
     } catch {
-      toast({ title: "Eroare", description: "Nu s-a putut salva strategia", variant: "destructive" });
+      toast({ title: t("errTitle"), description: t("saveErr"), variant: "destructive" });
     } finally {
       setIsSaving(false);
     }
@@ -861,13 +851,13 @@ export default function NewStrategyPage() {
       });
       const data = await res.json();
       if (data.backtestId) {
-        toast({ title: data.status === "COMPLETED" ? "Backtest complet!" : "Backtest creat", description: data.status === "COMPLETED" ? "Rezultatele sunt gata." : "Verifică statusul." });
+        toast({ title: data.status === "COMPLETED" ? t("btComplete") : t("btCreated"), description: data.status === "COMPLETED" ? t("resultsReady") : t("checkStatus") });
         router.push(`/backtesting/results/${data.backtestId}`);
       } else {
-        toast({ title: "Eroare backtest", description: data.error, variant: "destructive" });
+        toast({ title: t("btErr"), description: data.error, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Eroare de rețea", variant: "destructive" });
+      toast({ title: t("netErr"), variant: "destructive" });
     } finally {
       setIsRunning(false);
     }
@@ -885,10 +875,10 @@ export default function NewStrategyPage() {
         </button>
         <div>
           <h1 className="text-xl font-black gradient-text-cyber">
-            {existingStrategyId ? "Rulează Backtest" : "Strategie Nouă"}
+            {existingStrategyId ? t("runBacktestTitle") : t("newStrategyTitle")}
           </h1>
           <p className="text-sm text-zinc-500">
-            {step === 1 ? "Alege tipul de strategie" : step === 2 ? "Configurează parametrii" : "Configurează și rulează backtestul"}
+            {step === 1 ? t("step1Sub") : step === 2 ? t("step2Sub") : t("step3Sub")}
           </p>
         </div>
       </div>
@@ -942,24 +932,24 @@ export default function NewStrategyPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-zinc-100">{st.name}</p>
+                        <p className="text-sm font-semibold text-zinc-100">{st.id === "CUSTOM" ? t("stCustomName") : st.name}</p>
                         {isCustomCard && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded border bg-pink-500/20 text-pink-300 border-pink-500/30 font-medium">
-                            Builder vizual
+                            {t("visualBuilder")}
                           </span>
                         )}
                         {isSelected && !isCustomCard && (
-                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded border", st.badgeClass)}>Selectat</span>
+                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded border", st.badgeClass)}>{t("selected")}</span>
                         )}
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-500 mb-3 leading-relaxed">{st.desc}</p>
+                  <p className="text-xs text-zinc-500 mb-3 leading-relaxed">{t(st.desc)}</p>
                   {isCustomCard ? (
                     <div className="flex flex-wrap gap-2">
                       {st.details.map((d) => (
                         <span key={d} className="text-[11px] px-2 py-0.5 rounded-full border border-zinc-700 bg-zinc-800 text-zinc-400">
-                          {d}
+                          {t(d)}
                         </span>
                       ))}
                     </div>
@@ -967,7 +957,7 @@ export default function NewStrategyPage() {
                     <ul className="space-y-1">
                       {st.details.map((d) => (
                         <li key={d} className="flex items-start gap-1.5 text-[11px] text-zinc-600">
-                          <span className="text-emerald-500 mt-0.5">•</span> {d}
+                          <span className="text-emerald-500 mt-0.5">•</span> {t(d)}
                         </li>
                       ))}
                     </ul>
@@ -978,7 +968,7 @@ export default function NewStrategyPage() {
           </div>
           <div className="flex justify-end">
             <Button onClick={() => setStep(2)} className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white gap-2">
-              Continuă <ArrowRight className="h-4 w-4" />
+              {t("continueBtn")} <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -994,8 +984,8 @@ export default function NewStrategyPage() {
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ec489920" }}>
                     <Wand2 className="h-4 w-4" style={{ color: "#ec4899" }} />
                   </div>
-                  <span className="text-sm font-semibold text-zinc-200">Constructor de strategie</span>
-                  <span className="text-xs text-zinc-600 ml-1">— definești regulile tu</span>
+                  <span className="text-sm font-semibold text-zinc-200">{t("builderTitle")}</span>
+                  <span className="text-xs text-zinc-600 ml-1">{t("builderSub")}</span>
                 </div>
                 <CustomStrategyForm
                   rules={rules as unknown as CustomRulesState}
@@ -1006,14 +996,14 @@ export default function NewStrategyPage() {
               <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5 flex gap-6">
                 <div className="flex-1 space-y-4">
                   <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Nume strategie *</label>
+                    <label className="text-xs text-zinc-400 block mb-1">{t("nameLabel")}</label>
                     <input type="text" value={strategyName} onChange={(e) => setStrategyName(e.target.value)}
-                      placeholder="ex: EMA 9/21 + RSI personalizat"
+                      placeholder={t("nameCustomPh")}
                       className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-pink-500" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-zinc-400 block mb-2">Culoare</label>
+                  <label className="text-xs text-zinc-400 block mb-2">{t("color")}</label>
                   <div className="flex flex-wrap gap-2 max-w-[120px]">
                     {COLORS.map((c) => (
                       <button key={c} onClick={() => setSelectedColor(c)}
@@ -1031,8 +1021,8 @@ export default function NewStrategyPage() {
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${selectedStratDef.color}20` }}>
                     <selectedStratDef.icon className="h-4 w-4" style={{ color: selectedStratDef.color }} />
                   </div>
-                  <span className="text-sm font-semibold text-zinc-200">{selectedStratDef.name}</span>
-                  <span className="text-xs text-zinc-600 ml-1">— parametri de bază + filtre avansate</span>
+                  <span className="text-sm font-semibold text-zinc-200">{selectedStratDef.id === "CUSTOM" ? t("stCustomName") : selectedStratDef.name}</span>
+                  <span className="text-xs text-zinc-600 ml-1">{t("baseParams")}</span>
                 </div>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {selectedType === "EMA_CROSSOVER"    && <EmaCrossoverForm    rules={rules as any} onChange={(r) => setRules(r as Record<string, unknown>)} />}
@@ -1046,15 +1036,15 @@ export default function NewStrategyPage() {
 
               <div className="space-y-4">
                 <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5 space-y-4">
-                  <h3 className="text-sm font-bold text-zinc-200">Salvează strategia</h3>
+                  <h3 className="text-sm font-bold text-zinc-200">{t("saveStrategy")}</h3>
                   <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Nume strategie *</label>
+                    <label className="text-xs text-zinc-400 block mb-1">{t("nameLabel")}</label>
                     <input type="text" value={strategyName} onChange={(e) => setStrategyName(e.target.value)}
-                      placeholder="ex: EMA 9/21 H1 — EURUSD"
+                      placeholder={t("namePh")}
                       className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500" />
                   </div>
                   <div>
-                    <label className="text-xs text-zinc-400 block mb-2">Culoare identificare</label>
+                    <label className="text-xs text-zinc-400 block mb-2">{t("colorId")}</label>
                     <div className="flex flex-wrap gap-2">
                       {COLORS.map((c) => (
                         <button key={c} onClick={() => setSelectedColor(c)}
@@ -1065,7 +1055,7 @@ export default function NewStrategyPage() {
                   </div>
                 </div>
                 <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-4">
-                  <p className="text-xs text-zinc-500 mb-3 font-medium">PREVIEW STRATEGIE</p>
+                  <p className="text-xs text-zinc-500 mb-3 font-medium">{t("previewStrategy")}</p>
                   <div className="flex items-center gap-2.5">
                     <div className="w-3 h-3 rounded-full" style={{ background: selectedColor }} />
                     <span className="text-sm font-semibold text-zinc-200">{strategyName || "—"}</span>
@@ -1084,11 +1074,11 @@ export default function NewStrategyPage() {
 
           <div className={cn("flex items-center justify-between", isCustom ? "" : "md:col-span-2")}>
             <Button variant="outline" onClick={() => setStep(1)} className="border-zinc-700 text-zinc-400 gap-2">
-              <ArrowLeft className="h-4 w-4" /> Înapoi
+              <ArrowLeft className="h-4 w-4" /> {t("back")}
             </Button>
             <Button onClick={saveAndContinue} disabled={isSaving || !strategyName.trim()}
               className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white gap-2">
-              {isSaving ? "Se salvează..." : <>Salvează & Continuă <ArrowRight className="h-4 w-4" /></>}
+              {isSaving ? t("saving") : <>{t("saveContinue")} <ArrowRight className="h-4 w-4" /></>}
             </Button>
           </div>
         </div>
@@ -1098,7 +1088,7 @@ export default function NewStrategyPage() {
       {step === 3 && (
         <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-6 space-y-6">
           <h2 className="text-base font-semibold text-zinc-200 pb-3 border-b border-zinc-800">
-            Configurare Backtest
+            {t("runConfig")}
           </h2>
           <div className="grid md:grid-cols-2 gap-5">
             <div>
@@ -1107,7 +1097,7 @@ export default function NewStrategyPage() {
                 <select value={symbol} onChange={(e) => setSymbol(e.target.value)}
                   className="w-full appearance-none bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 pr-8">
                   {SYMBOL_GROUPS.map((g) => (
-                    <optgroup key={g.group} label={g.group}>
+                    <optgroup key={g.group} label={t(g.group)}>
                       {g.symbols.map((s) => <option key={s} value={s}>{s}</option>)}
                     </optgroup>
                   ))}
@@ -1120,52 +1110,52 @@ export default function NewStrategyPage() {
               <div className="relative">
                 <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)}
                   className="w-full appearance-none bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 pr-8">
-                  {TIMEFRAMES.map((tf) => <option key={tf.value} value={tf.value}>{tf.label}</option>)}
+                  {TIMEFRAMES.map((tf) => <option key={tf.value} value={tf.value}>{t(tf.label)}</option>)}
                 </select>
                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 pointer-events-none" />
               </div>
             </div>
             <div>
-              <label className="text-xs text-zinc-400 block mb-1.5 font-medium uppercase tracking-wide">Data start</label>
+              <label className="text-xs text-zinc-400 block mb-1.5 font-medium uppercase tracking-wide">{t("dateStart")}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500" />
               <div className="flex gap-1.5 mt-1.5">
                 {[1, 2, 3, 5].map((y) => (
                   <button key={y} onClick={() => { const d = new Date(); d.setFullYear(d.getFullYear() - y); setStartDate(d.toISOString().slice(0, 10)); }}
                     className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-500 hover:text-indigo-300 hover:border-indigo-500/40 transition-colors">
-                    -{y}A
+                    {t("yearsAgo", { y })}
                   </button>
                 ))}
               </div>
             </div>
             <div>
-              <label className="text-xs text-zinc-400 block mb-1.5 font-medium uppercase tracking-wide">Data end</label>
+              <label className="text-xs text-zinc-400 block mb-1.5 font-medium uppercase tracking-wide">{t("dateEnd")}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500" />
             </div>
-            <NumberInput label="Capital inițial (USD)" name="initialBalance" value={initialBalance} min={100} max={10000000} step={1000} onChange={setInitialBalance} />
+            <NumberInput label={t("initialCapital")} name="initialBalance" value={initialBalance} min={100} max={10000000} step={1000} onChange={setInitialBalance} />
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs text-zinc-400 font-medium uppercase tracking-wide">Risk per trade</label>
+                <label className="text-xs text-zinc-400 font-medium uppercase tracking-wide">{t("riskPerTrade")}</label>
                 <span className="text-sm font-bold text-indigo-300 num bg-indigo-500/10 px-2 py-0.5 rounded-md">{riskPerTrade}%</span>
               </div>
               <input type="range" min={0.1} max={5} step={0.1} value={riskPerTrade}
                 onChange={(e) => setRiskPerTrade(parseFloat(e.target.value))}
                 className="w-full h-1.5 bg-zinc-700 rounded-full appearance-none cursor-pointer accent-indigo-500" />
-              <p className="text-[11px] text-zinc-600 mt-1">Risc ${(initialBalance * riskPerTrade / 100).toFixed(0)} per trade</p>
+              <p className="text-[11px] text-zinc-600 mt-1">{t("riskAmount", { amount: (initialBalance * riskPerTrade / 100).toFixed(0) })}</p>
             </div>
-            <NumberInput label="Comision per lot (USD)" name="commission" value={commission} min={0} max={100} step={1} description="De ex: 7 USD/lot (round-trip = 14)" onChange={setCommission} />
+            <NumberInput label={t("commissionPerLot")} name="commission" value={commission} min={0} max={100} step={1} description={t("commissionD")} onChange={setCommission} />
           </div>
           <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
             <div className="text-xs text-zinc-600">
-              Date preluate live din Yahoo Finance · {symbol} · {timeframe}
+              {t("yahooLive", { symbol, timeframe })}
             </div>
             <Button onClick={runBacktest} disabled={isRunning || !savedStrategyId}
               className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white gap-2 px-8 h-11 text-base font-semibold shadow-lg shadow-indigo-500/20">
               {isRunning ? (
-                <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Se rulează...</>
+                <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t("running")}</>
               ) : (
-                <><Play className="h-5 w-5" />Rulează Backtestul</>
+                <><Play className="h-5 w-5" />{t("runBtn")}</>
               )}
             </Button>
           </div>
