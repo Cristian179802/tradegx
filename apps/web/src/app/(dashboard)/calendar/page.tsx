@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight, RefreshCw, Clock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,10 +53,11 @@ const IMPACT_CFG: Record<Impact, { dotColor: string; textColor: string; bg: stri
 };
 
 const MAJOR_CURRENCIES = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "NZD", "CHF"];
+// cheie → calendar.* (tradusă la randare)
 const WEEK_LABELS: Record<Week, string> = {
-  last: "Săptămâna trecută",
-  this: "Săptămâna aceasta",
-  next: "Săptămâna viitoare",
+  last: "weekLast",
+  this: "weekThis",
+  next: "weekNext",
 };
 
 function ImpactDots({ impact }: { impact: Impact }) {
@@ -72,13 +74,14 @@ function ImpactDots({ impact }: { impact: Impact }) {
 }
 
 function EventTime({ utcDate, allDay }: { utcDate: string; allDay: boolean }) {
+  const t = useTranslations("calendar");
   const [display, setDisplay] = useState("");
   useEffect(() => {
-    if (allDay || !utcDate) { setDisplay("Toată ziua"); return; }
+    if (allDay || !utcDate) { setDisplay(t("allDay")); return; }
     try {
       setDisplay(new Date(utcDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }));
     } catch { setDisplay("—"); }
-  }, [utcDate, allDay]);
+  }, [utcDate, allDay, t]);
   return <span className="font-mono text-xs tabular-nums text-zinc-400">{display || "..."}</span>;
 }
 
@@ -104,6 +107,8 @@ function getUTCDateKey(utcDate: string): string {
 }
 
 export default function CalendarPage() {
+  const t = useTranslations("calendar");
+  const locale = useLocale();
   const [week, setWeek]           = useState<Week>("this");
   const [events, setEvents]       = useState<CalendarEvent[]>([]);
   const [stats, setStats]         = useState({ high: 0, medium: 0, low: 0, source: "" });
@@ -165,9 +170,9 @@ export default function CalendarPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">Calendar Economic</h1>
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("title")}</h1>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-zinc-600">Sursă:</span>
+            <span className="text-xs text-zinc-600">{t("source")}</span>
             <Badge className={cn(
               "text-[10px] border px-1.5 py-0",
               stats.source === "fxstreet" ? "bg-blue-500/10 border-blue-500/30 text-blue-400" : "bg-zinc-800 border-zinc-700 text-zinc-500"
@@ -187,7 +192,7 @@ export default function CalendarPage() {
           <Button variant="ghost" size="sm" onClick={loadEvents} disabled={loading}
             className="text-zinc-400 hover:text-zinc-100">
             <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} />
-            Reîmprospătează
+            {t("refresh")}
           </Button>
         </div>
       </div>
@@ -198,25 +203,25 @@ export default function CalendarPage() {
           onClick={() => setWeek(weekOrder[Math.max(0, weekIdx - 1)])}
           disabled={weekIdx === 0}
           className="text-zinc-400 hover:text-zinc-100 disabled:opacity-30">
-          <ChevronLeft className="w-4 h-4 mr-1" />Anterior
+          <ChevronLeft className="w-4 h-4 mr-1" />{t("prev")}
         </Button>
-        <span className="font-semibold text-zinc-200">{WEEK_LABELS[week]}</span>
+        <span className="font-semibold text-zinc-200">{t(WEEK_LABELS[week])}</span>
         <Button variant="ghost" size="sm"
           onClick={() => setWeek(weekOrder[Math.min(weekOrder.length - 1, weekIdx + 1)])}
           disabled={weekIdx === weekOrder.length - 1}
           className="text-zinc-400 hover:text-zinc-100 disabled:opacity-30">
-          Următor<ChevronRight className="w-4 h-4 ml-1" />
+          {t("next")}<ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
 
       {/* Filters */}
       <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-4 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-zinc-500 font-medium w-14 shrink-0">Monedă</span>
+          <span className="text-xs text-zinc-500 font-medium w-14 shrink-0">{t("currency")}</span>
           <button onClick={() => setSelCurr([])}
             className={cn("px-2.5 py-1 text-xs rounded-lg border transition-colors",
               selCurr.length === 0 ? "bg-zinc-700 border-zinc-600 text-zinc-100 font-semibold" : "border-zinc-700 text-zinc-500 hover:text-zinc-300")}>
-            Toate
+            {t("all")}
           </button>
           {MAJOR_CURRENCIES.map(c => (
             <button key={c} onClick={() => setSelCurr(p => p.includes(c) ? p.filter(x => x !== c) : [...p, c])}
@@ -227,11 +232,11 @@ export default function CalendarPage() {
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-zinc-500 font-medium w-14 shrink-0">Impact</span>
+          <span className="text-xs text-zinc-500 font-medium w-14 shrink-0">{t("impact")}</span>
           <button onClick={() => setSelImpact([])}
             className={cn("px-2.5 py-1 text-xs rounded-lg border transition-colors",
               selImpact.length === 0 ? "bg-zinc-700 border-zinc-600 text-zinc-100 font-semibold" : "border-zinc-700 text-zinc-500 hover:text-zinc-300")}>
-            Toate
+            {t("all")}
           </button>
           {(["High", "Medium", "Low"] as Impact[]).map(imp => {
             const cfg = IMPACT_CFG[imp];
@@ -259,11 +264,11 @@ export default function CalendarPage() {
       ) : error ? (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center">
           <p className="text-red-400 text-sm">{error}</p>
-          <Button size="sm" variant="outline" className="mt-3 border-red-500/30 text-red-400" onClick={loadEvents}>Încearcă din nou</Button>
+          <Button size="sm" variant="outline" className="mt-3 border-red-500/30 text-red-400" onClick={loadEvents}>{t("tryAgain")}</Button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-12 text-center">
-          <p className="text-zinc-500">Niciun eveniment pentru filtrele selectate.</p>
+          <p className="text-zinc-500">{t("noEvents")}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -274,8 +279,8 @@ export default function CalendarPage() {
             const isToday = dayDate.getFullYear() === today.getFullYear() &&
                             dayDate.getMonth() === today.getMonth() &&
                             dayDate.getDate() === today.getDate();
-            const dayLabel = dayDate.toLocaleDateString("ro-RO", { weekday: "long" });
-            const dateLabel = dayDate.toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" });
+            const dayLabel = dayDate.toLocaleDateString(locale, { weekday: "long" });
+            const dateLabel = dayDate.toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" });
             const dayHigh = dayEvents.filter(e => e.impact === "High").length;
             const dayMed  = dayEvents.filter(e => e.impact === "Medium").length;
 
@@ -291,19 +296,19 @@ export default function CalendarPage() {
                   <div className="flex items-center gap-2 ml-auto text-xs">
                     {dayHigh > 0 && <span className="text-red-400">{dayHigh} High</span>}
                     {dayMed  > 0 && <span className="text-orange-400">{dayMed} Med</span>}
-                    {isToday && <Badge className="bg-indigo-500/20 border-indigo-500/30 text-indigo-300 text-[10px]">Astăzi</Badge>}
+                    {isToday && <Badge className="bg-indigo-500/20 border-indigo-500/30 text-indigo-300 text-[10px]">{t("today")}</Badge>}
                   </div>
                 </div>
 
                 {/* Column headers */}
                 <div className="hidden md:grid grid-cols-[90px_60px_100px_1fr_90px_90px_90px] gap-2 px-5 py-2 text-[10px] font-semibold text-zinc-600 uppercase tracking-wider border-b border-zinc-800/40">
-                  <span>Oră (local)</span>
-                  <span>Impact</span>
-                  <span>Monedă</span>
-                  <span>Eveniment</span>
-                  <span className="text-right">Actual</span>
-                  <span className="text-right">Prognoză</span>
-                  <span className="text-right">Anterior</span>
+                  <span>{t("colTime")}</span>
+                  <span>{t("colImpact")}</span>
+                  <span>{t("colCurrency")}</span>
+                  <span>{t("colEvent")}</span>
+                  <span className="text-right">{t("colActual")}</span>
+                  <span className="text-right">{t("colForecast")}</span>
+                  <span className="text-right">{t("colPrevious")}</span>
                 </div>
 
                 {/* Events */}
@@ -367,7 +372,7 @@ export default function CalendarPage() {
 
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-zinc-600">
-        <span className="text-zinc-500 font-medium">Legendă:</span>
+        <span className="text-zinc-500 font-medium">{t("legend")}</span>
         {(["High", "Medium", "Low"] as Impact[]).map(imp => (
           <div key={imp} className="flex items-center gap-1.5">
             <ImpactDots impact={imp} />
@@ -375,10 +380,10 @@ export default function CalendarPage() {
           </div>
         ))}
         <span className="mx-2">·</span>
-        <div className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">Verde</span> = mai bun ca prognoza</div>
-        <div className="flex items-center gap-1.5"><span className="text-red-400 font-bold">Roșu</span> = mai slab ca prognoza</div>
+        <div className="flex items-center gap-1.5">{t.rich("greenBetter", { g: (c) => <span className="text-emerald-400 font-bold">{c}</span> })}</div>
+        <div className="flex items-center gap-1.5">{t.rich("redWorse", { r: (c) => <span className="text-red-400 font-bold">{c}</span> })}</div>
         <div className="flex items-center gap-1.5 ml-auto">
-          <Zap className="w-3 h-3 text-zinc-600" /><span>Refresh automat la 5 min</span>
+          <Zap className="w-3 h-3 text-zinc-600" /><span>{t("autoRefresh")}</span>
         </div>
       </div>
     </div>

@@ -1,13 +1,15 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { TradingViewChart } from "./tradingview-chart";
 import { Search, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// label = cheie → charts.* (tradusă la randare)
 const SYMBOL_GROUPS = [
   {
-    label: "Forex", icon: "💱", color: "indigo",
+    label: "catForex", icon: "💱", color: "indigo",
     symbols: [
       { s: "EURUSD", label: "EUR/USD" }, { s: "GBPUSD", label: "GBP/USD" },
       { s: "USDJPY", label: "USD/JPY" }, { s: "USDCHF", label: "USD/CHF" },
@@ -17,7 +19,7 @@ const SYMBOL_GROUPS = [
     ],
   },
   {
-    label: "Crypto", icon: "₿", color: "amber",
+    label: "catCrypto", icon: "₿", color: "amber",
     symbols: [
       { s: "BTCUSD", label: "BTC/USD" }, { s: "ETHUSD", label: "ETH/USD" },
       { s: "SOLUSD", label: "SOL/USD" }, { s: "BNBUSD", label: "BNB/USD" },
@@ -26,13 +28,13 @@ const SYMBOL_GROUPS = [
     ],
   },
   {
-    label: "Metale", icon: "🥇", color: "yellow",
+    label: "catMetals", icon: "🥇", color: "yellow",
     symbols: [
       { s: "XAUUSD", label: "XAU/USD" }, { s: "XAGUSD", label: "XAG/USD" },
     ],
   },
   {
-    label: "Indici", icon: "📊", color: "violet",
+    label: "catIndices", icon: "📊", color: "violet",
     symbols: [
       { s: "NAS100", label: "NAS100" }, { s: "US30", label: "DOW30" },
       { s: "US500", label: "S&P500" }, { s: "GER40", label: "DAX40" },
@@ -40,7 +42,7 @@ const SYMBOL_GROUPS = [
     ],
   },
   {
-    label: "Acțiuni", icon: "🏢", color: "emerald",
+    label: "catStocks", icon: "🏢", color: "emerald",
     symbols: [
       { s: "AAPL", label: "Apple" }, { s: "TSLA", label: "Tesla" },
       { s: "NVDA", label: "NVIDIA" }, { s: "MSFT", label: "Microsoft" },
@@ -55,6 +57,7 @@ const TIMEFRAMES = [
 ];
 
 export default function ChartsPage() {
+  const t = useTranslations("charts");
   const [symbol, setSymbol] = React.useState("EURUSD");
   const [timeframe, setTimeframe] = React.useState("60");
   const [activeGroup, setActiveGroup] = React.useState(0);
@@ -80,8 +83,8 @@ export default function ChartsPage() {
       {/* Header */}
       <div className="shrink-0 mb-3 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-indigo">Grafice Live</h1>
-          <p className="text-sm text-zinc-500 mt-0.5">TradingView avansat · {symbol}</p>
+          <h1 className="text-2xl font-black tracking-tight neon-indigo">{t("title")}</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">{t("subtitle", { symbol })}</p>
         </div>
       </div>
 
@@ -94,7 +97,7 @@ export default function ChartsPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Caută simbol..."
+              placeholder={t("searchPlaceholder")}
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-8 pr-3 py-2 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/60 transition-colors"
             />
           </div>
@@ -111,7 +114,7 @@ export default function ChartsPage() {
                     activeGroup === -1 ? "bg-amber-500/15 border border-amber-500/30 text-amber-300" : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
                   )}
                 >
-                  <Star className="h-3 w-3" /> Favorite ({favorites.length})
+                  <Star className="h-3 w-3" /> {t("favorites", { n: favorites.length })}
                 </button>
               )}
               {SYMBOL_GROUPS.map((g, i) => (
@@ -123,7 +126,7 @@ export default function ChartsPage() {
                     activeGroup === i ? `bg-zinc-800 border border-zinc-700 text-zinc-100` : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
                   )}
                 >
-                  <span>{g.icon}</span> {g.label}
+                  <span>{g.icon}</span> {t(g.label)}
                 </button>
               ))}
             </div>
