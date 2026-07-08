@@ -11,23 +11,10 @@ interface Item {
   checked: boolean;
 }
 
-const DEFAULT_ITEMS: string[] = [
-  "Trendul/structura HTF (H4/D1) susține direcția tranzacției",
-  "Există un punct de interes clar (Order Block / FVG / lichiditate)",
-  "Am o confirmare de intrare (CHoCH / BOS / retest)",
-  "Stop Loss-ul este plasat logic (sub/peste structură), nu arbitrar",
-  "Risk:Reward este minim 1:2",
-  "Riscul per tranzacție respectă regula mea (≤ 1-2% din cont)",
-  "Sunt în sesiunea potrivită (Londra / New York / overlap)",
-  "Nu există știri de impact major în următoarele 30 min",
-  "Nu tranzacționez din răzbunare, FOMO sau plictiseală",
-  "Sunt calm și odihnit — starea mea mentală e bună",
-];
-
 const STORAGE_KEY = "tradegx-pretrade-checklist";
 const todayKey = () => new Date().toISOString().slice(0, 10);
 
-function loadItems(): Item[] {
+function loadItems(defaults: string[]): Item[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -40,18 +27,20 @@ function loadItems(): Item[] {
       return parsed.items;
     }
   } catch { /* ignoră */ }
-  return DEFAULT_ITEMS.map((text, i) => ({ id: `d${i}`, text, checked: false }));
+  return defaults.map((text, i) => ({ id: `d${i}`, text, checked: false }));
 }
 
 export default function ChecklistPage() {
   const t = useTranslations("checklistPage");
+  const DEFAULT_ITEMS = t.raw("items") as string[];
   const [items, setItems] = React.useState<Item[]>([]);
   const [newText, setNewText] = React.useState("");
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setItems(loadItems());
+    setItems(loadItems(DEFAULT_ITEMS));
     setMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   React.useEffect(() => {
@@ -145,7 +134,7 @@ export default function ChecklistPage() {
       </div>
 
       <button onClick={restoreDefaults} className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
-        Restabilește lista implicită
+        {t("restoreDefaults")}
       </button>
     </div>
   );

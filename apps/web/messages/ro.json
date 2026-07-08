@@ -128,11 +128,23 @@
     "dimWeekday": "Zi a săptămânii",
     "dimHour": "Ora intrării",
     "dimDuration": "Durată",
-    "dimTag": "Tag"
+    "dimTag": "Tag",
+    "wd0": "Duminică",
+    "wd1": "Luni",
+    "wd2": "Marți",
+    "wd3": "Miercuri",
+    "wd4": "Joi",
+    "wd5": "Vineri",
+    "wd6": "Sâmbătă",
+    "durScalp": "< 15 min (scalp)",
+    "durM15_60": "15–60 min",
+    "durH1_4": "1–4 ore",
+    "durH4_24": "4–24 ore",
+    "durSwing": "> 1 zi (swing)"
   },
   "monteCarlo": {
     "title": "Simulator Monte Carlo",
-    "subtitle": "10.000 de „vieți alternative” ale contului tău, construite din randamentele tale REALE. Află probabilitatea să treci un challenge de prop firm — înainte să plătești pentru el.",
+    "subtitle": "10.000 de „vieți alternative\" ale contului tău, construite din randamentele tale REALE. Află probabilitatea să treci un challenge de prop firm — înainte să plătești pentru el.",
     "loadingHistory": "Se încarcă istoricul...",
     "emptyTitle": "Ai nevoie de minim 10 tranzacții închise",
     "emptyDesc": "Simularea folosește distribuția REALĂ a rezultatelor tale — cu cât mai multe tranzacții în jurnal, cu atât mai fiabile probabilitățile calculate.",
@@ -302,7 +314,19 @@
     "reset": "Resetează",
     "addPlaceholder": "Adaugă o regulă personală...",
     "add": "Adaugă",
-    "restoreDefaults": "Restabilește lista implicită"
+    "restoreDefaults": "Restabilește lista implicită",
+    "items": [
+      "Trendul/structura HTF (H4/D1) susține direcția tranzacției",
+      "Există un punct de interes clar (Order Block / FVG / lichiditate)",
+      "Am o confirmare de intrare (CHoCH / BOS / retest)",
+      "Stop Loss-ul este plasat logic (sub/peste structură), nu arbitrar",
+      "Risk:Reward este minim 1:2",
+      "Riscul per tranzacție respectă regula mea (≤ 1-2% din cont)",
+      "Sunt în sesiunea potrivită (Londra / New York / overlap)",
+      "Nu există știri de impact major în următoarele 30 min",
+      "Nu tranzacționez din răzbunare, FOMO sau plictiseală",
+      "Sunt calm și odihnit — starea mea mentală e bună"
+    ]
   },
   "calc": {
     "title": "Calculator loturi",
@@ -318,7 +342,14 @@
     "riskUsd": "Risc $",
     "riskPct": "Risc %",
     "balanceLabel": "Balanță:",
-    "lots": "loturi"
+    "lots": "loturi",
+    "paramsTitle": "Parametri calcul",
+    "pipEquals": "1 pip = {val} pentru {symbol}",
+    "pipValueLabel": "Valoare pip / lot standard ($)",
+    "pipAuto": "(auto: {val}$)",
+    "standardLots": "loturi standard",
+    "emptyTitle": "Introdu parametrii pentru a calcula volumul",
+    "emptyHint": "Stop loss pips + risc → volum optim"
   },
   "market": {
     "title": "Selector Piață",
@@ -370,7 +401,15 @@
     "noTradeDay": "Zi fără tranzacții",
     "dailyLossLimit": "Limită pierdere zilnică",
     "lotSizing": "Dimensionare lot în funcție de risc",
-    "riskPerTrade": "Risc per tranzacție"
+    "riskPerTrade": "Risc per tranzacție",
+    "pnlToday": "P&L Azi",
+    "tradesToday": "Trades azi",
+    "unlimited": "Nelimitat",
+    "accountCapital": "Capital cont",
+    "pipValuePerLot": "Valoare 1 pip / lot",
+    "riskConservative": "Risc conservator — management optim",
+    "riskModerate": "Risc moderat — acceptabil, fii atent",
+    "riskHigh": "Risc ridicat — poate duce la pierderi mari"
   },
   "propFirmPage": {
     "title": "Prop Firm Challenge",
@@ -398,7 +437,10 @@
     "ruleDailyLoss": "Pierdere zilnică (azi)",
     "ruleDays": "Zile de tranzacționare",
     "errTitle": "Eroare",
-    "errDesc": "Nu s-au putut salva regulile."
+    "errDesc": "Nu s-au putut salva regulile.",
+    "soldOf": "Sold {balance} · din {initial}",
+    "ddTotalMax": "Drawdown total maxim",
+    "noChallengeAccount": "Niciun cont Challenge sau Live"
   },
   "tradesPage": {
     "title": "Trade-uri",
@@ -484,7 +526,17 @@
     "error": "Eroare",
     "retry": "Încearcă din nou",
     "noData": "Nicio dată disponibilă",
-    "language": "Limbă"
+    "language": "Limbă",
+    "openMenu": "Deschide meniul",
+    "trialPro": "Probă PRO",
+    "collapseSidebar": "Restrânge bara laterală",
+    "expandSidebar": "Extinde bara laterală",
+    "trialActive": "Probă PRO activă",
+    "trialActiveDesc": "Actualizează pentru acces nelimitat la toate funcțiile.",
+    "upgradeNow": "Upgrade acum",
+    "profileSettings": "Profil & Setări",
+    "tradingAccounts": "Conturi Trading",
+    "trader": "Trader"
   },
   "auth": {
     "login": "Autentificare",
@@ -500,7 +552,71 @@
     "verifyEmail": "Verifică emailul",
     "signIn": "Conectare",
     "createAccount": "Creează cont",
-    "trialBadge": "14 zile PRO gratuit — fără card"
+    "trialBadge": "14 zile PRO gratuit — fără card",
+    "errRetry": "Eroare. Încearcă din nou.",
+    "backToLogin": "Înapoi la autentificare",
+    "checkEmailTitle": "Verifică emailul",
+    "checkEmailDesc": "Dacă adresa există, vei primi un email cu instrucțiuni pentru resetarea parolei.",
+    "forgotDesc": "Introdu emailul și îți trimitem instrucțiuni de resetare.",
+    "sendInstructions": "Trimite instrucțiuni",
+    "pwResetTitle": "Parolă resetată!",
+    "redirecting": "Te redirecționăm la autentificare...",
+    "resetTitle": "Resetează parola",
+    "resetDesc": "Alege o nouă parolă securizată.",
+    "newPassword": "Parolă nouă",
+    "confirmPasswordLabel": "Confirmă parola",
+    "repeatPw": "Repetă parola",
+    "savePassword": "Salvează parola",
+    "verifyingTitle": "Se verifică...",
+    "verifyingDesc": "Un moment, verificăm adresa ta de email.",
+    "accountActive": "Contul tău este activ. Te redirecționăm...",
+    "linkExpired": "Linkul a expirat sau este invalid. Înregistrează-te din nou sau solicită un nou link.",
+    "registerLink": "Înregistrare",
+    "registerMeta": "Înregistrare — TradeGX",
+    "minChars": "Minim 8 caractere",
+    "emailVerified": "Email verificat!",
+    "linkInvalid": "Link invalid",
+    "secureAccess": "Acces securizat",
+    "welcomeBack": "Bun venit înapoi",
+    "loginSubtitle": "Conectează-te la contul tău TradeGX",
+    "emailVerifiedBanner": "Email verificat! Te poți conecta acum.",
+    "invalidCredentials": "Email sau parolă incorectă",
+    "orContinueWith": "sau continuă cu",
+    "e2eEncryption": "Criptare end-to-end",
+    "noAccount": "Nu ai cont?",
+    "registerFree": "Înregistrează-te gratuit →",
+    "pwMin8": "Minim 8 caractere",
+    "pwUpper": "Literă mare",
+    "pwLower": "Literă mică",
+    "pwDigit": "Cifră sau simbol",
+    "pwWeak": "Slabă",
+    "pwMedium": "Medie",
+    "pwGood": "Bună",
+    "pwStrong": "Puternică",
+    "pwStrengthLabel": "Parolă {s}",
+    "registerError": "Eroare la înregistrare",
+    "verifyEmailTitle": "Verifică emailul!",
+    "verifyEmailDesc": "Am trimis un link de confirmare la adresa ta.",
+    "checkSpam": "Nu uita să verifici și folderul Spam.",
+    "demoAccount": "Cont DEMO",
+    "trialProShort": "Trial PRO",
+    "days14": "14 zile",
+    "setupTime": "Setup",
+    "goToLogin": "Mergi la autentificare",
+    "proTrialFree": "14 zile PRO gratuit",
+    "noCardNeeded": "• Fără card necesar",
+    "createFreeAccount": "Creează cont gratuit",
+    "registerSubtitle": "Jurnalul profesional pentru traderi SMC / ICT",
+    "pillAiCoach": "AI Coach",
+    "pillJournal": "Jurnal ICT/SMC",
+    "pillAnalytics": "Analiză avansată",
+    "pillBrokerSync": "Broker sync",
+    "fullName": "Nume complet",
+    "zeroSpam": "Zero spam",
+    "haveAccount": "Ai deja cont?",
+    "signInLink": "Conectează-te →",
+    "consentCreate": "Prin crearea contului ești de acord cu <terms>Termenii și Condițiile</terms> și <privacy>Politica de Confidențialitate</privacy>.",
+    "consentRegister": "Prin înregistrare, ești de acord cu <terms>Termenii</terms> și <privacy>Politica de Confidențialitate</privacy>."
   },
   "settings": {
     "profile": {
@@ -1042,7 +1158,19 @@
     "colTrades": "Trades",
     "colWinRate": "Win Rate",
     "colPnlTotal": "P&L Total",
-    "colAvgPnl": "Avg P&L"
+    "colAvgPnl": "Avg P&L",
+    "perfTitle": "Analiză Performanță",
+    "perfSubtitle": "Statistici detaliate ale tranzacțiilor tale",
+    "exportPdf": "Export PDF",
+    "daysShort": [
+      "Dum",
+      "Lun",
+      "Mar",
+      "Mie",
+      "Joi",
+      "Vin",
+      "Sâm"
+    ]
   },
   "signals": {
     "sesAsian": "Sesiune Asia",
@@ -1950,5 +2078,372 @@
     "fq5A": "Da. Planul GRATUIT include jurnal nelimitat, import CSV, Academia completă (41 de lecții cu quiz-uri și certificat), analytics de bază, un cont de trading și 3 backteste pe lună. Fără limită de timp.",
     "fq6Q": "Semnalele AI sunt recomandări de investiții?",
     "fq6A": "Nu. Semnalele și toate funcțiile AI au exclusiv scop educațional și informativ — nu constituie consultanță financiară. Deciziile de tranzacționare îți aparțin în totalitate, iar tradingul implică risc real de pierdere."
+  },
+  "legalCommon": {
+    "backToSite": "Înapoi la site",
+    "lastUpdated": "Ultima actualizare: {date}",
+    "ftTerms": "Termeni",
+    "ftPrivacy": "Confidențialitate",
+    "ftContact": "Contact"
+  },
+  "about": {
+    "metaTitle": "Despre TradeGx — cine suntem și de ce construim asta",
+    "metaDesc": "Povestea TradeGx: un jurnal de trading construit în public, de un trader român, pentru traderii SMC/ICT.",
+    "title": "Despre TradeGx",
+    "s1Title": "De ce există TradeGx",
+    "s1p1": "TradeGx a pornit dintr-o frustrare simplă: jurnalele de trading existente sunt fie scumpe și generice, fie tabele Excel care mor după două săptămâni. Niciunul nu vorbea limba traderilor moderni — Smart Money Concepts, ICT, killzones, order blocks — și niciunul nu îți spunea lucrul care contează cu adevărat: <b>unde anume câștigi și unde pierzi bani, statistic</b>.",
+    "s1p2": "Așa că l-am construit noi. Un jurnal care etichetează setup-urile așa cum le gândești, se sincronizează singur cu brokerul, îți detectează revenge trading-ul înainte să-ți ardă contul și îți arată edge-ul real din date — nu din impresii.",
+    "s2Title": "Cine construiește",
+    "s2p1": "TradeGx este fondat și dezvoltat în România de <b>Cristian</b> — trader și builder — împreună cu instrumente moderne de dezvoltare asistată de AI. Nu suntem o corporație: suntem un produs mic, rapid și obsedat de calitate, în care fiecare sugestie de la utilizatori ajunge direct la persoana care scrie codul.",
+    "s2p2": "Nu venim să-ți vindem vise de îmbogățire. Venim din aceeași piață în care tranzacționezi și tu — cu aceleași stop loss-uri luate, aceleași lecții plătite scump. Exact de aceea platforma pune risk management-ul și disciplina înaintea oricărui „semnal magic”.",
+    "s3Title": "Construit în public",
+    "s3p1": "TradeGx se dezvoltă transparent: actualizări livrate constant, un <roadmap>roadmap public</roadmap> cu ce urmează, și zero testimoniale inventate pe site. Ce vezi în <pricing>pagina de prețuri</pricing> este exact ce primești — verificabil în cele 14 zile de probă, fără card.",
+    "s4Title": "Principiile noastre",
+    "s4l1": "<b>Datele tale sunt ale tale.</b> Găzduire în UE, acces la broker doar read-only, zero vânzare de date.",
+    "s4l2": "<b>Educație înainte de vânzare.</b> Academia completă (41 de lecții) este gratuită pentru oricine, pentru totdeauna.",
+    "s4l3": "<b>Onestitate statistică.</b> Nu promitem profituri. Tradingul implică risc real, iar noi îți dăm instrumente ca să-l gestionezi — nu garanții.",
+    "s4l4": "<b>Feedback cu putere de lege.</b> Funcțiile se construiesc din cererile utilizatorilor reali, nu din prezentări de marketing.",
+    "s5Title": "Vorbește cu noi",
+    "s5p1": "Orice întrebare, sugestie sau problemă: <contact>pagina de contact</contact> — răspundem de regulă în aceeași zi."
+  },
+  "roadmap": {
+    "metaTitle": "Roadmap public — TradeGx",
+    "metaDesc": "Ce am livrat, ce construim acum și ce urmează. TradeGx se dezvoltă în public.",
+    "title": "Roadmap public",
+    "updated": "5 iulie 2026 (seara)",
+    "intro": "TradeGx se construiește în public. Aici vezi exact ce e livrat, ce e în lucru și ce urmează — fără promisiuni vagi. Ai o idee? <contact>Spune-ne</contact> — cele mai cerute funcții urcă în listă.",
+    "shippedH": "✅ Livrat — funcțional azi, în producție",
+    "progressH": "🔨 În lucru acum",
+    "plannedH": "🗺️ Urmează",
+    "sh1": "Jurnal complet cu etichetare SMC/ICT (OB, FVG, BOS, CHoCH, killzones)",
+    "sh2": "Sincronizare automată broker: EA gratuit MT4/MT5 + MetaAPI cloud 24/7",
+    "sh3": "Dashboard cu 40+ metrici, curbă equity, streak-uri",
+    "sh4": "AI Trading Coach + detecție revenge trading / overtrading pe tranzacții reale",
+    "sh5": "Semnale AI (HPS) — max 3/zi, cu difuzare Telegram",
+    "sh6": "Backtesting pe date istorice reale + builder de strategii cu 15+ indicatori",
+    "sh7": "„Testează instant” — backtest în 3 click-uri, fără configurare",
+    "sh8": "Academia TradeGx: 41 lecții RO/EN, 47 diagrame, quiz-uri + certificat",
+    "sh9": "Edge Finder — edge-urile și leak-urile tale, dovedite statistic",
+    "sh10": "Simulator Monte Carlo — probabilitatea de a trece un challenge prop firm",
+    "sh11": "Raport AI săptămânal (in-app + Telegram)",
+    "sh12": "Alerte de preț pe watchlist + webhook TradingView",
+    "sh13": "Calculator lot, checklist pre-trade, obiective lunare, monitor prop firm",
+    "sh14": "Calendar economic + știri clasificate după impact",
+    "sh15": "Export PDF, partajare publică a tranzacțiilor, comunitate",
+    "sh16": "Aplicație Android + PWA instalabilă (desktop & iPhone)",
+    "sh17": "Command palette (Ctrl+K), temă dark premium, design responsive",
+    "sh18": "Realizări & streak-uri de disciplină — calculate din datele tale reale",
+    "sh19": "AI Vision — analiza AI vede graficele atașate tranzacției (structură, intrare, SL)",
+    "sh20": "Interfață completă bilingvă RO/EN — tot site-ul și aplicația, cuvânt cu cuvânt",
+    "ip1": "Integrări broker noi: cTrader, TradeLocker, DXtrade",
+    "pl1": "Notificări push native pe telefon (cu aplicația închisă)",
+    "pl2": "Autentificare în doi pași (2FA)",
+    "pl3": "Leaderboard comunitate cu track-record verificat din sync",
+    "pl4": "Prețuri realtime prin WebSocket",
+    "pl5": "Traduceri: germană, franceză, spaniolă, italiană",
+    "pl6": "Rapoarte fiscale pentru România",
+    "pl7": "Integrări suplimentare și automatizări la cererea comunității"
+  },
+  "contactPage": {
+    "metaTitle": "Contact — TradeGx",
+    "metaDesc": "Contactează echipa TradeGx: suport, feedback, raportare probleme de securitate.",
+    "title": "Contact",
+    "intro": "TradeGx este un produs nou, dezvoltat activ — fiecare mesaj ajunge direct la fondator. Răspundem de regulă în aceeași zi.",
+    "emailTitle": "Email",
+    "emailDesc": "Suport, întrebări despre abonamente, feedback, parteneriate.",
+    "secTitle": "Securitate",
+    "secDesc": "Ai găsit o vulnerabilitate? Scrie-ne cu subiectul <b>[SECURITY]</b> — tratăm raportările responsabile cu prioritate maximă. Detalii și în <code>/.well-known/security.txt</code>.",
+    "fbTitle": "Feedback de produs",
+    "fbDesc": "O funcție lipsă? Un bug? Spune-ne exact ce ai pățit și pe ce dispozitiv — construim public, iar sugestiile utilizatorilor intră direct în planul de dezvoltare.",
+    "timeTitle": "Timp de răspuns",
+    "timeDesc": "De regulă în aceeași zi, maximum 48 de ore lucrătoare. Cererile GDPR (acces/ștergere date) sunt procesate cu prioritate.",
+    "idTitle": "Date de identificare",
+    "idP": "Platforma TradeGx este operată din România. Detaliile complete despre prelucrarea datelor se află în <privacy>Politica de Confidențialitate</privacy>, iar condițiile de utilizare în <terms>Termeni și Condiții</terms>."
+  },
+  "terms": {
+    "metaTitle": "Termeni și Condiții — TradeGx",
+    "metaDesc": "Termenii și condițiile de utilizare a platformei TradeGx.",
+    "title": "Termeni și Condiții",
+    "updated": "3 iulie 2026",
+    "s1Title": "1. Despre serviciu",
+    "s1p1": "TradeGx (www.tradegx.com) este o platformă software de tip SaaS pentru jurnalizarea, analiza și îmbunătățirea activității de tranzacționare (trade journal). Platforma oferă instrumente de evidență a tranzacțiilor, statistici de performanță, materiale educaționale, instrumente de gestionare a riscului și funcții asistate de inteligență artificială.",
+    "s1p2": "<b>TradeGx NU este broker, dealer, bancă sau firmă de investiții.</b> Platforma nu execută tranzacții, nu deține și nu administrează fondurile utilizatorilor și nu intermediază accesul la piețe financiare.",
+    "s2Title": "2. Fără consultanță financiară",
+    "s2p1": "Tot conținutul platformei — inclusiv semnalele generate de AI, statisticile, rapoartele, materialele din Academie și răspunsurile asistentului AI — are exclusiv scop informativ și educațional. Nimic din TradeGx nu constituie consultanță financiară, de investiții, juridică sau fiscală și nu reprezintă o recomandare de a cumpăra sau vinde vreun instrument financiar.",
+    "s2p2": "Deciziile de tranzacționare îți aparțin în totalitate. Tranzacționarea instrumentelor financiare implică un risc semnificativ de pierdere a capitalului.",
+    "s3Title": "3. Contul de utilizator",
+    "s3p1": "Pentru utilizarea platformei este necesar un cont. Ești responsabil pentru păstrarea confidențialității datelor de autentificare și pentru toată activitatea desfășurată în contul tău. Trebuie să ai cel puțin 18 ani pentru a folosi TradeGx.",
+    "s3p2": "Conectarea la conturile de broker (MT4/MT5) se realizează exclusiv prin parola de investitor (read-only) sau prin mecanisme echivalente de acces în citire. Nu îți vom cere niciodată parola principală de tranzacționare.",
+    "s4Title": "4. Abonamente și perioada de probă",
+    "s4p1": "Anumite funcții sunt disponibile contra unui abonament, conform ofertei afișate pe pagina de prețuri. Perioada de probă gratuită (dacă este oferită) nu necesită card de credit și nu se convertește automat într-un abonament plătit fără acordul tău explicit.",
+    "s4p2": "Plățile sunt procesate prin furnizori terți specializați. Poți anula abonamentul oricând din setările contului; anularea produce efecte la finalul perioadei de facturare curente.",
+    "s5Title": "5. Utilizare acceptabilă",
+    "s5intro": "Este interzis să folosești platforma pentru:",
+    "s5l1": "activități ilegale sau frauduloase;",
+    "s5l2": "încercări de acces neautorizat la sistemele TradeGx sau la conturile altor utilizatori;",
+    "s5l3": "copierea, revânzarea sau redistribuirea conținutului platformei fără acord scris;",
+    "s5l4": "încărcarea de conținut care încalcă drepturile terților.",
+    "s6Title": "6. Proprietate intelectuală",
+    "s6p1": "Platforma, codul, designul, marca TradeGx și materialele educaționale sunt protejate de legislația privind proprietatea intelectuală. Datele pe care le introduci (tranzacții, note, capturi de ecran) rămân ale tale; ne acorzi doar licența tehnică necesară stocării și afișării lor în cadrul serviciului.",
+    "s7Title": "7. Limitarea răspunderii",
+    "s7p1": "Serviciul este furnizat „așa cum este”. În limitele maxime permise de lege, TradeGx nu răspunde pentru pierderi financiare rezultate din deciziile tale de tranzacționare, pentru acuratețea datelor furnizate de terți (cotații, calendar economic, știri) sau pentru întreruperi temporare ale serviciului. Sincronizarea cu brokerii depinde de servicii terțe și poate suferi întârzieri.",
+    "s8Title": "8. Încetarea",
+    "s8p1": "Îți poți șterge contul oricând din setări. Ne rezervăm dreptul de a suspenda conturile care încalcă acești termeni, cu notificare prealabilă acolo unde este rezonabil posibil.",
+    "s9Title": "9. Modificări și legea aplicabilă",
+    "s9p1": "Putem actualiza acești termeni; modificările semnificative vor fi anunțate în aplicație. Continuarea utilizării după intrarea în vigoare a modificărilor înseamnă acceptarea lor. Acești termeni sunt guvernați de legea română și de reglementările UE aplicabile.",
+    "s10Title": "10. Contact",
+    "s10p1": "Pentru orice întrebare legată de acești termeni: <mail>palcristi1@gmail.com</mail> sau pagina de <contact>contact</contact>."
+  },
+  "privacy_page": {
+    "metaTitle": "Politica de Confidențialitate — TradeGx",
+    "metaDesc": "Cum colectează, folosește și protejează TradeGx datele tale (GDPR).",
+    "title": "Politica de Confidențialitate",
+    "updated": "3 iulie 2026",
+    "s1Title": "1. Cine suntem",
+    "s1p1": "Această politică explică modul în care platforma TradeGx (www.tradegx.com) colectează, utilizează și protejează datele cu caracter personal, în conformitate cu Regulamentul (UE) 2016/679 (GDPR). Operatorul datelor este operatorul platformei TradeGx; ne poți contacta la <mail>palcristi1@gmail.com</mail>.",
+    "s2Title": "2. Ce date colectăm",
+    "s2l1": "<b>Date de cont:</b> nume, adresă de email, parolă (stocată exclusiv criptat/hash).",
+    "s2l2": "<b>Date de tranzacționare:</b> tranzacțiile introduse manual, importate sau sincronizate de la broker (simbol, prețuri, volume, profit/pierdere), notele de jurnal, capturile de ecran încărcate.",
+    "s2l3": "<b>Date de conectare broker:</b> pentru sincronizare folosim exclusiv acces de tip read-only (parolă de investitor); credențialele necesare integrărilor sunt stocate criptat.",
+    "s2l4": "<b>Date tehnice:</b> jurnale de server minimale necesare securității și funcționării (adresă IP, tip browser).",
+    "s2p": "Nu colectăm mai multe date decât sunt necesare funcționării serviciului (principiul minimizării).",
+    "s3Title": "3. În ce scopuri folosim datele",
+    "s3l1": "furnizarea serviciului (jurnal, statistici, alerte, rapoarte) — temei: executarea contractului;",
+    "s3l2": "funcțiile AI (analiză, semnale, coach) — datele statistice relevante sunt transmise punctual furnizorului de AI pentru generarea răspunsului — temei: executarea contractului;",
+    "s3l3": "notificări pe care le activezi tu (Telegram, push, email) — temei: consimțământ;",
+    "s3l4": "securitate și prevenirea abuzurilor — temei: interes legitim.",
+    "s3p": "<b>Nu vindem și nu închiriem datele tale nimănui.</b>",
+    "s4Title": "4. Unde sunt stocate datele",
+    "s4p1": "Baza de date este găzduită în Uniunea Europeană (regiunea Frankfurt, Germania). Aplicația rulează pe infrastructură cloud cu criptare în tranzit (HTTPS/TLS) și criptare la stocare.",
+    "s5Title": "5. Împuterniciți (subprocesatori)",
+    "s5intro": "Folosim un număr limitat de furnizori pentru funcționarea serviciului:",
+    "s5l1": "<b>Vercel</b> — găzduirea aplicației;",
+    "s5l2": "<b>Neon</b> — baza de date (UE, Frankfurt);",
+    "s5l3": "<b>Anthropic</b> — funcțiile de inteligență artificială;",
+    "s5l4": "<b>Telegram</b> — doar dacă activezi notificările Telegram;",
+    "s5l5": "<b>MetaApi</b> — doar dacă activezi sincronizarea cloud cu brokerul;",
+    "s5l6": "<b>Cloudinary</b> — stocarea capturilor de ecran încărcate.",
+    "s6Title": "6. Cât timp păstrăm datele",
+    "s6p1": "Datele contului sunt păstrate cât timp contul este activ. La ștergerea contului, datele personale sunt șterse sau anonimizate într-un termen rezonabil, cu excepția situațiilor în care legea impune păstrarea lor.",
+    "s7Title": "7. Drepturile tale (GDPR)",
+    "s7p1": "Ai dreptul de acces, rectificare, ștergere („dreptul de a fi uitat”), restricționare, portabilitate și opoziție, precum și dreptul de a-ți retrage consimțământul oricând. Pentru exercitarea lor, scrie-ne la <mail>palcristi1@gmail.com</mail>. Ai de asemenea dreptul de a depune o plângere la ANSPDCP (www.dataprotection.ro).",
+    "s8Title": "8. Cookies",
+    "s8p1": "TradeGx folosește doar cookies strict necesare funcționării: cookie-ul de sesiune pentru autentificare. Nu folosim cookies de publicitate sau de urmărire terță. Preferințele de interfață (temă, limbă, progres Academie) sunt stocate local în browserul tău (localStorage) și nu părăsesc dispozitivul.",
+    "s9Title": "9. Modificări",
+    "s9p1": "Vom anunța în aplicație orice modificare semnificativă a acestei politici înainte ca ea să intre în vigoare."
+  },
+  "motivationBanner": {
+    "label": "Sfatul zilei",
+    "hideForToday": "Ascunde pentru azi",
+    "tips": [
+      {
+        "text": "Nu risca niciodată mai mult de 1–2% din cont pe o singură tranzacție.",
+        "cat": "Risc"
+      },
+      {
+        "text": "Mută stop-loss-ul la break-even după ce tranzacția atinge +1R profit.",
+        "cat": "Management"
+      },
+      {
+        "text": "Cu un Risk:Reward de 1:2 ești profitabil chiar și cu o rată de câștig de doar 40%.",
+        "cat": "Matematică"
+      },
+      {
+        "text": "Verifică trendul pe timeframe-ul mare (H4/D1) înainte să intri pe cel mic.",
+        "cat": "Analiză"
+      },
+      {
+        "text": "Evită intrările cu 30 de minute înainte și după știrile de impact ridicat.",
+        "cat": "Timing"
+      },
+      {
+        "text": "Nu adăuga niciodată la o poziție pe pierdere — așa îți distrugi contul.",
+        "cat": "Risc"
+      },
+      {
+        "text": "Calculează dimensiunea poziției ÎNAINTE de intrare, pornind de la stop-loss.",
+        "cat": "Sizing"
+      },
+      {
+        "text": "Plasează stop-loss-ul sub/peste structură, nu la o distanță fixă arbitrară.",
+        "cat": "Execuție"
+      },
+      {
+        "text": "O pierdere de 50% cere un câștig de 100% pentru recuperare. Limitează pierderile.",
+        "cat": "Matematică"
+      },
+      {
+        "text": "Dacă pierzi 2–3 tranzacții consecutiv, oprește-te pentru azi. Protejează capitalul.",
+        "cat": "Disciplină"
+      },
+      {
+        "text": "Așteaptă confirmarea (CHoCH / BOS) — nu intra doar pentru că prețul a atins o zonă.",
+        "cat": "Confirmare"
+      },
+      {
+        "text": "Sesiunea Londra (10:00–13:00 RO) oferă cea mai mare lichiditate pe forex.",
+        "cat": "Timing"
+      },
+      {
+        "text": "Killzone-ul New York (15:30–18:00 RO) e ideal pentru indici și perechile cu USD.",
+        "cat": "Timing"
+      },
+      {
+        "text": "Win rate-ul singur nu spune nimic — contează expectanța: (win rate × R:R) − rata de pierdere.",
+        "cat": "Matematică"
+      },
+      {
+        "text": "Nu tranzacționa niciodată fără stop-loss, indiferent cât de sigur ești pe setup.",
+        "cat": "Risc"
+      },
+      {
+        "text": "Un Fair Value Gap tinde să fie umplut — folosește-l ca zonă de intrare cu confluență.",
+        "cat": "SMC"
+      },
+      {
+        "text": "Lichiditatea se acumulează peste maxime și sub minime evidente (equal highs/lows).",
+        "cat": "SMC"
+      },
+      {
+        "text": "Un Order Block valid a creat o mișcare cu displacement, nu o lumânare oarecare.",
+        "cat": "SMC"
+      },
+      {
+        "text": "Jurnalizează fiecare tranzacție — fără date nu poți îmbunătăți nimic obiectiv.",
+        "cat": "Proces"
+      },
+      {
+        "text": "Profită parțial la +1R și lasă restul să curgă cu stop-loss-ul la break-even.",
+        "cat": "Management"
+      },
+      {
+        "text": "Nu deschide două poziții puternic corelate — e risc dublu ascuns pe aceeași direcție.",
+        "cat": "Risc"
+      },
+      {
+        "text": "Reduce dimensiunea poziției când volatilitatea (ATR) crește semnificativ.",
+        "cat": "Risc"
+      },
+      {
+        "text": "Tranzacționează în direcția trendului — nu încerca să prinzi vârfuri și funduri.",
+        "cat": "Trend"
+      },
+      {
+        "text": "Un trend sănătos formează maxime și minime tot mai înalte (higher highs & lows).",
+        "cat": "Trend"
+      },
+      {
+        "text": "Backtestează o strategie pe minim 100 de tranzacții înainte să o folosești live.",
+        "cat": "Pregătire"
+      },
+      {
+        "text": "Spread-ul se lărgește la deschiderea și închiderea sesiunilor — evită acele momente.",
+        "cat": "Execuție"
+      },
+      {
+        "text": "Confluența mai multor factori (trend + zonă HTF + sesiune) crește probabilitatea.",
+        "cat": "Analiză"
+      },
+      {
+        "text": "Aurul (XAU) e mai volatil decât majoritatea perechilor forex — lărgește stop-loss-ul.",
+        "cat": "Instrument"
+      },
+      {
+        "text": "Evită tranzacționarea vineri după-amiaza: lichiditate scăzută, mișcări imprevizibile.",
+        "cat": "Timing"
+      },
+      {
+        "text": "Verifică calendarul economic în fiecare dimineață, înainte să deschizi o poziție.",
+        "cat": "Rutină"
+      },
+      {
+        "text": "Riscă mereu același procent din cont — nu mări miza ca să recuperezi o pierdere.",
+        "cat": "Disciplină"
+      },
+      {
+        "text": "Prețul reacționează la nivelurile pe care le văd toți — desenează zonele de pe H4/D1.",
+        "cat": "Analiză"
+      }
+    ]
+  },
+  "marketSessions": {
+    "title": "Sesiuni de Piață",
+    "subtitle": "Ora României (EET/EEST)",
+    "keyOverlaps": "Suprapuneri cheie",
+    "sydney": "Sydney",
+    "tokyo": "Tokyo",
+    "london": "Londra",
+    "newYork": "New York",
+    "overlapTokyoLondon": "Tokyo / Londra",
+    "overlapLondonNewYork": "Londra / New York"
+  },
+  "dailyReview": {
+    "title": "Rezumatul zilei",
+    "analyzing": "Se analizează...",
+    "generate": "Generează",
+    "intro": "Primește un rezumat AI al zilei tale de trading — cum a mers și ce poți îmbunătăți. Îl primești automat și pe Telegram, seara.",
+    "trades": "trades"
+  },
+  "telegramCard": {
+    "compactTitle": "Canalul Telegram TradeGx",
+    "compactSubtitle": "Semnalele AI ale zilei, direct pe telefon",
+    "enter": "Intră",
+    "fullTitle": "Alătură-te comunității TradeGx",
+    "fullDesc": "Primești cele 3 semnale AI ale zilei direct pe Telegram, alături de alți traderi. Gratuit, fără spam.",
+    "enterChannel": "Intră în canal"
+  },
+  "economicCountdown": {
+    "nextImpactNews": "Următoarea știre de impact",
+    "remaining": "rămas",
+    "now": "acum"
+  },
+  "performanceHeatmap": {
+    "title": "Performanța pe oră și zi",
+    "subtitle": "Când tranzacționezi cel mai bine (ora ta locală)",
+    "metricVolume": "Volum",
+    "empty": "Nicio tranzacție înregistrată încă. Heatmap-ul se populează pe măsură ce tranzacționezi.",
+    "hoverHint": "Treci cu mouse-ul peste o celulă pentru detalii",
+    "bestWindow": "Cea mai bună fereastră",
+    "avoid": "De evitat",
+    "trade": "trade",
+    "trades": "trades",
+    "win": "win",
+    "days": [
+      "Luni",
+      "Marți",
+      "Miercuri",
+      "Joi",
+      "Vineri",
+      "Sâmbătă",
+      "Duminică"
+    ],
+    "daysShort": [
+      "Lun",
+      "Mar",
+      "Mie",
+      "Joi",
+      "Vin",
+      "Sâm",
+      "Dum"
+    ]
+  },
+  "correlationHeatmap": {
+    "title": "Matrice de corelație",
+    "subtitle": "Pe randamentele zilnice {days} — evită expunerea dublă",
+    "daysLabel": "· {n} zile",
+    "unavailable": "Date de corelație indisponibile momentan.",
+    "legendPositive": "Corelație pozitivă (se mișcă la fel)",
+    "legendNegative": "Negativă (opus)"
+  },
+  "reportPage": {
+    "metaTitle": "Raport de Performanță — TradeGx",
+    "instrForex": "Forex",
+    "instrCrypto": "Crypto",
+    "instrMetals": "Metale",
+    "instrIndices": "Indici",
+    "instrCommodities": "Mărfuri",
+    "instrStocks": "Acțiuni",
+    "instrCfd": "CFD",
+    "setupOther": "Altul"
   }
 }

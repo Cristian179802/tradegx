@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Settings, Zap, ChevronRight, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,37 +13,43 @@ import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { AccountSwitcher } from "@/components/layout/account-switcher";
 import { useAuthStore } from "@/stores/auth.store";
 
-const PAGE_TITLES: Record<string, { title: string; icon?: string; description?: string }> = {
-  "/dashboard":    { title: "Panou de Control",  icon: "📊", description: "Statistici & activitate recentă" },
-  "/signals":      { title: "Semnale AI",         icon: "🎯", description: "Setup-uri de înaltă probabilitate (HPS)" },
-  "/checklist":    { title: "Checklist Pre-Trade", icon: "✅", description: "Verifică disciplina înainte de intrare" },
-  "/goals":        { title: "Obiective",          icon: "🏆", description: "Ținte lunare & monitor prop firm" },
-  "/trades":       { title: "Tranzacții",         icon: "📋", description: "Istoric complet de trading" },
-  "/journal":      { title: "Jurnal",             icon: "📓", description: "Analiză & reflecție" },
-  "/calculator":   { title: "Calculator Lot",     icon: "🧮", description: "Calculează dimensiunea poziției" },
-  "/analytics":    { title: "Analiză",            icon: "📈", description: "Metrici & performanță" },
-  "/accounts":     { title: "Conturi",            icon: "💼", description: "Gestionează conturile de trading" },
-  "/backtesting":  { title: "Backtesting",        icon: "🔬", description: "Testează strategii pe date istorice" },
-  "/charts":       { title: "Grafice Live",       icon: "💹", description: "TradingView avansat" },
-  "/market":       { title: "Piețe",              icon: "🌍", description: "Prețuri & instrumente" },
-  "/tools":        { title: "Unelte Pro",         icon: "📊", description: "Forța valutelor, risc de ruină, corelații" },
-  "/news":         { title: "Știri de Piață",     icon: "📰", description: "Știri financiare clasificate pe impact" },
-  "/calendar":     { title: "Calendar Economic",  icon: "📅", description: "Evenimente macro importante" },
-  "/community":    { title: "Comunitate",         icon: "👥", description: "Conectează-te cu traderii" },
-  "/settings":     { title: "Setări",             icon: "⚙️", description: "Personalizează TradeGx" },
-  "/ai-assistant": { title: "AI Trading Coach",   icon: "🤖", description: "Analiză inteligentă AI" },
-  "/alerts":       { title: "Alerte AI",          icon: "🔔", description: "Monitorizare risc în timp real" },
-  "/risk-manager": { title: "Risk Manager",        icon: "🛡️", description: "Monitorizare risc în timp real" },
-  "/prop-firm":    { title: "Prop Firm Challenge", icon: "🏆", description: "Monitorizare reguli challenge în timp real" },
+// route → { nav translation key, icon }. Titlul se traduce la randare via nav.*
+const PAGE_TITLES: Record<string, { key: string; icon: string }> = {
+  "/dashboard":    { key: "dashboard",   icon: "📊" },
+  "/signals":      { key: "signals",     icon: "🎯" },
+  "/checklist":    { key: "checklist",   icon: "✅" },
+  "/goals":        { key: "goals",       icon: "🏆" },
+  "/trades":       { key: "trades",      icon: "📋" },
+  "/journal":      { key: "journal",     icon: "📓" },
+  "/calculator":   { key: "calculator",  icon: "🧮" },
+  "/analytics":    { key: "analytics",   icon: "📈" },
+  "/accounts":     { key: "accounts",    icon: "💼" },
+  "/backtesting":  { key: "backtesting", icon: "🔬" },
+  "/charts":       { key: "charts",      icon: "💹" },
+  "/market":       { key: "market",      icon: "🌍" },
+  "/tools":        { key: "tools",       icon: "📊" },
+  "/news":         { key: "news",        icon: "📰" },
+  "/calendar":     { key: "calendar",    icon: "📅" },
+  "/community":    { key: "community",   icon: "👥" },
+  "/settings":     { key: "settings",    icon: "⚙️" },
+  "/ai-assistant": { key: "aiAssistant", icon: "🤖" },
+  "/alerts":       { key: "alerts",      icon: "🔔" },
+  "/risk-manager": { key: "riskManager", icon: "🛡️" },
+  "/prop-firm":    { key: "propFirm",    icon: "🏆" },
 };
 
 export function Topbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { toggleMobileSidebar } = useAuthStore();
+  const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
 
   const matchKey = Object.keys(PAGE_TITLES).find(k => pathname === k || pathname.startsWith(k + "/"));
-  const page = (matchKey ? PAGE_TITLES[matchKey] : null) ?? { title: "TradeGx", icon: "⚡" };
+  const matched = matchKey ? PAGE_TITLES[matchKey] : null;
+  const page = matched
+    ? { title: tNav(matched.key), icon: matched.icon }
+    : { title: "TradeGx", icon: "⚡" };
 
   return (
     <div className="shrink-0">
@@ -58,7 +65,7 @@ export function Topbar() {
           <button
             onClick={toggleMobileSidebar}
             className="md:hidden flex items-center justify-center w-8 h-8 -ml-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition-colors"
-            aria-label="Deschide meniul"
+            aria-label={tCommon("openMenu")}
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -84,7 +91,7 @@ export function Topbar() {
             <Link href="/pricing">
               <Badge className="bg-gradient-to-r from-indigo-500/15 to-violet-500/10 border border-indigo-500/25 text-indigo-300 hover:from-indigo-500/25 hover:to-violet-500/20 cursor-pointer text-[10px] px-2 py-0.5 gap-1 flex items-center transition-all">
                 <Zap className="w-2.5 h-2.5" />
-                Probă PRO
+                {tCommon("trialPro")}
               </Badge>
             </Link>
           )}

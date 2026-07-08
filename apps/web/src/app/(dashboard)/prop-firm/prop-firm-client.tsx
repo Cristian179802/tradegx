@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import {
   Shield, Target, TrendingDown, CalendarCheck, Settings2, Loader2,
@@ -42,8 +42,8 @@ const STATUS_CFG = {
   NO_RULES:    { label: "noRules",    cls: "bg-zinc-700/40 text-zinc-400 border-zinc-600/40",     Icon: Settings2 },
 };
 
-function money(n: number, c: string) {
-  return new Intl.NumberFormat("ro-RO", { style: "currency", currency: c, maximumFractionDigits: 0 }).format(n);
+function money(n: number, c: string, locale: string) {
+  return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "en-US", { style: "currency", currency: c, maximumFractionDigits: 0 }).format(n);
 }
 
 // Bară "progres spre obiectiv" (verde, bine să umpli)
@@ -85,6 +85,7 @@ function LimitBar({ value, limit, unit = "%" }: { value: number; limit: number |
 
 function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
   const t = useTranslations("propFirmPage");
+  const locale = useLocale();
   const { toast } = useToast();
   const [editing, setEditing] = React.useState(acc.status === "NO_RULES");
   const [saving, setSaving] = React.useState(false);
@@ -158,7 +159,7 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
               {r.propFirm && <span className="text-[10px] text-zinc-500 font-semibold">{r.propFirm}</span>}
             </div>
             <p className="text-[11px] text-zinc-600 mt-0.5">
-              Sold {money(acc.balance, acc.currency)} · din {money(acc.initialBalance, acc.currency)}
+              {t("soldOf", { balance: money(acc.balance, acc.currency, locale), initial: money(acc.initialBalance, acc.currency, locale) })}
             </p>
           </div>
         </div>
@@ -189,7 +190,7 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
           </div>
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-rose-400/80 mb-1.5">
-              <AlertTriangle className="w-3 h-3" /> Drawdown total maxim
+              <AlertTriangle className="w-3 h-3" /> {t("ddTotalMax")}
             </div>
             <LimitBar value={p.maxDrawdownPct} limit={r.maxDrawdownPct} />
           </div>
@@ -276,7 +277,7 @@ export function PropFirmClient() {
       ) : accounts.length === 0 ? (
         <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-10 text-center">
           <Shield className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
-          <p className="text-sm font-semibold text-zinc-300">Niciun cont Challenge sau Live</p>
+          <p className="text-sm font-semibold text-zinc-300">{t("noChallengeAccount")}</p>
           <p className="text-xs text-zinc-500 mt-1 max-w-md mx-auto">
             {t("empty")}
           </p>

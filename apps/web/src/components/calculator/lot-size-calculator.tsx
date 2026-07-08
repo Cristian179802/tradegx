@@ -104,14 +104,14 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
       <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5 space-y-4">
         <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
           <Calculator className="h-4 w-4 text-indigo-400" />
-          Parametri calcul
+          {t("paramsTitle")}
         </h3>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Account */}
           <div>
             <label className="text-xs font-medium text-zinc-400 block mb-1">
-              Cont trading
+              {t("account")}
             </label>
             <Select value={accountId} onValueChange={setAccountId}>
               <SelectTrigger className="bg-zinc-800/80 border-zinc-700 text-zinc-100">
@@ -218,7 +218,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
             />
             {symbol && (
               <p className="text-xs text-zinc-600 mt-1">
-                1 pip = {isJPYPair(symbol) ? "0.01" : "0.0001"} pentru {symbol}
+                {t("pipEquals", { val: isJPYPair(symbol) ? "0.01" : "0.0001", symbol })}
               </p>
             )}
           </div>
@@ -226,9 +226,9 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
           {/* Custom pip value */}
           <div>
             <label className="text-xs font-medium text-zinc-400 block mb-1">
-              Valoare pip / lot standard ($){" "}
+              {t("pipValueLabel")}{" "}
               <span className="text-zinc-600 font-normal">
-                (auto: {getPipValue(symbol)}$)
+                {t("pipAuto", { val: getPipValue(symbol) })}
               </span>
             </label>
             <Input
@@ -257,7 +257,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
             <p className="text-5xl font-black text-white num tracking-tight">
               {result.lotSize.toFixed(2)}
             </p>
-            <p className="text-sm text-zinc-500 mt-1">loturi standard</p>
+            <p className="text-sm text-zinc-500 mt-1">{t("standardLots")}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -294,8 +294,8 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
       ) : (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-10 text-center">
           <Calculator className="h-10 w-10 text-zinc-700 mx-auto mb-3" />
-          <p className="text-sm text-zinc-500 font-medium">Introdu parametrii pentru a calcula volumul</p>
-          <p className="text-xs text-zinc-700 mt-1">Stop loss pips + risc → volum optim</p>
+          <p className="text-sm text-zinc-500 font-medium">{t("emptyTitle")}</p>
+          <p className="text-xs text-zinc-700 mt-1">{t("emptyHint")}</p>
         </div>
       )}
     </div>

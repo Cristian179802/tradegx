@@ -1,114 +1,69 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 
-export const metadata: Metadata = {
-  title: "Termeni și Condiții — TradeGx",
-  description: "Termenii și condițiile de utilizare a platformei TradeGx.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("terms");
+  return { title: t("metaTitle"), description: t("metaDesc") };
+}
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const t = await getTranslations("terms");
+  const b = (c: React.ReactNode) => <strong className="text-zinc-300">{c}</strong>;
   return (
-    <LegalPage title="Termeni și Condiții" updated="3 iulie 2026">
-      <LegalSection title="1. Despre serviciu">
-        <p>
-          TradeGx (www.tradegx.com) este o platformă software de tip SaaS pentru jurnalizarea,
-          analiza și îmbunătățirea activității de tranzacționare (trade journal). Platforma oferă
-          instrumente de evidență a tranzacțiilor, statistici de performanță, materiale educaționale,
-          instrumente de gestionare a riscului și funcții asistate de inteligență artificială.
-        </p>
-        <p>
-          <strong className="text-zinc-300">TradeGx NU este broker, dealer, bancă sau firmă de investiții.</strong>{" "}
-          Platforma nu execută tranzacții, nu deține și nu administrează fondurile utilizatorilor și nu
-          intermediază accesul la piețe financiare.
-        </p>
+    <LegalPage title={t("title")} updated={t("updated")}>
+      <LegalSection title={t("s1Title")}>
+        <p>{t("s1p1")}</p>
+        <p>{t.rich("s1p2", { b })}</p>
       </LegalSection>
 
-      <LegalSection title="2. Fără consultanță financiară">
-        <p>
-          Tot conținutul platformei — inclusiv semnalele generate de AI, statisticile, rapoartele,
-          materialele din Academie și răspunsurile asistentului AI — are exclusiv scop informativ și
-          educațional. Nimic din TradeGx nu constituie consultanță financiară, de investiții, juridică
-          sau fiscală și nu reprezintă o recomandare de a cumpăra sau vinde vreun instrument financiar.
-        </p>
-        <p>
-          Deciziile de tranzacționare îți aparțin în totalitate. Tranzacționarea instrumentelor
-          financiare implică un risc semnificativ de pierdere a capitalului.
-        </p>
+      <LegalSection title={t("s2Title")}>
+        <p>{t("s2p1")}</p>
+        <p>{t("s2p2")}</p>
       </LegalSection>
 
-      <LegalSection title="3. Contul de utilizator">
-        <p>
-          Pentru utilizarea platformei este necesar un cont. Ești responsabil pentru păstrarea
-          confidențialității datelor de autentificare și pentru toată activitatea desfășurată în contul
-          tău. Trebuie să ai cel puțin 18 ani pentru a folosi TradeGx.
-        </p>
-        <p>
-          Conectarea la conturile de broker (MT4/MT5) se realizează exclusiv prin parola de investitor
-          (read-only) sau prin mecanisme echivalente de acces în citire. Nu îți vom cere niciodată
-          parola principală de tranzacționare.
-        </p>
+      <LegalSection title={t("s3Title")}>
+        <p>{t("s3p1")}</p>
+        <p>{t("s3p2")}</p>
       </LegalSection>
 
-      <LegalSection title="4. Abonamente și perioada de probă">
-        <p>
-          Anumite funcții sunt disponibile contra unui abonament, conform ofertei afișate pe pagina de
-          prețuri. Perioada de probă gratuită (dacă este oferită) nu necesită card de credit și nu se
-          convertește automat într-un abonament plătit fără acordul tău explicit.
-        </p>
-        <p>
-          Plățile sunt procesate prin furnizori terți specializați. Poți anula abonamentul oricând din
-          setările contului; anularea produce efecte la finalul perioadei de facturare curente.
-        </p>
+      <LegalSection title={t("s4Title")}>
+        <p>{t("s4p1")}</p>
+        <p>{t("s4p2")}</p>
       </LegalSection>
 
-      <LegalSection title="5. Utilizare acceptabilă">
-        <p>Este interzis să folosești platforma pentru:</p>
+      <LegalSection title={t("s5Title")}>
+        <p>{t("s5intro")}</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li>activități ilegale sau frauduloase;</li>
-          <li>încercări de acces neautorizat la sistemele TradeGx sau la conturile altor utilizatori;</li>
-          <li>copierea, revânzarea sau redistribuirea conținutului platformei fără acord scris;</li>
-          <li>încărcarea de conținut care încalcă drepturile terților.</li>
+          <li>{t("s5l1")}</li>
+          <li>{t("s5l2")}</li>
+          <li>{t("s5l3")}</li>
+          <li>{t("s5l4")}</li>
         </ul>
       </LegalSection>
 
-      <LegalSection title="6. Proprietate intelectuală">
-        <p>
-          Platforma, codul, designul, marca TradeGx și materialele educaționale sunt protejate de
-          legislația privind proprietatea intelectuală. Datele pe care le introduci (tranzacții, note,
-          capturi de ecran) rămân ale tale; ne acorzi doar licența tehnică necesară stocării și
-          afișării lor în cadrul serviciului.
-        </p>
+      <LegalSection title={t("s6Title")}>
+        <p>{t("s6p1")}</p>
       </LegalSection>
 
-      <LegalSection title="7. Limitarea răspunderii">
-        <p>
-          Serviciul este furnizat „așa cum este”. În limitele maxime permise de lege, TradeGx nu
-          răspunde pentru pierderi financiare rezultate din deciziile tale de tranzacționare, pentru
-          acuratețea datelor furnizate de terți (cotații, calendar economic, știri) sau pentru
-          întreruperi temporare ale serviciului. Sincronizarea cu brokerii depinde de servicii terțe și
-          poate suferi întârzieri.
-        </p>
+      <LegalSection title={t("s7Title")}>
+        <p>{t("s7p1")}</p>
       </LegalSection>
 
-      <LegalSection title="8. Încetarea">
-        <p>
-          Îți poți șterge contul oricând din setări. Ne rezervăm dreptul de a suspenda conturile care
-          încalcă acești termeni, cu notificare prealabilă acolo unde este rezonabil posibil.
-        </p>
+      <LegalSection title={t("s8Title")}>
+        <p>{t("s8p1")}</p>
       </LegalSection>
 
-      <LegalSection title="9. Modificări și legea aplicabilă">
-        <p>
-          Putem actualiza acești termeni; modificările semnificative vor fi anunțate în aplicație.
-          Continuarea utilizării după intrarea în vigoare a modificărilor înseamnă acceptarea lor.
-          Acești termeni sunt guvernați de legea română și de reglementările UE aplicabile.
-        </p>
+      <LegalSection title={t("s9Title")}>
+        <p>{t("s9p1")}</p>
       </LegalSection>
 
-      <LegalSection title="10. Contact">
+      <LegalSection title={t("s10Title")}>
         <p>
-          Pentru orice întrebare legată de acești termeni: <a href="mailto:palcristi1@gmail.com" className="text-indigo-400 hover:text-indigo-300">palcristi1@gmail.com</a>{" "}
-          sau pagina de <a href="/contact" className="text-indigo-400 hover:text-indigo-300">contact</a>.
+          {t.rich("s10p1", {
+            mail: (c) => <a href="mailto:palcristi1@gmail.com" className="text-indigo-400 hover:text-indigo-300">{c}</a>,
+            contact: (c) => <a href="/contact" className="text-indigo-400 hover:text-indigo-300">{c}</a>,
+          })}
         </p>
       </LegalSection>
     </LegalPage>

@@ -1,10 +1,11 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 
 // ── Wrapper comun pentru paginile legale/publice (terms, privacy, contact) ──
 
-export function LegalPage({
+export async function LegalPage({
   title,
   updated,
   children,
@@ -13,6 +14,7 @@ export function LegalPage({
   updated?: string;
   children: React.ReactNode;
 }) {
+  const t = await getTranslations("legalCommon");
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
       {/* Header */}
@@ -30,7 +32,7 @@ export function LegalPage({
             href="/"
             className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-medium"
           >
-            <ChevronLeft className="w-3.5 h-3.5" /> Înapoi la site
+            <ChevronLeft className="w-3.5 h-3.5" /> {t("backToSite")}
           </Link>
         </div>
       </header>
@@ -39,7 +41,7 @@ export function LegalPage({
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="text-3xl font-black tracking-tight mb-2">{title}</h1>
         {updated && (
-          <p className="text-xs text-zinc-600 mb-10">Ultima actualizare: {updated}</p>
+          <p className="text-xs text-zinc-600 mb-10">{t("lastUpdated", { date: updated })}</p>
         )}
         <div className="space-y-8">{children}</div>
       </main>
@@ -49,9 +51,9 @@ export function LegalPage({
         <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs text-zinc-600">
           <p>&copy; {new Date().getFullYear()} TradeGx</p>
           <div className="flex gap-5">
-            <Link href="/terms" className="hover:text-zinc-400 transition-colors">Termeni</Link>
-            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">Confidențialitate</Link>
-            <Link href="/contact" className="hover:text-zinc-400 transition-colors">Contact</Link>
+            <Link href="/terms" className="hover:text-zinc-400 transition-colors">{t("ftTerms")}</Link>
+            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">{t("ftPrivacy")}</Link>
+            <Link href="/contact" className="hover:text-zinc-400 transition-colors">{t("ftContact")}</Link>
           </div>
         </div>
       </footer>

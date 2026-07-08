@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,15 +25,16 @@ import { registerSchema, type RegisterInput } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 
 function PasswordStrength({ password }: { password: string }) {
+  const t = useTranslations("auth");
   const checks = useMemo(() => [
-    { label: "Minim 8 caractere", ok: password.length >= 8 },
-    { label: "Literă mare", ok: /[A-Z]/.test(password) },
-    { label: "Literă mică", ok: /[a-z]/.test(password) },
-    { label: "Cifră sau simbol", ok: /[\d!@#$%^&*]/.test(password) },
-  ], [password]);
+    { label: t("pwMin8"), ok: password.length >= 8 },
+    { label: t("pwUpper"), ok: /[A-Z]/.test(password) },
+    { label: t("pwLower"), ok: /[a-z]/.test(password) },
+    { label: t("pwDigit"), ok: /[\d!@#$%^&*]/.test(password) },
+  ], [password, t]);
 
   const score = checks.filter(c => c.ok).length;
-  const strength = score <= 1 ? "Slabă" : score === 2 ? "Medie" : score === 3 ? "Bună" : "Puternică";
+  const strength = score <= 1 ? t("pwWeak") : score === 2 ? t("pwMedium") : score === 3 ? t("pwGood") : t("pwStrong");
   const color = score <= 1 ? "rose" : score === 2 ? "amber" : score === 3 ? "indigo" : "emerald";
 
   if (!password) return null;
@@ -59,7 +61,7 @@ function PasswordStrength({ password }: { password: string }) {
           color === "amber" ? "text-amber-400" :
           color === "indigo" ? "text-indigo-400" : "text-emerald-400"
         )}>
-          Parolă {strength}
+          {t("pwStrengthLabel", { s: strength })}
         </p>
         <div className="flex gap-3">
           {checks.map((c, i) => (
@@ -80,6 +82,7 @@ function PasswordStrength({ password }: { password: string }) {
 }
 
 export function RegisterForm() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -110,7 +113,7 @@ export function RegisterForm() {
     const json = await res.json();
 
     if (!json.success) {
-      setError(json.error ?? "Eroare la înregistrare");
+      setError(json.error ?? t("registerError"));
       return;
     }
 
@@ -131,17 +134,17 @@ export function RegisterForm() {
             </div>
           </div>
 
-          <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Verifică emailul!</h2>
+          <h2 className="text-2xl font-black text-white mb-2 tracking-tight">{t("verifyEmailTitle")}</h2>
           <p className="text-zinc-400 text-sm mb-2 leading-relaxed">
-            Am trimis un link de confirmare la adresa ta.
+            {t("verifyEmailDesc")}
           </p>
-          <p className="text-zinc-600 text-xs mb-8">Nu uita să verifici și folderul Spam.</p>
+          <p className="text-zinc-600 text-xs mb-8">{t("checkSpam")}</p>
 
           <div className="grid grid-cols-3 gap-3 mb-8 p-4 bg-zinc-800/30 rounded-xl border border-zinc-800">
             {[
-              { label: "Cont DEMO", value: "$10,000" },
-              { label: "Trial PRO", value: "14 zile" },
-              { label: "Setup", value: "< 2 min" },
+              { label: t("demoAccount"), value: "$10,000" },
+              { label: t("trialProShort"), value: t("days14") },
+              { label: t("setupTime"), value: "< 2 min" },
             ].map(({ label, value }) => (
               <div key={label} className="text-center">
                 <p className="text-white font-black text-lg">{value}</p>
@@ -154,7 +157,7 @@ export function RegisterForm() {
             onClick={() => router.push("/login")}
             className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 h-11 font-semibold shadow-lg shadow-indigo-500/25"
           >
-            Mergi la autentificare
+            {t("goToLogin")}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
@@ -175,20 +178,20 @@ export function RegisterForm() {
         <div className="mb-6">
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/25 mb-4">
             <Zap className="w-3 h-3 text-indigo-400" />
-            <span className="text-xs font-bold text-indigo-300">14 zile PRO gratuit</span>
-            <span className="text-[10px] text-indigo-500/70">• Fără card necesar</span>
+            <span className="text-xs font-bold text-indigo-300">{t("proTrialFree")}</span>
+            <span className="text-[10px] text-indigo-500/70">{t("noCardNeeded")}</span>
           </div>
           <h1 className="text-2xl font-black text-white mb-1.5 tracking-tight">
-            Creează cont gratuit
+            {t("createFreeAccount")}
           </h1>
           <p className="text-zinc-400 text-sm">
-            Jurnalul profesional pentru traderi SMC / ICT
+            {t("registerSubtitle")}
           </p>
         </div>
 
         {/* Feature pills */}
         <div className="flex flex-wrap gap-1.5 mb-6">
-          {["AI Coach", "Jurnal ICT/SMC", "Analiză avansată", "Broker sync"].map((f) => (
+          {[t("pillAiCoach"), t("pillJournal"), t("pillAnalytics"), t("pillBrokerSync")].map((f) => (
             <span key={f} className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800/80 border border-zinc-700/50 text-zinc-500 font-medium">
               ✓ {f}
             </span>
@@ -209,7 +212,7 @@ export function RegisterForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-zinc-300 text-xs font-semibold uppercase tracking-wider">
-                    Nume complet
+                    {t("fullName")}
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -233,7 +236,7 @@ export function RegisterForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-zinc-300 text-xs font-semibold uppercase tracking-wider">
-                    Email
+                    {t("email")}
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -255,7 +258,7 @@ export function RegisterForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-zinc-300 text-xs font-semibold uppercase tracking-wider">
-                    Parolă
+                    {t("password")}
                   </FormLabel>
                   <FormControl>
                     <div>
@@ -263,7 +266,7 @@ export function RegisterForm() {
                         <Input
                           {...field}
                           type={showPassword ? "text" : "password"}
-                          placeholder="Minim 8 caractere"
+                          placeholder={t("minChars")}
                           autoComplete="new-password"
                           className="bg-zinc-800/60 border-zinc-700/80 text-white placeholder:text-zinc-600 focus:border-indigo-500/70 focus:bg-zinc-800 focus:ring-2 focus:ring-indigo-500/10 h-11 pr-10 transition-all duration-200"
                         />
@@ -290,14 +293,14 @@ export function RegisterForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-zinc-300 text-xs font-semibold uppercase tracking-wider">
-                    Confirmă parola
+                    {t("confirmPasswordLabel")}
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         {...field}
                         type={showConfirm ? "text" : "password"}
-                        placeholder="Repetă parola"
+                        placeholder={t("repeatPw")}
                         autoComplete="new-password"
                         className="bg-zinc-800/60 border-zinc-700/80 text-white placeholder:text-zinc-600 focus:border-indigo-500/70 focus:bg-zinc-800 focus:ring-2 focus:ring-indigo-500/10 h-11 pr-10 transition-all duration-200"
                       />
@@ -331,7 +334,7 @@ export function RegisterForm() {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <span className="flex items-center gap-2">
-                  Creează cont gratuit
+                  {t("createFreeAccount")}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </span>
               )}
@@ -340,15 +343,10 @@ export function RegisterForm() {
 
             {/* Consimțământ legal */}
             <p className="text-[11px] text-zinc-600 text-center leading-relaxed">
-              Prin crearea contului ești de acord cu{" "}
-              <Link href="/terms" className="text-zinc-400 hover:text-zinc-300 underline underline-offset-2">
-                Termenii și Condițiile
-              </Link>{" "}
-              și{" "}
-              <Link href="/privacy" className="text-zinc-400 hover:text-zinc-300 underline underline-offset-2">
-                Politica de Confidențialitate
-              </Link>
-              .
+              {t.rich("consentCreate", {
+                terms: (c) => <Link href="/terms" className="text-zinc-400 hover:text-zinc-300 underline underline-offset-2">{c}</Link>,
+                privacy: (c) => <Link href="/privacy" className="text-zinc-400 hover:text-zinc-300 underline underline-offset-2">{c}</Link>,
+              })}
             </p>
           </form>
         </Form>
@@ -360,7 +358,7 @@ export function RegisterForm() {
           </div>
           <div className="relative flex justify-center">
             <span className="bg-zinc-900/90 px-3 text-[11px] text-zinc-600 uppercase tracking-wider font-medium">
-              sau continuă cu
+              {t("orContinueWith")}
             </span>
           </div>
         </div>
@@ -404,28 +402,23 @@ export function RegisterForm() {
           <div className="w-px h-3 bg-zinc-800" />
           <div className="text-[11px] text-zinc-600">GDPR compliant</div>
           <div className="w-px h-3 bg-zinc-800" />
-          <div className="text-[11px] text-zinc-600">Zero spam</div>
+          <div className="text-[11px] text-zinc-600">{t("zeroSpam")}</div>
         </div>
 
         <p className="text-xs text-zinc-600 text-center mt-4 leading-relaxed">
-          Prin înregistrare, ești de acord cu{" "}
-          <Link href="/terms" className="text-zinc-500 hover:text-zinc-300 underline transition-colors">
-            Termenii
-          </Link>{" "}
-          și{" "}
-          <Link href="/privacy" className="text-zinc-500 hover:text-zinc-300 underline transition-colors">
-            Politica de Confidențialitate
-          </Link>
-          .
+          {t.rich("consentRegister", {
+            terms: (c) => <Link href="/terms" className="text-zinc-500 hover:text-zinc-300 underline transition-colors">{c}</Link>,
+            privacy: (c) => <Link href="/privacy" className="text-zinc-500 hover:text-zinc-300 underline transition-colors">{c}</Link>,
+          })}
         </p>
 
         <p className="text-center text-sm text-zinc-500 mt-3">
-          Ai deja cont?{" "}
+          {t("haveAccount")}{" "}
           <Link
             href="/login"
             className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
           >
-            Conectează-te →
+            {t("signInLink")}
           </Link>
         </p>
       </div>

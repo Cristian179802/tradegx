@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FileDown } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AnalyticsClient } from "./analytics-client";
 import { PerformanceHeatmap } from "@/components/analytics/performance-heatmap";
 
-export const metadata: Metadata = { title: "Analiză Performanță" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("analytics");
+  return { title: t("perfTitle") };
+}
 
 export default async function AnalyticsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  const t = await getTranslations("analytics");
 
   const { prisma } = await import("@/lib/prisma");
   const userId = session.user.id;
@@ -54,8 +59,8 @@ export default async function AnalyticsPage() {
       <div className="space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-zinc-100">Analiză Performanță</h1>
-            <p className="text-sm text-zinc-500 mt-1">Statistici detaliate ale tranzacțiilor tale</p>
+            <h1 className="text-2xl font-bold text-zinc-100">{t("perfTitle")}</h1>
+            <p className="text-sm text-zinc-500 mt-1">{t("perfSubtitle")}</p>
           </div>
         </div>
         <AnalyticsClient data={{ empty: true }} />
@@ -93,7 +98,7 @@ export default async function AnalyticsPage() {
     .map(([month, pnl]) => ({ month, pnl: parseFloat(pnl.toFixed(2)) }));
 
   // Win rate by day
-  const dayNames = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
+  const dayNames = t.raw("daysShort") as string[];
   const dayMap = new Map<number, { wins: number; total: number }>();
   for (let i = 0; i < 7; i++) dayMap.set(i, { wins: 0, total: 0 });
   for (const t of closedTrades) {
@@ -221,8 +226,8 @@ export default async function AnalyticsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Analiză Performanță</h1>
-          <p className="text-sm text-zinc-500 mt-1">Statistici detaliate ale tranzacțiilor tale</p>
+          <h1 className="text-2xl font-bold text-zinc-100">{t("perfTitle")}</h1>
+          <p className="text-sm text-zinc-500 mt-1">{t("perfSubtitle")}</p>
         </div>
         <Link
           href="/report"
@@ -230,7 +235,7 @@ export default async function AnalyticsPage() {
           className="shrink-0 flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/70 hover:border-indigo-500/50 text-zinc-200 text-sm font-semibold px-4 py-2 rounded-xl transition-all"
         >
           <FileDown className="w-4 h-4 text-indigo-400" />
-          Export PDF
+          {t("exportPdf")}
         </Link>
       </div>
       <AnalyticsClient data={data} />

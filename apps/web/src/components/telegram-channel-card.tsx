@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Send, Users, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,7 @@ export const TELEGRAM_CHANNEL_URL = "https://t.me/tradegxsignals";
  * variant="full" — card mare (pagina Semnale). variant="compact" — bară subțire (dashboard).
  */
 export function TelegramChannelCard({ variant = "full" }: { variant?: "full" | "compact" }) {
+  const t = useTranslations("telegramCard");
   if (variant === "compact") {
     return (
       <a
@@ -24,11 +26,11 @@ export function TelegramChannelCard({ variant = "full" }: { variant?: "full" | "
           <Send className="w-4 h-4 text-sky-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-zinc-200 leading-tight">Canalul Telegram TradeGx</p>
-          <p className="text-[11px] text-zinc-500">Semnalele AI ale zilei, direct pe telefon</p>
+          <p className="text-sm font-bold text-zinc-200 leading-tight">{t("compactTitle")}</p>
+          <p className="text-[11px] text-zinc-500">{t("compactSubtitle")}</p>
         </div>
         <span className="flex items-center gap-1 text-xs font-semibold text-sky-400 shrink-0 group-hover:gap-2 transition-all">
-          Intră <ArrowRight className="w-3.5 h-3.5" />
+          {t("enter")} <ArrowRight className="w-3.5 h-3.5" />
         </span>
       </a>
     );
@@ -45,13 +47,13 @@ export function TelegramChannelCard({ variant = "full" }: { variant?: "full" | "
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h3 className="text-base font-black text-zinc-100">Alătură-te comunității TradeGx</h3>
+          <h3 className="text-base font-black text-zinc-100">{t("fullTitle")}</h3>
           <span className="flex items-center gap-1 text-[10px] font-bold text-sky-300 bg-sky-500/10 border border-sky-500/25 px-1.5 py-0.5 rounded-full">
             <Users className="w-2.5 h-2.5" /> Telegram
           </span>
         </div>
         <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-          Primești cele 3 semnale AI ale zilei direct pe Telegram, alături de alți traderi. Gratuit, fără spam.
+          {t("fullDesc")}
         </p>
       </div>
       <a
@@ -63,7 +65,7 @@ export function TelegramChannelCard({ variant = "full" }: { variant?: "full" | "
         )}
       >
         <Send className="w-4 h-4" />
-        Intră în canal
+        {t("enterChannel")}
       </a>
     </div>
   );

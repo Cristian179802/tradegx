@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -19,6 +20,7 @@ import {
 import { resetPasswordSchema, type ResetPasswordInput } from "@/lib/validations";
 
 function ResetPasswordContent() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
@@ -44,7 +46,7 @@ function ResetPasswordContent() {
 
     const json = await res.json();
     if (!json.success) {
-      setError(json.error ?? "Eroare. Încearcă din nou.");
+      setError(json.error ?? t("errRetry"));
       return;
     }
 
@@ -58,8 +60,8 @@ function ResetPasswordContent() {
         <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
           <CheckCircle2 className="w-7 h-7 text-emerald-500" />
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Parolă resetată!</h2>
-        <p className="text-zinc-400 text-sm">Te redirecționăm la autentificare...</p>
+        <h2 className="text-xl font-bold text-white mb-2">{t("pwResetTitle")}</h2>
+        <p className="text-zinc-400 text-sm">{t("redirecting")}</p>
       </div>
     );
   }
@@ -67,8 +69,8 @@ function ResetPasswordContent() {
   return (
     <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">Resetează parola</h1>
-        <p className="text-zinc-400 text-sm">Alege o nouă parolă securizată.</p>
+        <h1 className="text-2xl font-bold text-white mb-1">{t("resetTitle")}</h1>
+        <p className="text-zinc-400 text-sm">{t("resetDesc")}</p>
       </div>
 
       {error && (
@@ -84,13 +86,13 @@ function ResetPasswordContent() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-300 text-sm">Parolă nouă</FormLabel>
+                <FormLabel className="text-zinc-300 text-sm">{t("newPassword")}</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       {...field}
                       type={showPass ? "text" : "password"}
-                      placeholder="Minim 8 caractere"
+                      placeholder={t("minChars")}
                       className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-indigo-500 pr-10"
                     />
                     <button
@@ -112,13 +114,13 @@ function ResetPasswordContent() {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-300 text-sm">Confirmă parola</FormLabel>
+                <FormLabel className="text-zinc-300 text-sm">{t("confirmPasswordLabel")}</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       {...field}
                       type={showConfirm ? "text" : "password"}
-                      placeholder="Repetă parola"
+                      placeholder={t("repeatPw")}
                       className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-indigo-500 pr-10"
                     />
                     <button
@@ -140,14 +142,14 @@ function ResetPasswordContent() {
             disabled={isLoading || !token}
             className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold h-11"
           >
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salvează parola"}
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("savePassword")}
           </Button>
         </form>
       </Form>
 
       <div className="text-center mt-5">
         <Link href="/login" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
-          Înapoi la autentificare
+          {t("backToLogin")}
         </Link>
       </div>
     </div>

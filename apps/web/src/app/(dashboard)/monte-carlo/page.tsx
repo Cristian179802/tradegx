@@ -246,8 +246,7 @@ export default function MonteCarloPage() {
           <h1 className="text-2xl font-black text-zinc-100 tracking-tight">{t("title")}</h1>
         </div>
         <p className="text-sm text-zinc-500 max-w-2xl">
-          10.000 de „vieți alternative" ale contului tău, construite din randamentele tale REALE.
-          Află probabilitatea să treci un challenge de prop firm — înainte să plătești pentru el.
+          {t("subtitle")}
         </p>
       </div>
 

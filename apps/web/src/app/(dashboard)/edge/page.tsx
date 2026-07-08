@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PaywallCard } from "@/components/billing/paywall-card";
@@ -26,13 +26,22 @@ const PERIOADE = [
 /** cheia de traducere pentru o dimensiune (symbol → dimSymbol) */
 const dimKey = (d: string) => `dim${d.charAt(0).toUpperCase()}${d.slice(1)}`;
 
-function fmt(n: number) {
+/** traduce valoarea via valueKey (weekday/duration); altfel o lasă neschimbată */
+function useDisplayValue() {
+  const t = useTranslations("edge");
+  return (valueKey: string | undefined, value: string) =>
+    valueKey ? t(valueKey) : value;
+}
+
+function fmt(n: number, locale: string) {
   const sign = n > 0 ? "+" : "";
-  return `${sign}${n.toLocaleString("ro-RO", { maximumFractionDigits: 2 })} $`;
+  return `${sign}${n.toLocaleString(locale === "ro" ? "ro-RO" : "en-US", { maximumFractionDigits: 2 })} $`;
 }
 
 function EdgeCard({ stat, kind }: { stat: EdgeStat; kind: "edge" | "leak" }) {
   const t = useTranslations("edge");
+  const locale = useLocale();
+  const displayValue = useDisplayValue();
   const isEdge = kind === "edge";
   return (
     <div
@@ -53,10 +62,10 @@ function EdgeCard({ stat, kind }: { stat: EdgeStat; kind: "edge" | "leak" }) {
             isEdge ? "text-emerald-400" : "text-rose-400"
           )}
         >
-          {fmt(stat.netPnl)}
+          {fmt(stat.netPnl, locale)}
         </span>
       </div>
-      <p className="text-sm font-bold text-zinc-100 mb-2 truncate">{stat.value}</p>
+      <p className="text-sm font-bold text-zinc-100 mb-2 truncate">{displayValue(stat.valueKey, stat.value)}</p>
       <div className="flex items-center gap-3 text-[11px] text-zinc-500">
         <span>
           <span className="text-zinc-300 font-semibold">{stat.n}</span> {t("trades")}
@@ -72,7 +81,7 @@ function EdgeCard({ stat, kind }: { stat: EdgeStat; kind: "edge" | "leak" }) {
         <span>
           {t("avg")}{" "}
           <span className={cn("font-semibold", isEdge ? "text-emerald-400" : "text-rose-400")}>
-            {fmt(stat.avgPnl)}
+            {fmt(stat.avgPnl, locale)}
           </span>
         </span>
       </div>
@@ -90,6 +99,8 @@ export default function EdgeFinderPage() {
   const { data: session } = useSession();
   const isFree = session?.user?.plan === "FREE";
   const t = useTranslations("edge");
+  const locale = useLocale();
+  const displayValue = useDisplayValue();
   const [days, setDays] = React.useState(365);
   const [report, setReport] = React.useState<EdgeReport | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -273,7 +284,7 @@ export default function EdgeFinderPage() {
                           <tbody className="divide-y divide-zinc-800/40">
                             {stats.map((s) => (
                               <tr key={s.value} className="hover:bg-zinc-800/20">
-                                <td className="px-4 py-2 font-semibold text-zinc-300">{s.value}</td>
+                                <td className="px-4 py-2 font-semibold text-zinc-300">{displayValue(s.valueKey, s.value)}</td>
                                 <td className="px-3 py-2 text-right text-zinc-400">{s.n}</td>
                                 <td className="px-3 py-2 text-right text-zinc-400">{s.winRate}%</td>
                                 <td className="px-3 py-2 text-right text-zinc-400">
@@ -285,7 +296,7 @@ export default function EdgeFinderPage() {
                                     s.netPnl >= 0 ? "text-emerald-400" : "text-rose-400"
                                   )}
                                 >
-                                  {fmt(s.netPnl)}
+                                  {fmt(s.netPnl, locale)}
                                 </td>
                               </tr>
                             ))}

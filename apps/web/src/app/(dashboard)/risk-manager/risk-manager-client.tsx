@@ -128,7 +128,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
           data.todayPnl >= 0 ? "border-emerald-500/20" : "border-rose-500/20"
         )}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">P&L Azi</span>
+            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">{t("pnlToday")}</span>
             <DollarSign className={cn("h-3.5 w-3.5", data.todayPnl >= 0 ? "text-emerald-500" : "text-rose-500")} />
           </div>
           <p className={cn("text-xl font-black num", data.todayPnl >= 0 ? "text-emerald-400 neon-emerald" : "text-rose-400 neon-rose")}>
@@ -142,7 +142,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
           data.todayTradeCount >= data.user.maxTradesPerDay ? "border-rose-500/20" : "border-zinc-800"
         )}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Trades azi</span>
+            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">{t("tradesToday")}</span>
             <BarChart3 className="h-3.5 w-3.5 text-zinc-500" />
           </div>
           <p className={cn("text-xl font-black num", data.todayTradeCount >= data.user.maxTradesPerDay ? "text-rose-400" : "text-zinc-100")}>
@@ -172,7 +172,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
               </div>
             </>
           ) : (
-            <p className="text-zinc-600 text-sm">Nelimitat</p>
+            <p className="text-zinc-600 text-sm">{t("unlimited")}</p>
           )}
         </div>
 
@@ -220,7 +220,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
             {/* Account balance */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs text-zinc-400 font-medium">Capital cont</label>
+                <label className="text-xs text-zinc-400 font-medium">{t("accountCapital")}</label>
                 <span className="text-xs text-zinc-200 num font-bold">{formatCurrency(accountSize, selectedAccount?.currency ?? "USD")}</span>
               </div>
               <input type="number" value={accountSize} min={100} max={10000000} step={1000}
@@ -316,7 +316,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
             {/* Pip value */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
               <div>
-                <p className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold">Valoare 1 pip / lot</p>
+                <p className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold">{t("pipValuePerLot")}</p>
               </div>
               <p className="text-base font-bold text-zinc-300 num">$10.00</p>
             </div>
@@ -333,9 +333,9 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
              riskPct <= 2 ? <AlertTriangle className="h-4 w-4 shrink-0" /> :
              <XCircle className="h-4 w-4 shrink-0" />}
             <p className="text-xs font-medium">
-              {riskPct <= 1 ? "Risc conservator — management optim" :
-               riskPct <= 2 ? "Risc moderat — acceptabil, fii atent" :
-               "Risc ridicat — poate duce la pierderi mari"}
+              {riskPct <= 1 ? t("riskConservative") :
+               riskPct <= 2 ? t("riskModerate") :
+               t("riskHigh")}
             </p>
           </div>
         </div>
@@ -359,13 +359,13 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
                 label: t("dailyLoss"),
                 check: !dailyLossStatus || dailyLossStatus.pct < 100,
                 value: dailyLossStatus ? `${dailyLossStatus.pct.toFixed(0)}%` : "—",
-                limit: selectedAccount.maxDailyLossPct ? `Max ${selectedAccount.maxDailyLossPct}%` : "Nelimitat",
+                limit: selectedAccount.maxDailyLossPct ? `Max ${selectedAccount.maxDailyLossPct}%` : t("unlimited"),
               },
               {
                 label: t("totalDd"),
                 check: !drawdownStatus || drawdownStatus.dd < (drawdownStatus.maxDD ?? 999),
                 value: drawdownStatus ? `-${drawdownStatus.dd.toFixed(1)}%` : "0%",
-                limit: selectedAccount.maxDrawdownPct ? `Max ${selectedAccount.maxDrawdownPct}%` : "Nelimitat",
+                limit: selectedAccount.maxDrawdownPct ? `Max ${selectedAccount.maxDrawdownPct}%` : t("unlimited"),
               },
               {
                 label: t("tradesPerDay"),

@@ -122,6 +122,7 @@ const INDICATOR_MAP: Record<string, string> = {
 
 export function Sidebar() {
   const t = useTranslations("nav");
+  const tc = useTranslations("common");
   const pathname = usePathname();
   const { data: session } = useSession();
   const { sidebarCollapsed, setSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useAuthStore();
@@ -175,7 +176,7 @@ export function Sidebar() {
       {/* ── Floating edge collapse/expand handle ── */}
       <motion.button
         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-        title={sidebarCollapsed ? "Extinde bara laterală" : "Restrânge bara laterală"}
+        title={sidebarCollapsed ? tc("expandSidebar") : tc("collapseSidebar")}
         className="max-md:hidden absolute top-1/2 -translate-y-1/2 -right-3 z-50 flex items-center justify-center w-6 h-12 rounded-r-xl border border-l-0 border-zinc-700/60 bg-zinc-900 hover:bg-zinc-800 hover:border-indigo-500/50 text-zinc-600 hover:text-indigo-400 transition-all duration-200 shadow-lg group"
         style={{ boxShadow: "2px 0 16px rgba(0,0,0,0.5)" }}
         whileHover={{ x: 2, scale: 1.05 }}
@@ -340,14 +341,14 @@ export function Sidebar() {
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent" />
               <div className="flex items-center gap-1.5 mb-0.5">
                 <Sparkles className="w-3 h-3 text-indigo-400" />
-                <span className="text-indigo-300 text-[11px] font-bold">Probă PRO activă</span>
+                <span className="text-indigo-300 text-[11px] font-bold">{tc("trialActive")}</span>
               </div>
               <p className="text-zinc-500 text-[10px] leading-relaxed">
-                Actualizează pentru acces nelimitat la toate funcțiile.
+                {tc("trialActiveDesc")}
               </p>
               <Link href="/pricing" className="mt-1.5 flex items-center gap-1 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
                 <Zap className="w-2.5 h-2.5" />
-                Upgrade acum
+                {tc("upgradeNow")}
               </Link>
             </motion.div>
           )}
@@ -376,7 +377,7 @@ export function Sidebar() {
                     className="flex-1 min-w-0 overflow-hidden"
                   >
                     <p className="text-[12px] font-semibold text-zinc-200 truncate leading-tight">
-                      {session?.user?.name ?? "Trader"}
+                      {session?.user?.name ?? tc("trader")}
                     </p>
                     <div className="flex items-center gap-1">
                       {isPro && (
@@ -402,13 +403,13 @@ export function Sidebar() {
             <DropdownMenuItem asChild>
               <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
                 <User className="w-4 h-4 text-zinc-400" />
-                <span className="text-zinc-300">Profil & Setări</span>
+                <span className="text-zinc-300">{tc("profileSettings")}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/accounts" className="flex items-center gap-2 cursor-pointer">
                 <Activity className="w-4 h-4 text-zinc-400" />
-                <span className="text-zinc-300">Conturi Trading</span>
+                <span className="text-zinc-300">{tc("tradingAccounts")}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-zinc-800/80" />
@@ -417,7 +418,7 @@ export function Sidebar() {
               className="flex items-center gap-2 cursor-pointer text-rose-400 focus:text-rose-300 focus:bg-rose-500/10"
             >
               <LogOut className="w-4 h-4" />
-              <span>Deconectare</span>
+              <span>{t("logout")}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,26 +1,31 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { ReportClient } from "./report-client";
 
-export const metadata: Metadata = { title: "Raport de Performanță — TradeGx" };
-
-const INSTRUMENT_LABEL: Record<string, string> = {
-  FOREX: "Forex", CRYPTO: "Crypto", METALS: "Metale", INDICES: "Indici",
-  COMMODITIES: "Mărfuri", STOCKS: "Acțiuni", CFD: "CFD",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("reportPage");
+  return { title: t("metaTitle") };
+}
 
 const SETUP_LABEL: Record<string, string> = {
   ORDER_BLOCK: "Order Block", FAIR_VALUE_GAP: "Fair Value Gap", LIQUIDITY_SWEEP: "Liquidity Sweep",
   BOS: "Break of Structure", CHOCH: "Change of Character", BREAKER: "Breaker",
   MITIGATION: "Mitigation", REJECTION: "Rejection", TREND_FOLLOW: "Trend Follow",
-  SCALP: "Scalp", OTHER: "Altul",
+  SCALP: "Scalp",
 };
 
 export default async function ReportPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  const t = await getTranslations("reportPage");
+
+  const INSTRUMENT_LABEL: Record<string, string> = {
+    FOREX: t("instrForex"), CRYPTO: t("instrCrypto"), METALS: t("instrMetals"), INDICES: t("instrIndices"),
+    COMMODITIES: t("instrCommodities"), STOCKS: t("instrStocks"), CFD: t("instrCfd"),
+  };
 
   const userId = session.user.id;
 
@@ -113,7 +118,7 @@ export default async function ReportPage() {
   }
   const bySetup = Array.from(setupMap.entries())
     .map(([k, v]) => ({
-      label: SETUP_LABEL[k] ?? k,
+      label: k === "OTHER" ? t("setupOther") : (SETUP_LABEL[k] ?? k),
       winRate: +((v.wins / v.total) * 100).toFixed(1),
       total: v.total, pnl: +v.pnl.toFixed(2),
     }))

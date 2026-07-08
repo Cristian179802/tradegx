@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ function short(sym: string): string {
 }
 
 export function CorrelationHeatmap() {
+  const t = useTranslations("correlationHeatmap");
   const [data, setData] = React.useState<CorrData | null>(null);
   const [loading, setLoading] = React.useState(true);
 
@@ -47,9 +49,9 @@ export function CorrelationHeatmap() {
     <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-sm font-bold text-zinc-200">Matrice de corelație</p>
+          <p className="text-sm font-bold text-zinc-200">{t("title")}</p>
           <p className="text-[11px] text-zinc-600">
-            Pe randamentele zilnice {data?.days ? `· ${data.days} zile` : ""} — evită expunerea dublă
+            {t("subtitle", { days: data?.days ? t("daysLabel", { n: data.days }) : "" })}
           </p>
         </div>
         <button onClick={load} disabled={loading} className="text-zinc-500 hover:text-zinc-300 transition-colors">
@@ -60,7 +62,7 @@ export function CorrelationHeatmap() {
       {loading && !data ? (
         <div className="h-64 bg-zinc-800/40 rounded-xl animate-pulse" />
       ) : !data?.matrix ? (
-        <p className="text-sm text-zinc-500 text-center py-8">Date de corelație indisponibile momentan.</p>
+        <p className="text-sm text-zinc-500 text-center py-8">{t("unavailable")}</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="border-collapse mx-auto">
@@ -101,8 +103,8 @@ export function CorrelationHeatmap() {
 
       {/* Legendă */}
       <div className="flex items-center justify-center gap-4 mt-4 text-[10px] text-zinc-500">
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ background: "rgba(16,185,129,0.7)" }} /> Corelație pozitivă (se mișcă la fel)</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ background: "rgba(244,63,94,0.7)" }} /> Negativă (opus)</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ background: "rgba(16,185,129,0.7)" }} /> {t("legendPositive")}</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ background: "rgba(244,63,94,0.7)" }} /> {t("legendNegative")}</span>
       </div>
     </div>
   );

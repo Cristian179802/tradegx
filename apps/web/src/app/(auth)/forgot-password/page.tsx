@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -18,6 +19,7 @@ import {
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations";
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations("auth");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +40,7 @@ export default function ForgotPasswordPage() {
 
     const json = await res.json();
     if (!json.success) {
-      setError(json.error ?? "Eroare. Încearcă din nou.");
+      setError(json.error ?? t("errRetry"));
       return;
     }
     setSent(true);
@@ -51,23 +53,23 @@ export default function ForgotPasswordPage() {
           <div className="w-14 h-14 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4">
             <Mail className="w-7 h-7 text-indigo-400" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Verifică emailul</h2>
+          <h2 className="text-xl font-bold text-white mb-2">{t("checkEmailTitle")}</h2>
           <p className="text-zinc-400 text-sm mb-6">
-            Dacă adresa există, vei primi un email cu instrucțiuni pentru resetarea parolei.
+            {t("checkEmailDesc")}
           </p>
           <Link href="/login">
             <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Înapoi la autentificare
+              {t("backToLogin")}
             </Button>
           </Link>
         </div>
       ) : (
         <>
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-white mb-1">Ai uitat parola?</h1>
+            <h1 className="text-2xl font-bold text-white mb-1">{t("forgotPassword")}</h1>
             <p className="text-zinc-400 text-sm">
-              Introdu emailul și îți trimitem instrucțiuni de resetare.
+              {t("forgotDesc")}
             </p>
           </div>
 
@@ -84,7 +86,7 @@ export default function ForgotPasswordPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-zinc-300 text-sm">Email</FormLabel>
+                    <FormLabel className="text-zinc-300 text-sm">{t("email")}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -106,7 +108,7 @@ export default function ForgotPasswordPage() {
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  "Trimite instrucțiuni"
+                  t("sendInstructions")
                 )}
               </Button>
             </form>
@@ -118,7 +120,7 @@ export default function ForgotPasswordPage() {
               className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors flex items-center justify-center gap-1"
             >
               <ArrowLeft className="w-3 h-3" />
-              Înapoi la autentificare
+              {t("backToLogin")}
             </Link>
           </div>
         </>

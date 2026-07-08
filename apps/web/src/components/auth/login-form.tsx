@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,6 +22,7 @@ import { loginSchema, type LoginInput } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 
 export function LoginForm() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
@@ -45,7 +47,7 @@ export function LoginForm() {
     });
 
     if (res?.error) {
-      setError("Email sau parolă incorectă");
+      setError(t("invalidCredentials"));
       return;
     }
 
@@ -75,19 +77,19 @@ export function LoginForm() {
             <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
               <Lock className="w-4 h-4 text-indigo-400" />
             </div>
-            <span className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">Acces securizat</span>
+            <span className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">{t("secureAccess")}</span>
           </div>
           <h1 className="text-2xl font-black text-white mb-1.5 tracking-tight">
-            Bun venit înapoi
+            {t("welcomeBack")}
           </h1>
-          <p className="text-zinc-400 text-sm">Conectează-te la contul tău TradeGX</p>
+          <p className="text-zinc-400 text-sm">{t("loginSubtitle")}</p>
         </div>
 
         {/* Verified banner */}
         {verified && (
           <div className="flex items-center gap-2.5 bg-emerald-500/8 border border-emerald-500/20 rounded-xl px-4 py-3 mb-6 animate-fade-in">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <p className="text-emerald-300 text-sm font-medium">Email verificat! Te poți conecta acum.</p>
+            <p className="text-emerald-300 text-sm font-medium">{t("emailVerifiedBanner")}</p>
           </div>
         )}
 
@@ -129,13 +131,13 @@ export function LoginForm() {
                 <FormItem>
                   <div className="flex items-center justify-between">
                     <FormLabel className="text-zinc-300 text-xs font-semibold uppercase tracking-wider">
-                      Parolă
+                      {t("password")}
                     </FormLabel>
                     <Link
                       href="/forgot-password"
                       className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
                     >
-                      Ai uitat parola?
+                      {t("forgotPassword")}
                     </Link>
                   </div>
                   <FormControl>
@@ -181,7 +183,7 @@ export function LoginForm() {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <span className="flex items-center gap-2">
-                  Conectare
+                  {t("signIn")}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </span>
               )}
@@ -198,7 +200,7 @@ export function LoginForm() {
           </div>
           <div className="relative flex justify-center">
             <span className="bg-zinc-900/90 px-3 text-[11px] text-zinc-600 uppercase tracking-wider font-medium">
-              sau continuă cu
+              {t("orContinueWith")}
             </span>
           </div>
         </div>
@@ -239,7 +241,7 @@ export function LoginForm() {
           <div className="w-px h-3 bg-zinc-800" />
           <div className="flex items-center gap-1.5 text-[11px] text-zinc-600">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60" />
-            <span>Criptare end-to-end</span>
+            <span>{t("e2eEncryption")}</span>
           </div>
           <div className="w-px h-3 bg-zinc-800" />
           <div className="text-[11px] text-zinc-600">
@@ -248,12 +250,12 @@ export function LoginForm() {
         </div>
 
         <p className="text-center text-sm text-zinc-500 mt-5">
-          Nu ai cont?{" "}
+          {t("noAccount")}{" "}
           <Link
             href="/register"
             className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
           >
-            Înregistrează-te gratuit →
+            {t("registerFree")}
           </Link>
         </p>
       </div>

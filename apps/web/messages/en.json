@@ -128,11 +128,23 @@
     "dimWeekday": "Day of week",
     "dimHour": "Entry hour",
     "dimDuration": "Duration",
-    "dimTag": "Tag"
+    "dimTag": "Tag",
+    "wd0": "Sunday",
+    "wd1": "Monday",
+    "wd2": "Tuesday",
+    "wd3": "Wednesday",
+    "wd4": "Thursday",
+    "wd5": "Friday",
+    "wd6": "Saturday",
+    "durScalp": "< 15 min (scalp)",
+    "durM15_60": "15–60 min",
+    "durH1_4": "1–4 hours",
+    "durH4_24": "4–24 hours",
+    "durSwing": "> 1 day (swing)"
   },
   "monteCarlo": {
     "title": "Monte Carlo Simulator",
-    "subtitle": "10,000 alternative lives of your account, built from your REAL returns. Learn the probability of passing a prop firm challenge — before paying for it.",
+    "subtitle": "10,000 \"alternative lives\" of your account, built from your REAL returns. Find out the probability of passing a prop firm challenge — before you pay for it.",
     "loadingHistory": "Loading history...",
     "emptyTitle": "You need at least 10 closed trades",
     "emptyDesc": "The simulation uses the REAL distribution of your results — the more trades in your journal, the more reliable the probabilities.",
@@ -302,7 +314,19 @@
     "reset": "Reset",
     "addPlaceholder": "Add a personal rule...",
     "add": "Add",
-    "restoreDefaults": "Restore default list"
+    "restoreDefaults": "Restore default list",
+    "items": [
+      "The HTF trend/structure (H4/D1) supports the trade direction",
+      "There's a clear point of interest (Order Block / FVG / liquidity)",
+      "I have an entry confirmation (CHoCH / BOS / retest)",
+      "The Stop Loss is placed logically (below/above structure), not arbitrarily",
+      "Risk:Reward is at least 1:2",
+      "Risk per trade respects my rule (≤ 1-2% of the account)",
+      "I'm in the right session (London / New York / overlap)",
+      "There's no major-impact news in the next 30 min",
+      "I'm not trading out of revenge, FOMO or boredom",
+      "I'm calm and rested — my mental state is good"
+    ]
   },
   "calc": {
     "title": "Lot size calculator",
@@ -318,7 +342,14 @@
     "riskUsd": "Risk $",
     "riskPct": "Risk %",
     "balanceLabel": "Balance:",
-    "lots": "lots"
+    "lots": "lots",
+    "paramsTitle": "Calculation parameters",
+    "pipEquals": "1 pip = {val} for {symbol}",
+    "pipValueLabel": "Pip value / standard lot ($)",
+    "pipAuto": "(auto: ${val})",
+    "standardLots": "standard lots",
+    "emptyTitle": "Enter the parameters to calculate the volume",
+    "emptyHint": "Stop loss pips + risk → optimal volume"
   },
   "market": {
     "title": "Market Selector",
@@ -370,7 +401,15 @@
     "noTradeDay": "No-trade day",
     "dailyLossLimit": "Daily loss limit",
     "lotSizing": "Lot sizing based on risk",
-    "riskPerTrade": "Risk per trade"
+    "riskPerTrade": "Risk per trade",
+    "pnlToday": "P&L Today",
+    "tradesToday": "Trades today",
+    "unlimited": "Unlimited",
+    "accountCapital": "Account capital",
+    "pipValuePerLot": "1 pip value / lot",
+    "riskConservative": "Conservative risk — optimal management",
+    "riskModerate": "Moderate risk — acceptable, stay alert",
+    "riskHigh": "High risk — may lead to large losses"
   },
   "propFirmPage": {
     "title": "Prop Firm Challenge",
@@ -398,7 +437,10 @@
     "ruleDailyLoss": "Daily loss (today)",
     "ruleDays": "Trading days",
     "errTitle": "Error",
-    "errDesc": "Could not save the rules."
+    "errDesc": "Could not save the rules.",
+    "soldOf": "Balance {balance} · of {initial}",
+    "ddTotalMax": "Max total drawdown",
+    "noChallengeAccount": "No Challenge or Live account"
   },
   "tradesPage": {
     "title": "Trades",
@@ -484,7 +526,17 @@
     "error": "Error",
     "retry": "Try again",
     "noData": "No data available",
-    "language": "Language"
+    "language": "Language",
+    "openMenu": "Open menu",
+    "trialPro": "PRO Trial",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "trialActive": "PRO Trial active",
+    "trialActiveDesc": "Upgrade for unlimited access to all features.",
+    "upgradeNow": "Upgrade now",
+    "profileSettings": "Profile & Settings",
+    "tradingAccounts": "Trading Accounts",
+    "trader": "Trader"
   },
   "auth": {
     "login": "Sign in",
@@ -500,7 +552,71 @@
     "verifyEmail": "Verify email",
     "signIn": "Sign in",
     "createAccount": "Create account",
-    "trialBadge": "14 days of PRO free — no card required"
+    "trialBadge": "14 days of PRO free — no card required",
+    "errRetry": "Error. Try again.",
+    "backToLogin": "Back to sign in",
+    "checkEmailTitle": "Check your email",
+    "checkEmailDesc": "If the address exists, you will receive an email with instructions to reset your password.",
+    "forgotDesc": "Enter your email and we will send you reset instructions.",
+    "sendInstructions": "Send instructions",
+    "pwResetTitle": "Password reset!",
+    "redirecting": "Redirecting you to sign in...",
+    "resetTitle": "Reset password",
+    "resetDesc": "Choose a new secure password.",
+    "newPassword": "New password",
+    "confirmPasswordLabel": "Confirm password",
+    "repeatPw": "Repeat the password",
+    "savePassword": "Save password",
+    "verifyingTitle": "Verifying...",
+    "verifyingDesc": "One moment, we are verifying your email address.",
+    "accountActive": "Your account is active. Redirecting you...",
+    "linkExpired": "The link has expired or is invalid. Register again or request a new link.",
+    "registerLink": "Sign up",
+    "registerMeta": "Sign up — TradeGX",
+    "minChars": "At least 8 characters",
+    "emailVerified": "Email verified!",
+    "linkInvalid": "Invalid link",
+    "secureAccess": "Secure access",
+    "welcomeBack": "Welcome back",
+    "loginSubtitle": "Sign in to your TradeGX account",
+    "emailVerifiedBanner": "Email verified! You can sign in now.",
+    "invalidCredentials": "Incorrect email or password",
+    "orContinueWith": "or continue with",
+    "e2eEncryption": "End-to-end encryption",
+    "noAccount": "Don't have an account?",
+    "registerFree": "Sign up free →",
+    "pwMin8": "At least 8 characters",
+    "pwUpper": "Uppercase letter",
+    "pwLower": "Lowercase letter",
+    "pwDigit": "Digit or symbol",
+    "pwWeak": "Weak",
+    "pwMedium": "Medium",
+    "pwGood": "Good",
+    "pwStrong": "Strong",
+    "pwStrengthLabel": "{s} password",
+    "registerError": "Registration error",
+    "verifyEmailTitle": "Check your email!",
+    "verifyEmailDesc": "We sent a confirmation link to your address.",
+    "checkSpam": "Don't forget to check your Spam folder too.",
+    "demoAccount": "DEMO account",
+    "trialProShort": "PRO Trial",
+    "days14": "14 days",
+    "setupTime": "Setup",
+    "goToLogin": "Go to sign in",
+    "proTrialFree": "14 days PRO free",
+    "noCardNeeded": "• No card required",
+    "createFreeAccount": "Create free account",
+    "registerSubtitle": "The professional journal for SMC / ICT traders",
+    "pillAiCoach": "AI Coach",
+    "pillJournal": "ICT/SMC Journal",
+    "pillAnalytics": "Advanced analytics",
+    "pillBrokerSync": "Broker sync",
+    "fullName": "Full name",
+    "zeroSpam": "Zero spam",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in →",
+    "consentCreate": "By creating an account you agree to the <terms>Terms and Conditions</terms> and <privacy>Privacy Policy</privacy>.",
+    "consentRegister": "By registering, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>."
   },
   "settings": {
     "profile": {
@@ -1042,7 +1158,19 @@
     "colTrades": "Trades",
     "colWinRate": "Win Rate",
     "colPnlTotal": "Total P&L",
-    "colAvgPnl": "Avg P&L"
+    "colAvgPnl": "Avg P&L",
+    "perfTitle": "Performance Analysis",
+    "perfSubtitle": "Detailed statistics of your trades",
+    "exportPdf": "Export PDF",
+    "daysShort": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ]
   },
   "signals": {
     "sesAsian": "Asia session",
@@ -1950,5 +2078,372 @@
     "fq5A": "Yes. The FREE plan includes unlimited journal, CSV import, the full Academy (41 lessons with quizzes and certificate), basic analytics, one trading account and 3 backtests per month. No time limit.",
     "fq6Q": "Are the AI signals investment recommendations?",
     "fq6A": "No. Signals and all AI features are exclusively educational and informational — they do not constitute financial advice. Trading decisions are entirely your own, and trading involves a real risk of loss."
+  },
+  "legalCommon": {
+    "backToSite": "Back to site",
+    "lastUpdated": "Last updated: {date}",
+    "ftTerms": "Terms",
+    "ftPrivacy": "Privacy",
+    "ftContact": "Contact"
+  },
+  "about": {
+    "metaTitle": "About TradeGx — who we are and why we build this",
+    "metaDesc": "The TradeGx story: a trading journal built in public, by a Romanian trader, for SMC/ICT traders.",
+    "title": "About TradeGx",
+    "s1Title": "Why TradeGx exists",
+    "s1p1": "TradeGx started from a simple frustration: existing trading journals are either expensive and generic, or Excel sheets that die after two weeks. None spoke the language of modern traders — Smart Money Concepts, ICT, killzones, order blocks — and none told you what truly matters: <b>exactly where you win and where you lose money, statistically</b>.",
+    "s1p2": "So we built it ourselves. A journal that tags setups the way you think about them, syncs itself with your broker, detects your revenge trading before it burns your account, and shows your real edge from data — not from impressions.",
+    "s2Title": "Who builds it",
+    "s2p1": "TradeGx is founded and developed in Romania by <b>Cristian</b> — trader and builder — together with modern AI-assisted development tools. We're not a corporation: we're a small, fast, quality-obsessed product where every user suggestion reaches the person who writes the code directly.",
+    "s2p2": "We're not here to sell you get-rich dreams. We come from the same market you trade — with the same stop losses taken, the same lessons paid for dearly. That's exactly why the platform puts risk management and discipline ahead of any “magic signal”.",
+    "s3Title": "Built in public",
+    "s3p1": "TradeGx develops transparently: updates shipped constantly, a <roadmap>public roadmap</roadmap> of what's coming, and zero fake testimonials on the site. What you see on the <pricing>pricing page</pricing> is exactly what you get — verifiable in the 14-day trial, no card.",
+    "s4Title": "Our principles",
+    "s4l1": "<b>Your data is yours.</b> EU hosting, read-only broker access, zero data selling.",
+    "s4l2": "<b>Education before sales.</b> The full Academy (41 lessons) is free for everyone, forever.",
+    "s4l3": "<b>Statistical honesty.</b> We don't promise profits. Trading involves real risk, and we give you tools to manage it — not guarantees.",
+    "s4l4": "<b>Feedback with the force of law.</b> Features are built from real user requests, not from marketing decks.",
+    "s5Title": "Talk to us",
+    "s5p1": "Any question, suggestion or issue: <contact>the contact page</contact> — we usually reply the same day."
+  },
+  "roadmap": {
+    "metaTitle": "Public roadmap — TradeGx",
+    "metaDesc": "What we've shipped, what we're building now and what's next. TradeGx develops in public.",
+    "title": "Public roadmap",
+    "updated": "July 5, 2026 (evening)",
+    "intro": "TradeGx is built in public. Here you see exactly what's shipped, what's in progress and what's next — no vague promises. Have an idea? <contact>Tell us</contact> — the most requested features move up the list.",
+    "shippedH": "✅ Shipped — working today, in production",
+    "progressH": "🔨 In progress now",
+    "plannedH": "🗺️ Coming up",
+    "sh1": "Full journal with SMC/ICT tagging (OB, FVG, BOS, CHoCH, killzones)",
+    "sh2": "Automatic broker sync: free EA MT4/MT5 + MetaAPI cloud 24/7",
+    "sh3": "Dashboard with 40+ metrics, equity curve, streaks",
+    "sh4": "AI Trading Coach + revenge trading / overtrading detection on real trades",
+    "sh5": "AI Signals (HPS) — max 3/day, with Telegram broadcast",
+    "sh6": "Backtesting on real historical data + strategy builder with 15+ indicators",
+    "sh7": "“Test instantly” — backtest in 3 clicks, no setup",
+    "sh8": "TradeGx Academy: 41 lessons RO/EN, 47 diagrams, quizzes + certificate",
+    "sh9": "Edge Finder — your edges and leaks, statistically proven",
+    "sh10": "Monte Carlo Simulator — the probability of passing a prop firm challenge",
+    "sh11": "Weekly AI report (in-app + Telegram)",
+    "sh12": "Price alerts on your watchlist + TradingView webhook",
+    "sh13": "Lot calculator, pre-trade checklist, monthly goals, prop firm monitor",
+    "sh14": "Economic calendar + news classified by impact",
+    "sh15": "PDF export, public trade sharing, community",
+    "sh16": "Android app + installable PWA (desktop & iPhone)",
+    "sh17": "Command palette (Ctrl+K), premium dark theme, responsive design",
+    "sh18": "Achievements & discipline streaks — computed from your real data",
+    "sh19": "AI Vision — AI analysis sees the charts attached to the trade (structure, entry, SL)",
+    "sh20": "Full bilingual RO/EN interface — the entire site and app, word for word",
+    "ip1": "New broker integrations: cTrader, TradeLocker, DXtrade",
+    "pl1": "Native push notifications on your phone (with the app closed)",
+    "pl2": "Two-factor authentication (2FA)",
+    "pl3": "Community leaderboard with a track record verified from sync",
+    "pl4": "Real-time prices via WebSocket",
+    "pl5": "Translations: German, French, Spanish, Italian",
+    "pl6": "Tax reports for Romania",
+    "pl7": "Additional integrations and automations on community request"
+  },
+  "contactPage": {
+    "metaTitle": "Contact — TradeGx",
+    "metaDesc": "Contact the TradeGx team: support, feedback, security issue reporting.",
+    "title": "Contact",
+    "intro": "TradeGx is a new, actively developed product — every message reaches the founder directly. We usually reply the same day.",
+    "emailTitle": "Email",
+    "emailDesc": "Support, subscription questions, feedback, partnerships.",
+    "secTitle": "Security",
+    "secDesc": "Found a vulnerability? Write to us with the subject <b>[SECURITY]</b> — we handle responsible reports with top priority. Details also in <code>/.well-known/security.txt</code>.",
+    "fbTitle": "Product feedback",
+    "fbDesc": "A missing feature? A bug? Tell us exactly what happened and on which device — we build in public, and user suggestions go straight into the development plan.",
+    "timeTitle": "Response time",
+    "timeDesc": "Usually the same day, at most 48 business hours. GDPR requests (data access/deletion) are processed with priority.",
+    "idTitle": "Identification details",
+    "idP": "The TradeGx platform is operated from Romania. Full details about data processing are in the <privacy>Privacy Policy</privacy>, and the terms of use in the <terms>Terms & Conditions</terms>."
+  },
+  "terms": {
+    "metaTitle": "Terms & Conditions — TradeGx",
+    "metaDesc": "The terms and conditions for using the TradeGx platform.",
+    "title": "Terms & Conditions",
+    "updated": "July 3, 2026",
+    "s1Title": "1. About the service",
+    "s1p1": "TradeGx (www.tradegx.com) is a SaaS software platform for journaling, analyzing and improving trading activity (trade journal). The platform provides trade record-keeping tools, performance statistics, educational materials, risk management tools and AI-assisted features.",
+    "s1p2": "<b>TradeGx is NOT a broker, dealer, bank or investment firm.</b> The platform does not execute trades, does not hold or manage user funds and does not intermediate access to financial markets.",
+    "s2Title": "2. No financial advice",
+    "s2p1": "All platform content — including AI-generated signals, statistics, reports, Academy materials and AI assistant responses — is exclusively informational and educational. Nothing in TradeGx constitutes financial, investment, legal or tax advice and does not represent a recommendation to buy or sell any financial instrument.",
+    "s2p2": "Trading decisions are entirely your own. Trading financial instruments involves a significant risk of capital loss.",
+    "s3Title": "3. User account",
+    "s3p1": "Using the platform requires an account. You are responsible for keeping your login credentials confidential and for all activity carried out in your account. You must be at least 18 years old to use TradeGx.",
+    "s3p2": "Connecting to broker accounts (MT4/MT5) is done exclusively via the investor password (read-only) or equivalent read-access mechanisms. We will never ask for your main trading password.",
+    "s4Title": "4. Subscriptions and trial period",
+    "s4p1": "Certain features are available for a subscription, according to the offer shown on the pricing page. The free trial (if offered) does not require a credit card and does not automatically convert into a paid subscription without your explicit consent.",
+    "s4p2": "Payments are processed by specialized third-party providers. You can cancel your subscription anytime from account settings; cancellation takes effect at the end of the current billing period.",
+    "s5Title": "5. Acceptable use",
+    "s5intro": "You are prohibited from using the platform for:",
+    "s5l1": "illegal or fraudulent activities;",
+    "s5l2": "attempts at unauthorized access to TradeGx systems or other users' accounts;",
+    "s5l3": "copying, reselling or redistributing platform content without written consent;",
+    "s5l4": "uploading content that infringes third-party rights.",
+    "s6Title": "6. Intellectual property",
+    "s6p1": "The platform, code, design, the TradeGx brand and educational materials are protected by intellectual property law. The data you enter (trades, notes, screenshots) remains yours; you grant us only the technical license needed to store and display it within the service.",
+    "s7Title": "7. Limitation of liability",
+    "s7p1": "The service is provided “as is”. To the maximum extent permitted by law, TradeGx is not liable for financial losses resulting from your trading decisions, for the accuracy of third-party data (quotes, economic calendar, news) or for temporary service interruptions. Broker sync depends on third-party services and may experience delays.",
+    "s8Title": "8. Termination",
+    "s8p1": "You can delete your account anytime from settings. We reserve the right to suspend accounts that violate these terms, with prior notice where reasonably possible.",
+    "s9Title": "9. Changes and applicable law",
+    "s9p1": "We may update these terms; significant changes will be announced in the app. Continuing to use the service after changes take effect means you accept them. These terms are governed by Romanian law and applicable EU regulations.",
+    "s10Title": "10. Contact",
+    "s10p1": "For any question about these terms: <mail>palcristi1@gmail.com</mail> or the <contact>contact</contact> page."
+  },
+  "privacy_page": {
+    "metaTitle": "Privacy Policy — TradeGx",
+    "metaDesc": "How TradeGx collects, uses and protects your data (GDPR).",
+    "title": "Privacy Policy",
+    "updated": "July 3, 2026",
+    "s1Title": "1. Who we are",
+    "s1p1": "This policy explains how the TradeGx platform (www.tradegx.com) collects, uses and protects personal data, in accordance with Regulation (EU) 2016/679 (GDPR). The data controller is the operator of the TradeGx platform; you can contact us at <mail>palcristi1@gmail.com</mail>.",
+    "s2Title": "2. What data we collect",
+    "s2l1": "<b>Account data:</b> name, email address, password (stored exclusively encrypted/hashed).",
+    "s2l2": "<b>Trading data:</b> trades entered manually, imported or synced from your broker (symbol, prices, volumes, profit/loss), journal notes, uploaded screenshots.",
+    "s2l3": "<b>Broker connection data:</b> for sync we use exclusively read-only access (investor password); credentials needed for integrations are stored encrypted.",
+    "s2l4": "<b>Technical data:</b> minimal server logs needed for security and operation (IP address, browser type).",
+    "s2p": "We don't collect more data than needed to operate the service (the minimization principle).",
+    "s3Title": "3. What we use the data for",
+    "s3l1": "providing the service (journal, statistics, alerts, reports) — basis: performance of the contract;",
+    "s3l2": "AI features (analysis, signals, coach) — relevant statistical data is sent on a case-by-case basis to the AI provider to generate the response — basis: performance of the contract;",
+    "s3l3": "notifications you enable yourself (Telegram, push, email) — basis: consent;",
+    "s3l4": "security and abuse prevention — basis: legitimate interest.",
+    "s3p": "<b>We do not sell or rent your data to anyone.</b>",
+    "s4Title": "4. Where data is stored",
+    "s4p1": "The database is hosted in the European Union (Frankfurt region, Germany). The app runs on cloud infrastructure with encryption in transit (HTTPS/TLS) and encryption at rest.",
+    "s5Title": "5. Processors (subprocessors)",
+    "s5intro": "We use a limited number of providers to run the service:",
+    "s5l1": "<b>Vercel</b> — app hosting;",
+    "s5l2": "<b>Neon</b> — the database (EU, Frankfurt);",
+    "s5l3": "<b>Anthropic</b> — the artificial intelligence features;",
+    "s5l4": "<b>Telegram</b> — only if you enable Telegram notifications;",
+    "s5l5": "<b>MetaApi</b> — only if you enable cloud broker sync;",
+    "s5l6": "<b>Cloudinary</b> — storage for uploaded screenshots.",
+    "s6Title": "6. How long we keep data",
+    "s6p1": "Account data is kept for as long as the account is active. When you delete your account, personal data is deleted or anonymized within a reasonable timeframe, except where the law requires it to be kept.",
+    "s7Title": "7. Your rights (GDPR)",
+    "s7p1": "You have the right to access, rectification, erasure (“the right to be forgotten”), restriction, portability and objection, as well as the right to withdraw your consent anytime. To exercise them, write to us at <mail>palcristi1@gmail.com</mail>. You also have the right to lodge a complaint with the ANSPDCP (www.dataprotection.ro).",
+    "s8Title": "8. Cookies",
+    "s8p1": "TradeGx uses only strictly necessary cookies: the session cookie for authentication. We do not use advertising or third-party tracking cookies. Interface preferences (theme, language, Academy progress) are stored locally in your browser (localStorage) and never leave your device.",
+    "s9Title": "9. Changes",
+    "s9p1": "We will announce any significant change to this policy in the app before it takes effect."
+  },
+  "motivationBanner": {
+    "label": "Tip of the day",
+    "hideForToday": "Hide for today",
+    "tips": [
+      {
+        "text": "Never risk more than 1–2% of your account on a single trade.",
+        "cat": "Risk"
+      },
+      {
+        "text": "Move your stop-loss to break-even once the trade reaches +1R profit.",
+        "cat": "Management"
+      },
+      {
+        "text": "With a 1:2 Risk:Reward you're profitable even with just a 40% win rate.",
+        "cat": "Math"
+      },
+      {
+        "text": "Check the trend on the higher timeframe (H4/D1) before entering on the lower one.",
+        "cat": "Analysis"
+      },
+      {
+        "text": "Avoid entries 30 minutes before and after high-impact news.",
+        "cat": "Timing"
+      },
+      {
+        "text": "Never add to a losing position — that's how you blow up your account.",
+        "cat": "Risk"
+      },
+      {
+        "text": "Calculate your position size BEFORE entering, starting from your stop-loss.",
+        "cat": "Sizing"
+      },
+      {
+        "text": "Place your stop-loss below/above structure, not at an arbitrary fixed distance.",
+        "cat": "Execution"
+      },
+      {
+        "text": "A 50% loss requires a 100% gain to recover. Limit your losses.",
+        "cat": "Math"
+      },
+      {
+        "text": "If you lose 2–3 trades in a row, stop for the day. Protect your capital.",
+        "cat": "Discipline"
+      },
+      {
+        "text": "Wait for confirmation (CHoCH / BOS) — don't enter just because price hit a zone.",
+        "cat": "Confirmation"
+      },
+      {
+        "text": "The London session (10:00–13:00 RO) offers the highest liquidity on forex.",
+        "cat": "Timing"
+      },
+      {
+        "text": "The New York killzone (15:30–18:00 RO) is ideal for indices and USD pairs.",
+        "cat": "Timing"
+      },
+      {
+        "text": "Win rate alone means nothing — what matters is expectancy: (win rate × R:R) − loss rate.",
+        "cat": "Math"
+      },
+      {
+        "text": "Never trade without a stop-loss, no matter how confident you are in the setup.",
+        "cat": "Risk"
+      },
+      {
+        "text": "A Fair Value Gap tends to get filled — use it as an entry zone with confluence.",
+        "cat": "SMC"
+      },
+      {
+        "text": "Liquidity builds up above obvious highs and below obvious lows (equal highs/lows).",
+        "cat": "SMC"
+      },
+      {
+        "text": "A valid Order Block created a move with displacement, not just any candle.",
+        "cat": "SMC"
+      },
+      {
+        "text": "Journal every trade — without data you can't objectively improve anything.",
+        "cat": "Process"
+      },
+      {
+        "text": "Take partial profit at +1R and let the rest run with the stop at break-even.",
+        "cat": "Management"
+      },
+      {
+        "text": "Don't open two strongly correlated positions — it's hidden double risk in the same direction.",
+        "cat": "Risk"
+      },
+      {
+        "text": "Reduce your position size when volatility (ATR) rises significantly.",
+        "cat": "Risk"
+      },
+      {
+        "text": "Trade in the direction of the trend — don't try to catch tops and bottoms.",
+        "cat": "Trend"
+      },
+      {
+        "text": "A healthy trend forms higher highs and higher lows.",
+        "cat": "Trend"
+      },
+      {
+        "text": "Backtest a strategy on at least 100 trades before using it live.",
+        "cat": "Preparation"
+      },
+      {
+        "text": "The spread widens at session opens and closes — avoid those moments.",
+        "cat": "Execution"
+      },
+      {
+        "text": "Confluence of several factors (trend + HTF zone + session) raises the probability.",
+        "cat": "Analysis"
+      },
+      {
+        "text": "Gold (XAU) is more volatile than most forex pairs — widen your stop-loss.",
+        "cat": "Instrument"
+      },
+      {
+        "text": "Avoid trading Friday afternoons: low liquidity, unpredictable moves.",
+        "cat": "Timing"
+      },
+      {
+        "text": "Check the economic calendar every morning, before opening a position.",
+        "cat": "Routine"
+      },
+      {
+        "text": "Always risk the same percentage of your account — don't increase your stake to recover a loss.",
+        "cat": "Discipline"
+      },
+      {
+        "text": "Price reacts to the levels everyone sees — draw the zones from H4/D1.",
+        "cat": "Analysis"
+      }
+    ]
+  },
+  "marketSessions": {
+    "title": "Market Sessions",
+    "subtitle": "Romania time (EET/EEST)",
+    "keyOverlaps": "Key overlaps",
+    "sydney": "Sydney",
+    "tokyo": "Tokyo",
+    "london": "London",
+    "newYork": "New York",
+    "overlapTokyoLondon": "Tokyo / London",
+    "overlapLondonNewYork": "London / New York"
+  },
+  "dailyReview": {
+    "title": "Daily summary",
+    "analyzing": "Analyzing...",
+    "generate": "Generate",
+    "intro": "Get an AI summary of your trading day — how it went and what you can improve. You also receive it automatically on Telegram, in the evening.",
+    "trades": "trades"
+  },
+  "telegramCard": {
+    "compactTitle": "TradeGx Telegram channel",
+    "compactSubtitle": "The day's AI signals, straight to your phone",
+    "enter": "Join",
+    "fullTitle": "Join the TradeGx community",
+    "fullDesc": "Get the 3 AI signals of the day directly on Telegram, alongside other traders. Free, no spam.",
+    "enterChannel": "Join channel"
+  },
+  "economicCountdown": {
+    "nextImpactNews": "Next high-impact news",
+    "remaining": "remaining",
+    "now": "now"
+  },
+  "performanceHeatmap": {
+    "title": "Performance by hour and day",
+    "subtitle": "When you trade best (your local time)",
+    "metricVolume": "Volume",
+    "empty": "No trades recorded yet. The heatmap fills in as you trade.",
+    "hoverHint": "Hover over a cell for details",
+    "bestWindow": "Best window",
+    "avoid": "Avoid",
+    "trade": "trade",
+    "trades": "trades",
+    "win": "win",
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "daysShort": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ]
+  },
+  "correlationHeatmap": {
+    "title": "Correlation matrix",
+    "subtitle": "On daily returns {days} — avoid double exposure",
+    "daysLabel": "· {n} days",
+    "unavailable": "Correlation data unavailable right now.",
+    "legendPositive": "Positive correlation (moves together)",
+    "legendNegative": "Negative (opposite)"
+  },
+  "reportPage": {
+    "metaTitle": "Performance Report — TradeGx",
+    "instrForex": "Forex",
+    "instrCrypto": "Crypto",
+    "instrMetals": "Metals",
+    "instrIndices": "Indices",
+    "instrCommodities": "Commodities",
+    "instrStocks": "Stocks",
+    "instrCfd": "CFD",
+    "setupOther": "Other"
   }
 }

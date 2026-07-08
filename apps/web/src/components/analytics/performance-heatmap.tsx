@@ -1,18 +1,20 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Clock, TrendingUp, TrendingDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RawTrade { time: string; pnl: number; }
 type Metric = "pnl" | "winrate" | "count";
 
-const DAYS = ["Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă", "Duminică"];
-const DAYS_SHORT = ["Lun", "Mar", "Mie", "Joi", "Vin", "Sâm", "Dum"];
-
 interface Cell { pnl: number; count: number; wins: number; }
 
 export function PerformanceHeatmap() {
+  const t = useTranslations("performanceHeatmap");
+  const locale = useLocale();
+  const DAYS = t.raw("days") as string[];
+  const DAYS_SHORT = t.raw("daysShort") as string[];
   const [trades, setTrades] = React.useState<RawTrade[]>([]);
   const [currency, setCurrency] = React.useState("USD");
   const [loading, setLoading] = React.useState(true);
@@ -91,7 +93,7 @@ export function PerformanceHeatmap() {
   }, [grid]);
 
   const money = (n: number) =>
-    new Intl.NumberFormat("ro-RO", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
   const hh = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
   const hovered = hover ? grid[hover.d][hover.h] : null;
@@ -104,13 +106,13 @@ export function PerformanceHeatmap() {
             <Clock className="w-4 h-4 text-amber-400" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-zinc-200">Performanța pe oră și zi</h2>
-            <p className="text-[11px] text-zinc-600">Când tranzacționezi cel mai bine (ora ta locală)</p>
+            <h2 className="text-sm font-bold text-zinc-200">{t("title")}</h2>
+            <p className="text-[11px] text-zinc-600">{t("subtitle")}</p>
           </div>
         </div>
         {/* Selector metrică */}
         <div className="flex items-center gap-0.5 bg-zinc-800 rounded-lg p-0.5">
-          {([["pnl", "P&L"], ["winrate", "Win %"], ["count", "Volum"]] as [Metric, string][]).map(([m, label]) => (
+          {([["pnl", "P&L"], ["winrate", "Win %"], ["count", t("metricVolume")]] as [Metric, string][]).map(([m, label]) => (
             <button
               key={m}
               onClick={() => setMetric(m)}
@@ -129,7 +131,7 @@ export function PerformanceHeatmap() {
         <div className="h-48 bg-zinc-800/40 rounded-xl animate-pulse" />
       ) : trades.length === 0 ? (
         <p className="text-sm text-zinc-500 text-center py-10">
-          Nicio tranzacție înregistrată încă. Heatmap-ul se populează pe măsură ce tranzacționezi.
+          {t("empty")}
         </p>
       ) : (
         <>
@@ -142,11 +144,11 @@ export function PerformanceHeatmap() {
                 <span className={hovered.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}>
                   {hovered.pnl >= 0 ? "+" : ""}{money(hovered.pnl)}
                 </span>
-                {" · "}{hovered.count} {hovered.count === 1 ? "trade" : "trades"}
-                {" · "}{Math.round((hovered.wins / hovered.count) * 100)}% win
+                {" · "}{hovered.count} {hovered.count === 1 ? t("trade") : t("trades")}
+                {" · "}{Math.round((hovered.wins / hovered.count) * 100)}% {t("win")}
               </span>
             ) : (
-              <span className="text-[11px] text-zinc-600">Treci cu mouse-ul peste o celulă pentru detalii</span>
+              <span className="text-[11px] text-zinc-600">{t("hoverHint")}</span>
             )}
           </div>
 
@@ -192,7 +194,7 @@ export function PerformanceHeatmap() {
               <div className="rounded-xl bg-emerald-500/8 border border-emerald-500/20 px-3 py-2.5 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">Cea mai bună fereastră</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">{t("bestWindow")}</p>
                   <p className="text-xs text-zinc-200 font-semibold">
                     {DAYS[best.best.d]} {hh(best.best.h)} · <span className="text-emerald-400">+{money(best.best.pnl)}</span>
                   </p>
@@ -202,7 +204,7 @@ export function PerformanceHeatmap() {
                 <div className="rounded-xl bg-rose-500/8 border border-rose-500/20 px-3 py-2.5 flex items-center gap-2">
                   <TrendingDown className="w-4 h-4 text-rose-400 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-rose-400/80">De evitat</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-rose-400/80">{t("avoid")}</p>
                     <p className="text-xs text-zinc-200 font-semibold">
                       {DAYS[best.worst.d]} {hh(best.worst.h)} · <span className="text-rose-400">{money(best.worst.pnl)}</span>
                     </p>

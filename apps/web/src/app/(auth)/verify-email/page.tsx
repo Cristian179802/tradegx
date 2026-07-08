@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -7,6 +8,7 @@ import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function VerifyEmailContent() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -35,8 +37,8 @@ function VerifyEmailContent() {
       {status === "loading" && (
         <>
           <Loader2 className="w-10 h-10 animate-spin text-indigo-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Se verifică...</h2>
-          <p className="text-zinc-400 text-sm">Un moment, verificăm adresa ta de email.</p>
+          <h2 className="text-xl font-bold text-white mb-2">{t("verifyingTitle")}</h2>
+          <p className="text-zinc-400 text-sm">{t("verifyingDesc")}</p>
         </>
       )}
 
@@ -45,9 +47,9 @@ function VerifyEmailContent() {
           <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-7 h-7 text-emerald-500" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Email verificat!</h2>
+          <h2 className="text-xl font-bold text-white mb-2">{t("emailVerified")}</h2>
           <p className="text-zinc-400 text-sm mb-4">
-            Contul tău este activ. Te redirecționăm...
+            {t("accountActive")}
           </p>
         </>
       )}
@@ -57,19 +59,19 @@ function VerifyEmailContent() {
           <div className="w-14 h-14 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto mb-4">
             <XCircle className="w-7 h-7 text-rose-500" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Link invalid</h2>
+          <h2 className="text-xl font-bold text-white mb-2">{t("linkInvalid")}</h2>
           <p className="text-zinc-400 text-sm mb-6">
-            Linkul a expirat sau este invalid. Înregistrează-te din nou sau solicită un nou link.
+            {t("linkExpired")}
           </p>
           <div className="flex gap-3 justify-center">
             <Link href="/register">
               <Button className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20">
-                Înregistrare
+                {t("registerLink")}
               </Button>
             </Link>
             <Link href="/login">
               <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-                Autentificare
+                {t("signIn")}
               </Button>
             </Link>
           </div>
