@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Home, ArrowLeft, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function DashboardNotFound() {
+export default async function DashboardNotFound() {
+  const t = await getTranslations("errorPages");
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] gap-8 text-center px-4">
       {/* Glowing 404 */}
@@ -19,9 +21,9 @@ export default function DashboardNotFound() {
       </div>
 
       <div className="space-y-2 max-w-sm">
-        <h2 className="text-2xl font-black text-zinc-100 tracking-tight">Pagina nu a fost găsită</h2>
+        <h2 className="text-2xl font-black text-zinc-100 tracking-tight">{t("notFoundTitle")}</h2>
         <p className="text-sm text-zinc-500 leading-relaxed">
-          Ruta pe care o cauți nu există sau a fost mutată.
+          {t("notFoundRouteDesc")}
         </p>
       </div>
 
@@ -33,7 +35,7 @@ export default function DashboardNotFound() {
         >
           <Link href="javascript:history.back()">
             <ArrowLeft className="w-4 h-4" />
-            Înapoi
+            {t("back")}
           </Link>
         </Button>
         <Button

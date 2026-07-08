@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("errorPages");
   useEffect(() => {
     console.error("[Dashboard Error]", error);
   }, [error]);
@@ -27,9 +29,9 @@ export default function DashboardError({
       </div>
 
       <div className="space-y-2 max-w-sm">
-        <h2 className="text-2xl font-black text-zinc-100 tracking-tight">Ceva a mers greșit</h2>
+        <h2 className="text-2xl font-black text-zinc-100 tracking-tight">{t("somethingWrong")}</h2>
         <p className="text-sm text-zinc-500 leading-relaxed">
-          A apărut o eroare neașteptată. Dacă problema persistă, reîncarcă pagina sau contactează suportul.
+          {t("unexpectedDesc")}
         </p>
         {error.digest && (
           <p className="text-xs text-zinc-700 font-mono bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 mt-2 inline-block">
@@ -54,7 +56,7 @@ export default function DashboardError({
           className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20 gap-2"
         >
           <RefreshCw className="w-4 h-4" />
-          Încearcă din nou
+          {t("tryAgain")}
         </Button>
       </div>
     </div>

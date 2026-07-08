@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { TradeForm } from "@/components/trades/trade-form";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -11,13 +12,15 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
+  const t = await getTranslations("tradesPage");
   const trade = await prisma.trade.findUnique({ where: { id }, select: { symbol: true } });
-  return { title: trade ? `Editează ${trade.symbol}` : "Editează trade" };
+  return { title: trade ? t("editMetaSym", { symbol: trade.symbol }) : t("editMeta") };
 }
 
 export default async function EditTradePage({ params }: Props) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  const t = await getTranslations("tradesPage");
 
   const { id } = await params;
 
@@ -71,13 +74,13 @@ export default async function EditTradePage({ params }: Props) {
           className="text-zinc-400 hover:text-zinc-100 flex items-center gap-1 text-sm"
         >
           <ArrowLeft className="h-4 w-4" />
-          Înapoi
+          {t("back")}
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-zinc-100">
-            Editează {trade.symbol} {trade.direction}
+            {t("editTitle", { symbol: trade.symbol, direction: trade.direction })}
           </h1>
-          <p className="text-sm text-zinc-500 mt-0.5">Modifică detaliile trade-ului</p>
+          <p className="text-sm text-zinc-500 mt-0.5">{t("editSubtitle")}</p>
         </div>
       </div>
       <TradeForm accounts={serializedAccounts} initialTrade={initialTrade} />
