@@ -2,9 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 import {
   ArrowLeft, Send, Trash2, TrendingUp, MessageSquare, Loader2, X, ChevronLeft,
 } from "lucide-react";
+
+type TFn = (key: string, values?: Record<string, string | number>) => string;
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -47,27 +50,27 @@ interface Post {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const EMOJIS: { emoji: string; label: string }[] = [
-  { emoji: "🔥", label: "Hot" },
-  { emoji: "🚀", label: "Bullish" },
-  { emoji: "💡", label: "Idee" },
-  { emoji: "💯", label: "Perfect" },
-  { emoji: "👀", label: "Urmăresc" },
-  { emoji: "❤️", label: "Apreciez" },
+const EMOJIS: { emoji: string; labelKey: string }[] = [
+  { emoji: "🔥", labelKey: "emojiHot" },
+  { emoji: "🚀", labelKey: "emojiBullish" },
+  { emoji: "💡", labelKey: "emojiIdea" },
+  { emoji: "💯", labelKey: "emojiPerfect" },
+  { emoji: "👀", labelKey: "emojiWatching" },
+  { emoji: "❤️", labelKey: "emojiLike" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function timeAgo(iso: string): string {
+function timeAgo(iso: string, t: TFn, locale: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const min = Math.floor(diff / 60000);
-  if (min < 1) return "acum";
-  if (min < 60) return `${min} min`;
+  if (min < 1) return t("now");
+  if (min < 60) return `${min} ${t("minShort")}`;
   const h = Math.floor(min / 60);
   if (h < 24) return `${h}h`;
   const d = Math.floor(h / 24);
-  if (d < 7) return `${d} zile`;
-  return new Date(iso).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" });
+  if (d < 7) return `${d} ${t("daysWord")}`;
+  return new Date(iso).toLocaleDateString(locale === "ro" ? "ro-RO" : "en-US", { day: "numeric", month: "long", year: "numeric" });
 }
 
 function getInitials(name: string | null) {
@@ -209,13 +212,15 @@ function ReactionBar({
   postId: string;
   onReact: (emoji: string) => void;
 }) {
+  const t = useTranslations("communityDetail");
   const map = Object.fromEntries(reactions.map((r) => [r.emoji, r]));
   const totalReactions = reactions.reduce((s, r) => s + r.count, 0);
 
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
-        {EMOJIS.map(({ emoji, label }) => {
+        {EMOJIS.map(({ emoji, labelKey }) => {
+          const label = t(labelKey);
           const r = map[emoji];
           const count = r?.count ?? 0;
           const reacted = r?.reacted ?? false;
@@ -239,7 +244,7 @@ function ReactionBar({
       </div>
       {totalReactions > 0 && (
         <p className="text-[11px] text-zinc-600">
-          {totalReactions} {totalReactions === 1 ? "reacție" : "reacții"} totale
+          {t("reactionsTotal", { n: totalReactions })}
         </p>
       )}
     </div>
@@ -253,6 +258,8 @@ function CommentItem({
   comment: Comment;
   currentUserId: string;
 }) {
+  const t = useTranslations("communityDetail");
+  const locale = useLocale();
   return (
     <div className="flex gap-3">
       <UserAvatar user={comment.user} size={8} />
@@ -264,10 +271,10 @@ function CommentItem({
             </span>
             {comment.user.id === currentUserId && (
               <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded-full">
-                Tu
+                {t("you")}
               </span>
             )}
-            <span className="text-[10px] text-zinc-600 ml-auto">{timeAgo(comment.createdAt)}</span>
+            <span className="text-[10px] text-zinc-600 ml-auto">{timeAgo(comment.createdAt, t, locale)}</span>
           </div>
           <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
         </div>
@@ -285,6 +292,8 @@ export function PostClient({
   post: Post;
   currentUserId: string;
 }) {
+  const t = useTranslations("communityDetail");
+  const locale = useLocale();
   const { toast } = useToast();
   const [post, setPost] = React.useState(initial);
   const [comment, setComment] = React.useState("");
@@ -343,19 +352,19 @@ export function PostClient({
       }));
       setComment("");
     } else {
-      toast({ title: "Eroare la trimitere", variant: "destructive" });
+      toast({ title: t("sendError"), variant: "destructive" });
     }
     setSubmitting(false);
   }
 
   async function deletePost() {
-    if (!confirm("Ești sigur că vrei să ștergi această postare?")) return;
+    if (!confirm(t("confirmDeletePostFull"))) return;
     setDeleting(true);
     const res = await fetch(`/api/community/posts/${post.id}`, { method: "DELETE" });
     if (res.ok) {
       window.location.href = "/community";
     } else {
-      toast({ title: "Eroare la ștergere", variant: "destructive" });
+      toast({ title: t("errDelete"), variant: "destructive" });
       setDeleting(false);
     }
   }
@@ -368,7 +377,7 @@ export function PostClient({
         className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors group"
       >
         <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
-        Înapoi la comunitate
+        {t("back")}
       </Link>
 
       {/* ── Post card ───────────────────────────────────────── */}
@@ -381,7 +390,7 @@ export function PostClient({
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-bold text-zinc-200">{post.user.name ?? "Trader"}</span>
                 <span className="text-zinc-700">·</span>
-                <span className="text-xs text-zinc-500">{timeAgo(post.createdAt)}</span>
+                <span className="text-xs text-zinc-500">{timeAgo(post.createdAt, t, locale)}</span>
                 {post.symbol && (
                   <>
                     <span className="text-zinc-700">·</span>
@@ -400,7 +409,7 @@ export function PostClient({
                 onClick={deletePost}
                 disabled={deleting}
                 className="h-8 w-8 text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 shrink-0"
-                title="Șterge postarea"
+                title={t("deletePostTitle")}
               >
                 {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               </Button>
@@ -443,19 +452,19 @@ export function PostClient({
           <MessageSquare className="h-3.5 w-3.5" />
           <span>
             {post.comments.length === 0
-              ? "Niciun răspuns încă — fii primul!"
-              : `${post.comments.length} ${post.comments.length === 1 ? "răspuns" : "răspunsuri"}`}
+              ? t("noRepliesYet")
+              : t("repliesCount", { n: post.comments.length })}
           </span>
         </div>
       </div>
 
       {/* ── Reply form ──────────────────────────────────────── */}
       <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 space-y-3">
-        <h3 className="text-sm font-semibold text-zinc-400">Lasă un răspuns</h3>
+        <h3 className="text-sm font-semibold text-zinc-400">{t("leaveReply")}</h3>
         <textarea
           ref={textareaRef}
           className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 resize-none transition-colors leading-relaxed"
-          placeholder="Scrie un comentariu, întrebare sau analiză..."
+          placeholder={t("phComment")}
           rows={3}
           value={comment}
           onChange={(e) => setComment(e.target.value)}
@@ -464,7 +473,7 @@ export function PostClient({
           }}
         />
         <div className="flex items-center justify-between">
-          <p className="text-[11px] text-zinc-700">Ctrl+Enter pentru a trimite rapid</p>
+          <p className="text-[11px] text-zinc-700">{t("ctrlEnterHint")}</p>
           <Button
             onClick={submitComment}
             disabled={submitting || !comment.trim()}
@@ -476,7 +485,7 @@ export function PostClient({
             ) : (
               <>
                 <Send className="h-3.5 w-3.5 mr-1.5" />
-                Trimite
+                {t("send")}
               </>
             )}
           </Button>
@@ -488,7 +497,7 @@ export function PostClient({
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-zinc-400 flex items-center gap-2 px-1">
             <MessageSquare className="h-4 w-4" />
-            Răspunsuri ({post.comments.length})
+            {t("repliesTitle", { n: post.comments.length })}
           </h3>
           <div className="space-y-2.5">
             {post.comments.map((c) => (
