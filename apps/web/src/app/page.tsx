@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HeroTilt } from "@/components/landing/hero-tilt";
+import { FeatureCarousel } from "@/components/landing/feature-carousel";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("landing");
@@ -320,25 +321,22 @@ export default async function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Carusel interactiv — o funcție pe rând, vizual mare, auto-rotativ */}
+          <FeatureCarousel items={FEATURES.map((f) => ({ title: t(f.title), desc: t(f.description) }))} />
+
+          {/* Grilă compactă cu toate funcțiile (dedesubt, pentru scanare rapidă) */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 mt-10">
             {FEATURES.map((f) => {
               const Icon = f.icon;
               return (
                 <div
                   key={f.title}
-                  className={`group relative bg-zinc-900/50 border rounded-2xl p-6 transition-all duration-300 hover:bg-zinc-900/80 hover:shadow-xl overflow-hidden ${f.border} ${f.glow} card-hover-lift`}
+                  className={`group flex items-center gap-3 bg-zinc-900/40 border rounded-xl px-4 py-3 transition-all duration-300 hover:bg-zinc-900/70 ${f.border}`}
                 >
-                  {/* Top neon line on hover */}
-                  <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent to-transparent ${f.topLine} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-                  {/* Corner glow blob */}
-                  <div className={`absolute -top-8 -right-8 w-24 h-24 ${f.bg} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-                  <div className={`relative w-11 h-11 rounded-xl ${f.bg} border ${f.border} flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110`}>
-                    <Icon className={`w-5 h-5 ${f.color}`} />
+                  <div className={`w-8 h-8 rounded-lg ${f.bg} border ${f.border} flex items-center justify-center shrink-0`}>
+                    <Icon className={`w-4 h-4 ${f.color}`} />
                   </div>
-                  <h3 className="font-bold text-zinc-100 mb-2.5 text-[15px]">{t(f.title)}</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed">{t(f.description)}</p>
+                  <span className="text-[13px] font-semibold text-zinc-300 leading-tight">{t(f.title)}</span>
                 </div>
               );
             })}

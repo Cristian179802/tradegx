@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
-export const metadata: Metadata = {
-  title: "Autentificare — TradeGX",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return { title: t("authMeta") };
+}
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const t = await getTranslations("auth");
   return (
     <div className="min-h-screen bg-[#09090b] flex flex-col relative overflow-hidden">
       {/* Background effects */}
@@ -31,15 +35,18 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </span>
         </Link>
 
-        {/* Right side badges */}
-        <div className="hidden md:flex items-center gap-2 text-xs text-zinc-600">
-          <span className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900/60 border border-zinc-800 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Criptare SSL
-          </span>
-          <span className="px-2.5 py-1 bg-zinc-900/60 border border-zinc-800 rounded-full">
-            14 zile PRO gratuit
-          </span>
+        {/* Right side: language switcher + badges */}
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher compact />
+          <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900/60 border border-zinc-800 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {t("sslEncryption")}
+            </span>
+            <span className="px-2.5 py-1 bg-zinc-900/60 border border-zinc-800 rounded-full">
+              {t("proTrialFree")}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -51,7 +58,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Footer */}
       <div className="relative z-10 text-center pb-6">
         <p className="text-zinc-700 text-xs">
-          &copy; {new Date().getFullYear()} TradeGX. Toate drepturile rezervate.
+          &copy; {new Date().getFullYear()} TradeGX. {t("allRights")}
         </p>
       </div>
     </div>

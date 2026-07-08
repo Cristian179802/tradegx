@@ -626,7 +626,10 @@
     "haveAccount": "Already have an account?",
     "signInLink": "Sign in →",
     "consentCreate": "By creating an account you agree to the <terms>Terms and Conditions</terms> and <privacy>Privacy Policy</privacy>.",
-    "consentRegister": "By registering, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>."
+    "consentRegister": "By registering, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
+    "sslEncryption": "SSL Encryption",
+    "allRights": "All rights reserved.",
+    "authMeta": "Sign in — TradeGX"
   },
   "settings": {
     "profile": {

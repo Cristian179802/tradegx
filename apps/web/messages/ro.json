@@ -626,7 +626,10 @@
     "haveAccount": "Ai deja cont?",
     "signInLink": "Conectează-te →",
     "consentCreate": "Prin crearea contului ești de acord cu <terms>Termenii și Condițiile</terms> și <privacy>Politica de Confidențialitate</privacy>.",
-    "consentRegister": "Prin înregistrare, ești de acord cu <terms>Termenii</terms> și <privacy>Politica de Confidențialitate</privacy>."
+    "consentRegister": "Prin înregistrare, ești de acord cu <terms>Termenii</terms> și <privacy>Politica de Confidențialitate</privacy>.",
+    "sslEncryption": "Criptare SSL",
+    "allRights": "Toate drepturile rezervate.",
+    "authMeta": "Autentificare — TradeGX"
   },
   "settings": {
     "profile": {
