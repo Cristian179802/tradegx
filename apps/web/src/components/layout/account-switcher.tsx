@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import {
   ChevronDown, Check, Plus, Settings2, TrendingUp, TrendingDown,
 } from "lucide-react";
@@ -62,9 +63,9 @@ const TYPE_CONFIG: Record<string, {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatBalance(balance: string | number, currency: string): string {
+function formatBalance(balance: string | number, currency: string, locale: string): string {
   const num = typeof balance === "string" ? parseFloat(balance) : balance;
-  return new Intl.NumberFormat("ro-RO", {
+  return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "en-US", {
     style: "currency",
     currency,
     minimumFractionDigits: 2,
@@ -75,6 +76,7 @@ function formatBalance(balance: string | number, currency: string): string {
 // ─── Trigger pill 3D ──────────────────────────────────────────────────────────
 
 function AccountPill({ account }: { account: TradingAccount }) {
+  const locale  = useLocale();
   const cfg     = TYPE_CONFIG[account.type];
   const balance = typeof account.balance === "string" ? parseFloat(account.balance) : account.balance;
   const isPositive = balance >= 10000;
@@ -204,7 +206,7 @@ function AccountPill({ account }: { account: TradingAccount }) {
               transition: "filter 0.2s",
             }}
           >
-            {formatBalance(account.balance, account.currency)}
+            {formatBalance(account.balance, account.currency, locale)}
           </span>
         </div>
 
@@ -230,6 +232,8 @@ function AccountPill({ account }: { account: TradingAccount }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function AccountSwitcher() {
+  const t = useTranslations("accountSwitcher");
+  const locale = useLocale();
   const { activeAccountId, setActiveAccountId } = useAuthStore();
   const [accounts, setAccounts] = useState<TradingAccount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -268,7 +272,7 @@ export function AccountSwitcher() {
           className="flex items-center gap-2 h-9 px-4 rounded-xl border border-dashed border-zinc-700 hover:border-zinc-500 text-zinc-500 hover:text-zinc-300 text-xs transition-all"
         >
           <Plus className="w-3.5 h-3.5" />
-          Adaugă cont
+          {t("addAccount")}
         </button>
 
         <AccountDialog
@@ -296,7 +300,7 @@ export function AccountSwitcher() {
           className="w-72 bg-zinc-900/95 border-zinc-800 text-zinc-300 backdrop-blur-sm p-1.5"
         >
           <DropdownMenuLabel className="text-zinc-500 text-[10px] font-semibold uppercase tracking-widest px-2 pt-1 pb-2">
-            Conturile tale
+            {t("yourAccounts")}
           </DropdownMenuLabel>
 
           {accounts.map((account) => {
@@ -335,7 +339,7 @@ export function AccountSwitcher() {
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-xs text-zinc-400 font-mono">
-                      {formatBalance(account.balance, account.currency)}
+                      {formatBalance(account.balance, account.currency, locale)}
                     </span>
                     {account.broker && (
                       <span className="text-xs text-zinc-600 truncate">· {account.broker}</span>
@@ -362,8 +366,8 @@ export function AccountSwitcher() {
               <Plus className="w-3.5 h-3.5 text-indigo-400" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-zinc-200">Adaugă cont nou</p>
-              <p className="text-[10px] text-zinc-500">MT4/MT5, cTrader sau manual</p>
+              <p className="text-xs font-semibold text-zinc-200">{t("addNewAccount")}</p>
+              <p className="text-[10px] text-zinc-500">{t("addNewSub")}</p>
             </div>
           </DropdownMenuItem>
 
@@ -379,8 +383,8 @@ export function AccountSwitcher() {
               <Settings2 className="w-3.5 h-3.5 text-zinc-400" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-zinc-300">Gestionează conturi</p>
-              <p className="text-[10px] text-zinc-500">Editează sau configurează contul activ</p>
+              <p className="text-xs font-semibold text-zinc-300">{t("manageAccounts")}</p>
+              <p className="text-[10px] text-zinc-500">{t("manageSub")}</p>
             </div>
           </DropdownMenuItem>
         </DropdownMenuContent>

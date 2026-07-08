@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard, Target, BookOpen, NotebookPen, ListChecks, Trophy,
   Calculator, Shield, Award, TrendingUp, BarChart3, FlaskConical, Brain,
@@ -15,41 +16,41 @@ import { cn } from "@/lib/utils";
 // Navigare instant + acțiuni rapide, cu căutare fără diacritice.
 
 interface Cmd {
-  label: string;
-  hint?: string;
+  navKey: string; // cheie în namespace nav (label tradus la randare); "cmdAddTrade" pt. acțiunea de adăugare
+  isAction?: boolean;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   keywords?: string;
 }
 
 const COMMANDS: Cmd[] = [
-  { label: "Adaugă tranzacție", hint: "acțiune", href: "/trades/new", icon: Plus, keywords: "trade nou add new" },
-  { label: "Panou de Control", href: "/dashboard", icon: LayoutDashboard, keywords: "dashboard acasa home" },
-  { label: "Semnale AI", href: "/signals", icon: Target, keywords: "hps signals" },
-  { label: "Tranzacții", href: "/trades", icon: BookOpen, keywords: "trades istoric" },
-  { label: "Jurnal", href: "/journal", icon: NotebookPen, keywords: "journal note emotii" },
-  { label: "Checklist Pre-Trade", href: "/checklist", icon: ListChecks, keywords: "disciplina" },
-  { label: "Obiective", href: "/goals", icon: Trophy, keywords: "goals target prop" },
-  { label: "Calculator Lot", href: "/calculator", icon: Calculator, keywords: "lot size risc" },
-  { label: "Risk Manager", href: "/risk-manager", icon: Shield, keywords: "risc" },
-  { label: "Prop Firm", href: "/prop-firm", icon: Award, keywords: "ftmo challenge funded" },
-  { label: "Conturi", href: "/accounts", icon: TrendingUp, keywords: "accounts broker sync mt4 mt5" },
-  { label: "Analiză", href: "/analytics", icon: BarChart3, keywords: "analytics statistici metrici" },
-  { label: "Edge Finder", href: "/edge", icon: Crosshair, keywords: "edge leak statistici tipare" },
-  { label: "Monte Carlo", href: "/monte-carlo", icon: Dices, keywords: "simulare risc ruina challenge" },
-  { label: "Backtesting", href: "/backtesting", icon: FlaskConical, keywords: "strategie test istoric" },
-  { label: "AI Assistant", href: "/ai-assistant", icon: Brain, keywords: "coach chat" },
-  { label: "Alerte AI", href: "/alerts", icon: BellRing, keywords: "alerts notificari" },
-  { label: "Academie", href: "/academy", icon: GraduationCap, keywords: "curs invatare lectii academy" },
-  { label: "Realizări", href: "/achievements", icon: GraduationCap, keywords: "achievements streak medalii gamification realizari" },
-  { label: "Grafice Live", href: "/charts", icon: LineChart, keywords: "chart pret" },
-  { label: "Selector Piață", href: "/market", icon: Globe, keywords: "market piete" },
-  { label: "Unelte Pro", href: "/tools", icon: Gauge, keywords: "tools" },
-  { label: "Calendar Economic", href: "/calendar", icon: CalendarDays, keywords: "stiri nfp cpi fomc" },
-  { label: "Știri de Piață", href: "/news", icon: Newspaper, keywords: "news" },
-  { label: "Comunitate", href: "/community", icon: Users, keywords: "community echipe" },
-  { label: "Setări", href: "/settings", icon: Settings, keywords: "settings profil telegram notificari" },
-  { label: "Abonament", href: "/billing", icon: CreditCard, keywords: "billing facturare plata pro upgrade abonament stripe" },
+  { navKey: "cmdAddTrade", isAction: true, href: "/trades/new", icon: Plus, keywords: "trade nou add new adauga tranzactie" },
+  { navKey: "dashboard", href: "/dashboard", icon: LayoutDashboard, keywords: "dashboard acasa home panou" },
+  { navKey: "signals", href: "/signals", icon: Target, keywords: "hps signals semnale" },
+  { navKey: "trades", href: "/trades", icon: BookOpen, keywords: "trades istoric tranzactii" },
+  { navKey: "journal", href: "/journal", icon: NotebookPen, keywords: "journal note emotii jurnal" },
+  { navKey: "checklist", href: "/checklist", icon: ListChecks, keywords: "disciplina checklist" },
+  { navKey: "goals", href: "/goals", icon: Trophy, keywords: "goals target prop obiective" },
+  { navKey: "calculator", href: "/calculator", icon: Calculator, keywords: "lot size risc calculator" },
+  { navKey: "riskManager", href: "/risk-manager", icon: Shield, keywords: "risc risk" },
+  { navKey: "propFirm", href: "/prop-firm", icon: Award, keywords: "ftmo challenge funded prop" },
+  { navKey: "accounts", href: "/accounts", icon: TrendingUp, keywords: "accounts broker sync mt4 mt5 conturi" },
+  { navKey: "analytics", href: "/analytics", icon: BarChart3, keywords: "analytics statistici metrici analiza" },
+  { navKey: "edge", href: "/edge", icon: Crosshair, keywords: "edge leak statistici tipare" },
+  { navKey: "monteCarlo", href: "/monte-carlo", icon: Dices, keywords: "simulare risc ruina challenge monte carlo" },
+  { navKey: "backtesting", href: "/backtesting", icon: FlaskConical, keywords: "strategie test istoric backtest" },
+  { navKey: "aiAssistant", href: "/ai-assistant", icon: Brain, keywords: "coach chat assistant" },
+  { navKey: "alerts", href: "/alerts", icon: BellRing, keywords: "alerts notificari alerte" },
+  { navKey: "academy", href: "/academy", icon: GraduationCap, keywords: "curs invatare lectii academy academie" },
+  { navKey: "achievements", href: "/achievements", icon: GraduationCap, keywords: "achievements streak medalii gamification realizari" },
+  { navKey: "charts", href: "/charts", icon: LineChart, keywords: "chart pret grafice" },
+  { navKey: "market", href: "/market", icon: Globe, keywords: "market piete selector" },
+  { navKey: "tools", href: "/tools", icon: Gauge, keywords: "tools unelte" },
+  { navKey: "calendar", href: "/calendar", icon: CalendarDays, keywords: "stiri nfp cpi fomc calendar" },
+  { navKey: "news", href: "/news", icon: Newspaper, keywords: "news stiri" },
+  { navKey: "community", href: "/community", icon: Users, keywords: "community echipe comunitate" },
+  { navKey: "settings", href: "/settings", icon: Settings, keywords: "settings profil telegram notificari setari" },
+  { navKey: "billing", href: "/billing", icon: CreditCard, keywords: "billing facturare plata pro upgrade abonament stripe" },
 ];
 
 const norm = (s: string) =>
@@ -57,6 +58,9 @@ const norm = (s: string) =>
 
 export function CommandPalette() {
   const router = useRouter();
+  const tNav = useTranslations("nav");
+  const tCmd = useTranslations("commandPalette");
+  const labelOf = (c: Cmd) => (c.isAction ? tCmd("addTrade") : tNav(c.navKey));
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [active, setActive] = React.useState(0);
@@ -84,7 +88,7 @@ export function CommandPalette() {
 
   const q = norm(query.trim());
   const results = q
-    ? COMMANDS.filter((c) => norm(`${c.label} ${c.keywords ?? ""}`).includes(q))
+    ? COMMANDS.filter((c) => norm(`${labelOf(c)} ${c.keywords ?? ""}`).includes(q))
     : COMMANDS;
 
   const go = (cmd: Cmd) => {
@@ -135,7 +139,7 @@ export function CommandPalette() {
               setActive(0);
             }}
             onKeyDown={onInputKey}
-            placeholder="Caută pagini și acțiuni..."
+            placeholder={tCmd("searchPlaceholder")}
             className="flex-1 bg-transparent text-sm text-zinc-100 placeholder:text-zinc-600 outline-none"
           />
           <kbd className="text-[9px] font-bold text-zinc-600 border border-zinc-700 rounded px-1.5 py-0.5">
@@ -146,13 +150,13 @@ export function CommandPalette() {
         {/* Rezultate */}
         <div className="max-h-[320px] overflow-y-auto py-1.5">
           {results.length === 0 ? (
-            <p className="py-8 text-center text-xs text-zinc-600">Niciun rezultat.</p>
+            <p className="py-8 text-center text-xs text-zinc-600">{tCmd("noResults")}</p>
           ) : (
             results.map((cmd, i) => {
               const Icon = cmd.icon;
               return (
                 <button
-                  key={cmd.href + cmd.label}
+                  key={cmd.href + cmd.navKey}
                   onClick={() => go(cmd)}
                   onMouseEnter={() => setActive(i)}
                   className={cn(
@@ -176,11 +180,11 @@ export function CommandPalette() {
                       i === active ? "text-zinc-100" : "text-zinc-400"
                     )}
                   >
-                    {cmd.label}
+                    {labelOf(cmd)}
                   </span>
-                  {cmd.hint && (
+                  {cmd.isAction && (
                     <span className="text-[9px] font-bold uppercase text-indigo-400/70 border border-indigo-500/25 rounded px-1.5 py-0.5">
-                      {cmd.hint}
+                      {tCmd("action")}
                     </span>
                   )}
                   {i === active && <CornerDownLeft className="w-3.5 h-3.5 text-zinc-600" />}
@@ -192,8 +196,8 @@ export function CommandPalette() {
 
         {/* Footer */}
         <div className="flex items-center gap-3 px-4 py-2 border-t border-zinc-800 text-[9px] text-zinc-600 font-semibold">
-          <span>↑↓ navighează</span>
-          <span>↵ deschide</span>
+          <span>↑↓ {tCmd("navigate")}</span>
+          <span>↵ {tCmd("openHint")}</span>
           <span className="ml-auto">TradeGx</span>
         </div>
       </div>

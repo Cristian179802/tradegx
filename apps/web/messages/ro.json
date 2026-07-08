@@ -2445,5 +2445,50 @@
     "instrStocks": "Acțiuni",
     "instrCfd": "CFD",
     "setupOther": "Altul"
+  },
+  "notifDropdown": {
+    "title": "Notificări",
+    "newSuffix": "noi",
+    "markAllRead": "Citește tot",
+    "loading": "Se încarcă...",
+    "empty": "Nicio notificare",
+    "emptyHint": "Vei fi alertat când apar probleme",
+    "now": "acum",
+    "daySuffix": "z"
+  },
+  "accountSwitcher": {
+    "addAccount": "Adaugă cont",
+    "yourAccounts": "Conturile tale",
+    "addNewAccount": "Adaugă cont nou",
+    "addNewSub": "MT4/MT5, cTrader sau manual",
+    "manageAccounts": "Gestionează conturi",
+    "manageSub": "Editează sau configurează contul activ"
+  },
+  "localeWidget": {
+    "title": "Preferințe locale",
+    "subtitle": "Fusul orar și limba afișate",
+    "tzTab": "Fus orar",
+    "langTab": "Limbă",
+    "searchCity": "Caută oraș...",
+    "noResult": "Niciun rezultat",
+    "cities": {
+      "Europe/Bucharest": "București",
+      "Europe/London": "Londra",
+      "Europe/Moscow": "Moscova",
+      "Europe/Rome": "Roma"
+    }
+  },
+  "commandPalette": {
+    "addTrade": "Adaugă tranzacție",
+    "action": "acțiune",
+    "searchPlaceholder": "Caută pagini și acțiuni...",
+    "noResults": "Niciun rezultat.",
+    "navigate": "navighează",
+    "openHint": "deschide"
+  },
+  "liveChart": {
+    "realtimeData": "Date în timp real TradingView",
+    "searchSymbol": "Caută simbol... (ex: EUR, DAX, BTC)",
+    "title": "Grafic Live"
   }
 }

@@ -2445,5 +2445,50 @@
     "instrStocks": "Stocks",
     "instrCfd": "CFD",
     "setupOther": "Other"
+  },
+  "notifDropdown": {
+    "title": "Notifications",
+    "newSuffix": "new",
+    "markAllRead": "Mark all read",
+    "loading": "Loading...",
+    "empty": "No notifications",
+    "emptyHint": "You'll be alerted when issues arise",
+    "now": "now",
+    "daySuffix": "d"
+  },
+  "accountSwitcher": {
+    "addAccount": "Add account",
+    "yourAccounts": "Your accounts",
+    "addNewAccount": "Add new account",
+    "addNewSub": "MT4/MT5, cTrader or manual",
+    "manageAccounts": "Manage accounts",
+    "manageSub": "Edit or configure the active account"
+  },
+  "localeWidget": {
+    "title": "Locale preferences",
+    "subtitle": "Displayed timezone and language",
+    "tzTab": "Timezone",
+    "langTab": "Language",
+    "searchCity": "Search city...",
+    "noResult": "No results",
+    "cities": {
+      "Europe/Bucharest": "Bucharest",
+      "Europe/London": "London",
+      "Europe/Moscow": "Moscow",
+      "Europe/Rome": "Rome"
+    }
+  },
+  "commandPalette": {
+    "addTrade": "Add trade",
+    "action": "action",
+    "searchPlaceholder": "Search pages and actions...",
+    "noResults": "No results.",
+    "navigate": "navigate",
+    "openHint": "open"
+  },
+  "liveChart": {
+    "realtimeData": "Real-time TradingView data",
+    "searchSymbol": "Search symbol... (e.g. EUR, DAX, BTC)",
+    "title": "Live Chart"
   }
 }

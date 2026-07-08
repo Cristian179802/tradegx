@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Bell, CheckCheck, AlertTriangle, TrendingDown, Zap, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,15 +29,16 @@ const SEVERITY_CONFIG = {
   LOW: { color: "text-indigo-400", bg: "bg-indigo-500/10", icon: Info },
 };
 
-function timeAgo(iso: string) {
+function timeAgo(iso: string, nowLabel: string, daySuffix: string) {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (diff < 60) return "acum";
+  if (diff < 60) return nowLabel;
   if (diff < 3600) return `${Math.floor(diff / 60)}m`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-  return `${Math.floor(diff / 86400)}z`;
+  return `${Math.floor(diff / 86400)}${daySuffix}`;
 }
 
 export function NotificationDropdown() {
+  const t = useTranslations("notifDropdown");
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   const [alerts, setAlerts] = React.useState<Alert[]>([]);
@@ -157,10 +159,10 @@ export function NotificationDropdown() {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-zinc-100">Notificări</p>
+            <p className="text-sm font-semibold text-zinc-100">{t("title")}</p>
             {unreadCount > 0 && (
               <span className="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded-full">
-                {unreadCount} noi
+                {unreadCount} {t("newSuffix")}
               </span>
             )}
           </div>
@@ -170,7 +172,7 @@ export function NotificationDropdown() {
               className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
             >
               <CheckCheck className="h-3.5 w-3.5" />
-              Citește tot
+              {t("markAllRead")}
             </button>
           )}
         </div>
@@ -178,14 +180,14 @@ export function NotificationDropdown() {
         {/* List */}
         <div className="max-h-[360px] overflow-y-auto">
           {loading && alerts.length === 0 ? (
-            <div className="py-8 text-center text-zinc-600 text-xs">Se încarcă...</div>
+            <div className="py-8 text-center text-zinc-600 text-xs">{t("loading")}</div>
           ) : alerts.length === 0 ? (
             <div className="py-10 text-center">
               <div className="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center mx-auto mb-3">
                 <Zap className="h-5 w-5 text-zinc-600" />
               </div>
-              <p className="text-sm font-semibold text-zinc-500">Nicio notificare</p>
-              <p className="text-xs text-zinc-600 mt-0.5">Vei fi alertat când apar probleme</p>
+              <p className="text-sm font-semibold text-zinc-500">{t("empty")}</p>
+              <p className="text-xs text-zinc-600 mt-0.5">{t("emptyHint")}</p>
             </div>
           ) : (
             alerts.map((alert) => {
@@ -209,7 +211,7 @@ export function NotificationDropdown() {
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-zinc-200 truncate">{alert.title}</p>
                     <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">{alert.message}</p>
-                    <p className="text-[10px] text-zinc-600 mt-1">{timeAgo(alert.createdAt)}</p>
+                    <p className="text-[10px] text-zinc-600 mt-1">{timeAgo(alert.createdAt, t("now"), t("daySuffix"))}</p>
                   </div>
                   <button
                     onClick={(e) => dismissAlert(alert.id, e)}

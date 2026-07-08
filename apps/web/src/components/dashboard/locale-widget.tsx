@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Globe, Clock, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,10 @@ const LS_LANG = "TradeGX_language";
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function LocaleWidget() {
+  const t = useTranslations("localeWidget");
+  const appLocale = useLocale();
+  const cityOverrides = t.raw("cities") as Record<string, string>;
+  const cityLabel = (tz: { value: string; label: string }) => cityOverrides[tz.value] ?? tz.label;
   const [timezone, setTimezone]   = useState("Europe/Bucharest");
   const [language, setLanguage]   = useState("ro");
   const [timeStr, setTimeStr]     = useState("");
@@ -65,7 +70,7 @@ export function LocaleWidget() {
   useEffect(() => {
     function tick() {
       setTimeStr(
-        new Intl.DateTimeFormat("ro-RO", {
+        new Intl.DateTimeFormat(appLocale === "ro" ? "ro-RO" : "en-GB", {
           timeZone: timezone,
           hour: "2-digit",
           minute: "2-digit",
@@ -77,7 +82,7 @@ export function LocaleWidget() {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [timezone]);
+  }, [timezone, appLocale]);
 
   // Close on outside click
   useEffect(() => {
@@ -102,8 +107,9 @@ export function LocaleWidget() {
 
   const currentTz   = TIMEZONES.find((t) => t.value === timezone);
   const currentLang = LANGUAGES.find((l) => l.value === language);
-  const filteredTz  = TIMEZONES.filter((t) =>
-    t.label.toLowerCase().includes(tzSearch.toLowerCase())
+  const filteredTz  = TIMEZONES.filter((tz) =>
+    cityLabel(tz).toLowerCase().includes(tzSearch.toLowerCase()) ||
+    tz.label.toLowerCase().includes(tzSearch.toLowerCase())
   );
 
   return (
@@ -128,8 +134,8 @@ export function LocaleWidget() {
         <div className="absolute bottom-full right-0 mb-2 w-72 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="px-4 pt-3.5 pb-2.5 border-b border-zinc-800">
-            <p className="text-xs font-bold text-zinc-200">Preferințe locale</p>
-            <p className="text-[10px] text-zinc-600 mt-0.5">Fusul orar și limba afișate</p>
+            <p className="text-xs font-bold text-zinc-200">{t("title")}</p>
+            <p className="text-[10px] text-zinc-600 mt-0.5">{t("subtitle")}</p>
           </div>
 
           {/* Tabs */}
@@ -144,7 +150,7 @@ export function LocaleWidget() {
               )}
             >
               <Clock className="h-3.5 w-3.5" />
-              Fus orar
+              {t("tzTab")}
             </button>
             <button
               onClick={() => setTab("lang")}
@@ -156,7 +162,7 @@ export function LocaleWidget() {
               )}
             >
               <Globe className="h-3.5 w-3.5" />
-              Limbă
+              {t("langTab")}
             </button>
           </div>
 
@@ -167,7 +173,7 @@ export function LocaleWidget() {
               <div className="px-3 pt-2.5 pb-1.5">
                 <input
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="Caută oraș..."
+                  placeholder={t("searchCity")}
                   value={tzSearch}
                   onChange={(e) => setTzSearch(e.target.value)}
                   autoFocus
@@ -186,7 +192,7 @@ export function LocaleWidget() {
                     )}
                   >
                     <span className="text-base leading-none">{tz.flag}</span>
-                    <span className="flex-1 font-medium text-left">{tz.label}</span>
+                    <span className="flex-1 font-medium text-left">{cityLabel(tz)}</span>
                     <span className="text-[10px] font-mono text-zinc-600">{tz.offset}</span>
                     {timezone === tz.value && (
                       <Check className="h-3 w-3 text-indigo-400 shrink-0" />
@@ -194,7 +200,7 @@ export function LocaleWidget() {
                   </button>
                 ))}
                 {filteredTz.length === 0 && (
-                  <p className="text-center text-[11px] text-zinc-600 py-6">Niciun rezultat</p>
+                  <p className="text-center text-[11px] text-zinc-600 py-6">{t("noResult")}</p>
                 )}
               </div>
             </div>
@@ -227,7 +233,7 @@ export function LocaleWidget() {
           {/* Current selection footer */}
           <div className="border-t border-zinc-800 px-4 py-2.5 flex items-center justify-between">
             <span className="text-[10px] text-zinc-600">
-              {currentTz?.flag} {currentTz?.label} · {currentTz?.offset}
+              {currentTz?.flag} {currentTz ? cityLabel(currentTz) : ""} · {currentTz?.offset}
             </span>
             <span className="text-[10px] text-zinc-600">
               {currentLang?.flag} {currentLang?.label}

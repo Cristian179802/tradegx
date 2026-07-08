@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronDown, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -93,6 +94,7 @@ const INTERVALS = [
 const CATS = ["Forex", "Metale", "Indici", "Crypto", "Energie"];
 
 export function LiveChart() {
+  const t = useTranslations("liveChart");
   const [symbol, setSymbol]     = useState("FX:EURUSD");
   const [interval, setInterval] = useState("60");
   const [open, setOpen]         = useState(false);
@@ -164,8 +166,8 @@ export function LiveChart() {
       {/* ── Header ───────────────────────────────────────── */}
       <div className="shrink-0 flex items-center justify-between mb-2 gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-zinc-200">Grafic Live</h2>
-          <p className="text-xs text-zinc-600 mt-0.5">Date în timp real TradingView</p>
+          <h2 className="text-sm font-semibold text-zinc-200">{t("title")}</h2>
+          <p className="text-xs text-zinc-600 mt-0.5">{t("realtimeData")}</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -206,7 +208,7 @@ export function LiveChart() {
                   <input
                     ref={searchRef}
                     className="flex-1 bg-transparent text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none"
-                    placeholder="Caută simbol... (ex: EUR, DAX, BTC)"
+                    placeholder={t("searchSymbol")}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
