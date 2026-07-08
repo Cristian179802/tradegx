@@ -41,7 +41,8 @@
     "trialCta": "Keep PRO →",
     "freeText": "You are on the Standard plan — AI signals, Edge Finder and broker sync are PRO features",
     "freeCta": "See PRO →",
-    "planStandard": "Standard"
+    "planStandard": "Standard",
+    "close": "Close"
   },
   "bottomNav": {
     "home": "Home",
@@ -252,7 +253,8 @@
     "t7": "HIGH Impact News",
     "d7": "Alert 30 minutes before major-impact economic events.",
     "t8": "Drawdown Alert",
-    "d8": "Notification when the account drawdown exceeds the set threshold."
+    "d8": "Notification when the account drawdown exceeds the set threshold.",
+    "recentAlerts": "Recent Alerts"
   },
   "accounts": {
     "title": "Trading accounts",
@@ -378,7 +380,8 @@
     "alertSetDesc": "You get an in-app + Telegram notification when the price hits the level (checked every ~10 min).",
     "saveError": "Save error",
     "noResults": "Try another search term",
-    "addedBtn": "Added"
+    "addedBtn": "Added",
+    "noResultsTitle": "No results"
   },
   "riskManager": {
     "title": "Risk Manager",
@@ -1693,7 +1696,8 @@
     "pBars": "Bars analyzed",
     "tradesTitle": "Trades ({n})",
     "thReason": "Reason",
-    "comShort": "com."
+    "comShort": "com.",
+    "noTrades": "No trades"
   },
   "backtestNew": {
     "stCustomName": "Custom",

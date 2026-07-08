@@ -63,7 +63,7 @@ export function TrialBanner() {
             try { localStorage.setItem(DISMISS_KEY, "1"); } catch {}
           }}
           className="ml-1 text-zinc-600 hover:text-zinc-400"
-          aria-label="Închide"
+          aria-label={t("close")}
         >
           <X className="w-3 h-3" />
         </button>

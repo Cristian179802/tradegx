@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { AlertsClient, type AlertSettings } from "./alerts-client";
 
-export const metadata: Metadata = { title: "Alerte AI" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("alertsPage");
+  return { title: t("title") };
+}
 
 const DEFAULT_SETTINGS: AlertSettings = {
   OVERTRADING: true,

@@ -41,7 +41,8 @@
     "trialCta": "Păstrează PRO →",
     "freeText": "Ești pe planul Standard — semnalele AI, Edge Finder și sincronizarea broker sunt în PRO",
     "freeCta": "Vezi PRO →",
-    "planStandard": "Standard"
+    "planStandard": "Standard",
+    "close": "Închide"
   },
   "bottomNav": {
     "home": "Acasă",
@@ -252,7 +253,8 @@
     "t7": "Știri HIGH Impact",
     "d7": "Alertă cu 30 minute înainte de evenimentele economice de impact major.",
     "t8": "Alertă Drawdown",
-    "d8": "Notificare când drawdown-ul contului depășește pragul setat."
+    "d8": "Notificare când drawdown-ul contului depășește pragul setat.",
+    "recentAlerts": "Alerte Recente"
   },
   "accounts": {
     "title": "Conturi de trading",
@@ -378,7 +380,8 @@
     "alertSetDesc": "Primești notificare in-app + Telegram când prețul atinge pragul (verificare la ~10 min).",
     "saveError": "Eroare la salvare",
     "noResults": "Încearcă alt termen de căutare",
-    "addedBtn": "Adăugat"
+    "addedBtn": "Adăugat",
+    "noResultsTitle": "Niciun rezultat"
   },
   "riskManager": {
     "title": "Risk Manager",
@@ -1693,7 +1696,8 @@
     "pBars": "Lumânări analizate",
     "tradesTitle": "Trade-uri ({n})",
     "thReason": "Motiv",
-    "comShort": "com."
+    "comShort": "com.",
+    "noTrades": "Niciun trade"
   },
   "backtestNew": {
     "stCustomName": "Personalizată",

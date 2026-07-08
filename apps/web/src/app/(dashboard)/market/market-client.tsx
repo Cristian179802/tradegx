@@ -491,7 +491,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                 <Search className="h-5 w-5 text-zinc-600" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-semibold text-zinc-500">Niciun rezultat</p>
+                <p className="text-sm font-semibold text-zinc-500">{t("noResultsTitle")}</p>
                 <p className="text-xs text-zinc-700 mt-1">{t("noResults")}</p>
               </div>
             </div>

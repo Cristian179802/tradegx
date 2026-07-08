@@ -325,7 +325,7 @@ export function AlertsClient({ alerts, settings: initialSettings }: AlertsClient
           <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-                Alerte Recente
+                {t("recentAlerts")}
               </h3>
               {unread > 0 && (
                 <button

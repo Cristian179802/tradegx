@@ -58,6 +58,14 @@ export default function ChecklistPage() {
   const resetChecks = () => setItems((p) => p.map((it) => ({ ...it, checked: false })));
   const restoreDefaults = () => setItems(DEFAULT_ITEMS.map((text, i) => ({ id: `d${i}`, text, checked: false })));
 
+  // Itemele default (id d0..d9) se afișează MEREU din traducerea curentă, chiar dacă
+  // în localStorage e salvată versiunea RO veche. Itemele custom păstrează textul userului.
+  const displayText = (it: Item) => {
+    const m = /^d(\d+)$/.exec(it.id);
+    if (m) return DEFAULT_ITEMS[Number(m[1])] ?? it.text;
+    return it.text;
+  };
+
   const checkedCount = items.filter((it) => it.checked).length;
   const total = items.length;
   const allChecked = total > 0 && checkedCount === total;
@@ -109,7 +117,7 @@ export default function ChecklistPage() {
                 : <Square className="w-5 h-5 text-zinc-600 hover:text-zinc-400 transition-colors" />}
             </button>
             <span className={cn("flex-1 text-sm transition-colors", it.checked ? "text-zinc-500 line-through" : "text-zinc-200")}>
-              {it.text}
+              {displayText(it)}
             </span>
             <button onClick={() => remove(it.id)} className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-rose-400 transition-all shrink-0">
               <X className="w-4 h-4" />

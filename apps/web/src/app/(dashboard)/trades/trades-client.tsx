@@ -120,7 +120,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
             <SelectValue placeholder={t("allAccounts")} />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
-            <SelectItem value="all" className="text-zinc-100">Toate conturile</SelectItem>
+            <SelectItem value="all" className="text-zinc-100">{t("allAccounts")}</SelectItem>
             {accounts.map((a) => (
               <SelectItem key={a.id} value={a.id} className="text-zinc-100">
                 {a.name}

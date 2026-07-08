@@ -657,7 +657,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
         </div>
 
         {pageTrades.length === 0 ? (
-          <div className="py-12 text-center text-zinc-600 text-sm">Niciun trade</div>
+          <div className="py-12 text-center text-zinc-600 text-sm">{t("noTrades")}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
