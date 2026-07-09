@@ -235,7 +235,54 @@ function StatsStrip({ t }: { t: TT }) {
   );
 }
 
-// ── Bento tile ───────────────────────────────────────────────────────────────
+// ── Tilt 3D (înclinare după mouse + reflexie holografică) ────────────────────
+function Tilt3D({
+  children, className, style,
+}: {
+  children: React.ReactNode; className?: string; style?: React.CSSProperties;
+}) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const raf = React.useRef<number>(0);
+  const [tilt, setTilt] = React.useState({ rx: 0, ry: 0, gx: 50, gy: 50, active: false });
+
+  function onMove(e: React.MouseEvent) {
+    const el = ref.current; if (!el) return;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() =>
+      setTilt({ rx: (0.5 - py) * 9, ry: (px - 0.5) * 11, gx: px * 100, gy: py * 100, active: true })
+    );
+  }
+  function onLeave() {
+    cancelAnimationFrame(raf.current);
+    setTilt((s) => ({ ...s, rx: 0, ry: 0, active: false }));
+  }
+
+  return (
+    <div
+      ref={ref}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      className={className}
+      style={{
+        ...style,
+        transform: `perspective(800px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) translateZ(0)`,
+        transition: tilt.active ? "transform 0.08s linear" : "transform 0.5s cubic-bezier(.22,.68,0,1.2)",
+        transformStyle: "preserve-3d",
+        willChange: "transform",
+      }}
+    >
+      {children}
+      {/* glare care urmărește cursorul */}
+      <div className="pointer-events-none absolute inset-0 rounded-2xl transition-opacity duration-300"
+        style={{ opacity: tilt.active ? 1 : 0, background: `radial-gradient(circle at ${tilt.gx}% ${tilt.gy}%, rgba(255,255,255,0.14), transparent 45%)` }} />
+    </div>
+  );
+}
+
+// ── Bento tile (futuristic, 3D tilt + neon + holo sweep) ─────────────────────
 function BentoTile({
   span, rgb, label, Icon, delay = 0, children,
 }: {
@@ -243,27 +290,63 @@ function BentoTile({
 }) {
   return (
     <motion.div
-      className={`group relative rounded-2xl border bg-zinc-900/60 backdrop-blur-sm p-4 overflow-hidden hover:bg-zinc-900/80 transition-colors ${span}`}
-      style={{ borderColor: `rgba(${rgb},0.22)` }}
+      className={`${span} h-full`}
       initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay, ease: EASE }}
     >
-      <div className="absolute top-0 left-0 right-0 h-px opacity-60" style={{ background: `linear-gradient(90deg,transparent,rgb(${rgb}),transparent)` }} />
-      <div className="absolute -inset-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ background: `radial-gradient(ellipse at 75% 15%, rgba(${rgb},0.12), transparent 70%)` }} />
-      <div className="relative flex items-center gap-2 mb-3">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `rgba(${rgb},0.14)`, color: `rgb(${rgb})` }}><Icon className="w-4 h-4" /></div>
-        <span className="text-[13px] font-bold text-zinc-200 leading-tight">{label}</span>
-      </div>
-      <div className="relative">{children}</div>
+      <Tilt3D
+        className="tg-holo group relative h-full rounded-2xl border bg-zinc-900/50 backdrop-blur-md p-4 overflow-hidden"
+        style={{ borderColor: `rgba(${rgb},0.35)`, boxShadow: `0 0 0 1px rgba(${rgb},0.05), 0 8px 30px -12px rgba(${rgb},0.25)` }}
+      >
+        <div className="absolute top-0 left-0 right-0 h-px opacity-80" style={{ background: `linear-gradient(90deg,transparent,rgb(${rgb}),transparent)` }} />
+        <div className="absolute -inset-12 opacity-40 pointer-events-none" style={{ background: `radial-gradient(ellipse at 80% 0%, rgba(${rgb},0.14), transparent 60%)` }} />
+        <div className="relative flex items-center gap-2 mb-3" style={{ transform: "translateZ(30px)" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border" style={{ background: `rgba(${rgb},0.16)`, borderColor: `rgba(${rgb},0.3)`, color: `rgb(${rgb})` }}><Icon className="w-4 h-4" /></div>
+          <span className="text-[13px] font-bold text-zinc-100 leading-tight">{label}</span>
+        </div>
+        <div className="relative" style={{ transform: "translateZ(20px)" }}>{children}</div>
+      </Tilt3D>
     </motion.div>
+  );
+}
+
+// Fundal decorativ: lumânări care plutesc (temă trading)
+function CandlesBg() {
+  const candles = React.useMemo(
+    () => Array.from({ length: 40 }, (_, i) => ({
+      up: Math.random() > 0.45,
+      h: 20 + Math.random() * 70,
+      wick: 12 + Math.random() * 22,
+      y: Math.random() * 40,
+      x: i * 26,
+    })), []);
+  return (
+    <div className="absolute inset-x-0 bottom-0 h-64 overflow-hidden pointer-events-none opacity-[0.13]">
+      <motion.div className="absolute bottom-10 left-0 flex items-end gap-3 w-max"
+        animate={{ x: ["0%", "-50%"] }} transition={{ duration: 40, repeat: Infinity, ease: "linear" }}>
+        {[...candles, ...candles].map((c, i) => {
+          const col = c.up ? "#34d399" : "#f43f5e";
+          return (
+            <svg key={i} width="14" height="160" viewBox="0 0 14 160" style={{ transform: `translateY(${c.y}px)` }}>
+              <line x1="7" y1={80 - c.wick} x2="7" y2={80 + c.h + c.wick} stroke={col} strokeWidth="1.5" />
+              <rect x="2" y={80} width="10" height={c.h} rx="1.5" fill={col} />
+            </svg>
+          );
+        })}
+      </motion.div>
+    </div>
   );
 }
 
 // ── Features — bento grid cu mini-mock-uri reale ale funcțiilor ───────────────
 function Features({ t }: { t: TT }) {
   return (
-    <section id="features" className="relative py-24 px-6">
-      <div className="max-w-6xl mx-auto">
+    <section id="features" className="relative py-24 px-6 overflow-hidden">
+      {/* Fundal futurist: grilă în perspectivă + glow + lumânări */}
+      <div className="tg-grid-floor" />
+      <CandlesBg />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 8%, rgba(99,102,241,0.10), transparent 55%)" }} />
+      <div className="relative z-10 max-w-6xl mx-auto">
         <SectionHeader t={t} icon={Layers} badge={t("featuresBadge")} title={t("featuresTitle")} sub={t("featuresSub")} />
 
         <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 md:auto-rows-[168px] md:grid-flow-dense">
