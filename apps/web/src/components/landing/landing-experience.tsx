@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { LiveChartCanvas, TickerTape, FloatingTickers } from "@/components/landing/hero-fx";
 
 // ── Landing experience ───────────────────────────────────────────────────────
 // Prezentare premium, parallax de sus până jos. Doar transform/opacity (GPU) +
@@ -140,9 +141,22 @@ function Hero({ t }: { t: TT }) {
         className="absolute top-[10%] left-[15%] w-[620px] h-[620px] bg-indigo-600/14 rounded-full blur-[120px] pointer-events-none" />
       <motion.div animate={{ x: [0, -50, 0], y: [0, 40, 0] }} transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-[20%] right-[10%] w-[520px] h-[520px] bg-violet-600/12 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Grafic live pe canvas (streaming) */}
+      <div className="absolute inset-x-0 top-0 h-[78vh] pointer-events-none"
+        style={{ opacity: 0.5, WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 18%, #000 64%, transparent)", maskImage: "linear-gradient(to bottom, transparent, #000 18%, #000 64%, transparent)" }}>
+        <LiveChartCanvas className="w-full h-full block" />
+      </div>
+      {/* Grilă în perspectivă jos */}
+      <div className="tg-grid-floor" style={{ height: "40%", opacity: 0.6 }} />
+      {/* Cotații care plutesc */}
+      <FloatingTickers />
+      {/* Bandă de cotații sus */}
+      <div className="absolute top-14 inset-x-0 z-20"><TickerTape /></div>
+
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none" />
 
-      <motion.div style={{ y: textY, opacity: textOpacity }} className="relative max-w-4xl mx-auto text-center">
+      <motion.div style={{ y: textY, opacity: textOpacity }} className="relative z-10 max-w-4xl mx-auto text-center">
         <Reveal>
           <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/8 backdrop-blur-sm">
             <span className="live-dot-indigo" />
@@ -191,7 +205,7 @@ function Hero({ t }: { t: TT }) {
       </motion.div>
 
       {/* Mock dashboard cu parallax pe scroll */}
-      <motion.div style={{ y: mockY, scale: mockScale }} className="relative max-w-3xl mx-auto mt-16">
+      <motion.div style={{ y: mockY, scale: mockScale }} className="relative z-10 max-w-3xl mx-auto mt-16">
         <motion.div initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.6, ease: EASE }}
           className="rounded-2xl border border-zinc-800/80 bg-zinc-900/70 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden">
           <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800/60">
