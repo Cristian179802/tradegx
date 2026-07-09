@@ -15,7 +15,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
-import { TickerTape } from "@/components/landing/hero-fx";
 import { EASE, Reveal, FloatIdle, BreathingGlow, MarketBackdrop } from "@/components/landing/fx";
 import { HeroCinematic } from "@/components/landing/hero-cinematic";
 import { MagneticButton } from "@/components/landing/parallax";
@@ -129,10 +128,8 @@ function Hero({ t }: { t: TT }) {
       <motion.div animate={{ x: [0, -50, 0], y: [0, 40, 0] }} transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-[20%] right-[10%] w-[520px] h-[520px] bg-violet-600/12 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Scenă cinematică: nebula + candele 3D + Bull vs Bear + SMC + sferă AI */}
+      {/* Scenă cinematică: imaginea Bull vs Bear + SMC + nebula */}
       <HeroCinematic />
-      {/* Bandă de cotații sus */}
-      <div className="absolute top-14 inset-x-0 z-20"><TickerTape /></div>
 
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none" />
 

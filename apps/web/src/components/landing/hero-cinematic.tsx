@@ -177,17 +177,16 @@ export function HeroCinematic() {
 
       {imgOk ? (
         /* Imaginea reală = centrul scenei (breathing zoom + parallax) */
-        <ParallaxLayer depth={14} className="absolute inset-0">
+        <ParallaxLayer depth={10} className="absolute inset-0">
           <motion.img
             src="/hero-battle.jpg"
             alt=""
             aria-hidden
             onError={() => setImgOk(false)}
-            className="absolute inset-0 w-full h-full object-cover object-center select-none"
-            style={{ opacity: 0.95 }}
-            initial={{ scale: 1.05 }}
-            animate={{ scale: [1.05, 1.12, 1.05] }}
-            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 w-full h-full object-contain object-center select-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.96 }}
+            transition={{ duration: 1.1, ease: "easeOut" }}
           />
         </ParallaxLayer>
       ) : (
@@ -203,15 +202,17 @@ export function HeroCinematic() {
         </>
       )}
 
-      {/* Etichete SMC — holograme peste scenă */}
-      <ParallaxLayer depth={26} className="absolute inset-0 hidden sm:block">
-        <SmcLabel text="Bearish Order Block" cls="top-[15%] left-[3%]" color="red" box />
-        <SmcLabel text="FVG" cls="top-[40%] left-[4%]" color="red" />
-        <SmcLabel text="Bullish Order Block" cls="top-[24%] right-[3%]" color="green" box />
-        <SmcLabel text="FVG" cls="top-[46%] right-[5%]" color="green" />
-        <SmcLabel text="Liquidity" cls="top-[42%] left-1/2 -translate-x-1/2" color="zinc" />
-        <SmcLabel text="BOS" cls="top-[68%] left-1/2 -translate-x-1/2" color="zinc" />
-      </ParallaxLayer>
+      {/* Etichete SMC — doar pentru scena desenată (imaginea reală e deja completă) */}
+      {!imgOk && (
+        <ParallaxLayer depth={26} className="absolute inset-0 hidden sm:block">
+          <SmcLabel text="Bearish Order Block" cls="top-[15%] left-[3%]" color="red" box />
+          <SmcLabel text="FVG" cls="top-[40%] left-[4%]" color="red" />
+          <SmcLabel text="Bullish Order Block" cls="top-[24%] right-[3%]" color="green" box />
+          <SmcLabel text="FVG" cls="top-[46%] right-[5%]" color="green" />
+          <SmcLabel text="Liquidity" cls="top-[42%] left-1/2 -translate-x-1/2" color="zinc" />
+          <SmcLabel text="BOS" cls="top-[68%] left-1/2 -translate-x-1/2" color="zinc" />
+        </ParallaxLayer>
+      )}
 
       {/* Măști: titlul (sus) + fundul se leagă de pagină; laterale */}
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,8,11,0.92) 0%, rgba(8,8,11,0.4) 20%, transparent 40%, transparent 60%, rgba(8,8,11,0.88) 92%)" }} />
