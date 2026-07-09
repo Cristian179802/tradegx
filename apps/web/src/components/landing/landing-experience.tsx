@@ -114,8 +114,7 @@ function Hero({ t }: { t: TT }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const textY = useTransform(scrollYProgress, [0, 1], [0, 90]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const textScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]); // camera zoom
-  const textBlur = useTransform(scrollYProgress, [0, 0.7], ["blur(0px)", "blur(6px)"]);
+  const textScale = useTransform(scrollYProgress, [0, 1], [1, 1.06]); // camera zoom
   const mockY = useTransform(scrollYProgress, [0, 1], [0, 180]);
   const mockScale = useTransform(scrollYProgress, [0, 1], [1, 0.94]);
 
@@ -137,7 +136,7 @@ function Hero({ t }: { t: TT }) {
 
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none" />
 
-      <motion.div style={{ y: textY, opacity: textOpacity, scale: textScale, filter: textBlur }} className="relative z-10 max-w-4xl mx-auto text-center">
+      <motion.div style={{ y: textY, opacity: textOpacity, scale: textScale }} className="relative z-10 max-w-4xl mx-auto text-center">
         <Reveal>
           <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/8 backdrop-blur-sm">
             <span className="live-dot-indigo" />

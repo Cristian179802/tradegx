@@ -62,7 +62,7 @@ export function BreathingGlow({ className }: { className?: string }) {
 // ── Fundal ambiental global: particule care plutesc ─────────────────────────
 export function MarketBackdrop() {
   const particles = React.useMemo(
-    () => Array.from({ length: 22 }, () => ({
+    () => Array.from({ length: 14 }, () => ({
       left: Math.random() * 100,
       top: Math.random() * 100,
       size: 2 + Math.random() * 3,
