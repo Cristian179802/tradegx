@@ -2017,7 +2017,11 @@
     "copyright": "Toate drepturile rezervate.",
     "riskLabel": "Avertisment de risc:",
     "riskText": "TradeGx este un instrument de jurnalizare, analiză și educație — nu este broker, nu execută tranzacții și nu oferă consultanță financiară sau de investiții. Tranzacționarea instrumentelor financiare (forex, CFD-uri, crypto) implică un risc semnificativ de pierdere a capitalului și nu este potrivită pentru oricine. Statisticile afișate în materialele de prezentare sunt demonstrative. Performanța trecută nu garantează rezultate viitoare.",
-    "days30": "30 zile"
+    "days30": "30 zile",
+    "pxBadge": "Prezentare live",
+    "pxTitle": "Vezi-ți performanța cum prinde viață",
+    "pxSub": "Fiecare cifră, fiecare curbă — actualizate în timp real din tranzacțiile tale.",
+    "pxDemoNote": "Date demonstrative"
   },
   "pricing": {
     "navLogin": "Autentificare",

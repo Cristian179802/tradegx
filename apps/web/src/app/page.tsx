@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HeroTilt } from "@/components/landing/hero-tilt";
 import { FeatureCarousel } from "@/components/landing/feature-carousel";
+import { ParallaxShowcase } from "@/components/landing/parallax-showcase";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("landing");
@@ -343,6 +344,14 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Parallax showcase (cinematic, cifre demo) ──────────────────────── */}
+      <ParallaxShowcase
+        badge={t("pxBadge")}
+        title={t("pxTitle")}
+        sub={t("pxSub")}
+        demoNote={t("pxDemoNote")}
+      />
 
       {/* ── How It Works ───────────────────────────────────────────────────── */}
       <section id="how-it-works" className="py-28 px-6 bg-zinc-900/30">

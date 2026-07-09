@@ -2017,7 +2017,11 @@
     "copyright": "All rights reserved.",
     "riskLabel": "Risk warning:",
     "riskText": "TradeGx is a journaling, analysis and education tool — it is not a broker, does not execute trades and does not provide financial or investment advice. Trading financial instruments (forex, CFDs, crypto) involves a significant risk of capital loss and is not suitable for everyone. The statistics shown in presentation materials are illustrative. Past performance does not guarantee future results.",
-    "days30": "30 days"
+    "days30": "30 days",
+    "pxBadge": "Live preview",
+    "pxTitle": "Watch your performance come alive",
+    "pxSub": "Every number, every curve — updated in real time from your trades.",
+    "pxDemoNote": "Demo data"
   },
   "pricing": {
     "navLogin": "Sign in",
