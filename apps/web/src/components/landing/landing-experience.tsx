@@ -56,50 +56,6 @@ function CountOnView({
   );
 }
 
-// Mini-vizual decorativ per accent (chart / bars / grid)
-function FeatureVisual({ index, rgb }: { index: number; rgb: string }) {
-  const kind = index % 3;
-  const c = `rgb(${rgb})`;
-  if (kind === 0) {
-    return (
-      <svg viewBox="0 0 360 180" className="w-full h-full">
-        <defs>
-          <linearGradient id={`lv-${index}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={c} stopOpacity="0.3" /><stop offset="100%" stopColor={c} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d="M0 150 C50 140 80 100 120 105 C170 111 200 60 250 55 C300 50 330 82 360 20" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
-        <path d="M0 150 C50 140 80 100 120 105 C170 111 200 60 250 55 C300 50 330 82 360 20 L360 180 L0 180 Z" fill={`url(#lv-${index})`} />
-        <circle cx="360" cy="20" r="4" fill={c} />
-      </svg>
-    );
-  }
-  if (kind === 1) {
-    const bars = [60, 95, 72, 120, 88, 105, 70, 130, 96, 112];
-    return (
-      <svg viewBox="0 0 360 180" className="w-full h-full">
-        {bars.map((h, i) => <rect key={i} x={i * 35 + 6} y={165 - h} width={24} height={h} rx={4} fill={c} opacity={0.3 + (h / 130) * 0.55} />)}
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 360 180" className="w-full h-full">
-      {Array.from({ length: 4 }).map((_, r) => Array.from({ length: 9 }).map((_, col) => {
-        const v = Math.abs(Math.sin(r * 1.6 + col * 0.8));
-        return <rect key={`${r}-${col}`} x={col * 39 + 5} y={r * 43 + 5} width={34} height={38} rx={6} fill={c} opacity={0.07 + v * 0.5} />;
-      }))}
-    </svg>
-  );
-}
-
-const FEATURE_META = [
-  { Icon: BarChart3, rgb: "129,140,248" }, { Icon: Brain, rgb: "167,139,250" },
-  { Icon: BookOpen, rgb: "52,211,153" }, { Icon: Wifi, rgb: "251,191,36" },
-  { Icon: Shield, rgb: "251,113,133" }, { Icon: Calculator, rgb: "56,189,248" },
-  { Icon: GraduationCap, rgb: "129,140,248" }, { Icon: FlaskConical, rgb: "251,113,133" },
-  { Icon: Target, rgb: "52,211,153" },
-];
-
 const STEP_META = [{ Icon: Wifi, rgb: "129,140,248" }, { Icon: BookOpen, rgb: "167,139,250" }, { Icon: Target, rgb: "52,211,153" }];
 const COMMIT_META = [{ Icon: Lock, rgb: "52,211,153" }, { Icon: Shield, rgb: "129,140,248" }, { Icon: Users, rgb: "167,139,250" }];
 const STAT_META = [{ v: 40, suffix: "+", rgb: "129,140,248", Icon: BarChart3 }, { v: 99.9, suffix: "%", decimals: 1, rgb: "52,211,153", Icon: Activity }, { v: 2, prefix: "< ", suffix: "s", rgb: "251,191,36", Icon: Zap }, { v: 0, custom: "E2E", rgb: "251,113,133", Icon: Lock }];
@@ -279,57 +235,157 @@ function StatsStrip({ t }: { t: TT }) {
   );
 }
 
-// ── Features — rânduri alternante cu reveal lateral ──────────────────────────
+// ── Bento tile ───────────────────────────────────────────────────────────────
+function BentoTile({
+  span, rgb, label, Icon, delay = 0, children,
+}: {
+  span: string; rgb: string; label: string; Icon: React.ComponentType<{ className?: string }>; delay?: number; children: React.ReactNode;
+}) {
+  return (
+    <motion.div
+      className={`group relative rounded-2xl border bg-zinc-900/60 backdrop-blur-sm p-4 overflow-hidden hover:bg-zinc-900/80 transition-colors ${span}`}
+      style={{ borderColor: `rgba(${rgb},0.22)` }}
+      initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, delay, ease: EASE }}
+    >
+      <div className="absolute top-0 left-0 right-0 h-px opacity-60" style={{ background: `linear-gradient(90deg,transparent,rgb(${rgb}),transparent)` }} />
+      <div className="absolute -inset-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ background: `radial-gradient(ellipse at 75% 15%, rgba(${rgb},0.12), transparent 70%)` }} />
+      <div className="relative flex items-center gap-2 mb-3">
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `rgba(${rgb},0.14)`, color: `rgb(${rgb})` }}><Icon className="w-4 h-4" /></div>
+        <span className="text-[13px] font-bold text-zinc-200 leading-tight">{label}</span>
+      </div>
+      <div className="relative">{children}</div>
+    </motion.div>
+  );
+}
+
+// ── Features — bento grid cu mini-mock-uri reale ale funcțiilor ───────────────
 function Features({ t }: { t: TT }) {
   return (
     <section id="features" className="relative py-24 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionHeader t={t} icon={Layers} badge={t("featuresBadge")} title={t("featuresTitle")} sub={t("featuresSub")} />
-        <div className="mt-16 space-y-16 md:space-y-24">
-          {FEATURE_META.map((m, i) => {
-            const reversed = i % 2 === 1;
-            const Icon = m.Icon;
-            return (
-              <div key={i} className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-                {/* Text */}
-                <motion.div
-                  initial={{ opacity: 0, x: reversed ? 50 : -50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-80px" }}
-                  transition={{ duration: 0.7, ease: EASE }}
-                  className={reversed ? "md:order-2" : ""}
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0" style={{ background: `rgba(${m.rgb},0.12)`, borderColor: `rgba(${m.rgb},0.3)`, color: `rgb(${m.rgb})` }}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <span className="text-6xl font-black font-mono leading-none" style={{ color: `rgba(${m.rgb},0.15)` }}>{String(i + 1).padStart(2, "0")}</span>
-                  </div>
-                  <h3 className="text-2xl md:text-3xl font-black text-zinc-50 mb-3 tracking-tight">{t(`f${i + 1}T`)}</h3>
-                  <p className="text-zinc-400 leading-relaxed text-[15px] max-w-md">{t(`f${i + 1}D`)}</p>
-                </motion.div>
 
-                {/* Vizual */}
-                <motion.div
-                  initial={{ opacity: 0, x: reversed ? -50 : 50, rotateY: reversed ? -8 : 8 }}
-                  whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
-                  viewport={{ once: true, margin: "-80px" }}
-                  transition={{ duration: 0.75, ease: EASE }}
-                  style={{ perspective: 1000 }}
-                  className={reversed ? "md:order-1" : ""}
-                >
-                  <div className="relative rounded-3xl border border-zinc-800/70 bg-zinc-900/60 backdrop-blur-xl p-6 h-[240px] overflow-hidden shadow-2xl shadow-black/40">
-                    <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg,transparent,rgb(${m.rgb}),transparent)` }} />
-                    <div className="absolute -inset-10 opacity-30 pointer-events-none" style={{ background: `radial-gradient(ellipse at 70% 30%, rgba(${m.rgb},0.14), transparent 70%)` }} />
-                    <div className="flex items-center gap-1.5 mb-4 relative">
-                      <div className="w-2 h-2 rounded-full bg-zinc-700" /><div className="w-2 h-2 rounded-full bg-zinc-700" /><div className="w-2 h-2 rounded-full bg-zinc-700" />
-                    </div>
-                    <div className="h-[170px] relative"><FeatureVisual index={i} rgb={m.rgb} /></div>
-                  </div>
-                </motion.div>
+        <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 md:auto-rows-[168px] md:grid-flow-dense">
+          {/* AI Signals — tile mare */}
+          <BentoTile span="col-span-2 md:row-span-2" rgb="129,140,248" Icon={Brain} label={t("f2T")}>
+            <span className="absolute top-4 right-4 text-[9px] font-black text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded-full px-2 py-0.5">HPS</span>
+            <div className="rounded-xl border border-zinc-800/70 bg-zinc-950/50 p-3 mt-1">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-sm font-black text-zinc-100">EUR/USD</span>
+                <span className="text-[10px] font-black text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 rounded px-1.5 py-0.5">BUY</span>
               </div>
-            );
-          })}
+              <div className="grid grid-cols-3 gap-2 mb-2.5">
+                {[["Entry", "1.0842"], ["SL", "1.0818"], ["TP", "1.0910"]].map(([k, v]) => (
+                  <div key={k} className="rounded-lg bg-zinc-900/70 border border-zinc-800/60 px-2 py-1.5">
+                    <p className="text-[8px] text-zinc-600 uppercase font-bold tracking-wide">{k}</p>
+                    <p className="text-[11px] font-bold text-zinc-200 num">{v}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-400" style={{ width: "82%" }} />
+                </div>
+                <span className="text-[10px] font-black text-emerald-400 num">82%</span>
+              </div>
+            </div>
+            <p className="text-[11px] text-zinc-500 mt-3 leading-relaxed">{t("f2D")}</p>
+          </BentoTile>
+
+          {/* Analytics */}
+          <BentoTile span="col-span-2" rgb="167,139,250" Icon={BarChart3} label={t("f1T")} delay={0.05}>
+            <svg viewBox="0 0 300 54" className="w-full h-12">
+              <defs><linearGradient id="bt-an" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#a78bfa" stopOpacity="0.35" /><stop offset="100%" stopColor="#a78bfa" stopOpacity="0" /></linearGradient></defs>
+              <path d="M0 46 C40 42 60 30 90 32 C130 35 150 14 190 12 C230 10 250 24 300 4" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" />
+              <path d="M0 46 C40 42 60 30 90 32 C130 35 150 14 190 12 C230 10 250 24 300 4 L300 54 L0 54 Z" fill="url(#bt-an)" />
+            </svg>
+            <div className="flex gap-2 mt-2">
+              <span className="text-[10px] font-bold text-zinc-400 bg-zinc-800/70 rounded px-2 py-0.5">Win Rate <span className="text-emerald-400 num">56.8%</span></span>
+              <span className="text-[10px] font-bold text-zinc-400 bg-zinc-800/70 rounded px-2 py-0.5">PF <span className="text-indigo-300 num">1.68</span></span>
+            </div>
+          </BentoTile>
+
+          {/* Journal */}
+          <BentoTile span="col-span-1" rgb="52,211,153" Icon={BookOpen} label={t("f3T")} delay={0.1}>
+            <div className="rounded-lg bg-zinc-950/50 border border-zinc-800/60 p-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-zinc-200">GBP/USD</span>
+                <span className="text-[11px] font-black text-emerald-400 num">+$120</span>
+              </div>
+              <div className="flex gap-1 mt-2">
+                {["#FVG", t("btTagDiscipline")].map((tag) => <span key={tag} className="text-[8px] text-zinc-500 bg-zinc-800/70 rounded px-1.5 py-0.5">{tag}</span>)}
+              </div>
+            </div>
+          </BentoTile>
+
+          {/* Broker sync */}
+          <BentoTile span="col-span-1" rgb="251,191,36" Icon={Wifi} label={t("f4T")} delay={0.15}>
+            <div className="rounded-lg bg-zinc-950/50 border border-zinc-800/60 p-2.5">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wide">Live sync</span>
+              </div>
+              <p className="text-[10px] text-zinc-500 font-mono">MT5 #105033542</p>
+              <p className="text-sm font-black text-zinc-100 num mt-0.5">$10,370</p>
+            </div>
+          </BentoTile>
+
+          {/* Risk Manager */}
+          <BentoTile span="col-span-2" rgb="251,113,133" Icon={Shield} label={t("f5T")} delay={0.1}>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="text-[9px] text-zinc-600 uppercase font-bold tracking-wide mb-1">{t("btRiskPerTrade")}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 rounded-full bg-zinc-800 overflow-hidden"><div className="h-full bg-rose-400 rounded-full" style={{ width: "33%" }} /></div>
+                  <span className="text-[11px] font-black text-rose-300 num">1%</span>
+                </div>
+                <p className="text-[10px] text-zinc-500 mt-2">Max risk <span className="text-rose-400 font-bold num">−$103</span></p>
+              </div>
+              <div className="rounded-lg bg-zinc-950/50 border border-zinc-800/60 p-2.5 text-center">
+                <p className="text-[8px] text-zinc-600 uppercase font-bold tracking-wide">{t("btVolume")}</p>
+                <p className="text-2xl font-black text-indigo-300 num">0.52</p>
+              </div>
+            </div>
+          </BentoTile>
+
+          {/* Lot Calculator */}
+          <BentoTile span="col-span-1" rgb="56,189,248" Icon={Calculator} label={t("f6T")} delay={0.15}>
+            <div className="text-center py-1">
+              <p className="text-3xl font-black text-sky-300 num leading-none">0.52</p>
+              <p className="text-[9px] text-zinc-600 mt-1">EURUSD · 20 pips</p>
+            </div>
+          </BentoTile>
+
+          {/* Backtesting */}
+          <BentoTile span="col-span-1" rgb="244,63,94" Icon={FlaskConical} label={t("f8T")} delay={0.2}>
+            <svg viewBox="0 0 120 40" className="w-full h-9">
+              {[18, 28, 22, 34, 26, 32].map((h, i) => <rect key={i} x={i * 20 + 2} y={38 - h} width={14} height={h} rx={2} fill="#fb7185" opacity={0.4 + (h / 34) * 0.5} />)}
+            </svg>
+            <p className="text-[10px] text-zinc-500 mt-1">+$536 · <span className="text-zinc-300 num">PF 1.11</span></p>
+          </BentoTile>
+
+          {/* Academy */}
+          <BentoTile span="col-span-2" rgb="129,140,248" Icon={GraduationCap} label={t("f7T")} delay={0.15}>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] text-zinc-400">{t("btAcademyMeta")}</p>
+              <span className="text-[11px] font-black text-indigo-300 num">68%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden mb-2"><div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" style={{ width: "68%" }} /></div>
+            <div className="flex gap-1.5">
+              {["SMC", "ICT", "Risk", "Psy"].map((m) => <span key={m} className="text-[8px] font-bold text-zinc-500 bg-zinc-800/70 rounded px-1.5 py-0.5">{m}</span>)}
+            </div>
+          </BentoTile>
+
+          {/* Goals */}
+          <BentoTile span="col-span-2" rgb="52,211,153" Icon={Target} label={t("f9T")} delay={0.2}>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] text-zinc-400">{t("btMonthlyTarget")}</p>
+              <span className="text-[11px] font-black text-emerald-400 num">$1,940 / $2,850</span>
+            </div>
+            <div className="h-2 rounded-full bg-zinc-800 overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-300" style={{ width: "68%" }} /></div>
+            <p className="text-[10px] text-zinc-600 mt-2">{t("btGoalNote")}</p>
+          </BentoTile>
         </div>
       </div>
     </section>

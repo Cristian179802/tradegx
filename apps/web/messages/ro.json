@@ -2021,7 +2021,13 @@
     "pxBadge": "Prezentare live",
     "pxTitle": "Vezi-ți performanța cum prinde viață",
     "pxSub": "Fiecare cifră, fiecare curbă — actualizate în timp real din tranzacțiile tale.",
-    "pxDemoNote": "Date demonstrative"
+    "pxDemoNote": "Date demonstrative",
+    "btRiskPerTrade": "Risc / trade",
+    "btVolume": "Volum",
+    "btAcademyMeta": "9 module · 72 lecții",
+    "btMonthlyTarget": "Țintă lunară",
+    "btGoalNote": "68% · 12 zile rămase",
+    "btTagDiscipline": "#disciplină"
   },
   "pricing": {
     "navLogin": "Autentificare",

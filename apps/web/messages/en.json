@@ -2021,7 +2021,13 @@
     "pxBadge": "Live preview",
     "pxTitle": "Watch your performance come alive",
     "pxSub": "Every number, every curve — updated in real time from your trades.",
-    "pxDemoNote": "Demo data"
+    "pxDemoNote": "Demo data",
+    "btRiskPerTrade": "Risk / trade",
+    "btVolume": "Volume",
+    "btAcademyMeta": "9 modules · 72 lessons",
+    "btMonthlyTarget": "Monthly target",
+    "btGoalNote": "68% · 12 days left",
+    "btTagDiscipline": "#discipline"
   },
   "pricing": {
     "navLogin": "Sign in",
