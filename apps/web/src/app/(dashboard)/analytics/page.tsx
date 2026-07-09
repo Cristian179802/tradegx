@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileDown } from "lucide-react";
+import { FileDown, Landmark } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -16,6 +16,7 @@ export default async function AnalyticsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   const t = await getTranslations("analytics");
+  const tTax = await getTranslations("taxReport");
 
   const { prisma } = await import("@/lib/prisma");
   const userId = session.user.id;
@@ -229,14 +230,24 @@ export default async function AnalyticsPage() {
           <h1 className="text-2xl font-bold text-zinc-100">{t("perfTitle")}</h1>
           <p className="text-sm text-zinc-500 mt-1">{t("perfSubtitle")}</p>
         </div>
-        <Link
-          href="/report"
-          target="_blank"
-          className="shrink-0 flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/70 hover:border-indigo-500/50 text-zinc-200 text-sm font-semibold px-4 py-2 rounded-xl transition-all"
-        >
-          <FileDown className="w-4 h-4 text-indigo-400" />
-          {t("exportPdf")}
-        </Link>
+        <div className="shrink-0 flex items-center gap-2">
+          <Link
+            href="/tax-report"
+            target="_blank"
+            className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/70 hover:border-indigo-500/50 text-zinc-200 text-sm font-semibold px-4 py-2 rounded-xl transition-all"
+          >
+            <Landmark className="w-4 h-4 text-indigo-400" />
+            {tTax("navTitle")}
+          </Link>
+          <Link
+            href="/report"
+            target="_blank"
+            className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/70 hover:border-indigo-500/50 text-zinc-200 text-sm font-semibold px-4 py-2 rounded-xl transition-all"
+          >
+            <FileDown className="w-4 h-4 text-indigo-400" />
+            {t("exportPdf")}
+          </Link>
+        </div>
       </div>
       <AnalyticsClient data={data} />
       <PerformanceHeatmap />

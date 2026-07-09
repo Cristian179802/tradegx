@@ -609,7 +609,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               </div>
               <Link href="/trades/new"
                 className="text-xs text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-4 py-2 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/20">
-                Adaugă tranzacție
+                {t("addTradeBtn")}
               </Link>
             </div>
           ) : (

@@ -89,7 +89,8 @@
     "bestTrade": "Cel mai bun trade",
     "worstTrade": "Cel mai slab",
     "avgWin": "Avg câștig",
-    "avgLoss": "Avg pierdere"
+    "avgLoss": "Avg pierdere",
+    "addTradeBtn": "Adaugă tranzacție"
   },
   "edge": {
     "subtitle": "Motorul statistic care îți arată exact unde câștigi și unde pierzi bani — pe simbol, setup, killzone, zi, oră și durată.",
@@ -2166,7 +2167,8 @@
     "pl4": "Prețuri realtime prin WebSocket",
     "pl5": "Traduceri: germană, franceză, spaniolă, italiană",
     "pl6": "Rapoarte fiscale pentru România",
-    "pl7": "Integrări suplimentare și automatizări la cererea comunității"
+    "pl7": "Integrări suplimentare și automatizări la cererea comunității",
+    "sh21": "Rapoarte fiscale România — sumar anual (rezultat net, estimare impozit) + export PDF"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
@@ -2629,5 +2631,79 @@
     "ctrlEnterHint": "Ctrl+Enter pentru a trimite rapid",
     "send": "Trimite",
     "repliesTitle": "Răspunsuri ({n})"
+  },
+  "paywall": {
+    "proFeature": "Funcție PRO",
+    "activatePro": "Activează PRO",
+    "cancelNote": "Anulezi oricând · Datele tale rămân intacte pe orice plan"
+  },
+  "sharePage": {
+    "metaTitle": "Trade partajat — TradeGx",
+    "invalidTitle": "Link invalid sau expirat",
+    "invalidDesc": "Acest link de partajare nu este valid.",
+    "goToApp": "Mergi la TradeGx",
+    "lEntryPrice": "Preț intrare",
+    "lExitPrice": "Preț ieșire",
+    "lEntryDate": "Data intrare",
+    "lDuration": "Durată",
+    "lSetup": "Setup",
+    "lKillzone": "Killzone",
+    "privacyNote": "Sumele în bani și detaliile contului sunt private și nu sunt partajate.",
+    "ctaQuestion": "Vrei un jurnal de trading ca acesta?",
+    "ctaButton": "Începe gratuit pe TradeGx",
+    "setupOther": "Altul"
+  },
+  "taxReport": {
+    "metaTitle": "Raport Fiscal — TradeGx",
+    "metaDesc": "Sumar fiscal automat pe an pentru traderi.",
+    "navTitle": "Raport Fiscal",
+    "title": "Raport Fiscal {year}",
+    "subtitle": "Sumar de an fiscal pentru declarația de venituri",
+    "back": "Înapoi la panou",
+    "saveAsPdf": "Salvează ca PDF",
+    "generated": "Generat:",
+    "yearLabel": "An fiscal",
+    "empty": "Nicio tranzacție în {year}",
+    "emptyDesc": "Nu ai tranzacții închise în acest an fiscal.",
+    "summaryTitle": "Sumar {year}",
+    "kTotalTrades": "Total tranzacții",
+    "kGrossGain": "Câștig brut",
+    "kGrossLoss": "Pierdere brută",
+    "kNetResult": "Rezultat net realizat",
+    "taxTitle": "Estimare impozit (orientativă)",
+    "taxableBase": "Bază impozabilă (câștig net)",
+    "estTax": "Impozit estimat (10%)",
+    "noGain": "Fără câștig net pe acest an — fără impozit estimat.",
+    "taxNote": "Estimare orientativă pe baza cotei standard de 10% pentru venituri din investiții. NU constituie consultanță fiscală și nu include CASS sau alte contribuții.",
+    "monthlyTitle": "Defalcare lunară",
+    "instrumentTitle": "Defalcare pe instrument",
+    "colMonth": "Luna",
+    "colTrades": "Tranzacții",
+    "colNetPnl": "P&L Net",
+    "colInstrument": "Instrument",
+    "colWinRate": "Win Rate",
+    "disclaimerTitle": "Important",
+    "disclaimer": "Cifrele se bazează pe tranzacțiile înregistrate în jurnal (P&L realizat). Verifică-le cu extrasele brokerului și consultă un contabil sau ANAF pentru declarația fiscală. TradeGx nu oferă consultanță fiscală.",
+    "footer": "Generat automat de TradeGx · www.tradegx.com",
+    "printHint": "La salvare alege „Destinație: Salvează ca PDF\" și marginile „Implicite\".",
+    "months": [
+      "Ianuarie",
+      "Februarie",
+      "Martie",
+      "Aprilie",
+      "Mai",
+      "Iunie",
+      "Iulie",
+      "August",
+      "Septembrie",
+      "Octombrie",
+      "Noiembrie",
+      "Decembrie"
+    ],
+    "paywallDesc": "Sumar fiscal automat pe an — pregătit pentru declarația de venituri.",
+    "pw1": "Rezultat net realizat pe an fiscal",
+    "pw2": "Estimare impozit + bază impozabilă",
+    "pw3": "Defalcare lunară și pe instrument",
+    "pw4": "Export PDF pentru contabil"
   }
 }

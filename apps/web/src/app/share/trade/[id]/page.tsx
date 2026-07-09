@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations, getLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { verifyShareToken } from "@/lib/share";
 import { TrendingUp, TrendingDown, ArrowRight, ShieldCheck } from "lucide-react";
@@ -9,26 +10,28 @@ interface Props {
   searchParams: Promise<{ t?: string }>;
 }
 
-export const metadata: Metadata = {
-  title: "Trade partajat — TradeGx",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getTranslations("sharePage");
+  return { title: tr("metaTitle"), robots: { index: false, follow: false } };
+}
 
+// Etichetele universale de setup; „Altul" se traduce la randare.
 const SETUP_LABELS: Record<string, string> = {
   ORDER_BLOCK: "Order Block", FAIR_VALUE_GAP: "Fair Value Gap", LIQUIDITY_SWEEP: "Liquidity Sweep",
   BOS: "Break of Structure", CHOCH: "Change of Character", BREAKER: "Breaker Block",
   MITIGATION: "Mitigation", REJECTION: "Rejection", TREND_FOLLOW: "Trend Follow",
-  SCALP: "Scalp", OTHER: "Altul",
+  SCALP: "Scalp",
 };
 
-function InvalidLink() {
+async function InvalidLink() {
+  const tr = await getTranslations("sharePage");
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
       <div className="text-center">
-        <h1 className="text-xl font-bold text-zinc-200">Link invalid sau expirat</h1>
-        <p className="text-sm text-zinc-500 mt-2">Acest link de partajare nu este valid.</p>
+        <h1 className="text-xl font-bold text-zinc-200">{tr("invalidTitle")}</h1>
+        <p className="text-sm text-zinc-500 mt-2">{tr("invalidDesc")}</p>
         <Link href="/" className="inline-flex items-center gap-2 mt-5 text-sm text-indigo-400 hover:text-indigo-300">
-          Mergi la TradeGx <ArrowRight className="w-4 h-4" />
+          {tr("goToApp")} <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     </div>
@@ -38,6 +41,8 @@ function InvalidLink() {
 export default async function SharedTradePage({ params, searchParams }: Props) {
   const { id } = await params;
   const { t } = await searchParams;
+  const tr = await getTranslations("sharePage");
+  const locale = await getLocale();
 
   if (!t || !verifyShareToken(id, t)) return <InvalidLink />;
 
@@ -64,7 +69,7 @@ export default async function SharedTradePage({ params, searchParams }: Props) {
 
   const fmtPrice = (p: { toString(): string } | null) => (p != null ? Number(p).toFixed(5) : "—");
   const fmtDate = (d: Date | null) =>
-    d ? new Date(d).toLocaleDateString("ro-RO", { day: "numeric", month: "short", year: "numeric" }) : "—";
+    d ? new Date(d).toLocaleDateString(locale === "ro" ? "ro-RO" : "en-US", { day: "numeric", month: "short", year: "numeric" }) : "—";
   const duration = trade.durationMinutes
     ? trade.durationMinutes < 60 ? `${trade.durationMinutes}m`
       : `${Math.floor(trade.durationMinutes / 60)}h ${trade.durationMinutes % 60}m`
@@ -119,12 +124,12 @@ export default async function SharedTradePage({ params, searchParams }: Props) {
         {/* Detalii */}
         <div className="p-6 grid grid-cols-2 gap-x-6 gap-y-4">
           {[
-            { label: "Preț intrare", value: fmtPrice(trade.entryPrice) },
-            { label: "Preț ieșire", value: fmtPrice(trade.exitPrice) },
-            { label: "Data intrare", value: fmtDate(trade.entryTime) },
-            { label: "Durată", value: duration },
-            { label: "Setup", value: trade.setupType ? (SETUP_LABELS[trade.setupType] ?? trade.setupType) : "—" },
-            { label: "Killzone", value: trade.killzone ?? "—" },
+            { label: tr("lEntryPrice"), value: fmtPrice(trade.entryPrice) },
+            { label: tr("lExitPrice"), value: fmtPrice(trade.exitPrice) },
+            { label: tr("lEntryDate"), value: fmtDate(trade.entryTime) },
+            { label: tr("lDuration"), value: duration },
+            { label: tr("lSetup"), value: trade.setupType ? (trade.setupType === "OTHER" ? tr("setupOther") : (SETUP_LABELS[trade.setupType] ?? trade.setupType)) : "—" },
+            { label: tr("lKillzone"), value: trade.killzone ?? "—" },
           ].map((row) => (
             <div key={row.label}>
               <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">{row.label}</p>
@@ -146,18 +151,18 @@ export default async function SharedTradePage({ params, searchParams }: Props) {
         {/* Notă confidențialitate */}
         <div className="px-6 pb-4 flex items-center gap-1.5 text-[10px] text-zinc-600">
           <ShieldCheck className="w-3 h-3" />
-          Sumele în bani și detaliile contului sunt private și nu sunt partajate.
+          {tr("privacyNote")}
         </div>
       </div>
 
       {/* CTA */}
       <div className="mt-8 text-center">
-        <p className="text-sm text-zinc-400">Vrei un jurnal de trading ca acesta?</p>
+        <p className="text-sm text-zinc-400">{tr("ctaQuestion")}</p>
         <Link
           href="/register"
           className="inline-flex items-center gap-2 mt-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/20 transition-all"
         >
-          Începe gratuit pe TradeGx <ArrowRight className="w-4 h-4" />
+          {tr("ctaButton")} <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     </div>

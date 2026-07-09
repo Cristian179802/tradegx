@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Check, Lock, Zap } from "lucide-react";
 
 // ── PaywallCard ─────────────────────────────────────────────────────────────
@@ -14,6 +17,7 @@ export function PaywallCard({
   description: string;
   bullets: string[];
 }) {
+  const t = useTranslations("paywall");
   return (
     <div className="relative rounded-2xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/[0.07] via-zinc-900/80 to-zinc-900/80 p-10 text-center overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
@@ -25,7 +29,7 @@ export function PaywallCard({
         </div>
 
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-2">
-          Funcție PRO
+          {t("proFeature")}
         </p>
         <h2 className="text-xl font-black text-zinc-100 mb-2">{feature}</h2>
         <p className="text-sm text-zinc-500 max-w-md mx-auto mb-6">{description}</p>
@@ -45,10 +49,10 @@ export function PaywallCard({
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all"
           >
             <Zap className="w-4 h-4" />
-            Activează PRO
+            {t("activatePro")}
           </Link>
           <p className="text-[10px] text-zinc-600 mt-3">
-            Anulezi oricând · Datele tale rămân intacte pe orice plan
+            {t("cancelNote")}
           </p>
         </div>
       </div>

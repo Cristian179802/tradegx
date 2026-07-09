@@ -65,9 +65,16 @@ function walk(dir, acc = []) {
   return acc;
 }
 
+// text JSX multi-linie (text pe linia lui, între taguri pe linii diferite) — doar
+// diacritice, ca să evităm fals-pozitive din cod (ex. `a > x < b`).
+const JSX_TEXT_ML = />([^<>{}]*[ăâîșțĂÂÎȘȚ][^<>{}]*)</g;
+const lineOf = (src, idx) => src.slice(0, idx).split("\n").length;
+
 const findings = [];
 for (const file of walk(ROOT)) {
   const src = fs.readFileSync(file, "utf8");
+  const seen = new Set();
+  const add = (line, text) => { const k = `${line}|${text}`; if (!seen.has(k)) { seen.add(k); findings.push({ file, line, text }); } };
   const lines = src.split("\n");
   lines.forEach((line, i) => {
     // sări peste comentarii evidente
@@ -75,13 +82,22 @@ for (const file of walk(ROOT)) {
     let m;
     JSX_TEXT.lastIndex = 0;
     while ((m = JSX_TEXT.exec(code))) {
-      if (isRomanian(m[1])) findings.push({ file, line: i + 1, text: m[1].trim() });
+      if (isRomanian(m[1])) add(i + 1, m[1].trim());
     }
     PROP_STR.lastIndex = 0;
     while ((m = PROP_STR.exec(code))) {
-      if (isRomanian(m[1])) findings.push({ file, line: i + 1, text: m[1].trim() });
+      if (isRomanian(m[1])) add(i + 1, m[1].trim());
     }
   });
+  // pasul multi-linie (pe tot fișierul). Acceptăm doar PROZĂ (fără tokenuri de cod),
+  // ca să nu prindem comentarii/cod între operatori `>` `<`.
+  const CODEY = /[=;()/\\`|]|\/\/|=>|\bconst\b|\breturn\b|\bnew\b|\bMap\b|\bfunction\b/;
+  let mm;
+  JSX_TEXT_ML.lastIndex = 0;
+  while ((mm = JSX_TEXT_ML.exec(src))) {
+    const txt = mm[1].trim().replace(/\s+/g, " ");
+    if (txt.length >= 3 && txt.length <= 160 && !ALLOW.includes(txt) && !CODEY.test(txt)) add(lineOf(src, mm.index), txt);
+  }
 }
 
 if (findings.length === 0) {
