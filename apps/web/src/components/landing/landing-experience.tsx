@@ -15,8 +15,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
-import { LiveChartCanvas, TickerTape, FloatingTickers } from "@/components/landing/hero-fx";
+import { TickerTape } from "@/components/landing/hero-fx";
 import { EASE, Reveal, FloatIdle, BreathingGlow, MarketBackdrop } from "@/components/landing/fx";
+import { HeroCinematic } from "@/components/landing/hero-cinematic";
+import { MagneticButton } from "@/components/landing/parallax";
 
 // ── Landing experience ───────────────────────────────────────────────────────
 // Prezentare premium, parallax de sus până jos. Doar transform/opacity (GPU) +
@@ -128,15 +130,8 @@ function Hero({ t }: { t: TT }) {
       <motion.div animate={{ x: [0, -50, 0], y: [0, 40, 0] }} transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
         className="absolute top-[20%] right-[10%] w-[520px] h-[520px] bg-violet-600/12 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Grafic live pe canvas (streaming) */}
-      <div className="absolute inset-x-0 top-0 h-[78vh] pointer-events-none"
-        style={{ opacity: 0.5, WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 18%, #000 64%, transparent)", maskImage: "linear-gradient(to bottom, transparent, #000 18%, #000 64%, transparent)" }}>
-        <LiveChartCanvas className="w-full h-full block" />
-      </div>
-      {/* Grilă în perspectivă jos */}
-      <div className="tg-grid-floor" style={{ height: "40%", opacity: 0.6 }} />
-      {/* Cotații care plutesc */}
-      <FloatingTickers />
+      {/* Scenă cinematică: nebula + candele 3D + Bull vs Bear + SMC + sferă AI */}
+      <HeroCinematic />
       {/* Bandă de cotații sus */}
       <div className="absolute top-14 inset-x-0 z-20"><TickerTape /></div>
 
@@ -176,12 +171,14 @@ function Hero({ t }: { t: TT }) {
 
         <Reveal delay={0.65}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/register" className="relative inline-flex">
+            <MagneticButton>
               <BreathingGlow />
-              <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2 transition-transform hover:scale-[1.03]">
-                {t("ctaStart")}<ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+              <Link href="/register">
+                <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2">
+                  {t("ctaStart")}<ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </MagneticButton>
             <Link href="/pricing">
               <Button size="lg" variant="outline" className="border-zinc-700/80 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800/80 hover:text-white h-12 px-8 text-base backdrop-blur-sm">
                 {t("ctaCompare")}
@@ -715,7 +712,7 @@ function FinalCta({ t }: { t: TT }) {
               <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold"><Zap className="w-3 h-3" />{t("ctaBadge")}</div>
               <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">{t("ctaTitle1")}<span className="gradient-text-indigo">{t("ctaTitle2")}</span></h2>
               <p className="text-zinc-400 mb-8 leading-relaxed">{t.rich("ctaSub", { b: (c) => <strong className="text-zinc-200">{c}</strong> })}</p>
-              <Link href="/register" className="relative inline-flex"><BreathingGlow /><Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-10 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2 transition-transform hover:scale-[1.03]"><Sparkles className="w-4 h-4" />{t("ctaBtn")}</Button></Link>
+              <MagneticButton><BreathingGlow /><Link href="/register"><Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-10 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2"><Sparkles className="w-4 h-4" />{t("ctaBtn")}</Button></Link></MagneticButton>
               <p className="text-zinc-600 text-sm mt-5">{t("ctaNote")}</p>
             </div>
           </div>

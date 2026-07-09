@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 
 // ── Primitive de mișcare reutilizabile (premium, GPU) ────────────────────────
 
@@ -59,14 +59,8 @@ export function BreathingGlow({ className }: { className?: string }) {
   );
 }
 
-// ── Fundal ambiental global: particule + mascote bull/bear cu parallax ───────
+// ── Fundal ambiental global: particule care plutesc ─────────────────────────
 export function MarketBackdrop() {
-  const { scrollYProgress } = useScroll();
-  const bullY = useTransform(scrollYProgress, [0, 1], [0, -160]);
-  const bearY = useTransform(scrollYProgress, [0, 1], [0, 140]);
-  const bullX = useTransform(scrollYProgress, [0, 1], [0, 60]);
-  const bearX = useTransform(scrollYProgress, [0, 1], [0, -50]);
-
   const particles = React.useMemo(
     () => Array.from({ length: 22 }, () => ({
       left: Math.random() * 100,
@@ -83,14 +77,6 @@ export function MarketBackdrop() {
     <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
       {/* Aură de fundal (luxury) */}
       <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 20% 10%, rgba(99,102,241,0.06), transparent 45%), radial-gradient(ellipse at 85% 60%, rgba(139,92,246,0.05), transparent 50%)" }} />
-
-      {/* Mascote bull / bear — ghost, blurate, parallax pe scroll */}
-      <motion.div style={{ y: bullY, x: bullX }} className="absolute top-[18%] -left-6 text-[220px] leading-none select-none blur-[2px]" aria-hidden>
-        <span style={{ opacity: 0.05 }}>🐂</span>
-      </motion.div>
-      <motion.div style={{ y: bearY, x: bearX }} className="absolute bottom-[10%] -right-6 text-[220px] leading-none select-none blur-[2px]" aria-hidden>
-        <span style={{ opacity: 0.05 }}>🐻</span>
-      </motion.div>
 
       {/* Particule care plutesc */}
       {!reduced && particles.map((p, i) => (
