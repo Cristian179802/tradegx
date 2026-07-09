@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
 // ── Landing experience ───────────────────────────────────────────────────────
 // Prezentare premium, parallax de sus până jos. Doar transform/opacity (GPU) +
@@ -111,7 +112,8 @@ function Navbar({ t }: { t: TT }) {
           <Link href="/pricing" className="hover:text-zinc-200 transition-colors font-medium">{t("navPricing")}</Link>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/login"><Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white hover:bg-zinc-800/80 text-[13px] font-medium">{t("login")}</Button></Link>
+          <LanguageSwitcher compact />
+          <Link href="/login" className="hidden sm:block"><Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white hover:bg-zinc-800/80 text-[13px] font-medium">{t("login")}</Button></Link>
           <Link href="/register"><Button size="sm" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25 text-[13px] font-bold gap-1.5"><Sparkles className="w-3.5 h-3.5" />{t("tryFree")}</Button></Link>
         </div>
       </div>
