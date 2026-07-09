@@ -167,58 +167,55 @@ function SmcLabel({ text, cls, color, box }: { text: string; cls: string; color:
   );
 }
 
-// ── Slot imagine reală (opțional) ────────────────────────────────────────────
-function BattleImage() {
-  const [ok, setOk] = React.useState(true);
-  if (!ok) return null;
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/hero-battle.jpg"
-      alt=""
-      aria-hidden
-      onError={() => setOk(false)}
-      className="absolute left-1/2 top-[54%] -translate-x-1/2 -translate-y-1/2 w-[min(1100px,96%)] max-w-none object-contain select-none"
-      style={{ opacity: 0.9, maskImage: "radial-gradient(ellipse at 50% 45%, #000 55%, transparent 78%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 45%, #000 55%, transparent 78%)" }}
-    />
-  );
-}
-
 // ── Compunerea ───────────────────────────────────────────────────────────────
 export function HeroCinematic() {
+  const [imgOk, setImgOk] = React.useState(true);
   return (
     <ParallaxScene className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* L1 nebula */}
-      <div className="absolute inset-0" style={{ opacity: 0.85 }}><NebulaCanvas /></div>
+      {/* L1 nebula (subtilă în spate) */}
+      <div className="absolute inset-0" style={{ opacity: 0.55 }}><NebulaCanvas /></div>
 
-      {/* L2 ziduri de candele */}
-      <ParallaxLayer depth={18} className="absolute inset-0">
-        <CandleWall side="left" />
-        <CandleWall side="right" />
-      </ParallaxLayer>
+      {imgOk ? (
+        /* Imaginea reală = centrul scenei (breathing zoom + parallax) */
+        <ParallaxLayer depth={14} className="absolute inset-0">
+          <motion.img
+            src="/hero-battle.jpg"
+            alt=""
+            aria-hidden
+            onError={() => setImgOk(false)}
+            className="absolute inset-0 w-full h-full object-cover object-center select-none"
+            style={{ opacity: 0.95 }}
+            initial={{ scale: 1.05 }}
+            animate={{ scale: [1.05, 1.12, 1.05] }}
+            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </ParallaxLayer>
+      ) : (
+        /* Fallback desenat dacă imaginea lipsește */
+        <>
+          <ParallaxLayer depth={18} className="absolute inset-0">
+            <CandleWall side="left" />
+            <CandleWall side="right" />
+          </ParallaxLayer>
+          <ParallaxLayer depth={10} className="absolute inset-0">
+            <div className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 w-[60%] h-[55%]"><Embers /></div>
+          </ParallaxLayer>
+        </>
+      )}
 
-      {/* L3 imagine reală (dacă există) + embers */}
-      <ParallaxLayer depth={10} className="absolute inset-0">
-        <BattleImage />
-        <div className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 w-[60%] h-[55%]"><Embers /></div>
-      </ParallaxLayer>
-
-      {/* L4 etichete SMC */}
+      {/* Etichete SMC — holograme peste scenă */}
       <ParallaxLayer depth={26} className="absolute inset-0 hidden sm:block">
-        <SmcLabel text="Bearish Order Block" cls="top-[16%] left-[3%]" color="red" box />
+        <SmcLabel text="Bearish Order Block" cls="top-[15%] left-[3%]" color="red" box />
         <SmcLabel text="FVG" cls="top-[40%] left-[4%]" color="red" />
-        <SmcLabel text="Bullish Order Block" cls="top-[26%] right-[3%]" color="green" box />
+        <SmcLabel text="Bullish Order Block" cls="top-[24%] right-[3%]" color="green" box />
         <SmcLabel text="FVG" cls="top-[46%] right-[5%]" color="green" />
-        <SmcLabel text="Liquidity" cls="top-[40%] left-1/2 -translate-x-1/2" color="zinc" />
-        <SmcLabel text="BOS" cls="top-[66%] left-1/2 -translate-x-1/2" color="zinc" />
+        <SmcLabel text="Liquidity" cls="top-[42%] left-1/2 -translate-x-1/2" color="zinc" />
+        <SmcLabel text="BOS" cls="top-[68%] left-1/2 -translate-x-1/2" color="zinc" />
       </ParallaxLayer>
 
-      {/* miez de energie */}
-      <div className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(251,191,36,0.28), rgba(249,115,22,0.12), transparent 70%)" }} />
-
-      {/* vignette ca textul să iasă */}
-      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 34%, transparent 26%, rgba(8,8,11,0.5) 72%), linear-gradient(to bottom, rgba(8,8,11,0.4), transparent 20%, transparent 70%, rgba(8,8,11,0.85))" }} />
+      {/* Măști: titlul (sus) + fundul se leagă de pagină; laterale */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,8,11,0.92) 0%, rgba(8,8,11,0.4) 20%, transparent 40%, transparent 60%, rgba(8,8,11,0.88) 92%)" }} />
+      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 42%, transparent 34%, rgba(8,8,11,0.35) 82%)" }} />
     </ParallaxScene>
   );
 }
