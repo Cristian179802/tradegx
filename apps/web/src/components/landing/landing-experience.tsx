@@ -16,32 +16,13 @@ import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { LiveChartCanvas, TickerTape, FloatingTickers } from "@/components/landing/hero-fx";
+import { EASE, Reveal, FloatIdle, BreathingGlow, MarketBackdrop } from "@/components/landing/fx";
 
 // ── Landing experience ───────────────────────────────────────────────────────
 // Prezentare premium, parallax de sus până jos. Doar transform/opacity (GPU) +
 // reveal la scroll (IntersectionObserver, o singură dată) = fără lag.
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-const EASE = [0.22, 0.68, 0, 1] as const;
-
-function Reveal({
-  children, delay = 0, y = 28, className,
-}: {
-  children: React.ReactNode; delay?: number; y?: number; className?: string;
-}) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-70px" }}
-      transition={{ duration: 0.65, delay, ease: EASE }}
-    >
-      {children}
-    </motion.div>
-  );
-}
 
 function CountOnView({
   value, decimals = 0, prefix = "", suffix = "", className,
@@ -77,6 +58,9 @@ export function LandingExperience() {
     <div className="relative min-h-screen bg-[#08080b] text-white overflow-x-hidden">
       {/* Bară progres scroll sus */}
       <motion.div style={{ scaleX }} className="fixed top-0 left-0 right-0 h-0.5 z-[60] origin-left bg-gradient-to-r from-indigo-500 via-violet-500 to-emerald-400" />
+
+      {/* Fundal ambiental global (particule + mascote bull/bear) */}
+      <MarketBackdrop />
 
       <Navbar t={t} />
       <Hero t={t} />
@@ -128,6 +112,8 @@ function Hero({ t }: { t: TT }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const textY = useTransform(scrollYProgress, [0, 1], [0, 90]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const textScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]); // camera zoom
+  const textBlur = useTransform(scrollYProgress, [0, 0.7], ["blur(0px)", "blur(6px)"]);
   const mockY = useTransform(scrollYProgress, [0, 1], [0, 180]);
   const mockScale = useTransform(scrollYProgress, [0, 1], [1, 0.94]);
 
@@ -156,7 +142,7 @@ function Hero({ t }: { t: TT }) {
 
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none" />
 
-      <motion.div style={{ y: textY, opacity: textOpacity }} className="relative z-10 max-w-4xl mx-auto text-center">
+      <motion.div style={{ y: textY, opacity: textOpacity, scale: textScale, filter: textBlur }} className="relative z-10 max-w-4xl mx-auto text-center">
         <Reveal>
           <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/8 backdrop-blur-sm">
             <span className="live-dot-indigo" />
@@ -190,7 +176,8 @@ function Hero({ t }: { t: TT }) {
 
         <Reveal delay={0.65}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/register">
+            <Link href="/register" className="relative inline-flex">
+              <BreathingGlow />
               <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2 transition-transform hover:scale-[1.03]">
                 {t("ctaStart")}<ArrowRight className="w-4 h-4" />
               </Button>
@@ -235,15 +222,17 @@ function StatsStrip({ t }: { t: TT }) {
       <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
         {STAT_META.map((s, i) => (
           <Reveal key={i} delay={i * 0.08}>
-            <div className="rounded-2xl border p-4 text-center bg-zinc-900/60 backdrop-blur-sm" style={{ borderColor: `rgba(${s.rgb},0.25)` }}>
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto mb-2" style={{ background: `rgba(${s.rgb},0.12)`, color: `rgb(${s.rgb})` }}>
-                <s.Icon className="w-4 h-4" />
+            <FloatIdle amount={5} duration={5 + i} delay={i * 0.4}>
+              <div className="rounded-2xl border p-4 text-center bg-zinc-900/50 backdrop-blur-xl shadow-lg shadow-black/30" style={{ borderColor: `rgba(${s.rgb},0.28)`, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 30px -14px rgba(${s.rgb},0.4)` }}>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto mb-2 border" style={{ background: `rgba(${s.rgb},0.12)`, borderColor: `rgba(${s.rgb},0.25)`, color: `rgb(${s.rgb})` }}>
+                  <s.Icon className="w-4 h-4" />
+                </div>
+                <p className="text-2xl font-black num" style={{ color: `rgb(${s.rgb})` }}>
+                  {s.custom ? s.custom : <CountOnView value={s.v} decimals={s.decimals ?? 0} prefix={s.prefix ?? ""} suffix={s.suffix ?? ""} />}
+                </p>
+                <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">{t(labels[i])}</p>
               </div>
-              <p className="text-2xl font-black num" style={{ color: `rgb(${s.rgb})` }}>
-                {s.custom ? s.custom : <CountOnView value={s.v} decimals={s.decimals ?? 0} prefix={s.prefix ?? ""} suffix={s.suffix ?? ""} />}
-              </p>
-              <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">{t(labels[i])}</p>
-            </div>
+            </FloatIdle>
           </Reveal>
         ))}
       </div>
@@ -726,7 +715,7 @@ function FinalCta({ t }: { t: TT }) {
               <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold"><Zap className="w-3 h-3" />{t("ctaBadge")}</div>
               <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">{t("ctaTitle1")}<span className="gradient-text-indigo">{t("ctaTitle2")}</span></h2>
               <p className="text-zinc-400 mb-8 leading-relaxed">{t.rich("ctaSub", { b: (c) => <strong className="text-zinc-200">{c}</strong> })}</p>
-              <Link href="/register"><Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-10 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2 transition-transform hover:scale-[1.03]"><Sparkles className="w-4 h-4" />{t("ctaBtn")}</Button></Link>
+              <Link href="/register" className="relative inline-flex"><BreathingGlow /><Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-10 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2 transition-transform hover:scale-[1.03]"><Sparkles className="w-4 h-4" />{t("ctaBtn")}</Button></Link>
               <p className="text-zinc-600 text-sm mt-5">{t("ctaNote")}</p>
             </div>
           </div>
