@@ -4,8 +4,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { verifyToken, decryptSecret, verifyBackup } from "@/lib/twofactor";
 import type { Role, SubscriptionPlan } from "@prisma/client";
+// NB: `@/lib/twofactor` folosește node:crypto și NU e Edge-safe. auth.ts e
+// importat de middleware (Edge), deci îl încărcăm DINAMIC în authorize() —
+// care rulează doar pe Node (route handler), nu în middleware-ul Edge.
 
 declare module "next-auth" {
   interface Session {
@@ -73,6 +75,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (user.totpEnabled && user.totpSecret) {
           const code = ((credentials.code as string) || "").trim();
           if (!code) return null; // clientul cere codul via pre-check
+          // Import dinamic (Node-only) — nu se evaluează în bundle-ul Edge al middleware-ului.
+          const { verifyToken, decryptSecret, verifyBackup } = await import("@/lib/twofactor");
           let ok = false;
           if (/^\d{6}$/.test(code)) {
             try { ok = verifyToken(code, decryptSecret(user.totpSecret)); } catch { ok = false; }
