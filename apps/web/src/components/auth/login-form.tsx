@@ -30,6 +30,9 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [twoFAStep, setTwoFAStep] = useState(false);
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -38,21 +41,44 @@ export function LoginForm() {
 
   const isLoading = form.formState.isSubmitting;
 
-  async function onSubmit(data: LoginInput) {
-    setError(null);
+  async function doSignIn(email: string, password: string, twoFactorCode?: string) {
     const res = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: false,
+      email, password, code: twoFactorCode ?? "", redirect: false,
     });
-
     if (res?.error) {
-      setError(t("invalidCredentials"));
-      return;
+      setError(twoFactorCode ? t("invalidCode") : t("invalidCredentials"));
+      return false;
     }
-
     router.push(callbackUrl);
     router.refresh();
+    return true;
+  }
+
+  // Pas 1: verifică parola și dacă e nevoie de 2FA (fără a crea sesiune)
+  async function onSubmit(data: LoginInput) {
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/2fa-required", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      });
+      const json = await res.json();
+      if (!json.ok) { setError(t("invalidCredentials")); return; }
+      if (json.required) { setTwoFAStep(true); setCode(""); return; }
+      await doSignIn(data.email, data.password);
+    } catch {
+      setError(t("invalidCredentials"));
+    }
+  }
+
+  // Pas 2: cod 2FA
+  async function verify2FA() {
+    if (!code.trim()) return;
+    setError(null);
+    setVerifying(true);
+    await doSignIn(form.getValues("email"), form.getValues("password"), code.trim());
+    setVerifying(false);
   }
 
   async function handleGoogleSignIn() {
@@ -80,9 +106,9 @@ export function LoginForm() {
             <span className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">{t("secureAccess")}</span>
           </div>
           <h1 className="text-2xl font-black text-white mb-1.5 tracking-tight">
-            {t("welcomeBack")}
+            {twoFAStep ? t("twoFATitle") : t("welcomeBack")}
           </h1>
-          <p className="text-zinc-400 text-sm">{t("loginSubtitle")}</p>
+          <p className="text-zinc-400 text-sm">{twoFAStep ? t("twoFADesc") : t("loginSubtitle")}</p>
         </div>
 
         {/* Verified banner */}
@@ -100,6 +126,36 @@ export function LoginForm() {
           </div>
         )}
 
+        {twoFAStep ? (
+          <div className="space-y-4">
+            <Input
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/[^0-9a-zA-Z-]/g, "").slice(0, 12))}
+              inputMode="numeric"
+              autoFocus
+              placeholder="000000"
+              onKeyDown={(e) => { if (e.key === "Enter") verify2FA(); }}
+              className="bg-zinc-800/60 border-zinc-700/80 text-white text-center text-xl font-mono tracking-[0.35em] h-12 focus:border-indigo-500/70"
+            />
+            <Button
+              onClick={verify2FA}
+              disabled={verifying || !code.trim()}
+              className="w-full h-11 font-semibold text-sm bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/25"
+            >
+              {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                <span className="flex items-center gap-2">{t("verify")}<ArrowRight className="w-4 h-4" /></span>
+              )}
+            </Button>
+            <button
+              type="button"
+              onClick={() => { setTwoFAStep(false); setCode(""); setError(null); }}
+              className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              {t("backToLogin")}
+            </button>
+          </div>
+        ) : (
+        <>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <FormField
@@ -258,6 +314,8 @@ export function LoginForm() {
             {t("registerFree")}
           </Link>
         </p>
+        </>
+        )}
       </div>
     </div>
   );

@@ -630,7 +630,11 @@
     "consentRegister": "By registering, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
     "sslEncryption": "SSL Encryption",
     "allRights": "All rights reserved.",
-    "authMeta": "Sign in — TradeGX"
+    "authMeta": "Sign in — TradeGX",
+    "twoFATitle": "Two-step verification",
+    "twoFADesc": "Enter the code from your authenticator app",
+    "verify": "Verify",
+    "invalidCode": "Incorrect code"
   },
   "settings": {
     "profile": {
@@ -705,7 +709,8 @@
       "billing": "Billing",
       "accounts": "Accounts",
       "apiKeys": "API Keys",
-      "privacy": "Privacy"
+      "privacy": "Privacy",
+      "security": "Security"
     },
     "billing": {
       "currentPlan": "Current subscription",
@@ -887,6 +892,37 @@
       "encryptNote": "All API keys are encrypted before storage and are not visible after saving.",
       "countConnected": "{n} of {total} connected",
       "allActive": "All integrations active 🎉"
+    },
+    "security": {
+      "title": "Two-factor authentication (2FA)",
+      "subtitle": "Add an extra layer of security with an authenticator app (Google Authenticator, Authy).",
+      "active": "Active",
+      "enable": "Enable 2FA",
+      "setupTitle": "Set up 2FA",
+      "setupDesc": "Scan the QR code with your authenticator app, then enter the 6-digit code it generates.",
+      "manualKey": "Or enter the key manually:",
+      "enterCode": "Code from app",
+      "verifyEnable": "Verify & enable",
+      "cancel": "Cancel",
+      "enabledToast": "2FA enabled successfully",
+      "disabledToast": "2FA disabled",
+      "invalidCode": "Incorrect code",
+      "invalidPassword": "Incorrect password",
+      "errGeneric": "Something went wrong. Try again.",
+      "backupTitle": "Backup codes",
+      "backupWarning": "Save these codes somewhere safe. Each can be used once if you lose your phone. You won't see them again after closing this window.",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "savedIt": "I saved them",
+      "backupRemaining": "{n} backup codes remaining",
+      "regenTitle": "Regenerate backup codes",
+      "regenDesc": "Enter a code from your app to generate a new set (the old ones become invalid).",
+      "regenBtn": "Regenerate",
+      "disableTitle": "Disable 2FA",
+      "disableDesc": "Requires your password and a valid code (app or backup).",
+      "password": "Password",
+      "codeOrBackup": "App or backup code",
+      "disableBtn": "Disable 2FA"
     }
   },
   "trade": {

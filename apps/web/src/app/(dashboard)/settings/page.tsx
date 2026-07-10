@@ -12,6 +12,7 @@ import { AccountsTab } from "./tabs/accounts-tab";
 import { ApiKeysTab } from "./tabs/api-keys-tab";
 import { PrivacyTab } from "./tabs/privacy-tab";
 import { BillingTab } from "./tabs/billing-tab";
+import { SecurityTab } from "./tabs/security-tab";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("settings.nav");
@@ -20,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const TABS = [
   { value: "profile", key: "profile" },
+  { value: "security", key: "security" },
   { value: "trading-rules", key: "trading" },
   { value: "appearance", key: "appearance" },
   { value: "notifications", key: "notifications" },
@@ -49,6 +51,8 @@ export default async function SettingsPage() {
         maxDailyLossPct: true,
         maxDrawdownPct: true,
         noTradeDays: true,
+        totpEnabled: true,
+        totpBackupCodes: true,
       },
     }),
     prisma.subscription.findUnique({
@@ -127,6 +131,9 @@ export default async function SettingsPage() {
         <TabsContent value="accounts"><AccountsTab /></TabsContent>
         <TabsContent value="api-keys"><ApiKeysTab /></TabsContent>
         <TabsContent value="privacy"><PrivacyTab /></TabsContent>
+        <TabsContent value="security">
+          <SecurityTab initialEnabled={user?.totpEnabled ?? false} initialBackupCount={user?.totpBackupCodes?.length ?? 0} />
+        </TabsContent>
       </Tabs>
     </div>
   );

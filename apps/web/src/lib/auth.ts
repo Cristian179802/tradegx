@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { verifyToken, decryptSecret, verifyBackup } from "@/lib/twofactor";
 import type { Role, SubscriptionPlan } from "@prisma/client";
 
 declare module "next-auth" {
@@ -46,6 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        code: { label: "2FA code", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -66,6 +68,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.password
         );
         if (!isValid) return null;
+
+        // ── Gate 2FA (doar dacă utilizatorul l-a activat) ──
+        if (user.totpEnabled && user.totpSecret) {
+          const code = ((credentials.code as string) || "").trim();
+          if (!code) return null; // clientul cere codul via pre-check
+          let ok = false;
+          if (/^\d{6}$/.test(code)) {
+            try { ok = verifyToken(code, decryptSecret(user.totpSecret)); } catch { ok = false; }
+          }
+          if (!ok) {
+            const res = verifyBackup(code, user.totpBackupCodes);
+            if (res.ok) {
+              await prisma.user.update({ where: { id: user.id }, data: { totpBackupCodes: res.remaining } });
+              ok = true;
+            }
+          }
+          if (!ok) return null;
+        }
 
         return {
           id: user.id,

@@ -288,8 +288,9 @@ model User {
   monthlyWinRateTarget Int?
 
   // 2FA
-  totpSecret  String?
-  totpEnabled Boolean @default(false)
+  totpSecret      String?
+  totpEnabled     Boolean  @default(false)
+  totpBackupCodes String[] @default([])
 
   // Notification preferences
   notificationPrefs Json?

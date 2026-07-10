@@ -630,7 +630,11 @@
     "consentRegister": "Prin înregistrare, ești de acord cu <terms>Termenii</terms> și <privacy>Politica de Confidențialitate</privacy>.",
     "sslEncryption": "Criptare SSL",
     "allRights": "Toate drepturile rezervate.",
-    "authMeta": "Autentificare — TradeGX"
+    "authMeta": "Autentificare — TradeGX",
+    "twoFATitle": "Verificare în doi pași",
+    "twoFADesc": "Introdu codul din aplicația ta de autentificare",
+    "verify": "Verifică",
+    "invalidCode": "Cod incorect"
   },
   "settings": {
     "profile": {
@@ -705,7 +709,8 @@
       "billing": "Facturare",
       "accounts": "Conturi",
       "apiKeys": "Chei API",
-      "privacy": "Confidențialitate"
+      "privacy": "Confidențialitate",
+      "security": "Securitate"
     },
     "billing": {
       "currentPlan": "Abonamentul curent",
@@ -887,6 +892,37 @@
       "encryptNote": "Toate cheile API sunt criptate înainte de stocare și nu sunt vizibile după salvare.",
       "countConnected": "{n} din {total} conectate",
       "allActive": "Toate integrările active 🎉"
+    },
+    "security": {
+      "title": "Autentificare în doi pași (2FA)",
+      "subtitle": "Adaugă un strat suplimentar de securitate cu o aplicație de autentificare (Google Authenticator, Authy).",
+      "active": "Activ",
+      "enable": "Activează 2FA",
+      "setupTitle": "Configurează 2FA",
+      "setupDesc": "Scanează codul QR cu aplicația de autentificare, apoi introdu codul de 6 cifre generat.",
+      "manualKey": "Sau introdu cheia manual:",
+      "enterCode": "Cod din aplicație",
+      "verifyEnable": "Verifică și activează",
+      "cancel": "Anulează",
+      "enabledToast": "2FA activat cu succes",
+      "disabledToast": "2FA dezactivat",
+      "invalidCode": "Cod incorect",
+      "invalidPassword": "Parolă incorectă",
+      "errGeneric": "A apărut o eroare. Încearcă din nou.",
+      "backupTitle": "Coduri de rezervă",
+      "backupWarning": "Salvează aceste coduri într-un loc sigur. Fiecare poate fi folosit o singură dată dacă îți pierzi telefonul. Nu le vei mai vedea după ce închizi această fereastră.",
+      "copy": "Copiază",
+      "copied": "Copiat!",
+      "savedIt": "Le-am salvat",
+      "backupRemaining": "{n} coduri de rezervă rămase",
+      "regenTitle": "Regenerează codurile de rezervă",
+      "regenDesc": "Introdu un cod din aplicație pentru a genera un set nou (cele vechi devin invalide).",
+      "regenBtn": "Regenerează",
+      "disableTitle": "Dezactivează 2FA",
+      "disableDesc": "Necesită parola ta și un cod valid (din aplicație sau de rezervă).",
+      "password": "Parolă",
+      "codeOrBackup": "Cod app sau de rezervă",
+      "disableBtn": "Dezactivează 2FA"
     }
   },
   "trade": {
