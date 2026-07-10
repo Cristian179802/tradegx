@@ -2204,7 +2204,8 @@
     "pl5": "Traduceri: germană, franceză, spaniolă, italiană",
     "pl6": "Rapoarte fiscale pentru România",
     "pl7": "Integrări suplimentare și automatizări la cererea comunității",
-    "sh21": "Rapoarte fiscale România — sumar anual (rezultat net, estimare impozit) + export PDF"
+    "sh21": "Rapoarte fiscale România — sumar anual (rezultat net, estimare impozit) + export PDF",
+    "sh22": "Autentificare în doi pași (2FA) cu aplicație de autentificare + coduri de rezervă"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",

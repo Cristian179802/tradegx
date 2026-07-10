@@ -2204,7 +2204,8 @@
     "pl5": "Translations: German, French, Spanish, Italian",
     "pl6": "Tax reports for Romania",
     "pl7": "Additional integrations and automations on community request",
-    "sh21": "Tax reports for Romania — annual summary (net result, estimated tax) + PDF export"
+    "sh21": "Tax reports for Romania — annual summary (net result, estimated tax) + PDF export",
+    "sh22": "Two-factor authentication (2FA) with authenticator app + backup codes"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
