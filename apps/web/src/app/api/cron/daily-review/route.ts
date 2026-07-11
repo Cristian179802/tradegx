@@ -8,12 +8,12 @@ export const maxDuration = 120;
 // Cron de seară (Vercel) — trimite rezumatul AI al zilei pe Telegram
 // fiecărui utilizator care are integrare activă ȘI a tranzacționat azi.
 export async function GET(req: NextRequest) {
+  // Fail-closed: fără CRON_SECRET setat în env, endpoint-ul refuză ORICE apel
+  // (protejează creditele AI și notificările de declanșări neautorizate).
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const authz = req.headers.get("authorization");
-    if (authz !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-    }
+  const authz = req.headers.get("authorization");
+  if (!secret || authz !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
   if (!process.env.TELEGRAM_BOT_TOKEN) {
     return NextResponse.json({ skipped: "no telegram token" });

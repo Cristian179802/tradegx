@@ -27,8 +27,9 @@ const publicRoutes = [
 
 const publicPrefixes = [
   "/api/auth",
-  "/api/webhooks",   // webhook routes use their own HMAC token auth, no session needed
-  "/api/cron",       // Vercel cron jobs — protected by CRON_SECRET bearer token
+  "/api/webhooks",       // webhook routes use their own HMAC token auth, no session needed
+  "/api/stripe/webhook", // Stripe events — protected by stripe-signature (constructEvent)
+  "/api/cron",           // Vercel cron jobs — protected by CRON_SECRET bearer token
   "/share",          // public share pages — protected by per-trade HMAC token
   "/api/share",      // share token validation endpoint
   "/_next",

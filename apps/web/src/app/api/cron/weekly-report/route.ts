@@ -10,12 +10,12 @@ export const maxDuration = 120;
 // Cron duminică seara (Vercel) — raportul AI al săptămânii pentru fiecare
 // utilizator activ: alertă in-app + Telegram (dacă are integrarea) + push.
 export async function GET(req: NextRequest) {
+  // Fail-closed: fără CRON_SECRET setat în env, endpoint-ul refuză ORICE apel
+  // (protejează creditele AI și notificările de declanșări neautorizate).
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const authz = req.headers.get("authorization");
-    if (authz !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-    }
+  const authz = req.headers.get("authorization");
+  if (!secret || authz !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
