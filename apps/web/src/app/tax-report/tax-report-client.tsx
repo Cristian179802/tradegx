@@ -34,46 +34,22 @@ export function TaxReportClient({ data }: { data: TaxData }) {
   }, [t, year]);
 
   async function downloadPdf() {
-    const el = pageRef.current;
-    if (!el || busy) return;
+    if (busy) return;
     setBusy(true);
     try {
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-        import("html2canvas"),
-        import("jspdf"),
-      ]);
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        logging: false,
-        imageTimeout: 0,
-        onclone: (_doc, node) => {
-          // Curăță efectele care pot bloca html2canvas (umbre, transform-uri)
-          (node as HTMLElement).style.boxShadow = "none";
-          (node as HTMLElement).style.transform = "none";
-          (node as HTMLElement).style.margin = "0";
-        },
-      });
-      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-      const pageW = 210;
-      const pageH = 297;
-      const imgW = pageW;
-      const imgH = (canvas.height * imgW) / canvas.width;
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      let heightLeft = imgH;
-      let position = 0;
-      pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH, undefined, "FAST");
-      heightLeft -= pageH;
-      while (heightLeft > 0) {
-        position -= pageH;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH, undefined, "FAST");
-        heightLeft -= pageH;
-      }
-      pdf.save(`TradeGx-${t("navTitle").replace(/\s+/g, "-")}-${year}.pdf`);
+      // PDF generat pe server (font încorporat → diacritice RO perfecte, fișier vectorial).
+      const res = await fetch(`/tax-report/pdf?year=${year}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `TradeGx-${t("navTitle").replace(/\s+/g, "-")}-${year}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch (err) {
-      // NICIODATĂ printare. Dacă pică, anunțăm clar utilizatorul.
       console.error("PDF export failed:", err);
       alert(t("pdfError"));
     } finally {
