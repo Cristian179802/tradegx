@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import { Download, ArrowLeft, Printer, Landmark, AlertTriangle } from "lucide-react";
+import { Download, ArrowLeft, Landmark, AlertTriangle, Loader2 } from "lucide-react";
 
 interface TaxData {
   year: number;
@@ -26,10 +26,52 @@ export function TaxReportClient({ data }: { data: TaxData }) {
   const locale = useLocale();
   const months = t.raw("months") as string[];
   const { summary: s, currency, year } = data;
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     document.title = `${t("navTitle")}-${year}`;
   }, [t, year]);
+
+  async function downloadPdf() {
+    const el = pageRef.current;
+    if (!el || busy) return;
+    setBusy(true);
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
+      });
+      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+      const pageW = 210;
+      const pageH = 297;
+      const imgW = pageW;
+      const imgH = (canvas.height * imgW) / canvas.width;
+      const imgData = canvas.toDataURL("image/png");
+      let heightLeft = imgH;
+      let position = 0;
+      pdf.addImage(imgData, "PNG", 0, position, imgW, imgH, undefined, "FAST");
+      heightLeft -= pageH;
+      while (heightLeft > 0) {
+        position -= pageH;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgW, imgH, undefined, "FAST");
+        heightLeft -= pageH;
+      }
+      pdf.save(`TradeGx-${t("navTitle").replace(/\s+/g, "-")}-${year}.pdf`);
+    } catch {
+      // fallback pe printarea nativă dacă ceva pică
+      window.print();
+    } finally {
+      setBusy(false);
+    }
+  }
 
   const generatedAt = new Date().toLocaleString(locale === "ro" ? "ro-RO" : "en-US", {
     day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
@@ -60,15 +102,17 @@ export function TaxReportClient({ data }: { data: TaxData }) {
           </div>
         </div>
         <button
-          onClick={() => window.print()}
-          className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-lg shadow-indigo-500/20 transition-all"
+          onClick={downloadPdf}
+          disabled={busy}
+          className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-60 disabled:cursor-wait"
         >
-          <Download className="w-4 h-4" /> {t("saveAsPdf")}
+          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {busy ? t("generating") : t("saveAsPdf")}
         </button>
       </div>
 
       {/* Pagina A4 */}
-      <div className="mx-auto my-6 print:my-0 bg-white text-zinc-900 shadow-2xl print:shadow-none"
+      <div ref={pageRef} className="mx-auto my-6 print:my-0 bg-white text-zinc-900 shadow-2xl print:shadow-none"
            style={{ width: "210mm", minHeight: "297mm", padding: "16mm" }}>
 
         {/* Antet */}
@@ -199,14 +243,7 @@ export function TaxReportClient({ data }: { data: TaxData }) {
           <p className="text-[10px] text-zinc-400">{t("footer")}</p>
         </div>
       </div>
-
-      {/* Hint print */}
-      <div className="print:hidden text-center pb-8 -mt-2">
-        <p className="text-xs text-zinc-500 flex items-center justify-center gap-1.5">
-          <Printer className="w-3.5 h-3.5" />
-          {t("printHint")}
-        </p>
-      </div>
+      <div className="pb-8" />
     </div>
   );
 }
