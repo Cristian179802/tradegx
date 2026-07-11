@@ -2741,6 +2741,9 @@
     "pw1": "Net realized result per fiscal year",
     "pw2": "Estimated tax + taxable base",
     "pw3": "Monthly and per-instrument breakdown",
-    "pw4": "PDF export for your accountant"
+    "pw4": "PDF export for your accountant",
+    "print": "Print",
+    "generating": "Generating…",
+    "pdfError": "Could not generate the PDF on this device. Try another browser (Chrome/Edge)."
   }
 }

@@ -2741,6 +2741,9 @@
     "pw1": "Rezultat net realizat pe an fiscal",
     "pw2": "Estimare impozit + bază impozabilă",
     "pw3": "Defalcare lunară și pe instrument",
-    "pw4": "Export PDF pentru contabil"
+    "pw4": "Export PDF pentru contabil",
+    "print": "Printează",
+    "generating": "Se generează…",
+    "pdfError": "Nu am putut genera PDF-ul pe acest dispozitiv. Încearcă din alt browser (Chrome/Edge)."
   }
 }

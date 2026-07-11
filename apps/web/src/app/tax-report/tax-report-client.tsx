@@ -47,27 +47,35 @@ export function TaxReportClient({ data }: { data: TaxData }) {
         backgroundColor: "#ffffff",
         useCORS: true,
         logging: false,
+        imageTimeout: 0,
+        onclone: (_doc, node) => {
+          // Curăță efectele care pot bloca html2canvas (umbre, transform-uri)
+          (node as HTMLElement).style.boxShadow = "none";
+          (node as HTMLElement).style.transform = "none";
+          (node as HTMLElement).style.margin = "0";
+        },
       });
       const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
       const pageW = 210;
       const pageH = 297;
       const imgW = pageW;
       const imgH = (canvas.height * imgW) / canvas.width;
-      const imgData = canvas.toDataURL("image/png");
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
       let heightLeft = imgH;
       let position = 0;
-      pdf.addImage(imgData, "PNG", 0, position, imgW, imgH, undefined, "FAST");
+      pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH, undefined, "FAST");
       heightLeft -= pageH;
       while (heightLeft > 0) {
         position -= pageH;
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgW, imgH, undefined, "FAST");
+        pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH, undefined, "FAST");
         heightLeft -= pageH;
       }
       pdf.save(`TradeGx-${t("navTitle").replace(/\s+/g, "-")}-${year}.pdf`);
-    } catch {
-      // fallback pe printarea nativă dacă ceva pică
-      window.print();
+    } catch (err) {
+      // NICIODATĂ printare. Dacă pică, anunțăm clar utilizatorul.
+      console.error("PDF export failed:", err);
+      alert(t("pdfError"));
     } finally {
       setBusy(false);
     }
