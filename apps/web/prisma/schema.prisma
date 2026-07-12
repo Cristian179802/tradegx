@@ -800,3 +800,13 @@ model AiSignal {
 
   @@index([date])
 }
+
+// Rate limiting persistent — funcționează corect peste instanțe serverless
+// (in-memory era per-lambda, deci ineficient pe Vercel).
+model RateLimit {
+  key     String   @id
+  count   Int      @default(1)
+  resetAt DateTime
+
+  @@index([resetAt])
+}

@@ -9,7 +9,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export async function POST(req: Request) {
   // Anti brute-force: endpoint-ul verifică parole → limită strictă pe IP.
   const ip = getClientIp(req);
-  const rl = rateLimit(`2fa-required:${ip}`, { limit: 10, windowSecs: 15 * 60 });
+  const rl = await rateLimit(`2fa-required:${ip}`, { limit: 10, windowSecs: 15 * 60 });
   if (!rl.success) {
     return NextResponse.json(
       { ok: false },

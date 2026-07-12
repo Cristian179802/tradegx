@@ -18,7 +18,7 @@ export async function POST(
   }
 
   // 10 AI analyses per user per hour
-  const rl = rateLimit(`ai-analyze:${session.user.id}`, { limit: 10, windowSecs: 60 * 60 });
+  const rl = await rateLimit(`ai-analyze:${session.user.id}`, { limit: 10, windowSecs: 60 * 60 });
   if (!rl.success) {
     return NextResponse.json(
       { error: "Ai atins limita de analize AI. Încearcă din nou mai târziu." },

@@ -10,7 +10,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export async function POST(req: Request) {
   // Anti brute-force: verificăm parole → limită strictă pe IP.
   const ip = getClientIp(req);
-  const rl = rateLimit(`mobile-login:${ip}`, { limit: 10, windowSecs: 15 * 60 });
+  const rl = await rateLimit(`mobile-login:${ip}`, { limit: 10, windowSecs: 15 * 60 });
   if (!rl.success) {
     return NextResponse.json(
       { error: "Prea multe încercări. Încearcă din nou mai târziu." },

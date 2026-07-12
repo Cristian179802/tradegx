@@ -1,19 +1,13 @@
+import { prisma } from "@/lib/prisma";
+
 interface RateLimitEntry {
   count: number;
   resetAt: number;
 }
 
-const store = new Map<string, RateLimitEntry>();
-
-// Clean up stale entries every 5 minutes
-if (typeof setInterval !== "undefined") {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of store.entries()) {
-      if (entry.resetAt < now) store.delete(key);
-    }
-  }, 5 * 60 * 1000);
-}
+// Fallback în memorie — folosit DOAR dacă interogarea DB eșuează (o eroare
+// trecătoare de conexiune nu trebuie să blocheze login-ul întregului site).
+const memStore = new Map<string, RateLimitEntry>();
 
 interface RateLimitOptions {
   /** Max requests allowed in the window */
@@ -28,26 +22,53 @@ interface RateLimitResult {
   resetAt: number;
 }
 
-export function rateLimit(
+/**
+ * Rate limiting persistent (Postgres) — corect peste instanțe serverless.
+ * Un singur roundtrip: upsert atomic care resetează fereastra dacă a expirat.
+ */
+export async function rateLimit(
   identifier: string,
   { limit, windowSecs }: RateLimitOptions
-): RateLimitResult {
+): Promise<RateLimitResult> {
   const now = Date.now();
-  const windowMs = windowSecs * 1000;
+  const windowEnd = new Date(now + windowSecs * 1000);
 
-  const entry = store.get(identifier);
+  try {
+    const rows = await prisma.$queryRaw<Array<{ count: number; resetAt: Date }>>`
+      INSERT INTO "RateLimit" ("key", "count", "resetAt")
+      VALUES (${identifier}, 1, ${windowEnd})
+      ON CONFLICT ("key") DO UPDATE SET
+        "count"   = CASE WHEN "RateLimit"."resetAt" < now() THEN 1 ELSE "RateLimit"."count" + 1 END,
+        "resetAt" = CASE WHEN "RateLimit"."resetAt" < now() THEN ${windowEnd} ELSE "RateLimit"."resetAt" END
+      RETURNING "count", "resetAt"
+    `;
+    const { count, resetAt } = rows[0];
 
-  if (!entry || entry.resetAt < now) {
-    store.set(identifier, { count: 1, resetAt: now + windowMs });
-    return { success: true, remaining: limit - 1, resetAt: now + windowMs };
+    // Curățenie oportunistă (~1% din apeluri), fire-and-forget.
+    if (Math.random() < 0.01) {
+      prisma
+        .$executeRaw`DELETE FROM "RateLimit" WHERE "resetAt" < now() - interval '1 day'`
+        .catch(() => {});
+    }
+
+    return {
+      success: count <= limit,
+      remaining: Math.max(0, limit - count),
+      resetAt: resetAt.getTime(),
+    };
+  } catch {
+    // DB indisponibil → fallback în memorie (per-instanță; mai bine decât nimic)
+    const entry = memStore.get(identifier);
+    if (!entry || entry.resetAt < now) {
+      memStore.set(identifier, { count: 1, resetAt: now + windowSecs * 1000 });
+      return { success: true, remaining: limit - 1, resetAt: now + windowSecs * 1000 };
+    }
+    if (entry.count >= limit) {
+      return { success: false, remaining: 0, resetAt: entry.resetAt };
+    }
+    entry.count += 1;
+    return { success: true, remaining: limit - entry.count, resetAt: entry.resetAt };
   }
-
-  if (entry.count >= limit) {
-    return { success: false, remaining: 0, resetAt: entry.resetAt };
-  }
-
-  entry.count += 1;
-  return { success: true, remaining: limit - entry.count, resetAt: entry.resetAt };
 }
 
 /** Extract IP from Next.js request headers */

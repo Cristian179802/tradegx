@@ -7,7 +7,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
-  const rl = rateLimit(`forgot-pw:${ip}`, { limit: 3, windowSecs: 15 * 60 });
+  const rl = await rateLimit(`forgot-pw:${ip}`, { limit: 3, windowSecs: 15 * 60 });
   if (!rl.success) {
     return NextResponse.json(
       { success: false, error: "Prea multe cereri. Încearcă din nou mai târziu." },

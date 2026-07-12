@@ -3,22 +3,14 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@/lib/auth";
 import { hasPro } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
-// ─── Rate limiting (30 messages / hour / user) ────────────────────────────────
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now();
-  const key = `chat:${userId}`;
-  const entry = rateLimitMap.get(key);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(key, { count: 1, resetAt: now + 3_600_000 });
-    return true;
-  }
-  if (entry.count >= 30) return false;
-  entry.count++;
-  return true;
+// ─── Rate limiting (30 messages / hour / user, persistent în DB) ─────────────
+async function checkRateLimit(userId: string): Promise<boolean> {
+  const rl = await rateLimit(`chat:${userId}`, { limit: 30, windowSecs: 3600 });
+  return rl.success;
 }
 
 // ─── Build trader context ─────────────────────────────────────────────────────
@@ -192,7 +184,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "AI Assistant este disponibil doar in planul PRO", code: "PRO_REQUIRED", upgradeUrl: "/pricing" }, { status: 402 });
   }
 
-  if (!checkRateLimit(session.user.id)) {
+  if (!(await checkRateLimit(session.user.id))) {
     return new Response(JSON.stringify({ error: "Ai atins limita de 30 mesaje/oră. Revino mai târziu." }), {
       status: 429, headers: { "Content-Type": "application/json" },
     });
