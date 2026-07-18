@@ -120,9 +120,12 @@ export default async function DashboardPage() {
     dailyMap.set(day, (dailyMap.get(day) ?? 0) + Number(t.pnlMoney ?? 0));
   }
 
-  // Max drawdown din TOATĂ istoria (echity curve cumulativ pe zi)
-  let peak = 0;
-  let runBal = 0;
+  // Max drawdown din TOATĂ istoria — raportat la CAPITAL (sold inițial + PnL
+  // cumulativ), nu la vârful PnL-ului. Altfel, un vârf mic la începutul
+  // istoriei umflă procentul absurd (ex: 180% pe un cont pe plus).
+  const baseEquity = accounts.reduce((s, a) => s + Number(a.initialBalance ?? 0), 0);
+  let peak = baseEquity;
+  let runBal = baseEquity;
   let maxDD = 0;
   const allDaysSorted = Array.from(dailyMap.entries()).sort(([a], [b]) => a.localeCompare(b));
   for (const [, dayPnl] of allDaysSorted) {
@@ -176,9 +179,9 @@ export default async function DashboardPage() {
     return (w / dayTrades.length) * 100;
   });
 
-  // Drawdown cumulativ pe zi
+  // Drawdown cumulativ pe zi (sparkline) — ancorat tot la capital
   const dailyDD: number[] = [];
-  let ddPeak = 0; let ddBal = 0;
+  let ddPeak = baseEquity; let ddBal = baseEquity;
   for (const [, v] of sortedDays) {
     ddBal += v;
     if (ddBal > ddPeak) ddPeak = ddBal;
