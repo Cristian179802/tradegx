@@ -2226,7 +2226,12 @@
     "vs6": "Vremea Pieței — starea pieței ca hartă meteo 3D vie: furtuni de volatilitate, maree de lichiditate, vânturi de sentiment — un limbaj vizual complet nou",
     "vs7": "Camera VR (WebXR) — pui casca și intri în terminalul tău spațial: analytics plutind în jurul tău, universul 3D deasupra",
     "vs8": "Jurnal vocal hands-free — vorbește în timpul tranzacției; AI-ul transcrie, clasifică emoția și o leagă automat de trade",
-    "vs9": "Autobiografia Traderului — după ani de date, AI-ul îți scrie povestea: capitole, momente de cotitură, scrisori anuale către tine-cel-din-viitor"
+    "vs9": "Autobiografia Traderului — după ani de date, AI-ul îți scrie povestea: capitole, momente de cotitură, scrisori anuale către tine-cel-din-viitor",
+    "vs10": "Gardianul de Știri — își știe pozițiile tale deschise și calendarul economic: te avertizează cu 15 minute înainte ca o știre majoră să lovească un simbol pe care ai poziție",
+    "vs11": "Contractul lui Ulise — îți scrii regulile când ești calm și le semnezi digital; când AI-ul detectează încălcarea, îți arată propriul contract, cu propria semnătură",
+    "vs12": "Scorul de Credit al Traderului — un scor de disciplină (nu de profit!) calculat doar din date sincronizate, verificabile: pașaportul tău către prop firm-uri și finanțare",
+    "vs13": "Genomul Pieței — pattern-matching pe regimuri istorice: „ziua de azi seamănă 87% cu 14 martie 2023 — uite cum ai tranzacționat TU atunci”",
+    "vs14": "Parteneri de disciplină — matching între traderi cu slăbiciuni complementare care se păzesc reciproc + camere live de co-jurnalizare"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",

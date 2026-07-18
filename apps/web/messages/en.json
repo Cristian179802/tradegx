@@ -2226,7 +2226,12 @@
     "vs6": "Market Weather — market state as a living 3D weather map: volatility storms, liquidity tides, sentiment winds — an entirely new visual language",
     "vs7": "The VR Room (WebXR) — put on the headset and step into your spatial terminal: analytics floating around you, the 3D universe above",
     "vs8": "Hands-free voice journaling — speak during the trade; AI transcribes, classifies the emotion and links it to the trade automatically",
-    "vs9": "The Trader's Autobiography — after years of data, AI writes your story: chapters, turning points, yearly letters to your future self"
+    "vs9": "The Trader's Autobiography — after years of data, AI writes your story: chapters, turning points, yearly letters to your future self",
+    "vs10": "The News Guardian — knows your open positions and the economic calendar: warns you 15 minutes before major news hits a symbol you're exposed to",
+    "vs11": "The Ulysses Contract — write your rules while calm and sign them digitally; when AI detects a breach, it shows you your own contract, with your own signature",
+    "vs12": "The Trader Credit Score — a discipline score (not a profit score!) computed only from synced, verifiable data: your passport to prop firms and funding",
+    "vs13": "The Market Genome — pattern-matching on historical regimes: “today looks 87% like March 14, 2023 — here's how YOU traded it back then”",
+    "vs14": "Discipline Partners — matching traders with complementary weaknesses who keep each other accountable + live co-journaling rooms"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
