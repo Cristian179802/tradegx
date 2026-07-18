@@ -43,6 +43,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Credențiale invalide" }, { status: 401 });
   }
 
+  // Contul demo e disponibil doar pe web (read-only, aplicat în middleware).
+  if (user.role === "DEMO") {
+    return NextResponse.json({ error: "Contul demo este disponibil doar pe web." }, { status: 403 });
+  }
+
   // ── Gate 2FA — mobile respectă aceeași regulă ca web (fără bypass) ──
   if (user.totpEnabled && user.totpSecret) {
     if (!code) {

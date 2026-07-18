@@ -52,3 +52,4 @@ diag.mjs
 cleanup.mjs
 backfill.mjs
 *.bundle
+apps/web/seed-demo.mjs

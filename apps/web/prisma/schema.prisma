@@ -15,6 +15,7 @@ enum Role {
   USER
   ADMIN
   COACH
+  DEMO
 }
 
 enum AccountType {

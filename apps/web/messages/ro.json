@@ -635,7 +635,10 @@
     "twoFATitle": "Verificare în doi pași",
     "twoFADesc": "Introdu codul din aplicația ta de autentificare",
     "verify": "Verifică",
-    "invalidCode": "Cod incorect"
+    "invalidCode": "Cod incorect",
+    "demoTitle": "Explorează contul demo",
+    "demoSub": "Date reale de trader avansat — fără înregistrare, doar vizualizare",
+    "demoLoading": "Se deschide demo…"
   },
   "settings": {
     "profile": {

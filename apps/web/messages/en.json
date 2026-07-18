@@ -635,7 +635,10 @@
     "twoFATitle": "Two-step verification",
     "twoFADesc": "Enter the code from your authenticator app",
     "verify": "Verify",
-    "invalidCode": "Incorrect code"
+    "invalidCode": "Incorrect code",
+    "demoTitle": "Explore the demo account",
+    "demoSub": "Real advanced-trader data — no sign-up, view only",
+    "demoLoading": "Opening demo…"
   },
   "settings": {
     "profile": {

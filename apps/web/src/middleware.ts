@@ -39,7 +39,7 @@ const publicPrefixes = [
   "/.well-known",    // security.txt și alte standarde web
 ];
 
-export default auth((req: NextRequest & { auth: { user?: { id?: string } } | null }) => {
+export default auth((req: NextRequest & { auth: { user?: { id?: string; role?: string } } | null }) => {
   const { pathname } = req.nextUrl;
 
   // Allow public routes
@@ -65,6 +65,20 @@ export default auth((req: NextRequest & { auth: { user?: { id?: string } } | nul
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Contul DEMO e read-only: orice mutație pe API e refuzată central.
+  // (GET/HEAD trec — vizitatorul vede tot, nu poate strica nimic.)
+  if (
+    req.auth.user.role === "DEMO" &&
+    pathname.startsWith("/api/") &&
+    req.method !== "GET" &&
+    req.method !== "HEAD"
+  ) {
+    return NextResponse.json(
+      { error: "Cont demo — doar vizualizare. / Demo account is read-only.", demo: true },
+      { status: 403 }
+    );
   }
 
   return NextResponse.next();

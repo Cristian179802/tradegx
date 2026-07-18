@@ -4,6 +4,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { AuthBackdrop, AuthHudStrip, AuthFrame } from "@/components/auth/auth-scene";
+import { DemoBubble } from "@/components/auth/demo-bubble";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth");
@@ -60,6 +61,9 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           &copy; {new Date().getFullYear()} TradeGX. {t("allRights")}
         </p>
       </div>
+
+      {/* Bula plutitoare: intră direct în contul demo (read-only) */}
+      <DemoBubble />
     </div>
   );
 }
