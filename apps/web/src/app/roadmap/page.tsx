@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, Loader2, Sparkles } from "lucide-react";
 import { LegalPage } from "@/components/legal/legal-page";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -11,6 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const SHIPPED = ["sh1","sh2","sh3","sh4","sh5","sh6","sh7","sh8","sh9","sh10","sh11","sh12","sh13","sh14","sh15","sh16","sh17","sh18","sh19","sh20","sh21","sh22"];
 const IN_PROGRESS = ["ip1"];
 const PLANNED = ["pl8","pl9","pl15","pl10","pl11","pl12","pl14","pl13","pl3","pl4","pl1","pl5","pl16","pl7"];
+const VISION = ["vs1","vs2","vs3","vs4","vs5","vs6","vs7","vs8","vs9"];
 
 function List({
   items,
@@ -58,6 +59,12 @@ export default async function RoadmapPage() {
       <section>
         <h2 className="text-base font-bold text-zinc-300 mb-4">{t("plannedH")}</h2>
         <List items={PLANNED} icon={Circle} iconClass="text-zinc-600" t={t} />
+      </section>
+
+      <section className="rounded-2xl border border-violet-500/25 bg-gradient-to-b from-violet-500/[0.07] to-transparent p-5 -mx-1">
+        <h2 className="text-base font-bold text-violet-300 mb-2">{t("visionH")}</h2>
+        <p className="text-sm leading-relaxed text-zinc-400 italic mb-4">{t("visionIntro")}</p>
+        <List items={VISION} icon={Sparkles} iconClass="text-violet-400" t={t} />
       </section>
     </LegalPage>
   );

@@ -2214,7 +2214,18 @@
     "pl13": "Light mode + full accessibility (WCAG): contrast, keyboard navigation, screen readers",
     "pl14": "Customizable dashboard — rearrangeable widgets, your cockpit exactly the way you want it",
     "pl15": "Proactive AI Coach: real-time revenge-trading detection, “what-if” analysis on your own history, longitudinal memory",
-    "pl16": "In-house market data infrastructure (candle cache + professional provider) + 24/7 monitoring and automated tests on every calculation"
+    "pl16": "In-house market data infrastructure (candle cache + professional provider) + 24/7 monitoring and automated tests on every calculation",
+    "visionH": "🔮 The Vision — years ahead of the industry",
+    "visionIntro": "The whole industry builds tools to see the market better. We are building the mirror that sees you. The market cannot be predicted — the trader can.",
+    "vs1": "The Digital Twin — your AI clone executing your plan perfectly, in the shadows, in parallel with you; the gap between your equity curves = the exact price of indiscipline, in money",
+    "vs2": "The Trading Firewall — AI that doesn't predict the market, it predicts you: detects tilt from your own patterns before the mistake happens and triggers a cooling-off period",
+    "vs3": "The 3D Universe — your trading history as a navigable galaxy: trades are stars, setups are constellations, drawdowns are black holes; fly through your career",
+    "vs4": "The War Room — a council of AI mentors with opposing personalities (trend follower, scalper, risk manager) debating your trade live, before you enter",
+    "vs5": "Biometrics — correlating smartwatch heart rate and HRV with your decisions: discover what your body knew before you did",
+    "vs6": "Market Weather — market state as a living 3D weather map: volatility storms, liquidity tides, sentiment winds — an entirely new visual language",
+    "vs7": "The VR Room (WebXR) — put on the headset and step into your spatial terminal: analytics floating around you, the 3D universe above",
+    "vs8": "Hands-free voice journaling — speak during the trade; AI transcribes, classifies the emotion and links it to the trade automatically",
+    "vs9": "The Trader's Autobiography — after years of data, AI writes your story: chapters, turning points, yearly letters to your future self"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",

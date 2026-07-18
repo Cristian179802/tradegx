@@ -2214,7 +2214,18 @@
     "pl13": "Light mode + accesibilitate completă (WCAG): contrast, navigare din tastatură, screen readers",
     "pl14": "Dashboard personalizabil — widget-uri rearanjabile, cockpitul tău exact cum îl vrei",
     "pl15": "AI Coach proactiv: detectează revenge trading în timp real, analiză „ce-ar fi dacă” pe istoricul tău, memorie longitudinală",
-    "pl16": "Infrastructură proprie de date de piață (cache candle-uri + provider profesionist) + monitorizare 24/7 și teste automate pe calcule"
+    "pl16": "Infrastructură proprie de date de piață (cache candle-uri + provider profesionist) + monitorizare 24/7 și teste automate pe calcule",
+    "visionH": "🔮 Viziunea — cu ani înaintea industriei",
+    "visionIntro": "Toată industria construiește unelte ca să vezi piața mai bine. Noi construim oglinda care te vede pe tine. Piața nu poate fi prezisă — traderul poate.",
+    "vs1": "Geamănul Digital — clona ta AI care îți execută planul perfect, în umbră, în paralel cu tine; diferența dintre curbele voastre de echitate = prețul exact al indisciplinei, în bani",
+    "vs2": "Firewall de Trading — AI-ul care nu prezice piața, ci te prezice pe tine: detectează starea de tilt din tiparele tale înainte să greșești și activează perioada de răcire",
+    "vs3": "Universul 3D — istoria ta de trading ca galaxie navigabilă: tranzacțiile sunt stele, setup-urile constelații, drawdown-urile găuri negre; zbori prin cariera ta",
+    "vs4": "Camera de Război — un consiliu de mentori AI cu personalități opuse (trend follower, scalper, manager de risc) care îți dezbat tranzacția în direct, înainte să intri",
+    "vs5": "Biometrie — corelarea pulsului și HRV de pe smartwatch cu deciziile tale: descoperă ce știa corpul tău înaintea ta",
+    "vs6": "Vremea Pieței — starea pieței ca hartă meteo 3D vie: furtuni de volatilitate, maree de lichiditate, vânturi de sentiment — un limbaj vizual complet nou",
+    "vs7": "Camera VR (WebXR) — pui casca și intri în terminalul tău spațial: analytics plutind în jurul tău, universul 3D deasupra",
+    "vs8": "Jurnal vocal hands-free — vorbește în timpul tranzacției; AI-ul transcrie, clasifică emoția și o leagă automat de trade",
+    "vs9": "Autobiografia Traderului — după ani de date, AI-ul îți scrie povestea: capitole, momente de cotitură, scrisori anuale către tine-cel-din-viitor"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
