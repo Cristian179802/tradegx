@@ -33,7 +33,8 @@
     "settings": "Setări",
     "billing": "Abonament",
     "logout": "Deconectare",
-    "new": "NOU"
+    "new": "NOU",
+    "roadmap": "Roadmap"
   },
   "banner": {
     "trialLabel": "PRO Trial",

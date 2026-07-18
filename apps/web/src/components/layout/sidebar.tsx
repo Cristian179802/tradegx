@@ -11,7 +11,7 @@ import {
   Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
   PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
   Trophy, ListChecks, Newspaper, Gauge, Award, GraduationCap, Crosshair, Dices,
-  CreditCard, Medal,
+  CreditCard, Medal, Rocket,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
@@ -89,6 +89,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "groupCommunity",
     items: [
       { href: "/community", label: "community", icon: Users, proOnly: true, color: "indigo" },
+      { href: "/roadmap",   label: "roadmap",   icon: Rocket, color: "violet" },
     ],
   },
   {

@@ -96,6 +96,7 @@ function Navbar({ t }: { t: TT }) {
           <a href="#features" className="hover:text-zinc-200 transition-colors font-medium">{t("navFeatures")}</a>
           <a href="#how-it-works" className="hover:text-zinc-200 transition-colors font-medium">{t("navHow")}</a>
           <Link href="/pricing" className="hover:text-zinc-200 transition-colors font-medium">{t("navPricing")}</Link>
+          <Link href="/roadmap" className="hover:text-zinc-200 transition-colors font-medium">{t("fRoadmap")}</Link>
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher compact />
@@ -729,7 +730,7 @@ function Footer({ t }: { t: TT }) {
             <span className="font-black text-zinc-400 text-sm group-hover:text-zinc-200 transition-colors">Trade<span className="gradient-text-indigo">Gx</span></span>
           </Link>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-600">
-            {[["/pricing", "navPricing"], ["/login", "login"], ["/register", "fRegister"], ["/about", "fAbout"], ["/roadmap", "fRoadmap"], ["/terms", "fTerms"], ["/privacy", "fPrivacy"], ["/contact", "fContact"]].map(([href, key]) => (
+            {[["/pricing", "navPricing"], ["/login", "login"], ["/register", "fRegister"], ["/about", "fAbout"], ["/terms", "fTerms"], ["/privacy", "fPrivacy"], ["/contact", "fContact"]].map(([href, key]) => (
               <Link key={href} href={href} className="hover:text-zinc-400 transition-colors font-medium">{t(key)}</Link>
             ))}
           </div>

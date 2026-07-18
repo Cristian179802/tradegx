@@ -33,7 +33,8 @@
     "settings": "Settings",
     "billing": "Subscription",
     "logout": "Sign out",
-    "new": "NEW"
+    "new": "NEW",
+    "roadmap": "Roadmap"
   },
   "banner": {
     "trialLabel": "PRO Trial",
