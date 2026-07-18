@@ -2205,7 +2205,16 @@
     "pl6": "Rapoarte fiscale pentru România",
     "pl7": "Integrări suplimentare și automatizări la cererea comunității",
     "sh21": "Rapoarte fiscale România — sumar anual (rezultat net, estimare impozit) + export PDF",
-    "sh22": "Autentificare în doi pași (2FA) cu aplicație de autentificare + coduri de rezervă"
+    "sh22": "Autentificare în doi pași (2FA) cu aplicație de autentificare + coduri de rezervă",
+    "pl8": "Analiză MAE/MFE + R-multiples — unde îți sunt stop-urile prea strânse, în limbajul risk managementului profesionist",
+    "pl9": "Metrici instituționale: Sharpe, Sortino, Calmar, expectancy + vedere agregată de portofoliu pe toate conturile",
+    "pl10": "Multi-asset complet: conectare directă la exchange-uri crypto (chei API read-only Binance/Bybit), futures și acțiuni",
+    "pl11": "Plan anual cu discount + facturi automate cu TVA (Stripe Tax) pentru clienți din toată Uniunea Europeană",
+    "pl12": "Onboarding interactiv cu date demo + ghid pas-cu-pas pentru primul trade importat",
+    "pl13": "Light mode + accesibilitate completă (WCAG): contrast, navigare din tastatură, screen readers",
+    "pl14": "Dashboard personalizabil — widget-uri rearanjabile, cockpitul tău exact cum îl vrei",
+    "pl15": "AI Coach proactiv: detectează revenge trading în timp real, analiză „ce-ar fi dacă” pe istoricul tău, memorie longitudinală",
+    "pl16": "Infrastructură proprie de date de piață (cache candle-uri + provider profesionist) + monitorizare 24/7 și teste automate pe calcule"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",

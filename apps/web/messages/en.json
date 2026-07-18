@@ -2205,7 +2205,16 @@
     "pl6": "Tax reports for Romania",
     "pl7": "Additional integrations and automations on community request",
     "sh21": "Tax reports for Romania — annual summary (net result, estimated tax) + PDF export",
-    "sh22": "Two-factor authentication (2FA) with authenticator app + backup codes"
+    "sh22": "Two-factor authentication (2FA) with authenticator app + backup codes",
+    "pl8": "MAE/MFE + R-multiples analytics — see where your stops are too tight, in the language of professional risk management",
+    "pl9": "Institutional metrics: Sharpe, Sortino, Calmar, expectancy + aggregated portfolio view across all accounts",
+    "pl10": "Full multi-asset: direct crypto exchange connections (read-only Binance/Bybit API keys), futures and stocks",
+    "pl11": "Annual plan with discount + automatic VAT invoices (Stripe Tax) for customers across the European Union",
+    "pl12": "Interactive onboarding with demo data + step-by-step guide to your first imported trade",
+    "pl13": "Light mode + full accessibility (WCAG): contrast, keyboard navigation, screen readers",
+    "pl14": "Customizable dashboard — rearrangeable widgets, your cockpit exactly the way you want it",
+    "pl15": "Proactive AI Coach: real-time revenge-trading detection, “what-if” analysis on your own history, longitudinal memory",
+    "pl16": "In-house market data infrastructure (candle cache + professional provider) + 24/7 monitoring and automated tests on every calculation"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
