@@ -10,7 +10,8 @@ import {
 import {
   BarChart3, Brain, BookOpen, Wifi, Shield, Calculator, GraduationCap,
   FlaskConical, Target, ArrowRight, CheckCircle2, Sparkles, ChevronRight,
-  Lock, Users, Zap, Activity, TrendingUp, Layers,
+  Lock, Users, Zap, Activity, TrendingUp, Layers, ChevronDown, Telescope,
+  Copy, Flame, Orbit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
@@ -37,6 +38,31 @@ function CountOnView({
       {inView ? <CountUp value={value} decimals={decimals} prefix={prefix} suffix={suffix} duration={1400} />
               : <>{prefix}0{suffix}</>}
     </span>
+  );
+}
+
+// ── HUD: rame de colț SF (decor pur, zero cost de layout) ────────────────────
+function HudCorners({ rgb = "129,140,248", size = 14, inset = 10, opacity = 0.55 }: { rgb?: string; size?: number; inset?: number; opacity?: number }) {
+  const s = `${size}px`;
+  const common: React.CSSProperties = { position: "absolute", width: s, height: s, opacity, pointerEvents: "none" };
+  const line = `1.5px solid rgba(${rgb},0.9)`;
+  return (
+    <>
+      <span style={{ ...common, top: inset, left: inset, borderTop: line, borderLeft: line }} />
+      <span style={{ ...common, top: inset, right: inset, borderTop: line, borderRight: line }} />
+      <span style={{ ...common, bottom: inset, left: inset, borderBottom: line, borderLeft: line }} />
+      <span style={{ ...common, bottom: inset, right: inset, borderBottom: line, borderRight: line }} />
+    </>
+  );
+}
+
+// Linie-fascicul între secțiuni (divider luminos)
+function BeamDivider() {
+  return (
+    <div className="relative h-px max-w-4xl mx-auto overflow-visible" aria-hidden>
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/35 to-transparent" />
+      <div className="absolute left-1/2 -translate-x-1/2 -top-[2px] w-24 h-[5px] bg-indigo-400/40 blur-[6px] rounded-full" />
+    </div>
   );
 }
 
@@ -67,10 +93,12 @@ export function LandingExperience() {
       <Hero t={t} />
       <StatsStrip t={t} />
       <Features t={t} />
+      <BeamDivider />
       <NumbersAct t={t} />
       <HowItWorks t={t} />
       <Trust t={t} />
       <IntegrationsMarquee t={t} />
+      <VisionTeaser t={t} />
       <Pricing t={t} />
       <Faq t={t} />
       <FinalCta t={t} />
@@ -134,6 +162,24 @@ function Hero({ t }: { t: TT }) {
 
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none" />
 
+      {/* HUD: rame de colț pe tot viewportul hero */}
+      <div className="absolute inset-x-4 top-20 bottom-4 pointer-events-none hidden md:block" aria-hidden>
+        <HudCorners rgb="129,140,248" size={22} inset={0} opacity={0.35} />
+      </div>
+
+      {/* HUD: readout mono sub navbar (decor tehnic) */}
+      <div className="absolute top-[4.2rem] inset-x-0 hidden md:flex justify-center pointer-events-none" aria-hidden>
+        <div className="flex items-center gap-5 font-mono text-[9px] tracking-[0.25em] text-zinc-600 uppercase">
+          <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />SYS ONLINE</span>
+          <span className="opacity-40">|</span>
+          <span>MT4 · MT5 · TV</span>
+          <span className="opacity-40">|</span>
+          <span className="text-indigo-400/70">AI CORE ACTIVE</span>
+          <span className="opacity-40">|</span>
+          <span>E2E SECURE</span>
+        </div>
+      </div>
+
       <motion.div style={{ y: textY, opacity: textOpacity, scale: textScale }} className="relative z-10 max-w-4xl mx-auto text-center">
         <Reveal>
           <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/8 backdrop-blur-sm">
@@ -185,24 +231,79 @@ function Hero({ t }: { t: TT }) {
         </Reveal>
       </motion.div>
 
-      {/* Mock dashboard cu parallax pe scroll */}
-      <motion.div style={{ y: mockY, scale: mockScale }} className="relative z-10 max-w-3xl mx-auto mt-16">
-        <motion.div initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.6, ease: EASE }}
-          className="rounded-2xl border border-zinc-800/80 bg-zinc-900/70 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden">
-          <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800/60">
-            <div className="w-2.5 h-2.5 rounded-full bg-rose-500/60" /><div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" /><div className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
-            <div className="flex-1 flex justify-center"><span className="text-[10px] text-zinc-600 font-mono">www.tradegx.com/dashboard</span></div>
-          </div>
-          <div className="p-4 grid grid-cols-4 gap-2">
-            {[{ l: "Win Rate", v: "56.8%", c: "text-emerald-400" }, { l: "Profit Factor", v: "1.68", c: "text-indigo-300" }, { l: "Net P&L", v: "+$1,940", c: "text-emerald-400" }, { l: "Max DD", v: "8.2%", c: "text-violet-300" }].map((s) => (
-              <div key={s.l} className="rounded-xl border border-zinc-800/60 bg-zinc-950/40 p-3">
-                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-wider mb-1">{s.l}</p>
-                <p className={`text-base font-black num ${s.c}`}>{s.v}</p>
+      {/* Cockpit 3D: trei panouri holografice cu tilt după mouse */}
+      <motion.div style={{ y: mockY, scale: mockScale }} className="relative z-10 max-w-4xl mx-auto mt-16">
+        <div className="grid md:grid-cols-[1fr_1.5fr_1fr] gap-3 items-center" style={{ perspective: "1400px" }}>
+
+          {/* Panou stânga: semnal AI */}
+          <motion.div initial={{ opacity: 0, x: -40, rotateY: 12 }} animate={{ opacity: 1, x: 0, rotateY: 8 }} transition={{ duration: 0.9, delay: 0.75, ease: EASE }}
+            className="hidden md:block" style={{ transformStyle: "preserve-3d" }}>
+            <div className="relative rounded-2xl border border-indigo-500/25 bg-zinc-900/70 backdrop-blur-xl p-3.5 shadow-2xl shadow-black/50">
+              <HudCorners rgb="129,140,248" size={10} inset={5} />
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-indigo-300/80">Signal · HPS</span>
+                <span className="text-[9px] font-black text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 rounded px-1.5 py-0.5">BUY</span>
               </div>
-            ))}
-          </div>
-        </motion.div>
+              <p className="text-sm font-black text-zinc-100 mb-1.5">EUR/USD</p>
+              <div className="flex items-center gap-1.5">
+                <div className="flex-1 h-1 rounded-full bg-zinc-800 overflow-hidden"><div className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400" style={{ width: "82%" }} /></div>
+                <span className="text-[10px] font-black text-emerald-400 num">82%</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Panou central: dashboard-ul */}
+          <motion.div initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.6, ease: EASE }}>
+            <Tilt3D className="relative rounded-2xl border border-zinc-700/60 bg-zinc-900/75 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/80 to-transparent" />
+              <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800/60">
+                <div className="w-2.5 h-2.5 rounded-full bg-rose-500/60" /><div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" /><div className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
+                <div className="flex-1 flex justify-center"><span className="text-[10px] text-zinc-600 font-mono">www.tradegx.com/dashboard</span></div>
+                <span className="live-dot-indigo" />
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-4 gap-2 mb-3">
+                  {[{ l: "Win Rate", v: "56.8%", c: "text-emerald-400" }, { l: "Profit Factor", v: "1.68", c: "text-indigo-300" }, { l: "Net P&L", v: "+$1,940", c: "text-emerald-400" }, { l: "Max DD", v: "8.2%", c: "text-violet-300" }].map((s) => (
+                    <div key={s.l} className="rounded-xl border border-zinc-800/60 bg-zinc-950/40 p-2.5">
+                      <p className="text-[8px] font-black text-zinc-600 uppercase tracking-wider mb-0.5">{s.l}</p>
+                      <p className={`text-sm font-black num ${s.c}`}>{s.v}</p>
+                    </div>
+                  ))}
+                </div>
+                <svg viewBox="0 0 400 64" className="w-full h-14">
+                  <defs><linearGradient id="hero-eq" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#34d399" stopOpacity="0.3" /><stop offset="100%" stopColor="#34d399" stopOpacity="0" /></linearGradient></defs>
+                  <motion.path initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.8, delay: 1.1, ease: "easeInOut" }}
+                    d="M0 56 C40 52 60 44 90 45 C130 46 150 28 190 26 C230 24 250 34 290 22 C330 12 360 10 400 4" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" />
+                  <motion.path initial={{ opacity: 0 }} animate={{ opacity: 0.9 }} transition={{ duration: 1, delay: 2 }}
+                    d="M0 56 C40 52 60 44 90 45 C130 46 150 28 190 26 C230 24 250 34 290 22 C330 12 360 10 400 4 L400 64 L0 64 Z" fill="url(#hero-eq)" />
+                </svg>
+              </div>
+            </Tilt3D>
+          </motion.div>
+
+          {/* Panou dreapta: AI Coach */}
+          <motion.div initial={{ opacity: 0, x: 40, rotateY: -12 }} animate={{ opacity: 1, x: 0, rotateY: -8 }} transition={{ duration: 0.9, delay: 0.9, ease: EASE }}
+            className="hidden md:block" style={{ transformStyle: "preserve-3d" }}>
+            <div className="relative rounded-2xl border border-violet-500/25 bg-zinc-900/70 backdrop-blur-xl p-3.5 shadow-2xl shadow-black/50">
+              <HudCorners rgb="167,139,250" size={10} inset={5} />
+              <div className="flex items-center gap-1.5 mb-2">
+                <Brain className="w-3.5 h-3.5 text-violet-300" />
+                <span className="font-mono text-[9px] uppercase tracking-widest text-violet-300/80">{t("heroCoachLabel")}</span>
+              </div>
+              <p className="text-[11px] leading-relaxed text-zinc-300">{t("heroCoach")}</p>
+            </div>
+          </motion.div>
+        </div>
         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-16 bg-indigo-500/12 blur-2xl rounded-full pointer-events-none" />
+      </motion.div>
+
+      {/* Indicator scroll */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.2, duration: 1 }}
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 pointer-events-none">
+        <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-600">{t("heroScroll")}</span>
+        <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
+          <ChevronDown className="w-4 h-4 text-indigo-400/70" />
+        </motion.div>
       </motion.div>
     </section>
   );
@@ -346,7 +447,7 @@ function Features({ t }: { t: TT }) {
       <CandlesBg />
       <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 8%, rgba(99,102,241,0.10), transparent 55%)" }} />
       <div className="relative z-10 max-w-6xl mx-auto">
-        <SectionHeader t={t} icon={Layers} badge={t("featuresBadge")} title={t("featuresTitle")} sub={t("featuresSub")} />
+        <SectionHeader t={t} num="01" rgb="129,140,248" icon={Layers} badge={t("featuresBadge")} title={t("featuresTitle")} sub={t("featuresSub")} />
 
         <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 md:auto-rows-[168px] md:grid-flow-dense">
           {/* AI Signals — tile mare */}
@@ -490,7 +591,7 @@ function NumbersAct({ t }: { t: TT }) {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[380px] bg-indigo-600/10 rounded-full blur-[130px] pointer-events-none" />
 
       <div className="relative max-w-5xl mx-auto">
-        <SectionHeader t={t} icon={Activity} badge={t("pxBadge")} title={t("pxTitle")} sub={t("pxSub")} />
+        <SectionHeader t={t} num="02" rgb="52,211,153" icon={Activity} badge={t("pxBadge")} title={t("pxTitle")} sub={t("pxSub")} />
 
         <div className="relative mt-14 grid md:grid-cols-[1fr_1.4fr_1fr] gap-5 items-center">
           {/* KPI stânga */}
@@ -557,20 +658,32 @@ function HowItWorks({ t }: { t: TT }) {
   return (
     <section id="how-it-works" className="relative py-24 px-6 bg-zinc-900/20">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader t={t} icon={ChevronRight} badge={t("howBadge")} title={t("howTitle")} sub={t("howSub")} />
-        <div className="mt-14 grid md:grid-cols-3 gap-6">
-          {STEP_META.map((m, i) => (
-            <Reveal key={i} delay={i * 0.15}>
-              <div className="relative rounded-2xl border p-6 h-full bg-zinc-900/50" style={{ borderColor: `rgba(${m.rgb},0.2)` }}>
-                <div className="flex items-start gap-3 mb-5">
-                  <span className="text-5xl font-black font-mono leading-none" style={{ color: `rgba(${m.rgb},0.2)` }}>{String(i + 1).padStart(2, "0")}</span>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mt-1" style={{ background: `rgba(${m.rgb},0.12)`, color: `rgb(${m.rgb})` }}><m.Icon className="w-5 h-5" /></div>
+        <SectionHeader t={t} num="03" rgb="167,139,250" icon={ChevronRight} badge={t("howBadge")} title={t("howTitle")} sub={t("howSub")} />
+        <div className="relative mt-14">
+          {/* conector „traseu de misiune" între pași (desktop) */}
+          <div className="hidden md:block absolute top-[3.4rem] left-[12%] right-[12%] pointer-events-none" aria-hidden>
+            <motion.div initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: EASE }}
+              className="h-px origin-left bg-gradient-to-r from-indigo-500/50 via-violet-500/50 to-emerald-400/50" />
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {STEP_META.map((m, i) => (
+              <Reveal key={i} delay={i * 0.15}>
+                <div className="relative rounded-2xl border p-6 h-full bg-zinc-900/60 backdrop-blur-sm overflow-hidden" style={{ borderColor: `rgba(${m.rgb},0.22)` }}>
+                  <HudCorners rgb={m.rgb} size={11} inset={6} opacity={0.4} />
+                  <div className="absolute top-0 left-0 right-0 h-px opacity-70" style={{ background: `linear-gradient(90deg,transparent,rgba(${m.rgb},0.8),transparent)` }} />
+                  <div className="flex items-start gap-3 mb-5">
+                    <span className="text-5xl font-black font-mono leading-none" style={{ color: `rgba(${m.rgb},0.22)` }}>{String(i + 1).padStart(2, "0")}</span>
+                    <div className="relative w-10 h-10 rounded-xl flex items-center justify-center mt-1 border" style={{ background: `rgba(${m.rgb},0.12)`, borderColor: `rgba(${m.rgb},0.3)`, color: `rgb(${m.rgb})` }}>
+                      <m.Icon className="w-5 h-5" />
+                      <span className="absolute -inset-1 rounded-xl blur-md -z-10" style={{ background: `rgba(${m.rgb},0.16)` }} />
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-zinc-100 mb-2 text-[15px]">{t(`s${i + 1}T`)}</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed">{t(`s${i + 1}D`)}</p>
                 </div>
-                <h3 className="font-bold text-zinc-100 mb-2 text-[15px]">{t(`s${i + 1}T`)}</h3>
-                <p className="text-zinc-500 text-sm leading-relaxed">{t(`s${i + 1}D`)}</p>
-              </div>
-            </Reveal>
-          ))}
+              </Reveal>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -582,7 +695,7 @@ function Trust({ t }: { t: TT }) {
   return (
     <section className="relative py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader t={t} icon={Shield} badge={t("transpBadge")} title={t("transpTitle")} sub={t("transpSub")} />
+        <SectionHeader t={t} num="04" rgb="52,211,153" icon={Shield} badge={t("transpBadge")} title={t("transpTitle")} sub={t("transpSub")} />
         <div className="mt-14 grid md:grid-cols-3 gap-4">
           {COMMIT_META.map((m, i) => (
             <Reveal key={i} delay={i * 0.12}>
@@ -605,7 +718,7 @@ function IntegrationsMarquee({ t }: { t: TT }) {
   return (
     <section className="relative py-20 border-y border-zinc-900 overflow-hidden">
       <div className="max-w-5xl mx-auto px-6 mb-8">
-        <SectionHeader t={t} icon={Wifi} badge={t("intBadge")} title={t("intTitle")} sub={t("intSub")} />
+        <SectionHeader t={t} num="05" rgb="56,189,248" icon={Wifi} badge={t("intBadge")} title={t("intTitle")} sub={t("intSub")} />
       </div>
       <div className="relative">
         <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#08080b] to-transparent z-10 pointer-events-none" />
@@ -626,12 +739,73 @@ function IntegrationsMarquee({ t }: { t: TT }) {
   );
 }
 
+// ── Vision teaser — banda cinematică „viitorul" ──────────────────────────────
+const VISION_META = [
+  { Icon: Copy,  rgb: "129,140,248", tK: "vis1T", dK: "vis1D" },
+  { Icon: Flame, rgb: "251,113,133", tK: "vis2T", dK: "vis2D" },
+  { Icon: Orbit, rgb: "167,139,250", tK: "vis3T", dK: "vis3D" },
+];
+
+function VisionTeaser({ t }: { t: TT }) {
+  // câmp de stele static (CSS pur, generat o singură dată)
+  const stars = React.useMemo(
+    () => Array.from({ length: 70 }, () => ({
+      x: Math.random() * 100, y: Math.random() * 100,
+      s: 1 + Math.random() * 1.6, o: 0.15 + Math.random() * 0.5,
+    })), []);
+
+  return (
+    <section className="relative py-28 px-6 overflow-hidden">
+      {/* cer înstelat + nebuloasă violetă */}
+      <div className="absolute inset-0 pointer-events-none">
+        {stars.map((st, i) => (
+          <span key={i} className="absolute rounded-full bg-white" style={{ left: `${st.x}%`, top: `${st.y}%`, width: st.s, height: st.s, opacity: st.o }} />
+        ))}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[820px] h-[440px] bg-violet-700/12 rounded-full blur-[140px]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto">
+        <SectionHeader t={t} num="06" rgb="167,139,250" icon={Telescope} badge={t("visBadge")} title={t("visTitle")} sub={t("visSub")} />
+
+        <div className="mt-14 grid md:grid-cols-3 gap-4">
+          {VISION_META.map((m, i) => (
+            <Reveal key={m.tK} delay={i * 0.12}>
+              <Tilt3D
+                className="relative h-full rounded-2xl border bg-zinc-950/60 backdrop-blur-md p-6 overflow-hidden"
+                style={{ borderColor: `rgba(${m.rgb},0.3)`, boxShadow: `0 0 0 1px rgba(${m.rgb},0.05), 0 20px 50px -20px rgba(${m.rgb},0.3)` }}
+              >
+                <HudCorners rgb={m.rgb} size={12} inset={7} />
+                <div className="absolute -inset-10 opacity-30 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 0%, rgba(${m.rgb},0.2), transparent 65%)` }} />
+                <div className="relative" style={{ transform: "translateZ(26px)" }}>
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 border" style={{ background: `rgba(${m.rgb},0.13)`, borderColor: `rgba(${m.rgb},0.3)`, color: `rgb(${m.rgb})` }}>
+                    <m.Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-base font-black text-zinc-100 mb-2">{t(m.tK)}</h3>
+                  <p className="text-[13px] leading-relaxed text-zinc-400">{t(m.dK)}</p>
+                </div>
+              </Tilt3D>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal delay={0.35} className="text-center mt-10">
+          <Link href="/roadmap" className="inline-flex items-center gap-2 rounded-xl border border-violet-500/35 bg-violet-500/10 hover:bg-violet-500/15 hover:border-violet-400/50 px-6 py-3 text-sm font-bold text-violet-200 transition-all">
+            <Telescope className="w-4 h-4" />{t("visCta")}<ArrowRight className="w-4 h-4" />
+          </Link>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 // ── Pricing ──────────────────────────────────────────────────────────────────
 function Pricing({ t }: { t: TT }) {
   return (
     <section id="preturi" className="relative py-24 px-6">
       <div className="max-w-4xl mx-auto">
-        <SectionHeader t={t} icon={Zap} badge={t("priceBadge")} title={t("priceTitle")} sub={t("priceSub")} />
+        <SectionHeader t={t} num="07" rgb="129,140,248" icon={Zap} badge={t("priceBadge")} title={t("priceTitle")} sub={t("priceSub")} />
         <div className="mt-12 grid md:grid-cols-2 gap-4">
           <Reveal>
             <div className="rounded-3xl border border-zinc-800/80 bg-zinc-900/50 p-7 h-full">
@@ -675,7 +849,7 @@ function Faq({ t }: { t: TT }) {
   return (
     <section id="faq" className="relative py-24 px-6 border-t border-zinc-900">
       <div className="max-w-3xl mx-auto">
-        <SectionHeader t={t} icon={Sparkles} badge={t("faqBadge")} title={t("faqTitle")} />
+        <SectionHeader t={t} num="08" rgb="167,139,250" icon={Sparkles} badge={t("faqBadge")} title={t("faqTitle")} />
         <div className="mt-10 space-y-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Reveal key={i} delay={i * 0.05}>
@@ -699,11 +873,14 @@ function FinalCta({ t }: { t: TT }) {
     <section className="relative py-28 px-6">
       <div className="max-w-2xl mx-auto">
         <Reveal>
-          <div className="relative rounded-3xl overflow-hidden text-center">
+          <div className="relative rounded-3xl p-px overflow-hidden">
+            {/* inel conic rotativ — marginea „portal" */}
+            <motion.div aria-hidden animate={{ rotate: 360 }} transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
+              className="absolute left-1/2 top-1/2 w-[190%] aspect-square -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ background: "conic-gradient(from 0deg, transparent 0deg, rgba(129,140,248,0.75) 55deg, rgba(167,139,250,0.5) 90deg, transparent 140deg, transparent 200deg, rgba(52,211,153,0.45) 260deg, transparent 320deg)" }} />
+            <div className="relative rounded-[calc(1.5rem-1px)] overflow-hidden text-center bg-[#0b0b10]">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/12 via-violet-500/10 to-purple-500/12" />
             <div className="absolute inset-0 hero-grid-bg-dense opacity-50" />
-            <div className="absolute inset-0 rounded-3xl border border-indigo-500/25" />
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent" />
             <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-64 h-32 bg-indigo-500/15 rounded-full blur-3xl" />
             <div className="relative p-12">
               <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold"><Zap className="w-3 h-3" />{t("ctaBadge")}</div>
@@ -711,6 +888,7 @@ function FinalCta({ t }: { t: TT }) {
               <p className="text-zinc-400 mb-8 leading-relaxed">{t.rich("ctaSub", { b: (c) => <strong className="text-zinc-200">{c}</strong> })}</p>
               <MagneticButton><BreathingGlow /><Link href="/register"><Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-10 h-12 shadow-2xl shadow-indigo-500/30 text-base gap-2"><Sparkles className="w-4 h-4" />{t("ctaBtn")}</Button></Link></MagneticButton>
               <p className="text-zinc-600 text-sm mt-5">{t("ctaNote")}</p>
+            </div>
             </div>
           </div>
         </Reveal>
@@ -744,14 +922,20 @@ function Footer({ t }: { t: TT }) {
   );
 }
 
-// ── Section header ───────────────────────────────────────────────────────────
-function SectionHeader({ t, icon: Icon, badge, title, sub }: { t: TT; icon: React.ComponentType<{ className?: string }>; badge: string; title: string; sub?: string }) {
+// ── Section header — consolă SF: [ 01 · ETICHETĂ ] + titlu + fascicul ────────
+function SectionHeader({ t, icon: Icon, badge, title, sub, num, rgb = "129,140,248" }: { t: TT; icon: React.ComponentType<{ className?: string }>; badge: string; title: string; sub?: string; num?: string; rgb?: string }) {
   return (
     <Reveal className="text-center">
-      <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400 text-xs font-bold uppercase tracking-widest">
-        <Icon className="w-3 h-3" />{badge}
+      <div className="inline-flex items-center gap-2.5 mb-5 font-mono text-[11px] font-bold uppercase tracking-[0.3em]" style={{ color: `rgba(${rgb},0.85)` }}>
+        <span className="opacity-40">[</span>
+        {num && <span className="opacity-70">{num}</span>}
+        {num && <span className="opacity-30">·</span>}
+        <Icon className="w-3 h-3" />
+        <span>{badge}</span>
+        <span className="opacity-40">]</span>
       </div>
       <h2 className="text-3xl md:text-4xl font-black tracking-tight">{title}</h2>
+      <div className="mx-auto mt-4 h-px w-24" style={{ background: `linear-gradient(90deg,transparent,rgba(${rgb},0.7),transparent)` }} />
       {sub && <p className="text-zinc-400 text-lg max-w-xl mx-auto leading-relaxed mt-4">{sub}</p>}
     </Reveal>
   );

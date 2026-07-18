@@ -2065,7 +2065,20 @@
     "btAcademyMeta": "9 modules · 72 lessons",
     "btMonthlyTarget": "Monthly target",
     "btGoalNote": "68% · 12 days left",
-    "btTagDiscipline": "#discipline"
+    "btTagDiscipline": "#discipline",
+    "visBadge": "The Vision",
+    "visTitle": "Building the future of trading",
+    "visSub": "We don't compare ourselves to anyone. These are the pieces we're building — years ahead of the industry.",
+    "vis1T": "The Digital Twin",
+    "vis1D": "Your AI clone executes your plan perfectly, in the shadows. The gap between you = the price of indiscipline, in money.",
+    "vis2T": "The Trading Firewall",
+    "vis2D": "We don't predict the market — we predict you. Tilt is detected before the mistake happens.",
+    "vis3T": "The 3D Universe",
+    "vis3D": "Your trading history as a navigable galaxy: trades as stars, setups as constellations, drawdowns as black holes.",
+    "visCta": "Explore the full vision",
+    "heroScroll": "Scroll",
+    "heroCoach": "You exited your last 3 GBP/USD trades too early. Let the TP do its job.",
+    "heroCoachLabel": "AI Coach · live"
   },
   "pricing": {
     "navLogin": "Sign in",
@@ -2230,7 +2243,8 @@
     "vs10": "The News Guardian — knows your open positions and the economic calendar: warns you 15 minutes before major news hits a symbol you're exposed to",
     "vs11": "The Ulysses Contract — write your rules while calm and sign them digitally; when AI detects a breach, it shows you your own contract, with your own signature",
     "vs12": "The Trader Credit Score — a discipline score (not a profit score!) computed only from synced, verifiable data: your passport to prop firms and funding",
-    "vs13": "The Market Genome — pattern-matching on historical regimes: “today looks 87% like March 14, 2023 — here's how YOU traded it back then”"
+    "vs13": "The Market Genome — pattern-matching on historical regimes: “today looks 87% like March 14, 2023 — here's how YOU traded it back then”",
+    "vs15": "The Black Box — after a blown account, AI produces an aviation-style crash investigation: the flight timeline, the fatal decision, contributing factors and recommendations so it never repeats"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",

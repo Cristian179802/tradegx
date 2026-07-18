@@ -2065,7 +2065,20 @@
     "btAcademyMeta": "9 module · 72 lecții",
     "btMonthlyTarget": "Țintă lunară",
     "btGoalNote": "68% · 12 zile rămase",
-    "btTagDiscipline": "#disciplină"
+    "btTagDiscipline": "#disciplină",
+    "visBadge": "Viziunea",
+    "visTitle": "Construim viitorul tranzacționării",
+    "visSub": "Nu ne comparăm cu nimeni. Astea sunt piesele la care lucrăm — cu ani înaintea industriei.",
+    "vis1T": "Geamănul Digital",
+    "vis1D": "Clona ta AI îți execută planul perfect, în umbră. Diferența dintre voi = prețul indisciplinei, în bani.",
+    "vis2T": "Firewall de Trading",
+    "vis2D": "Nu prezicem piața — te prezicem pe tine. Tilt-ul e detectat înainte de greșeală.",
+    "vis3T": "Universul 3D",
+    "vis3D": "Istoria ta de trading ca galaxie navigabilă: tranzacții-stele, setup-uri-constelații, drawdown-uri-găuri negre.",
+    "visCta": "Explorează viziunea completă",
+    "heroScroll": "Derulează",
+    "heroCoach": "Ai ieșit prea devreme din ultimele 3 tranzacții pe GBP/USD. Lasă TP-ul să lucreze.",
+    "heroCoachLabel": "AI Coach · live"
   },
   "pricing": {
     "navLogin": "Autentificare",
@@ -2230,7 +2243,8 @@
     "vs10": "Gardianul de Știri — își știe pozițiile tale deschise și calendarul economic: te avertizează cu 15 minute înainte ca o știre majoră să lovească un simbol pe care ai poziție",
     "vs11": "Contractul lui Ulise — îți scrii regulile când ești calm și le semnezi digital; când AI-ul detectează încălcarea, îți arată propriul contract, cu propria semnătură",
     "vs12": "Scorul de Credit al Traderului — un scor de disciplină (nu de profit!) calculat doar din date sincronizate, verificabile: pașaportul tău către prop firm-uri și finanțare",
-    "vs13": "Genomul Pieței — pattern-matching pe regimuri istorice: „ziua de azi seamănă 87% cu 14 martie 2023 — uite cum ai tranzacționat TU atunci”"
+    "vs13": "Genomul Pieței — pattern-matching pe regimuri istorice: „ziua de azi seamănă 87% cu 14 martie 2023 — uite cum ai tranzacționat TU atunci”",
+    "vs15": "Cutia Neagră — după un cont spulberat, AI-ul produce o anchetă în stil aviatic: cronologia „zborului”, decizia fatală, factorii contribuitori și recomandările ca accidentul să nu se repete"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
