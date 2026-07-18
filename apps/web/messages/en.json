@@ -2230,17 +2230,7 @@
     "vs10": "The News Guardian — knows your open positions and the economic calendar: warns you 15 minutes before major news hits a symbol you're exposed to",
     "vs11": "The Ulysses Contract — write your rules while calm and sign them digitally; when AI detects a breach, it shows you your own contract, with your own signature",
     "vs12": "The Trader Credit Score — a discipline score (not a profit score!) computed only from synced, verifiable data: your passport to prop firms and funding",
-    "vs13": "The Market Genome — pattern-matching on historical regimes: “today looks 87% like March 14, 2023 — here's how YOU traded it back then”",
-    "vs15": "The Black Box — after a blown account, AI produces an aviation-style crash investigation: the flight timeline, the fatal decision, contributing factors and recommendations so it never repeats",
-    "vs16": "The Ghosts — trade the session and see anonymized ghosts of other traders on the same symbol: where they entered, where they exited, where they hesitated",
-    "vs17": "Matrix Vision — order blocks, fair value gaps and liquidity pools rendered as glowing 3D structures inside the chart's depth; you don't read SMC concepts anymore — you see them",
-    "vs18": "The Holodeck — first-person backtesting: price becomes 3D terrain, a canyon you fly through; replaying a day = flying through that day",
-    "vs19": "The Swarm — the community's aggregated, anonymous positioning visualized as a living starling murmuration that reshapes with real market sentiment",
-    "vs20": "The Decompression Room — after a big loss, a 3D breathing room with biofeedback: the environment calms down as your heart rate comes down",
-    "vs21": "A Conversation with Future You — from your real trajectory, AI simulates who you'll be in 10 years — and you can talk to him; both versions: the disciplined one and the other one",
-    "vs22": "The Fingerprint — a unique piece of generative art computed from your trading style's DNA; it evolves with you, you share it as your identity",
-    "vs23": "The Rally Co-Pilot — a voice in your ear during the live session: “USD news in 5 minutes… 80% of daily risk reached” — you keep your eyes on the chart, it reads the map",
-    "vs24": "The Neuro-Adaptive Interface — the UI breathes with your state: at tilt risk the colors cool down and quick-entry buttons disappear; in flow, the cockpit expands"
+    "vs13": "The Market Genome — pattern-matching on historical regimes: “today looks 87% like March 14, 2023 — here's how YOU traded it back then”"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
