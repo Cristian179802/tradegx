@@ -183,6 +183,25 @@ export function NotificationDropdown() {
     setUnreadCount(0);
   }
 
+  // La deschiderea panoului: golește badge-ul instant + persistă „citit" pe
+  // server (altfel reapăreau necitite la navigare/refresh). Punctele albastre
+  // de pe fiecare notificare RĂMÂN pentru sesiunea curentă, ca să vezi ce era
+  // nou; la următoarea deschidere apar toate ca citite.
+  const markingSeen = React.useRef(false);
+  async function openAndMarkSeen() {
+    await fetchAlerts();
+    if (markingSeen.current) return;
+    markingSeen.current = true;
+    setUnreadCount(0);
+    try {
+      await fetch("/api/alerts", { method: "PATCH", cache: "no-store" });
+    } catch {
+      /* best-effort */
+    } finally {
+      markingSeen.current = false;
+    }
+  }
+
   async function dismissAlert(id: string, e: React.MouseEvent) {
     e.stopPropagation();
     await fetch(`/api/alerts/${id}`, { method: "DELETE" });
@@ -199,7 +218,7 @@ export function NotificationDropdown() {
   }
 
   return (
-    <DropdownMenu open={open} onOpenChange={(v) => { setOpen(v); if (v) fetchAlerts(); }}>
+    <DropdownMenu open={open} onOpenChange={(v) => { setOpen(v); if (v) openAndMarkSeen(); }}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
