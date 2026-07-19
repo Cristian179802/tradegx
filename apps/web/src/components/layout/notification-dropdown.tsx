@@ -101,19 +101,41 @@ export function NotificationDropdown() {
   const knownIds = React.useRef<Set<string>>(new Set());
   const initialized = React.useRef(false);
 
+  // „Văzute" local, persistate pe sesiune (sessionStorage). Rezolvă cazurile în
+  // care serverul NU poate persista (cont demo read-only) SAU polling-ul de la
+  // 25s ar readuce badge-ul: odată văzute, rămân citite până la refresh complet.
+  const SEEN_KEY = "tradegx-seen-alerts";
+  const seenRef = React.useRef<Set<string>>(new Set());
+  React.useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(SEEN_KEY);
+      if (raw) seenRef.current = new Set(JSON.parse(raw));
+    } catch { /* private mode */ }
+  }, []);
+  const persistSeen = () => {
+    try { sessionStorage.setItem(SEEN_KEY, JSON.stringify([...seenRef.current])); } catch { /* noop */ }
+  };
+  const markSeenLocal = (ids: string[]) => {
+    ids.forEach((id) => seenRef.current.add(id));
+    persistSeen();
+  };
+
   const fetchAlerts = React.useCallback(async (notify = false) => {
     setLoading(true);
     try {
       const res = await fetch("/api/alerts", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        const list: Alert[] = data.alerts ?? [];
+        const raw: Alert[] = data.alerts ?? [];
+        // Suprapune starea „văzut" locală peste cea de pe server
+        const seen = seenRef.current;
+        const list = raw.map((a) => (seen.has(a.id) ? { ...a, isRead: true } : a));
         setAlerts(list);
-        setUnreadCount(data.unreadCount ?? 0);
+        setUnreadCount(list.filter((a) => !a.isRead).length);
 
-        // Detectează alerte noi (apărute de la ultima verificare)
+        // Detectează alerte cu adevărat noi (nici pe server citite, nici văzute local)
         if (notify && initialized.current) {
-          const fresh = list.filter((a) => !a.isRead && !knownIds.current.has(a.id));
+          const fresh = raw.filter((a) => !a.isRead && !seen.has(a.id) && !knownIds.current.has(a.id));
           if (fresh.length > 0) {
             const top = fresh[0];
             const desc = fresh.length > 1 ? `${top.message} · +${fresh.length - 1}` : top.message;
@@ -131,7 +153,7 @@ export function NotificationDropdown() {
           }
         }
         // Reține toate ID-urile curente
-        knownIds.current = new Set(list.map((a) => a.id));
+        knownIds.current = new Set(raw.map((a) => a.id));
         initialized.current = true;
       }
     } finally {
@@ -178,20 +200,21 @@ export function NotificationDropdown() {
   }, [fetchAlerts]);
 
   async function markAllRead() {
-    await fetch("/api/alerts", { method: "PATCH" });
+    markSeenLocal(alerts.map((a) => a.id));
     setAlerts((prev) => prev.map((a) => ({ ...a, isRead: true })));
     setUnreadCount(0);
+    await fetch("/api/alerts", { method: "PATCH" }).catch(() => {}); // best-effort (demo → 403, dar local rămâne)
   }
 
-  // La deschiderea panoului: golește badge-ul instant + persistă „citit" pe
-  // server (altfel reapăreau necitite la navigare/refresh). Punctele albastre
-  // de pe fiecare notificare RĂMÂN pentru sesiunea curentă, ca să vezi ce era
-  // nou; la următoarea deschidere apar toate ca citite.
+  // La deschiderea panoului: golește badge-ul instant, îl reține local (rezistă
+  // la navigare + polling) și persistă și pe server (best-effort — pe demo dă
+  // 403, dar starea locală ține). Punctele albastre rămân pe sesiunea curentă.
   const markingSeen = React.useRef(false);
   async function openAndMarkSeen() {
     await fetchAlerts();
     if (markingSeen.current) return;
     markingSeen.current = true;
+    markSeenLocal([...knownIds.current]); // toate ID-urile curente (setate de fetchAlerts)
     setUnreadCount(0);
     try {
       await fetch("/api/alerts", { method: "PATCH", cache: "no-store" });
@@ -204,17 +227,19 @@ export function NotificationDropdown() {
 
   async function dismissAlert(id: string, e: React.MouseEvent) {
     e.stopPropagation();
-    await fetch(`/api/alerts/${id}`, { method: "DELETE" });
+    markSeenLocal([id]); // dacă serverul nu poate șterge (demo), măcar nu reapare ca necitit
     setAlerts((prev) => prev.filter((a) => a.id !== id));
     setUnreadCount((prev) => Math.max(0, prev - 1));
+    await fetch(`/api/alerts/${id}`, { method: "DELETE" }).catch(() => {}); // best-effort
   }
 
   async function markRead(alertId: string) {
     const alert = alerts.find((a) => a.id === alertId);
     if (!alert || alert.isRead) return;
-    await fetch(`/api/alerts/${alertId}`, { method: "PATCH" });
+    markSeenLocal([alertId]);
     setAlerts((prev) => prev.map((a) => (a.id === alertId ? { ...a, isRead: true } : a)));
     setUnreadCount((prev) => Math.max(0, prev - 1));
+    await fetch(`/api/alerts/${alertId}`, { method: "PATCH" }).catch(() => {}); // best-effort
   }
 
   return (
