@@ -1366,7 +1366,16 @@
     "catCrypto": "Crypto",
     "catMetals": "Metals",
     "catIndices": "Indices",
-    "catStocks": "Stocks"
+    "catStocks": "Stocks",
+    "indicators": "Indicators",
+    "indicatorsActive": "{n} active",
+    "indicatorsHint": "Add indicators directly on the chart",
+    "clearAll": "Clear all",
+    "catFavorites": "Favorites",
+    "trend": "Trend",
+    "momentum": "Momentum",
+    "volatility": "Volatility",
+    "volume": "Volume"
   },
   "calendar": {
     "title": "Economic Calendar",

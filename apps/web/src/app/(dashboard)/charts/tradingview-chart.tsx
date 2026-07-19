@@ -36,9 +36,20 @@ function toTVSymbol(symbol: string): string {
   return `FX:${symbol}`;
 }
 
-export function TradingViewChart({ symbol = "EURUSD", interval }: { symbol?: string; interval?: string }) {
+export function TradingViewChart({
+  symbol = "EURUSD",
+  interval,
+  studies = [],
+  locale = "ro",
+}: {
+  symbol?: string;
+  interval?: string;
+  studies?: string[];
+  locale?: string;
+}) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const tvSymbol = toTVSymbol(symbol);
+  const studiesKey = studies.join(",");
 
   React.useEffect(() => {
     if (!containerRef.current) return;
@@ -55,14 +66,18 @@ export function TradingViewChart({ symbol = "EURUSD", interval }: { symbol?: str
       timezone: "Europe/Bucharest",
       theme: "dark",
       style: "1",
-      locale: "ro",
+      locale,
       backgroundColor: "rgba(9, 9, 11, 1)",
       gridColor: "rgba(39, 39, 42, 1)",
       hide_top_toolbar: false,
+      hide_side_toolbar: false,   // bara de instrumente de desen (linii, fibo, forme)
       hide_legend: false,
       allow_symbol_change: true,
       save_image: true,
+      withdateranges: true,       // selector rapid de perioadă jos
+      details: false,
       calendar: false,
+      studies,                    // indicatoare preîncărcate
       support_host: "https://www.tradingview.com",
     });
 
@@ -71,7 +86,7 @@ export function TradingViewChart({ symbol = "EURUSD", interval }: { symbol?: str
     return () => {
       if (containerRef.current) containerRef.current.innerHTML = "";
     };
-  }, [tvSymbol, interval]);
+  }, [tvSymbol, interval, studiesKey, locale]);
 
   return (
     <div className="tradingview-widget-container h-full w-full" ref={containerRef}>

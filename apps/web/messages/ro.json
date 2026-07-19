@@ -1366,7 +1366,16 @@
     "catCrypto": "Crypto",
     "catMetals": "Metale",
     "catIndices": "Indici",
-    "catStocks": "Acțiuni"
+    "catStocks": "Acțiuni",
+    "indicators": "Indicatoare",
+    "indicatorsActive": "{n} active",
+    "indicatorsHint": "Adaugă indicatori direct pe grafic",
+    "clearAll": "Șterge tot",
+    "catFavorites": "Favorite",
+    "trend": "Trend",
+    "momentum": "Momentum",
+    "volatility": "Volatilitate",
+    "volume": "Volum"
   },
   "calendar": {
     "title": "Calendar Economic",
