@@ -1375,7 +1375,14 @@
     "trend": "Trend",
     "momentum": "Momentum",
     "volatility": "Volatilitate",
-    "volume": "Volum"
+    "volume": "Volum",
+    "grid1": "1 grafic",
+    "grid2": "2 grafice",
+    "grid4": "4 grafice",
+    "zen": "Mod Zen",
+    "exitZen": "Ieși din Zen",
+    "zenHint": "Esc pentru ieșire",
+    "activeChart": "Grafic activ"
   },
   "calendar": {
     "title": "Calendar Economic",

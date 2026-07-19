@@ -2,8 +2,9 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
+import { motion } from "framer-motion";
 import { TradingViewChart } from "./tradingview-chart";
-import { Search, Star, LineChart, X, ChevronDown } from "lucide-react";
+import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // label = cheie → charts.* (tradusă la randare)
@@ -59,8 +60,6 @@ const TIMEFRAMES = [
   { v: "60", l: "1h" }, { v: "240", l: "4h" }, { v: "D", l: "1D" }, { v: "W", l: "1W" },
 ];
 
-// Indicatoare rapide (TradingView basic studies), grupate. Restul (sute) rămân
-// accesibile din butonul „Indicators" al graficului — dar astea sunt la un click.
 const INDICATOR_GROUPS = [
   {
     cat: "trend",
@@ -102,17 +101,30 @@ const INDICATOR_GROUPS = [
   },
 ];
 
+const DEFAULT_CELLS = [
+  { symbol: "EURUSD", timeframe: "60" },
+  { symbol: "GBPUSD", timeframe: "60" },
+  { symbol: "XAUUSD", timeframe: "240" },
+  { symbol: "BTCUSD", timeframe: "60" },
+];
+
 export default function ChartsPage() {
   const t = useTranslations("charts");
   const locale = useLocale();
-  const [symbol, setSymbol] = React.useState("EURUSD");
-  const [timeframe, setTimeframe] = React.useState("60");
-  const [activeGroup, setActiveGroup] = React.useState(0);
+  const tvLocale = locale === "en" ? "en" : "ro";
+
+  const [layout, setLayout] = React.useState<1 | 2 | 4>(1);
+  const [cells, setCells] = React.useState(DEFAULT_CELLS);
+  const [activeCell, setActiveCell] = React.useState(0);
   const [search, setSearch] = React.useState("");
   const [favorites, setFavorites] = React.useState<string[]>(["EURUSD", "XAUUSD", "BTCUSD", "NAS100"]);
   const [studies, setStudies] = React.useState<string[]>([]);
   const [indOpen, setIndOpen] = React.useState(false);
+  const [activeGroup, setActiveGroup] = React.useState(0);
+  const [zen, setZen] = React.useState(false);
   const indRef = React.useRef<HTMLDivElement>(null);
+
+  const active = cells[activeCell] ?? cells[0]!;
 
   // închide panoul de indicatoare la click în afară
   React.useEffect(() => {
@@ -124,32 +136,66 @@ export default function ChartsPage() {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [indOpen]);
 
+  // Esc iese din Mod Zen
+  React.useEffect(() => {
+    if (!zen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setZen(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [zen]);
+
+  function setActiveSymbol(s: string) {
+    setCells((prev) => prev.map((c, i) => (i === activeCell ? { ...c, symbol: s } : c)));
+  }
+  function setActiveTf(tf: string) {
+    setCells((prev) => prev.map((c, i) => (i === activeCell ? { ...c, timeframe: tf } : c)));
+  }
+  function changeLayout(n: 1 | 2 | 4) {
+    setLayout(n);
+    if (activeCell >= n) setActiveCell(0);
+  }
   function toggleFav(s: string) {
-    setFavorites((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
+    setFavorites((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
   }
   function toggleStudy(id: string) {
-    setStudies((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+    setStudies((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
   const allSymbols = SYMBOL_GROUPS.flatMap((g) => g.symbols.map((s) => ({ ...s, group: g.label })));
   const searchResults = search.length > 0
     ? allSymbols.filter((s) => s.s.toLowerCase().includes(search.toLowerCase()) || s.label.toLowerCase().includes(search.toLowerCase()))
     : [];
-
   const stripSymbols = search.length > 0
     ? searchResults
     : activeGroup === -1
       ? allSymbols.filter((s) => favorites.includes(s.s))
       : SYMBOL_GROUPS[activeGroup]!.symbols.map((s) => ({ ...s, group: SYMBOL_GROUPS[activeGroup]!.label }));
 
+  const gridClass =
+    layout === 1 ? "grid-cols-1" :
+    layout === 2 ? "grid-cols-1 md:grid-cols-2" :
+    "grid-cols-1 md:grid-cols-2 md:grid-rows-2";
+
+  const LAYOUTS: { n: 1 | 2 | 4; Icon: React.ComponentType<{ className?: string }>; label: string }[] = [
+    { n: 1, Icon: Square, label: t("grid1") },
+    { n: 2, Icon: Columns2, label: t("grid2") },
+    { n: 4, Icon: LayoutGrid, label: t("grid4") },
+  ];
+
   return (
-    <div className="flex flex-col h-full" style={{ height: "calc(100vh - 96px)" }}>
-      {/* ── Bară de sus: căutare + categorii + timeframe + indicatoare ── */}
+    <div
+      className={cn(
+        "flex flex-col",
+        zen ? "fixed inset-0 z-[60] bg-[#08080b] p-3" : "h-full"
+      )}
+      style={zen ? undefined : { height: "calc(100vh - 96px)" }}
+    >
+      {/* ── Bară de sus ── */}
       <div className="shrink-0 flex flex-wrap items-center gap-2 mb-2">
-        {/* Titlu + simbol curent */}
         <div className="flex items-center gap-2 mr-1">
           <LineChart className="w-4 h-4 text-indigo-400" />
-          <span className="text-sm font-black text-zinc-100">{symbol}</span>
+          <span className="text-sm font-black text-zinc-100">{active.symbol}</span>
+          {layout > 1 && <span className="text-[10px] text-indigo-400/70 font-bold">· {t("activeChart")}</span>}
         </div>
 
         {/* Căutare */}
@@ -168,9 +214,10 @@ export default function ChartsPage() {
           {favorites.length > 0 && (
             <button
               onClick={() => { setActiveGroup(-1); setSearch(""); }}
+              title={t("catFavorites")}
               className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all",
-                activeGroup === -1 && search.length === 0 ? "bg-amber-500/15 border border-amber-500/30 text-amber-300" : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60 border border-transparent"
+                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border",
+                activeGroup === -1 && search.length === 0 ? "bg-amber-500/15 border-amber-500/30 text-amber-300" : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60 border-transparent"
               )}
             >
               <Star className="h-3 w-3" />
@@ -192,15 +239,32 @@ export default function ChartsPage() {
 
         <div className="flex-1" />
 
+        {/* Layout multi-chart */}
+        <div className="flex items-center gap-0.5 bg-zinc-900/70 border border-zinc-800 rounded-lg p-0.5">
+          {LAYOUTS.map((lo) => (
+            <button
+              key={lo.n}
+              onClick={() => changeLayout(lo.n)}
+              title={lo.label}
+              className={cn(
+                "p-1.5 rounded-md transition-all",
+                layout === lo.n ? "bg-indigo-500/25 text-indigo-200" : "text-zinc-500 hover:text-zinc-200"
+              )}
+            >
+              <lo.Icon className="w-3.5 h-3.5" />
+            </button>
+          ))}
+        </div>
+
         {/* Timeframe */}
         <div className="flex items-center gap-0.5 bg-zinc-900/70 border border-zinc-800 rounded-lg p-0.5">
           {TIMEFRAMES.map((tf) => (
             <button
               key={tf.v}
-              onClick={() => setTimeframe(tf.v)}
+              onClick={() => setActiveTf(tf.v)}
               className={cn(
                 "text-[11px] px-2 py-1 rounded-md font-bold transition-all",
-                timeframe === tf.v ? "bg-indigo-500/25 text-indigo-200" : "text-zinc-500 hover:text-zinc-200"
+                active.timeframe === tf.v ? "bg-indigo-500/25 text-indigo-200" : "text-zinc-500 hover:text-zinc-200"
               )}
             >
               {tf.l}
@@ -214,16 +278,12 @@ export default function ChartsPage() {
             onClick={() => setIndOpen((v) => !v)}
             className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-              studies.length > 0
-                ? "bg-indigo-500/15 border-indigo-500/40 text-indigo-200"
-                : "bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700"
+              studies.length > 0 ? "bg-indigo-500/15 border-indigo-500/40 text-indigo-200" : "bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700"
             )}
           >
             <LineChart className="w-3.5 h-3.5" />
             {t("indicators")}
-            {studies.length > 0 && (
-              <span className="ml-0.5 text-[10px] bg-indigo-500/30 rounded px-1.5 py-0.5">{studies.length}</span>
-            )}
+            {studies.length > 0 && <span className="ml-0.5 text-[10px] bg-indigo-500/30 rounded px-1.5 py-0.5">{studies.length}</span>}
             <ChevronDown className={cn("w-3 h-3 transition-transform", indOpen && "rotate-180")} />
           </button>
 
@@ -265,43 +325,87 @@ export default function ChartsPage() {
             </div>
           )}
         </div>
+
+        {/* Mod Zen */}
+        <button
+          onClick={() => setZen((v) => !v)}
+          title={zen ? t("exitZen") : t("zen")}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
+            zen ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-200" : "bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700"
+          )}
+        >
+          {zen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          <span className="hidden sm:inline">{zen ? t("exitZen") : t("zen")}</span>
+        </button>
       </div>
 
-      {/* ── Fâșie orizontală de simboluri (categoria activă / favorite / căutare) ── */}
-      <div className="shrink-0 flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 scrollbar-thin">
+      {/* ── Fâșie orizontală de simboluri ── */}
+      <div className="shrink-0 flex items-center gap-1.5 overflow-x-auto pb-2 mb-2">
         {stripSymbols.map((item) => (
           <button
             key={item.s}
-            onClick={() => setSymbol(item.s)}
+            onClick={() => setActiveSymbol(item.s)}
             className={cn(
               "group shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap",
-              symbol === item.s
-                ? "bg-indigo-500/15 border-indigo-500/40 text-indigo-200"
-                : "bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
+              active.symbol === item.s ? "bg-indigo-500/15 border-indigo-500/40 text-indigo-200" : "bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-zinc-100"
             )}
           >
             {item.label}
             <Star
               onClick={(e) => { e.stopPropagation(); toggleFav(item.s); }}
-              className={cn(
-                "h-3 w-3 transition-all",
-                favorites.includes(item.s) ? "text-amber-400 fill-amber-400" : "text-zinc-700 opacity-0 group-hover:opacity-100 hover:text-amber-400"
-              )}
+              className={cn("h-3 w-3 transition-all", favorites.includes(item.s) ? "text-amber-400 fill-amber-400" : "text-zinc-700 opacity-0 group-hover:opacity-100 hover:text-amber-400")}
             />
           </button>
         ))}
-        {stripSymbols.length === 0 && (
-          <span className="text-xs text-zinc-600 px-2">—</span>
-        )}
+        {stripSymbols.length === 0 && <span className="text-xs text-zinc-600 px-2">—</span>}
       </div>
 
-      {/* ── Chart pe tot ecranul ── */}
-      <div
-        className="flex-1 rounded-2xl overflow-hidden border border-zinc-800/80 min-h-0 shadow-xl shadow-black/20"
-        style={{ boxShadow: "0 0 40px rgba(99,102,241,0.05)" }}
-      >
-        <TradingViewChart symbol={symbol} interval={timeframe} studies={studies} locale={locale === "en" ? "en" : "ro"} />
+      {/* ── Zonă grafic (1 / 2 / 4) ── */}
+      <div className="relative flex-1 min-h-0">
+        {/* Glow ambiental care „respiră" în Mod Zen */}
+        {zen && (
+          <motion.div
+            aria-hidden
+            className="absolute -inset-1 rounded-2xl pointer-events-none z-0"
+            animate={{ opacity: [0.25, 0.5, 0.25], boxShadow: [
+              "0 0 60px rgba(99,102,241,0.15)",
+              "0 0 90px rgba(99,102,241,0.30)",
+              "0 0 60px rgba(99,102,241,0.15)",
+            ] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+
+        <div className={cn("relative z-10 grid gap-2 h-full", gridClass)}>
+          {cells.slice(0, layout).map((cell, i) => (
+            <div
+              key={i}
+              onClick={() => setActiveCell(i)}
+              className={cn(
+                "relative rounded-xl overflow-hidden border min-h-0 transition-all cursor-pointer",
+                layout > 1 && activeCell === i
+                  ? "border-indigo-500/60 ring-1 ring-indigo-500/40 shadow-lg shadow-indigo-500/10"
+                  : "border-zinc-800/80"
+              )}
+            >
+              {/* mini-antet doar în grid */}
+              {layout > 1 && (
+                <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 pointer-events-none">
+                  <span className={cn("w-1.5 h-1.5 rounded-full", activeCell === i ? "bg-indigo-400" : "bg-zinc-600")} />
+                  <span className="text-[10px] font-black text-zinc-200">{cell.symbol}</span>
+                  <span className="text-[9px] text-zinc-500">{TIMEFRAMES.find((tf) => tf.v === cell.timeframe)?.l}</span>
+                </div>
+              )}
+              <TradingViewChart symbol={cell.symbol} interval={cell.timeframe} studies={studies} locale={tvLocale} />
+            </div>
+          ))}
+        </div>
       </div>
+
+      {zen && (
+        <p className="shrink-0 text-center text-[10px] text-zinc-600 mt-1.5">{t("zenHint")}</p>
+      )}
     </div>
   );
 }

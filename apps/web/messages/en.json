@@ -1375,7 +1375,14 @@
     "trend": "Trend",
     "momentum": "Momentum",
     "volatility": "Volatility",
-    "volume": "Volume"
+    "volume": "Volume",
+    "grid1": "1 chart",
+    "grid2": "2 charts",
+    "grid4": "4 charts",
+    "zen": "Zen mode",
+    "exitZen": "Exit Zen",
+    "zenHint": "Esc to exit",
+    "activeChart": "Active chart"
   },
   "calendar": {
     "title": "Economic Calendar",
