@@ -2809,5 +2809,30 @@
     "print": "Printează",
     "generating": "Se generează…",
     "pdfError": "Nu am putut genera PDF-ul pe acest dispozitiv. Încearcă din alt browser (Chrome/Edge)."
+  },
+  "chartAI": {
+    "button": "Analizează",
+    "title": "Copilot AI",
+    "scanning": "Scanez structura…",
+    "scanningSub": "Lumânări reale + istoricul tău pe acest simbol",
+    "read": "Citirea",
+    "structure": "Structură SMC",
+    "keyLevels": "Niveluri cheie",
+    "plan": "Planul",
+    "personal": "Nota ta personală",
+    "coachNote": "Sfatul coach-ului",
+    "confidence": "Încredere",
+    "biasBULLISH": "Bullish",
+    "biasBEARISH": "Bearish",
+    "biasRANGE": "Range",
+    "lvl_support": "suport",
+    "lvl_resistance": "rezistență",
+    "lvl_liquidity": "lichiditate",
+    "error": "Analiza a eșuat. Încearcă din nou.",
+    "retry": "Reîncearcă",
+    "proTitle": "Funcție PRO",
+    "proDesc": "Copilotul AI analizează graficul cu date reale și istoricul tău personal.",
+    "proCta": "Activează PRO",
+    "disclaimer": "Analiză educațională generată de AI — nu constituie sfat financiar."
   }
 }

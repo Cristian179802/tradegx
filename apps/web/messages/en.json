@@ -2809,5 +2809,30 @@
     "print": "Print",
     "generating": "Generating…",
     "pdfError": "Could not generate the PDF on this device. Try another browser (Chrome/Edge)."
+  },
+  "chartAI": {
+    "button": "Analyze",
+    "title": "AI Copilot",
+    "scanning": "Scanning structure…",
+    "scanningSub": "Real candles + your history on this symbol",
+    "read": "The read",
+    "structure": "SMC structure",
+    "keyLevels": "Key levels",
+    "plan": "The plan",
+    "personal": "Your personal note",
+    "coachNote": "Coach's note",
+    "confidence": "Confidence",
+    "biasBULLISH": "Bullish",
+    "biasBEARISH": "Bearish",
+    "biasRANGE": "Range",
+    "lvl_support": "support",
+    "lvl_resistance": "resistance",
+    "lvl_liquidity": "liquidity",
+    "error": "Analysis failed. Try again.",
+    "retry": "Retry",
+    "proTitle": "PRO feature",
+    "proDesc": "The AI Copilot analyzes the chart with real data and your personal history.",
+    "proCta": "Go PRO",
+    "disclaimer": "AI-generated educational analysis — not financial advice."
   }
 }

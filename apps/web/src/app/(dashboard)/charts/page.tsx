@@ -4,7 +4,8 @@ import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import { motion } from "framer-motion";
 import { TradingViewChart } from "./tradingview-chart";
-import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2 } from "lucide-react";
+import { AnalyzePanel } from "./analyze-panel";
+import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // label = cheie → charts.* (tradusă la randare)
@@ -122,7 +123,9 @@ export default function ChartsPage() {
   const [indOpen, setIndOpen] = React.useState(false);
   const [activeGroup, setActiveGroup] = React.useState(0);
   const [zen, setZen] = React.useState(false);
+  const [aiOpen, setAiOpen] = React.useState(false);
   const indRef = React.useRef<HTMLDivElement>(null);
+  const tAI = useTranslations("chartAI");
 
   const active = cells[activeCell] ?? cells[0]!;
 
@@ -326,6 +329,20 @@ export default function ChartsPage() {
           )}
         </div>
 
+        {/* Copilot AI */}
+        <button
+          onClick={() => setAiOpen((v) => !v)}
+          className={cn(
+            "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all overflow-hidden",
+            aiOpen
+              ? "bg-violet-500/20 border-violet-400/50 text-violet-100"
+              : "bg-gradient-to-r from-indigo-600/80 to-violet-600/80 border-indigo-400/40 text-white hover:from-indigo-500/90 hover:to-violet-500/90 shadow-lg shadow-indigo-500/20"
+          )}
+        >
+          <Brain className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">{tAI("button")}</span>
+        </button>
+
         {/* Mod Zen */}
         <button
           onClick={() => setZen((v) => !v)}
@@ -406,6 +423,15 @@ export default function ChartsPage() {
       {zen && (
         <p className="shrink-0 text-center text-[10px] text-zinc-600 mt-1.5">{t("zenHint")}</p>
       )}
+
+      {/* Panoul Copilot AI */}
+      <AnalyzePanel
+        open={aiOpen}
+        onClose={() => setAiOpen(false)}
+        symbol={active.symbol}
+        timeframe={active.timeframe}
+        locale={tvLocale}
+      />
     </div>
   );
 }
