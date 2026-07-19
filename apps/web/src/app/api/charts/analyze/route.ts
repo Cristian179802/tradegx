@@ -125,12 +125,22 @@ Răspunde EXCLUSIV cu JSON valid (fără backticks), exact cu structura:
 ${langLine} Educațional, nu sfat financiar — nu include disclaimere în text.`;
 
   try {
-    const msg = await anthropic.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 1200,
-      thinking: { type: "adaptive" },
-      messages: [{ role: "user", content: prompt }],
-    });
+    let msg;
+    try {
+      msg = await anthropic.messages.create({
+        model: "claude-opus-4-8",
+        max_tokens: 3000,
+        thinking: { type: "adaptive" },
+        messages: [{ role: "user", content: prompt }],
+      });
+    } catch {
+      // Fallback pe configurația folosită de restul aplicației (dovedită pe prod)
+      msg = await anthropic.messages.create({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1200,
+        messages: [{ role: "user", content: prompt }],
+      });
+    }
 
     const text = msg.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join("");
     const jsonStart = text.indexOf("{");
@@ -150,7 +160,10 @@ ${langLine} Educațional, nu sfat financiar — nu include disclaimere în text.
       analysis: parsed,
       hasPersonal: personal.length > 0,
     });
-  } catch {
-    return NextResponse.json({ error: "Analiza AI a eșuat. Încearcă din nou.", code: "AI_ERROR" }, { status: 502 });
+  } catch (err) {
+    return NextResponse.json(
+      { error: "Analiza AI a eșuat. Încearcă din nou.", code: "AI_ERROR", detail: String(err).slice(0, 220) },
+      { status: 502 }
+    );
   }
 }
