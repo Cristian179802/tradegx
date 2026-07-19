@@ -311,8 +311,31 @@ model User {
   journalEntries  JournalEntry[]
   integrations    UserIntegration[]
   pushTokens      PushToken[]
+  pushSubscriptions PushSubscription[]
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Abonamente Web Push (browser/PWA) — notificări chiar cu tab-ul/browserul
+// închis, prin service worker. Independent de Expo (app nativă).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique @db.Text
+  p256dh    String   @db.Text
+  auth      String   @db.Text
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Config global cheie/valoare (ex: cheile VAPID pentru Web Push).
+model AppSetting {
+  key       String   @id
+  value     String   @db.Text
   updatedAt DateTime @updatedAt
 }
 

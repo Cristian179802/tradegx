@@ -2603,8 +2603,8 @@
     "emptyHint": "You'll be alerted when issues arise",
     "now": "now",
     "daySuffix": "d",
-    "webNotifyOn": "Browser notifications: ON — you get alerts even on another tab. Click to turn off.",
-    "webNotifyOff": "Browser notifications: off. Click to enable.",
+    "webNotifyOn": "Notifications ON — you get alerts, signals and AI Coach messages even with the browser closed. Click to turn off.",
+    "webNotifyOff": "Notifications off. Click to enable (phone + desktop, even with the browser closed).",
     "webNotifyDeniedT": "Notifications blocked",
     "webNotifyDeniedD": "You blocked notifications for this site. Re-enable them from your browser settings (the padlock icon next to the address).",
     "webNotifyTest": "Notifications are on. You'll receive alerts, signals and AI Coach messages even from another tab. 🔔"

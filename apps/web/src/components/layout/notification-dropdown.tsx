@@ -15,6 +15,9 @@ import {
   webNotifySupported, webNotifyEnabled, webNotifyDenied,
   enableWebNotify, disableWebNotify, showWebNotification,
 } from "@/lib/web-notify";
+import {
+  webPushSupported, isWebPushSubscribed, subscribeWebPush, unsubscribeWebPush,
+} from "@/lib/web-push-client";
 
 interface Alert {
   id: string;
@@ -51,20 +54,46 @@ export function NotificationDropdown() {
   // Notificări native de browser (Notification API) — opt-in
   const [webNotify, setWebNotify] = React.useState(false);
 
-  React.useEffect(() => { setWebNotify(webNotifyEnabled()); }, []);
+  const [busyNotify, setBusyNotify] = React.useState(false);
+
+  React.useEffect(() => {
+    (async () => {
+      // Activ dacă permisiunea e dată ȘI (abonat push SAU preferința locală ON)
+      const pushOn = webPushSupported() ? await isWebPushSubscribed() : false;
+      setWebNotify(webNotifyEnabled() || pushOn);
+    })();
+  }, []);
 
   async function toggleWebNotify() {
-    if (webNotify) {
-      disableWebNotify();
-      setWebNotify(false);
-    } else {
-      if (webNotifyDenied()) {
-        toast({ title: t("webNotifyDeniedT"), description: t("webNotifyDeniedD"), variant: "destructive" });
-        return;
+    if (busyNotify) return;
+    setBusyNotify(true);
+    try {
+      if (webNotify) {
+        disableWebNotify();
+        await unsubscribeWebPush();
+        setWebNotify(false);
+      } else {
+        if (webNotifyDenied()) {
+          toast({ title: t("webNotifyDeniedT"), description: t("webNotifyDeniedD"), variant: "destructive" });
+          return;
+        }
+        // 1) Notificări în browser (toast + OS pe alt tab)
+        const okLocal = await enableWebNotify();
+        // 2) Web Push real — notificări chiar cu browserul închis
+        const okPush = webPushSupported() ? await subscribeWebPush() : false;
+        const ok = okLocal || okPush;
+        setWebNotify(ok);
+        if (ok) {
+          if (okPush) {
+            // Confirmarea vine ca notificare REALĂ prin service worker (dovadă live)
+            await fetch("/api/push/web/test", { method: "POST" }).catch(() => {});
+          } else {
+            showWebNotification("TradeGx", t("webNotifyTest"));
+          }
+        }
       }
-      const ok = await enableWebNotify();
-      setWebNotify(ok);
-      if (ok) showWebNotification("TradeGx", t("webNotifyTest"));
+    } finally {
+      setBusyNotify(false);
     }
   }
 
@@ -214,9 +243,10 @@ export function NotificationDropdown() {
             {webNotifySupported() && (
               <button
                 onClick={toggleWebNotify}
+                disabled={busyNotify}
                 title={webNotify ? t("webNotifyOn") : t("webNotifyOff")}
                 className={cn(
-                  "flex items-center justify-center w-6 h-6 rounded-lg border transition-colors",
+                  "flex items-center justify-center w-6 h-6 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-wait",
                   webNotify
                     ? "text-emerald-300 border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20"
                     : "text-zinc-600 border-zinc-700/70 hover:text-zinc-400 hover:border-zinc-600"

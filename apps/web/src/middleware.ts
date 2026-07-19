@@ -23,6 +23,8 @@ const publicRoutes = [
   "/icon-192.png",
   "/icon-512.png",
   "/apple-touch-icon.png",
+  // Service worker Web Push — trebuie servit public, de la rădăcină (scope "/")
+  "/sw.js",
 ];
 
 const publicPrefixes = [

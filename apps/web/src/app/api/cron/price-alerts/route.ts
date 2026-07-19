@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { fetchLatestPrice } from "@/lib/yahoo-finance";
 import { notifyTelegram } from "@/lib/telegram";
 import { sendPushToUser } from "@/lib/push";
+import { sendWebPushToUser } from "@/lib/web-push";
 
 export const maxDuration = 60;
 
@@ -80,6 +81,7 @@ export async function GET(req: NextRequest) {
         body: message,
         data: { route: "/(tabs)/alerts" },
       });
+      await sendWebPushToUser(item.userId, { title: `🎯 ${title}`, body: message, url: "/watchlist", tag: `price-${item.symbol}` });
       fired++;
     } catch {
       /* continuă cu următorul */

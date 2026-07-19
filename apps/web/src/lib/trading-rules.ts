@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notifyTelegram } from "@/lib/telegram";
 import { sendPushToUser } from "@/lib/push";
+import { sendWebPushToUser } from "@/lib/web-push";
 
 interface ViolationCheckParams {
   userId: string;
@@ -168,6 +169,8 @@ export async function checkTradingRuleViolations({
         body: alert.message,
         data: { route: "/(tabs)/alerts" },
       });
+      // Web Push (browser/PWA, chiar cu browserul închis)
+      await sendWebPushToUser(userId, { title: alert.title, body: alert.message, url: "/dashboard", tag: `rule-${alert.type}` });
     }
   }
 }

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createHmac } from "crypto";
 import { notifyTelegram } from "@/lib/telegram";
 import { sendPushToUser } from "@/lib/push";
+import { sendWebPushToUser } from "@/lib/web-push";
 
 // ── Webhook TradingView ─────────────────────────────────────────────────────
 // TradingView trimite alertele ca POST JSON către un URL — fără headere
@@ -84,6 +85,7 @@ export async function POST(
 
   await notifyTelegram(userId, `📡 ${title}`, message);
   void sendPushToUser(userId, { title: `📡 ${title}`, body: message, data: { route: "/(tabs)/alerts" } });
+  await sendWebPushToUser(userId, { title: `📡 ${title}`, body: message, url: "/signals", tag: "tv-signal" });
 
   return NextResponse.json({ ok: true });
 }
