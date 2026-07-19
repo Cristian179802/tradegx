@@ -41,8 +41,10 @@ export async function getEffectivePlan(userId: string): Promise<EffectivePlan> {
         trialDaysLeft: Math.max(1, Math.ceil(msLeft / (24 * 60 * 60 * 1000))),
       };
     }
-    // Trial expirat → downgrade lazy (o singură dată), fără să blocheze request-ul
-    void prisma.subscription
+    // Trial expirat → downgrade lazy (o singură dată). AWAITED intenționat:
+    // pe Vercel serverless, un fire-and-forget („void") se pierde — lambda-ul
+    // îngheață imediat după răspuns și update-ul nu se mai execută.
+    await prisma.subscription
       .update({ where: { userId }, data: { status: "CANCELLED" } })
       .catch(() => {});
   }

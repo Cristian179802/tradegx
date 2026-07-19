@@ -53,3 +53,4 @@ cleanup.mjs
 backfill.mjs
 *.bundle
 apps/web/seed-demo.mjs
+apps/web/test-trial-expiry.mjs
