@@ -1,0 +1,27 @@
+name: Price alerts cron
+
+# Verifică pragurile de preț de pe watchlist la ~10 minute.
+# Necesită secretul CRON_SECRET în GitHub (Settings → Secrets → Actions),
+# cu ACEEAȘI valoare ca variabila CRON_SECRET de pe Vercel.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Apelează endpoint-ul de alerte preț
+        run: |
+          code=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://www.tradegx.com/api/cron/price-alerts")
+          cat /tmp/resp.json
+          echo ""
+          if [ "$code" != "200" ]; then
+            echo "Endpoint a răspuns cu $code"
+            exit 1
+          fi
