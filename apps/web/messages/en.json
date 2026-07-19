@@ -2602,7 +2602,12 @@
     "empty": "No notifications",
     "emptyHint": "You'll be alerted when issues arise",
     "now": "now",
-    "daySuffix": "d"
+    "daySuffix": "d",
+    "webNotifyOn": "Browser notifications: ON — you get alerts even on another tab. Click to turn off.",
+    "webNotifyOff": "Browser notifications: off. Click to enable.",
+    "webNotifyDeniedT": "Notifications blocked",
+    "webNotifyDeniedD": "You blocked notifications for this site. Re-enable them from your browser settings (the padlock icon next to the address).",
+    "webNotifyTest": "Notifications are on. You'll receive alerts, signals and AI Coach messages even from another tab. 🔔"
   },
   "accountSwitcher": {
     "addAccount": "Add account",

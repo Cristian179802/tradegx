@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Bell, CheckCheck, AlertTriangle, TrendingDown, Zap, Info, X } from "lucide-react";
+import { Bell, BellRing, BellOff, CheckCheck, AlertTriangle, TrendingDown, Zap, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import {
+  webNotifySupported, webNotifyEnabled, webNotifyDenied,
+  enableWebNotify, disableWebNotify, showWebNotification,
+} from "@/lib/web-notify";
 
 interface Alert {
   id: string;
@@ -44,6 +48,25 @@ export function NotificationDropdown() {
   const [alerts, setAlerts] = React.useState<Alert[]>([]);
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
+  // Notificări native de browser (Notification API) — opt-in
+  const [webNotify, setWebNotify] = React.useState(false);
+
+  React.useEffect(() => { setWebNotify(webNotifyEnabled()); }, []);
+
+  async function toggleWebNotify() {
+    if (webNotify) {
+      disableWebNotify();
+      setWebNotify(false);
+    } else {
+      if (webNotifyDenied()) {
+        toast({ title: t("webNotifyDeniedT"), description: t("webNotifyDeniedD"), variant: "destructive" });
+        return;
+      }
+      const ok = await enableWebNotify();
+      setWebNotify(ok);
+      if (ok) showWebNotification("TradeGx", t("webNotifyTest"));
+    }
+  }
 
   // ID-urile alertelor deja văzute — pentru a detecta alerte noi (toast live)
   const knownIds = React.useRef<Set<string>>(new Set());
@@ -59,17 +82,23 @@ export function NotificationDropdown() {
         setAlerts(list);
         setUnreadCount(data.unreadCount ?? 0);
 
-        // Detectează alerte noi (apărute de la ultima verificare) → toast live
+        // Detectează alerte noi (apărute de la ultima verificare)
         if (notify && initialized.current) {
           const fresh = list.filter((a) => !a.isRead && !knownIds.current.has(a.id));
-          // Cea mai recentă alertă nouă declanșează un toast (evită spam)
           if (fresh.length > 0) {
             const top = fresh[0];
-            toast({
-              title: top.title,
-              description: fresh.length > 1 ? `${top.message} · +${fresh.length - 1} alte alerte` : top.message,
-              variant: top.severity === "CRITICAL" || top.severity === "HIGH" ? "destructive" : "default",
-            });
+            const desc = fresh.length > 1 ? `${top.message} · +${fresh.length - 1}` : top.message;
+            if (document.visibilityState === "visible") {
+              // Pe site → toast (ca înainte)
+              toast({
+                title: top.title,
+                description: desc,
+                variant: top.severity === "CRITICAL" || top.severity === "HIGH" ? "destructive" : "default",
+              });
+            } else {
+              // Pe alt tab/fereastră → notificare de sistem
+              showWebNotification(top.title, desc);
+            }
           }
         }
         // Reține toate ID-urile curente
@@ -84,22 +113,28 @@ export function NotificationDropdown() {
   React.useEffect(() => {
     fetchAlerts(false); // prima încărcare — fără toast (doar baseline)
 
-    // Polling la 25s cât timp tab-ul e vizibil
+    // Polling: 25s cu tab-ul vizibil; 90s în fundal DACĂ notificările de
+    // browser sunt active (altfel se oprește complet, ca înainte).
     let id: ReturnType<typeof setInterval> | null = null;
-    const start = () => {
-      if (id) return;
-      id = setInterval(() => fetchAlerts(true), 25_000);
+    const start = (ms: number) => {
+      if (id) clearInterval(id);
+      id = setInterval(() => fetchAlerts(true), ms);
     };
     const stop = () => {
       if (id) { clearInterval(id); id = null; }
     };
 
-    start();
+    start(25_000);
 
-    // Refetch instant când utilizatorul revine pe tab / fereastră
     const onVisible = () => {
-      if (document.visibilityState === "visible") { fetchAlerts(true); start(); }
-      else stop();
+      if (document.visibilityState === "visible") {
+        fetchAlerts(true);
+        start(25_000);
+      } else if (webNotifyEnabled()) {
+        start(90_000); // fundal: mai rar, dar viu → notificări de sistem
+      } else {
+        stop();
+      }
     };
     const onFocus = () => fetchAlerts(true);
 
@@ -166,15 +201,31 @@ export function NotificationDropdown() {
               </span>
             )}
           </div>
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllRead}
-              className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
-            >
-              <CheckCheck className="h-3.5 w-3.5" />
-              {t("markAllRead")}
-            </button>
-          )}
+          <div className="flex items-center gap-2.5">
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllRead}
+                className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <CheckCheck className="h-3.5 w-3.5" />
+                {t("markAllRead")}
+              </button>
+            )}
+            {webNotifySupported() && (
+              <button
+                onClick={toggleWebNotify}
+                title={webNotify ? t("webNotifyOn") : t("webNotifyOff")}
+                className={cn(
+                  "flex items-center justify-center w-6 h-6 rounded-lg border transition-colors",
+                  webNotify
+                    ? "text-emerald-300 border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20"
+                    : "text-zinc-600 border-zinc-700/70 hover:text-zinc-400 hover:border-zinc-600"
+                )}
+              >
+                {webNotify ? <BellRing className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* List */}

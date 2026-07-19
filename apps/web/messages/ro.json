@@ -2602,7 +2602,12 @@
     "empty": "Nicio notificare",
     "emptyHint": "Vei fi alertat când apar probleme",
     "now": "acum",
-    "daySuffix": "z"
+    "daySuffix": "z",
+    "webNotifyOn": "Notificări de browser: ACTIVE — primești alerte și când ești pe alt tab. Click pentru oprire.",
+    "webNotifyOff": "Notificări de browser: oprite. Click pentru activare.",
+    "webNotifyDeniedT": "Notificări blocate",
+    "webNotifyDeniedD": "Ai blocat notificările pentru acest site. Reactivează-le din setările browserului (iconița lacăt de lângă adresă).",
+    "webNotifyTest": "Notificările sunt active. Vei primi alerte, semnale și mesaje de la AI Coach chiar și de pe alt tab. 🔔"
   },
   "accountSwitcher": {
     "addAccount": "Adaugă cont",
