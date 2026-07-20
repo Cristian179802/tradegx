@@ -169,7 +169,12 @@ export function SmcChart({
         const smc = detectSMC(candles, 6);
         smcRef.current = smc;
         onResult?.(smc);
-        requestAnimationFrame(() => { draw(); setLoading(false); });
+        setLoading(false);
+        // Desenăm sincron + o repetare scurtă (după ce chartul a așezat scala).
+        // setTimeout (nu rAF) ca să funcționeze și când fereastra nu e în față.
+        draw();
+        setTimeout(() => { if (!cancelled) draw(); }, 80);
+        setTimeout(() => { if (!cancelled) draw(); }, 300);
       } catch {
         if (!cancelled) { setError(true); setLoading(false); }
       }
