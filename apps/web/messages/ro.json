@@ -2834,5 +2834,18 @@
     "proDesc": "Copilotul AI analizează graficul cu date reale și istoricul tău personal.",
     "proCta": "Activează PRO",
     "disclaimer": "Analiză educațională generată de AI — nu constituie sfat financiar."
+  },
+  "chartRisk": {
+    "button": "Risc",
+    "title": "Risc Vizual",
+    "riskPct": "Risc pe tranzacție",
+    "risk": "Risc",
+    "reward": "Profit potențial",
+    "lots": "Loturi",
+    "units": "Unități",
+    "noPrice": "Preț indisponibil pentru acest simbol.",
+    "retry": "Reîncearcă",
+    "sideWarn": "Pentru {dir}, SL și TP par pe partea greșită a intrării.",
+    "note": "Calcul pe soldul contului tău: {balance} {currency}. Trage mânerele sau scrie prețurile."
   }
 }

@@ -5,7 +5,8 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { TradingViewChart } from "./tradingview-chart";
 import { AnalyzePanel } from "./analyze-panel";
-import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2, Brain } from "lucide-react";
+import { RiskPanel } from "./risk-panel";
+import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2, Brain, Crosshair } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // label = cheie → charts.* (tradusă la randare)
@@ -124,8 +125,10 @@ export default function ChartsPage() {
   const [activeGroup, setActiveGroup] = React.useState(0);
   const [zen, setZen] = React.useState(false);
   const [aiOpen, setAiOpen] = React.useState(false);
+  const [riskOpen, setRiskOpen] = React.useState(false);
   const indRef = React.useRef<HTMLDivElement>(null);
   const tAI = useTranslations("chartAI");
+  const tRisk = useTranslations("chartRisk");
 
   const active = cells[activeCell] ?? cells[0]!;
 
@@ -329,9 +332,21 @@ export default function ChartsPage() {
           )}
         </div>
 
+        {/* Risc vizual */}
+        <button
+          onClick={() => { setRiskOpen((v) => !v); setAiOpen(false); }}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
+            riskOpen ? "bg-emerald-500/20 border-emerald-400/50 text-emerald-100" : "bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700"
+          )}
+        >
+          <Crosshair className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">{tRisk("button")}</span>
+        </button>
+
         {/* Copilot AI */}
         <button
-          onClick={() => setAiOpen((v) => !v)}
+          onClick={() => { setAiOpen((v) => !v); setRiskOpen(false); }}
           className={cn(
             "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all overflow-hidden",
             aiOpen
@@ -431,6 +446,13 @@ export default function ChartsPage() {
         symbol={active.symbol}
         timeframe={active.timeframe}
         locale={tvLocale}
+      />
+
+      {/* Panoul de risc vizual */}
+      <RiskPanel
+        open={riskOpen}
+        onClose={() => setRiskOpen(false)}
+        symbol={active.symbol}
       />
     </div>
   );

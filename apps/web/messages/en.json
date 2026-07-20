@@ -2834,5 +2834,18 @@
     "proDesc": "The AI Copilot analyzes the chart with real data and your personal history.",
     "proCta": "Go PRO",
     "disclaimer": "AI-generated educational analysis — not financial advice."
+  },
+  "chartRisk": {
+    "button": "Risk",
+    "title": "Visual Risk",
+    "riskPct": "Risk per trade",
+    "risk": "Risk",
+    "reward": "Potential reward",
+    "lots": "Lots",
+    "units": "Units",
+    "noPrice": "Price unavailable for this symbol.",
+    "retry": "Retry",
+    "sideWarn": "For {dir}, SL and TP look like they're on the wrong side of entry.",
+    "note": "Computed on your account balance: {balance} {currency}. Drag the handles or type prices."
   }
 }
