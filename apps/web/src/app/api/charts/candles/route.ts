@@ -38,9 +38,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Date insuficiente pentru acest simbol.", code: "NO_DATA" }, { status: 422 });
   }
 
-  // limităm la ultimele 400 pentru performanță
+  // limităm la ultimele 400 pentru performanță (v = volum, pt. harta 3D)
   const trimmed = candles.slice(-400).map((c) => ({
-    time: c.time, open: c.open, high: c.high, low: c.low, close: c.close,
+    time: c.time, open: c.open, high: c.high, low: c.low, close: c.close, v: c.volume ?? 0,
   }));
 
   return NextResponse.json({ ok: true, symbol, candles: trimmed });

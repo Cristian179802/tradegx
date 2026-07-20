@@ -2858,5 +2858,11 @@
     "auto": "Detectat automat din acțiunea prețului",
     "loading": "Detectez structura…",
     "noData": "Date insuficiente pentru acest simbol."
+  },
+  "chartDepth": {
+    "button": "Lichiditate 3D",
+    "loading": "Construiesc terenul de lichiditate…",
+    "noData": "Date insuficiente pentru acest simbol.",
+    "hint": "Trage pentru a roti"
   }
 }

@@ -2858,5 +2858,11 @@
     "auto": "Auto-detected from price action",
     "loading": "Detecting structure…",
     "noData": "Not enough data for this symbol."
+  },
+  "chartDepth": {
+    "button": "3D Liquidity",
+    "loading": "Building the liquidity terrain…",
+    "noData": "Not enough data for this symbol.",
+    "hint": "Drag to rotate"
   }
 }
