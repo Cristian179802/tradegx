@@ -4,15 +4,11 @@ import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import { motion } from "framer-motion";
 import { TradingViewChart } from "./tradingview-chart";
-import dynamic from "next/dynamic";
 import { AnalyzePanel } from "./analyze-panel";
 import { RiskPanel } from "./risk-panel";
 import { SmcChart, type SmcToggles } from "./smc-chart";
-import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2, Brain, Crosshair, Boxes, Box } from "lucide-react";
+import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2, Brain, Crosshair, Boxes } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// three.js încărcat DOAR când se deschide vederea 3D (nu îngroașă bundle-ul inițial)
-const Liquidity3D = dynamic(() => import("./liquidity-3d").then((m) => m.Liquidity3D), { ssr: false });
 
 // label = cheie → charts.* (tradusă la randare)
 const SYMBOL_GROUPS = [
@@ -133,12 +129,10 @@ export default function ChartsPage() {
   const [riskOpen, setRiskOpen] = React.useState(false);
   const [smcMode, setSmcMode] = React.useState(false);
   const [smcToggles, setSmcToggles] = React.useState<SmcToggles>({ ob: true, fvg: true, liq: true, struct: true });
-  const [depth3d, setDepth3d] = React.useState(false);
   const indRef = React.useRef<HTMLDivElement>(null);
   const tAI = useTranslations("chartAI");
   const tRisk = useTranslations("chartRisk");
   const tSmc = useTranslations("chartSmc");
-  const tDepth = useTranslations("chartDepth");
 
   const active = cells[activeCell] ?? cells[0]!;
 
@@ -344,7 +338,7 @@ export default function ChartsPage() {
 
         {/* Structură SMC/ICT */}
         <button
-          onClick={() => { setSmcMode((v) => !v); setDepth3d(false); }}
+          onClick={() => setSmcMode((v) => !v)}
           className={cn(
             "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all overflow-hidden",
             smcMode
@@ -354,20 +348,6 @@ export default function ChartsPage() {
         >
           <Boxes className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">{tSmc("button")}</span>
-        </button>
-
-        {/* Lichiditate 3D */}
-        <button
-          onClick={() => { setDepth3d((v) => !v); setSmcMode(false); }}
-          className={cn(
-            "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all overflow-hidden",
-            depth3d
-              ? "bg-gradient-to-r from-violet-600/80 to-amber-500/60 border-violet-400/40 text-white shadow-lg shadow-violet-500/20"
-              : "bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700"
-          )}
-        >
-          <Box className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{tDepth("button")}</span>
         </button>
 
         {/* Risc vizual */}
@@ -473,18 +453,7 @@ export default function ChartsPage() {
           />
         )}
 
-        {depth3d ? (
-          // Vedere 3D de lichiditate (WebGL)
-          <div className="relative z-10 h-full rounded-xl overflow-hidden border border-violet-500/30 shadow-lg shadow-violet-500/10">
-            <Liquidity3D
-              symbol={active.symbol}
-              timeframe={active.timeframe}
-              loadingLabel={tDepth("loading")}
-              errorLabel={tDepth("noData")}
-              hintLabel={tDepth("hint")}
-            />
-          </div>
-        ) : smcMode ? (
+        {smcMode ? (
           // Chart propriu cu overlay SMC/ICT (single, pe tot spațiul)
           <div className="relative z-10 h-full rounded-xl overflow-hidden border border-emerald-500/30 shadow-lg shadow-emerald-500/5">
             <SmcChart
