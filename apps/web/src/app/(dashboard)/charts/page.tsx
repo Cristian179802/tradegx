@@ -6,7 +6,8 @@ import { motion } from "framer-motion";
 import { TradingViewChart } from "./tradingview-chart";
 import { AnalyzePanel } from "./analyze-panel";
 import { RiskPanel } from "./risk-panel";
-import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2, Brain, Crosshair } from "lucide-react";
+import { SmcChart, type SmcToggles } from "./smc-chart";
+import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2, Brain, Crosshair, Boxes } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // label = cheie → charts.* (tradusă la randare)
@@ -126,9 +127,12 @@ export default function ChartsPage() {
   const [zen, setZen] = React.useState(false);
   const [aiOpen, setAiOpen] = React.useState(false);
   const [riskOpen, setRiskOpen] = React.useState(false);
+  const [smcMode, setSmcMode] = React.useState(false);
+  const [smcToggles, setSmcToggles] = React.useState<SmcToggles>({ ob: true, fvg: true, liq: true, struct: true });
   const indRef = React.useRef<HTMLDivElement>(null);
   const tAI = useTranslations("chartAI");
   const tRisk = useTranslations("chartRisk");
+  const tSmc = useTranslations("chartSmc");
 
   const active = cells[activeCell] ?? cells[0]!;
 
@@ -332,6 +336,20 @@ export default function ChartsPage() {
           )}
         </div>
 
+        {/* Structură SMC/ICT */}
+        <button
+          onClick={() => setSmcMode((v) => !v)}
+          className={cn(
+            "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all overflow-hidden",
+            smcMode
+              ? "bg-gradient-to-r from-indigo-600/80 to-emerald-600/70 border-emerald-400/40 text-white shadow-lg shadow-emerald-500/20"
+              : "bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700"
+          )}
+        >
+          <Boxes className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">{tSmc("button")}</span>
+        </button>
+
         {/* Risc vizual */}
         <button
           onClick={() => { setRiskOpen((v) => !v); setAiOpen(false); }}
@@ -393,7 +411,33 @@ export default function ChartsPage() {
         {stripSymbols.length === 0 && <span className="text-xs text-zinc-600 px-2">—</span>}
       </div>
 
-      {/* ── Zonă grafic (1 / 2 / 4) ── */}
+      {/* ── Legenda SMC (doar în modul Structură) ── */}
+      {smcMode && (
+        <div className="shrink-0 flex items-center gap-1.5 flex-wrap mb-2">
+          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300/80 mr-1">{tSmc("legend")}</span>
+          {([
+            { k: "ob" as const, label: tSmc("ob"), dot: "bg-emerald-400" },
+            { k: "fvg" as const, label: tSmc("fvg"), dot: "bg-indigo-400" },
+            { k: "liq" as const, label: tSmc("liq"), dot: "bg-amber-400" },
+            { k: "struct" as const, label: tSmc("struct"), dot: "bg-slate-300" },
+          ]).map((it) => (
+            <button
+              key={it.k}
+              onClick={() => setSmcToggles((p) => ({ ...p, [it.k]: !p[it.k] }))}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all",
+                smcToggles[it.k] ? "bg-zinc-800 border-zinc-700 text-zinc-100" : "bg-zinc-900/50 border-zinc-800/60 text-zinc-600"
+              )}
+            >
+              <span className={cn("w-2 h-2 rounded-sm", smcToggles[it.k] ? it.dot : "bg-zinc-700")} />
+              {it.label}
+            </button>
+          ))}
+          <span className="text-[10px] text-zinc-600 ml-1 hidden md:inline">{tSmc("auto")}</span>
+        </div>
+      )}
+
+      {/* ── Zonă grafic ── */}
       <div className="relative flex-1 min-h-0">
         {/* Glow ambiental care „respiră" în Mod Zen */}
         {zen && (
@@ -409,30 +453,42 @@ export default function ChartsPage() {
           />
         )}
 
-        <div className={cn("relative z-10 grid gap-2 h-full", gridClass)}>
-          {cells.slice(0, layout).map((cell, i) => (
-            <div
-              key={i}
-              onClick={() => setActiveCell(i)}
-              className={cn(
-                "relative rounded-xl overflow-hidden border min-h-0 transition-all cursor-pointer",
-                layout > 1 && activeCell === i
-                  ? "border-indigo-500/60 ring-1 ring-indigo-500/40 shadow-lg shadow-indigo-500/10"
-                  : "border-zinc-800/80"
-              )}
-            >
-              {/* mini-antet doar în grid */}
-              {layout > 1 && (
-                <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 pointer-events-none">
-                  <span className={cn("w-1.5 h-1.5 rounded-full", activeCell === i ? "bg-indigo-400" : "bg-zinc-600")} />
-                  <span className="text-[10px] font-black text-zinc-200">{cell.symbol}</span>
-                  <span className="text-[9px] text-zinc-500">{TIMEFRAMES.find((tf) => tf.v === cell.timeframe)?.l}</span>
-                </div>
-              )}
-              <TradingViewChart symbol={cell.symbol} interval={cell.timeframe} studies={studies} locale={tvLocale} />
-            </div>
-          ))}
-        </div>
+        {smcMode ? (
+          // Chart propriu cu overlay SMC/ICT (single, pe tot spațiul)
+          <div className="relative z-10 h-full rounded-xl overflow-hidden border border-emerald-500/30 shadow-lg shadow-emerald-500/5">
+            <SmcChart
+              symbol={active.symbol}
+              timeframe={active.timeframe}
+              toggles={smcToggles}
+              errorLabel={tSmc("noData")}
+              loadingLabel={tSmc("loading")}
+            />
+          </div>
+        ) : (
+          <div className={cn("relative z-10 grid gap-2 h-full", gridClass)}>
+            {cells.slice(0, layout).map((cell, i) => (
+              <div
+                key={i}
+                onClick={() => setActiveCell(i)}
+                className={cn(
+                  "relative rounded-xl overflow-hidden border min-h-0 transition-all cursor-pointer",
+                  layout > 1 && activeCell === i
+                    ? "border-indigo-500/60 ring-1 ring-indigo-500/40 shadow-lg shadow-indigo-500/10"
+                    : "border-zinc-800/80"
+                )}
+              >
+                {layout > 1 && (
+                  <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 pointer-events-none">
+                    <span className={cn("w-1.5 h-1.5 rounded-full", activeCell === i ? "bg-indigo-400" : "bg-zinc-600")} />
+                    <span className="text-[10px] font-black text-zinc-200">{cell.symbol}</span>
+                    <span className="text-[9px] text-zinc-500">{TIMEFRAMES.find((tf) => tf.v === cell.timeframe)?.l}</span>
+                  </div>
+                )}
+                <TradingViewChart symbol={cell.symbol} interval={cell.timeframe} studies={studies} locale={tvLocale} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {zen && (

@@ -2847,5 +2847,16 @@
     "retry": "Retry",
     "sideWarn": "For {dir}, SL and TP look like they're on the wrong side of entry.",
     "note": "Computed on your account balance: {balance} {currency}. Drag the handles or type prices."
+  },
+  "chartSmc": {
+    "button": "Structure",
+    "legend": "Overlay:",
+    "ob": "Order Blocks",
+    "fvg": "Fair Value Gaps",
+    "liq": "Liquidity",
+    "struct": "BOS / CHoCH",
+    "auto": "Auto-detected from price action",
+    "loading": "Detecting structure…",
+    "noData": "Not enough data for this symbol."
   }
 }

@@ -2847,5 +2847,16 @@
     "retry": "Reîncearcă",
     "sideWarn": "Pentru {dir}, SL și TP par pe partea greșită a intrării.",
     "note": "Calcul pe soldul contului tău: {balance} {currency}. Trage mânerele sau scrie prețurile."
+  },
+  "chartSmc": {
+    "button": "Structură",
+    "legend": "Overlay:",
+    "ob": "Order Blocks",
+    "fvg": "Fair Value Gaps",
+    "liq": "Lichiditate",
+    "struct": "BOS / CHoCH",
+    "auto": "Detectat automat din acțiunea prețului",
+    "loading": "Detectez structura…",
+    "noData": "Date insuficiente pentru acest simbol."
   }
 }
