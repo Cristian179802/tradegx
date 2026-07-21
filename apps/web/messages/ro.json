@@ -34,7 +34,8 @@
     "billing": "Abonament",
     "logout": "Deconectare",
     "new": "NOU",
-    "roadmap": "Roadmap"
+    "roadmap": "Roadmap",
+    "institutional": "Metrici Pro"
   },
   "banner": {
     "trialLabel": "PRO Trial",
@@ -2858,5 +2859,43 @@
     "auto": "Detectat automat din acțiunea prețului",
     "loading": "Detectez structura…",
     "noData": "Date insuficiente pentru acest simbol."
+  },
+  "institutional": {
+    "metaTitle": "Metrici instituționale — TradeGX",
+    "title": "Metrici Instituționale",
+    "subtitle": "Aceleași cifre pe care le cer prop firm-urile și fondurile — pe tot portofoliul tău.",
+    "portfolio": "Portofoliu · toate conturile",
+    "equityCurve": "Curba de echitate",
+    "tradingDays": "zile active",
+    "perAccount": "Defalcare pe cont",
+    "empty": "Adaugă tranzacții ca să-ți calculăm metricile instituționale.",
+    "note": "Metrici anualizate din curba de echitate zilnică (√252). Expectancy R folosește riscul înregistrat pe fiecare tranzacție. Educațional, nu sfat financiar.",
+    "m_sharpe": "Sharpe",
+    "h_sharpe": "Randament pe unitate de risc",
+    "m_sortino": "Sortino",
+    "h_sortino": "Randament pe risc negativ",
+    "m_calmar": "Calmar",
+    "h_calmar": "Randament / drawdown maxim",
+    "m_maxdd": "Max Drawdown",
+    "h_maxdd": "Cea mai mare cădere de la vârf",
+    "m_pf": "Profit Factor",
+    "h_pf": "Câștig brut / pierdere brută",
+    "m_expR": "Expectancy",
+    "h_expR": "Câștig mediu per tranzacție, în R",
+    "m_winrate": "Win Rate",
+    "h_winrate": "Procent tranzacții câștigătoare",
+    "m_payoff": "Payoff",
+    "h_payoff": "Câștig mediu / pierdere medie",
+    "col_account": "Cont",
+    "col_return": "Randament",
+    "col_net": "Net",
+    "col_wr": "Win %",
+    "col_dd": "Max DD",
+    "col_trades": "Trades",
+    "paywallDesc": "Metricile instituționale (Sharpe, Sortino, Calmar, expectancy) și vederea de portofoliu sunt disponibile în planul PRO.",
+    "pw1": "Sharpe, Sortino, Calmar anualizate",
+    "pw2": "Expectancy în R + profit factor",
+    "pw3": "Vedere agregată pe toate conturile",
+    "pw4": "Defalcare de performanță per cont"
   }
 }

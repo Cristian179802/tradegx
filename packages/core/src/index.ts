@@ -2,6 +2,7 @@
 // SINGURA sursă de adevăr pentru risc, SMC și tipuri shared.
 
 export * from "./risk";
+export * from "./metrics";
 export * from "./smc";
 export * from "./smc-detect";
 export * from "./auth";

@@ -34,7 +34,8 @@
     "billing": "Subscription",
     "logout": "Sign out",
     "new": "NEW",
-    "roadmap": "Roadmap"
+    "roadmap": "Roadmap",
+    "institutional": "Pro Metrics"
   },
   "banner": {
     "trialLabel": "PRO Trial",
@@ -2858,5 +2859,43 @@
     "auto": "Auto-detected from price action",
     "loading": "Detecting structure…",
     "noData": "Not enough data for this symbol."
+  },
+  "institutional": {
+    "metaTitle": "Institutional metrics — TradeGX",
+    "title": "Institutional Metrics",
+    "subtitle": "The exact numbers prop firms and funds ask for — across your whole portfolio.",
+    "portfolio": "Portfolio · all accounts",
+    "equityCurve": "Equity curve",
+    "tradingDays": "active days",
+    "perAccount": "Per-account breakdown",
+    "empty": "Add trades so we can compute your institutional metrics.",
+    "note": "Metrics annualized from the daily equity curve (√252). Expectancy R uses the recorded risk on each trade. Educational, not financial advice.",
+    "m_sharpe": "Sharpe",
+    "h_sharpe": "Return per unit of risk",
+    "m_sortino": "Sortino",
+    "h_sortino": "Return per downside risk",
+    "m_calmar": "Calmar",
+    "h_calmar": "Return / max drawdown",
+    "m_maxdd": "Max Drawdown",
+    "h_maxdd": "Largest peak-to-trough drop",
+    "m_pf": "Profit Factor",
+    "h_pf": "Gross win / gross loss",
+    "m_expR": "Expectancy",
+    "h_expR": "Avg gain per trade, in R",
+    "m_winrate": "Win Rate",
+    "h_winrate": "Percent of winning trades",
+    "m_payoff": "Payoff",
+    "h_payoff": "Avg win / avg loss",
+    "col_account": "Account",
+    "col_return": "Return",
+    "col_net": "Net",
+    "col_wr": "Win %",
+    "col_dd": "Max DD",
+    "col_trades": "Trades",
+    "paywallDesc": "Institutional metrics (Sharpe, Sortino, Calmar, expectancy) and the portfolio view are available on the PRO plan.",
+    "pw1": "Annualized Sharpe, Sortino, Calmar",
+    "pw2": "Expectancy in R + profit factor",
+    "pw3": "Aggregated view across all accounts",
+    "pw4": "Per-account performance breakdown"
   }
 }
