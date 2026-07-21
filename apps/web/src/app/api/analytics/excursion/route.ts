@@ -48,7 +48,6 @@ export async function GET() {
   }
 
   const points: Point[] = [];
-  const debug: Record<string, unknown>[] = [];
 
   // SECVENȚIAL cu politețe (nu paraleliza — Yahoo respinge rafalele)
   for (const [sym, group] of bySymbol.entries()) {
@@ -63,15 +62,6 @@ export async function GET() {
       try { candles = await fetchHistoricalCandles(sym, "H1", start, end); } catch { candles = []; }
     }
     await new Promise((r) => setTimeout(r, 150)); // politețe cu Yahoo
-    const sample = group[0]!;
-    debug.push({
-      sym, trades: group.length, candles: candles?.length ?? 0,
-      winStart: start.toISOString(), winEnd: end.toISOString(),
-      candleFirst: candles?.[0] ? new Date(candles[0]!.time * 1000).toISOString() : null,
-      candleLast: candles?.length ? new Date(candles[candles.length - 1]!.time * 1000).toISOString() : null,
-      sampleEntry: new Date(sample.entryTime).toISOString(),
-      sampleExit: sample.exitTime ? new Date(sample.exitTime).toISOString() : null,
-    });
     if (!candles || candles.length === 0) continue;
 
     for (const t of group) {
@@ -79,9 +69,11 @@ export async function GET() {
       const sl = Number(t.stopLoss);
       const stopDist = Math.abs(entry - sl);
       if (stopDist <= 0) continue;
-      const eIn = new Date(t.entryTime).getTime() / 1000;
-      const eOut = new Date(t.exitTime!).getTime() / 1000;
-      const win = candles.filter((c) => c.time >= eIn - 3600 && c.time <= eOut + 3600);
+      // c.time e în MILISECUNDE (ca timpii tranzacției)
+      const eIn = new Date(t.entryTime).getTime();
+      const eOut = new Date(t.exitTime!).getTime();
+      const PAD = 3600_000; // 1h în ms
+      const win = candles.filter((c) => c.time >= eIn - PAD && c.time <= eOut + PAD);
       if (win.length === 0) continue;
 
       const hi = Math.max(...win.map((c) => c.high));
@@ -90,11 +82,14 @@ export async function GET() {
       const maePrice = isBuy ? entry - lo : hi - entry;   // împotriva ta
       const mfePrice = isBuy ? hi - entry : entry - lo;   // în favoarea ta
       const pnl = Number(t.pnlMoney ?? 0);
-      // R realizat estimat din MAE/MFE nu — folosim pnl semnul; magnitudinea R o luăm din preț ieșire? aproximăm cu MFE/MAE
+      const maeR = Math.max(0, maePrice) / stopDist;
+      const mfeR = Math.max(0, mfePrice) / stopDist;
+      // Plasă de sănătate: valori > 8R = eroare de fill / neconcordanță de date → ignoră
+      if (maeR > 8 || mfeR > 8) continue;
       points.push({
-        mae: +(Math.max(0, maePrice) / stopDist).toFixed(2),
-        mfe: +(Math.max(0, mfePrice) / stopDist).toFixed(2),
-        realizedR: 0, // completat mai jos din pnl dacă avem risc; altfel semn
+        mae: +maeR.toFixed(2),
+        mfe: +mfeR.toFixed(2),
+        realizedR: 0,
         win: pnl > 0,
         symbol: sym,
       });
@@ -119,5 +114,5 @@ export async function GET() {
     // eficiență = cât din MFE ai capturat (aproximat: câștigătoarele ating MFE dar închid mai jos)
   };
 
-  return NextResponse.json({ ok: true, points, insights, insufficient: false, debug });
+  return NextResponse.json({ ok: true, points, insights, insufficient: false });
 }
