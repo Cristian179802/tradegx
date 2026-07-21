@@ -11,7 +11,7 @@ import {
   Plus, Zap, User, NotebookPen, FlaskConical, Brain, BellRing,
   PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
   Trophy, ListChecks, Newspaper, Gauge, Award, GraduationCap, Crosshair, Dices,
-  CreditCard, Medal, Rocket, Landmark,
+  CreditCard, Medal, Rocket, Landmark, Ruler,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
@@ -57,6 +57,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/accounts",     label: "accounts",    icon: TrendingUp,      color: "sky" },
       { href: "/analytics",    label: "analytics",   icon: BarChart3,       color: "violet" },
       { href: "/institutional", label: "institutional", icon: Landmark,      color: "indigo", badge: "PRO" },
+      { href: "/excursion",    label: "excursion",   icon: Ruler,           color: "emerald", badge: "PRO" },
       { href: "/edge",         label: "edge",        icon: Crosshair,       color: "emerald", badge: "NOU" },
       { href: "/monte-carlo",  label: "monteCarlo",  icon: Dices,           color: "violet", badge: "NOU" },
       { href: "/backtesting",  label: "backtesting", icon: FlaskConical,    color: "rose" },
