@@ -2267,7 +2267,8 @@
     "vs13": "Genomul Pieței — pattern-matching pe regimuri istorice: „ziua de azi seamănă 87% cu 14 martie 2023 — uite cum ai tranzacționat TU atunci”",
     "vs15": "Cutia Neagră — după un cont spulberat, AI-ul produce o anchetă în stil aviatic: cronologia „zborului”, decizia fatală, factorii contribuitori și recomandările ca accidentul să nu se repete",
     "vs25": "Ritualul Zilnic — un centru de comandă care te întâmpină în fiecare dimineață cu briefing-ul tău personal (știri pe perechile tale, focusul zilei de la AI Coach, sesiunile pieței) și te ține legat prin seria de disciplină pe care nu vrei să o rupi: frica de a pierde progresul te aduce înapoi zilnic",
-    "sh23": "Metrici instituționale: Sharpe, Sortino, Calmar, expectancy (R) + vedere de portofoliu agregată pe toate conturile"
+    "sh23": "Metrici instituționale: Sharpe, Sortino, Calmar, expectancy (R) + vedere de portofoliu agregată pe toate conturile",
+    "sh24": "Analiză R-multiple + MAE/MFE — distribuția rezultatelor în R și unde-ți sunt stop-urile prea strânse / cât profit lași pe masă"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
