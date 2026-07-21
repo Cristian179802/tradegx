@@ -19,17 +19,20 @@ export async function GET() {
   if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   if (!(await hasPro(userId))) return NextResponse.json(PRO_REQUIRED, { status: 402 });
 
-  // ultimele ~80 tranzacții închise cu SL (pt normalizare în R)
+  // Tranzacții recente (ultimele 50 zile) cu SL — fereastră mică = lumânări
+  // M30 fiabile de la Yahoo (max 55 zile). Cele mai relevante oricum.
+  const since = new Date(Date.now() - 50 * 864e5);
   const trades = await prisma.trade.findMany({
     where: {
       account: { userId },
       status: "CLOSED",
       stopLoss: { not: null },
       exitTime: { not: null },
+      entryTime: { gte: since },
     },
     select: { symbol: true, direction: true, entryPrice: true, entryTime: true, exitTime: true, stopLoss: true, pnlMoney: true },
     orderBy: { entryTime: "desc" },
-    take: 80,
+    take: 60,
   });
 
   if (trades.length < 5) {
@@ -46,15 +49,20 @@ export async function GET() {
 
   const points: Point[] = [];
 
-  await Promise.all([...bySymbol.entries()].map(async ([sym, group]) => {
+  // SECVENȚIAL cu politețe (nu paraleliza — Yahoo respinge rafalele)
+  for (const [sym, group] of bySymbol.entries()) {
     const times = group.flatMap((t) => [new Date(t.entryTime).getTime(), t.exitTime ? new Date(t.exitTime).getTime() : 0]).filter(Boolean);
-    const start = new Date(Math.min(...times) - 2 * 3600_000);
-    const end = new Date(Math.max(...times) + 2 * 3600_000);
+    const start = new Date(Math.min(...times) - 6 * 3600_000);
+    const end = new Date(Math.max(...times) + 6 * 3600_000);
     let candles: Awaited<ReturnType<typeof fetchHistoricalCandles>> = [];
     try {
-      candles = await fetchHistoricalCandles(sym, "H1", start, end);
-    } catch { return; }
-    if (!candles || candles.length === 0) return;
+      candles = await fetchHistoricalCandles(sym, "M30", start, end);
+      if (!candles || candles.length === 0) candles = await fetchHistoricalCandles(sym, "H1", start, end);
+    } catch {
+      try { candles = await fetchHistoricalCandles(sym, "H1", start, end); } catch { candles = []; }
+    }
+    await new Promise((r) => setTimeout(r, 150)); // politețe cu Yahoo
+    if (!candles || candles.length === 0) continue;
 
     for (const t of group) {
       const entry = Number(t.entryPrice);
@@ -81,7 +89,7 @@ export async function GET() {
         symbol: sym,
       });
     }
-  }));
+  }
 
   // insight-uri
   const winners = points.filter((p) => p.win);
