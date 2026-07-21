@@ -48,6 +48,7 @@ export async function GET() {
   }
 
   const points: Point[] = [];
+  const debug: Record<string, unknown>[] = [];
 
   // SECVENȚIAL cu politețe (nu paraleliza — Yahoo respinge rafalele)
   for (const [sym, group] of bySymbol.entries()) {
@@ -62,6 +63,15 @@ export async function GET() {
       try { candles = await fetchHistoricalCandles(sym, "H1", start, end); } catch { candles = []; }
     }
     await new Promise((r) => setTimeout(r, 150)); // politețe cu Yahoo
+    const sample = group[0]!;
+    debug.push({
+      sym, trades: group.length, candles: candles?.length ?? 0,
+      winStart: start.toISOString(), winEnd: end.toISOString(),
+      candleFirst: candles?.[0] ? new Date(candles[0]!.time * 1000).toISOString() : null,
+      candleLast: candles?.length ? new Date(candles[candles.length - 1]!.time * 1000).toISOString() : null,
+      sampleEntry: new Date(sample.entryTime).toISOString(),
+      sampleExit: sample.exitTime ? new Date(sample.exitTime).toISOString() : null,
+    });
     if (!candles || candles.length === 0) continue;
 
     for (const t of group) {
@@ -109,5 +119,5 @@ export async function GET() {
     // eficiență = cât din MFE ai capturat (aproximat: câștigătoarele ating MFE dar închid mai jos)
   };
 
-  return NextResponse.json({ ok: true, points, insights, insufficient: false });
+  return NextResponse.json({ ok: true, points, insights, insufficient: false, debug });
 }
