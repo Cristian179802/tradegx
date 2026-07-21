@@ -2265,7 +2265,8 @@
     "vs12": "The Trader Credit Score — a discipline score (not a profit score!) computed only from synced, verifiable data: your passport to prop firms and funding",
     "vs13": "The Market Genome — pattern-matching on historical regimes: “today looks 87% like March 14, 2023 — here's how YOU traded it back then”",
     "vs15": "The Black Box — after a blown account, AI produces an aviation-style crash investigation: the flight timeline, the fatal decision, contributing factors and recommendations so it never repeats",
-    "vs25": "The Daily Ritual — a command center that greets you every morning with your personal briefing (news on your pairs, the day's focus from AI Coach, market sessions) and keeps you hooked through a discipline streak you don't want to break: the fear of losing your progress brings you back every day"
+    "vs25": "The Daily Ritual — a command center that greets you every morning with your personal briefing (news on your pairs, the day's focus from AI Coach, market sessions) and keeps you hooked through a discipline streak you don't want to break: the fear of losing your progress brings you back every day",
+    "sh23": "Institutional metrics: Sharpe, Sortino, Calmar, expectancy (R) + aggregated portfolio view across all accounts"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",

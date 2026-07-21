@@ -8,9 +8,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitle"), description: t("metaDesc") };
 }
 
-const SHIPPED = ["sh1","sh2","sh3","sh4","sh5","sh6","sh7","sh8","sh9","sh10","sh11","sh12","sh13","sh14","sh15","sh16","sh17","sh18","sh19","sh20","sh21","sh22"];
+const SHIPPED = ["sh1","sh2","sh3","sh4","sh5","sh6","sh7","sh8","sh9","sh10","sh11","sh12","sh13","sh14","sh15","sh16","sh17","sh18","sh19","sh20","sh21","sh22","sh23"];
 const IN_PROGRESS = ["ip1"];
-const PLANNED = ["pl8","pl9","pl15","pl10","pl11","pl12","pl14","pl13","pl3","pl4","pl1","pl5","pl16","pl7"];
+const PLANNED = ["pl8","pl15","pl10","pl11","pl12","pl14","pl13","pl3","pl4","pl1","pl5","pl16","pl7"];
 const VISION = ["vs1","vs25","vs2","vs3","vs15","vs10","vs11","vs12","vs4","vs5","vs6","vs13","vs7","vs8","vs9"];
 
 function List({

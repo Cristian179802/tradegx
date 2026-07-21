@@ -2265,7 +2265,8 @@
     "vs12": "Scorul de Credit al Traderului — un scor de disciplină (nu de profit!) calculat doar din date sincronizate, verificabile: pașaportul tău către prop firm-uri și finanțare",
     "vs13": "Genomul Pieței — pattern-matching pe regimuri istorice: „ziua de azi seamănă 87% cu 14 martie 2023 — uite cum ai tranzacționat TU atunci”",
     "vs15": "Cutia Neagră — după un cont spulberat, AI-ul produce o anchetă în stil aviatic: cronologia „zborului”, decizia fatală, factorii contribuitori și recomandările ca accidentul să nu se repete",
-    "vs25": "Ritualul Zilnic — un centru de comandă care te întâmpină în fiecare dimineață cu briefing-ul tău personal (știri pe perechile tale, focusul zilei de la AI Coach, sesiunile pieței) și te ține legat prin seria de disciplină pe care nu vrei să o rupi: frica de a pierde progresul te aduce înapoi zilnic"
+    "vs25": "Ritualul Zilnic — un centru de comandă care te întâmpină în fiecare dimineață cu briefing-ul tău personal (știri pe perechile tale, focusul zilei de la AI Coach, sesiunile pieței) și te ține legat prin seria de disciplină pe care nu vrei să o rupi: frica de a pierde progresul te aduce înapoi zilnic",
+    "sh23": "Metrici instituționale: Sharpe, Sortino, Calmar, expectancy (R) + vedere de portofoliu agregată pe toate conturile"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
