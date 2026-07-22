@@ -35,8 +35,7 @@
     "logout": "Sign out",
     "new": "NEW",
     "roadmap": "Roadmap",
-    "institutional": "Pro Metrics",
-    "excursion": "R Analysis"
+    "institutional": "Pro Metrics"
   },
   "banner": {
     "trialLabel": "PRO Trial",
@@ -2267,8 +2266,7 @@
     "vs13": "The Market Genome — pattern-matching on historical regimes: “today looks 87% like March 14, 2023 — here's how YOU traded it back then”",
     "vs15": "The Black Box — after a blown account, AI produces an aviation-style crash investigation: the flight timeline, the fatal decision, contributing factors and recommendations so it never repeats",
     "vs25": "The Daily Ritual — a command center that greets you every morning with your personal briefing (news on your pairs, the day's focus from AI Coach, market sessions) and keeps you hooked through a discipline streak you don't want to break: the fear of losing your progress brings you back every day",
-    "sh23": "Institutional metrics: Sharpe, Sortino, Calmar, expectancy (R) + aggregated portfolio view across all accounts",
-    "sh24": "R-multiple + MAE/MFE analysis — outcome distribution in R and where your stops are too tight / how much profit you leave on the table"
+    "sh23": "Institutional metrics: Sharpe, Sortino, Calmar, expectancy (R) + aggregated portfolio view across all accounts"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
@@ -2900,39 +2898,5 @@
     "pw2": "Expectancy in R + profit factor",
     "pw3": "Aggregated view across all accounts",
     "pw4": "Per-account performance breakdown"
-  },
-  "excursion": {
-    "metaTitle": "R & MAE/MFE analysis — TradeGX",
-    "title": "R & Excursion Analysis",
-    "subtitle": "Your results in R + where your stops are too tight and how much profit you leave on the table.",
-    "rDistribution": "Outcome distribution (R-multiple)",
-    "expectancy": "Expectancy",
-    "avgWin": "Avg win",
-    "avgLoss": "Avg loss",
-    "best": "Best",
-    "rNote": "{withR} of {total} trades have recorded risk. R = profit / risk.",
-    "scatterTitle": "MAE vs MFE (in R)",
-    "scatterHint": "Each dot = a trade. X = how far it went against you, Y = how far in your favor.",
-    "computing": "Computing from real candles…",
-    "insufficient": "Too few trades with SL for the analysis.",
-    "excError": "Couldn't compute excursions right now.",
-    "winners": "Winners",
-    "losers": "Losers",
-    "stopInsightTitle": "Is your stop too wide?",
-    "stopInsight": "Winners go only {mae}R against you on average before turning profitable.",
-    "stopTip": "A tighter stop would cut your risk without losing these trades.",
-    "stopOk": "Your stop looks well-calibrated for your volatility.",
-    "mfeInsightTitle": "Profit left on the table?",
-    "mfeInsight": "Winners reach {mfe}R of max profit on average.",
-    "mfeTip": "If you close well below that, consider a larger target or a trailing stop.",
-    "medianMAE": "Median MAE (against you)",
-    "sample": "Sample",
-    "note": "MAE/MFE computed from real H1 candles, last ~80 trades with SL. Educational, not financial advice.",
-    "emptyR": "Add trades with recorded risk so we can analyze your results in R.",
-    "paywallDesc": "R-multiple and MAE/MFE analysis (where your stops are too tight) are available on the PRO plan.",
-    "pw1": "Outcome distribution in R",
-    "pw2": "Expectancy + avg win/loss in R",
-    "pw3": "MAE/MFE from real candles",
-    "pw4": "Insights on stops and targets"
   }
 }

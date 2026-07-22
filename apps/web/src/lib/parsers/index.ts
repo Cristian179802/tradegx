@@ -57,8 +57,28 @@ export function autoDetectAndParse(content: string, filename: string): ParseResu
     return parseCTraderCSV(content);
   }
 
-  // MT4/MT5 CSV — default
-  return parseMT4CSV(content);
+  // DXtrade (DevExperts) CSV — order/fill blotter, distinctive headers
+  if (
+    content.includes("Filled Volume") ||
+    content.includes("Fill Price") ||
+    (content.toLowerCase().includes("date and time") && content.toLowerCase().includes("side"))
+  ) {
+    return parseDXtradeCSV(content);
+  }
+
+  // TradeLocker CSV — filename hint (no confirmed unique header signature)
+  if (lower.includes("tradelocker")) {
+    return parseTradeLockerCSV(content);
+  }
+
+  // MT4/MT5 CSV — default, with generic flexible fallback for unrecognized broker CSVs
+  const mt4Result = parseMT4CSV(content);
+  if (mt4Result.trades.length > 0) return mt4Result;
+
+  const genericResult = parseFlexibleCSV(content, "CSV broker (format detectat automat)");
+  if (genericResult.trades.length > 0) return genericResult;
+
+  return mt4Result;
 }
 
 // ─── MT4 date parser ───────────────────────────────────────────────────────────
@@ -224,68 +244,96 @@ export function parseMT4CSV(csv: string): ParseResult {
   return { trades, format: "MT4/MT5 CSV", warnings };
 }
 
-// ─── cTrader CSV parser ────────────────────────────────────────────────────────
+// ─── Generic flexible CSV engine (shared by cTrader / TradeLocker / DXtrade) ──
+//
+// Broad fuzzy header matching so we don't need one hand-written parser per
+// broker export dialect. Handles both "closed position" reports (distinct
+// entry/exit price+time columns) and single-timestamp order/fill blotters
+// (e.g. DXtrade) by best-effort collapsing entry=exit, same as the MT5
+// deals fallback above — a warning is added so the import UI can surface it.
 
-export function parseCTraderCSV(csv: string): ParseResult {
+function parseFlexibleCSV(csv: string, formatLabel: string): ParseResult {
   const trades: ParsedTrade[] = [];
   const warnings: string[] = [];
   const lines = csv.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
 
-  // Find header
   let headers: string[] = [];
   let startIdx = 0;
   for (let i = 0; i < Math.min(lines.length, 5); i++) {
     const lower = lines[i].toLowerCase();
-    if (lower.includes("position") || lower.includes("symbol") || lower.includes("direction")) {
+    if (lower.includes("position") || lower.includes("symbol") || lower.includes("direction") || lower.includes("side")) {
       headers = parseCSVLine(lines[i]).map((h) => h.toLowerCase().trim());
       startIdx = i + 1;
       break;
     }
   }
+  if (!headers.length) return { trades: [], format: formatLabel, warnings: [`${formatLabel}: nu am găsit antetul coloanelor`] };
 
-  // Column indices
   const col = (names: string[]) => names.map((n) => headers.findIndex((h) => h.includes(n))).find((i) => i >= 0) ?? -1;
-  const idxId = col(["position id", "positionid", "trade id"]);
+  const idxId = col(["position id", "positionid", "order id", "trade id", "deal id"]);
   const idxSymbol = col(["symbol", "instrument"]);
   const idxDir = col(["direction", "side", "type"]);
-  const idxVol = col(["volume", "size", "lots", "quantity"]);
-  const idxEntryPrice = col(["entry price", "open price"]);
+  const idxVol = col(["filled volume", "volume", "size", "lots", "quantity", "qty"]);
+  const idxEntryPrice = col(["entry price", "open price", "avg open price"]);
   const idxEntryTime = col(["entry time", "open time", "open date"]);
-  const idxExitPrice = col(["exit price", "close price", "closing price"]);
-  const idxExitTime = col(["exit time", "close time", "closing time", "close date"]);
-  const idxGross = col(["gross p&l", "gross profit", "profit", "p&l"]);
+  const idxExitPrice = col(["exit price", "close price", "closing price", "fill price"]);
+  const idxExitTime = col(["exit time", "close time", "closing time", "close date", "date and time", "date/time", "time"]);
+  const idxGross = col(["gross p&l", "gross profit", "profit", "p&l", "pnl"]);
   const idxNet = col(["net p&l", "net profit"]);
   const idxComm = col(["commission"]);
-  const idxSwap = col(["swap", "rollover"]);
+  const idxSwap = col(["swap", "rollover", "financing"]);
   const idxSL = col(["stop loss", "sl"]);
   const idxTP = col(["take profit", "tp"]);
+  const idxStatus = col(["status"]);
 
   const g = (cells: string[], idx: number) => (idx >= 0 ? cells[idx] ?? "" : "");
 
+  let warnedSingleTime = false;
+  let warnedSinglePrice = false;
+
   for (let i = startIdx; i < lines.length; i++) {
     const cells = parseCSVLine(lines[i]);
-    if (cells.length < 4) continue;
+    if (cells.length < 3) continue;
+
+    // Order/fill blotters (e.g. DXtrade) include a Status column — only keep filled/executed rows
+    if (idxStatus >= 0) {
+      const st = g(cells, idxStatus).toLowerCase();
+      if (st && !st.includes("fill") && !st.includes("execut") && !st.includes("closed")) continue;
+    }
 
     const sym = g(cells, idxSymbol).toUpperCase().replace(/\s/g, "");
     const dirRaw = g(cells, idxDir).toLowerCase();
     const dir = dirRaw.includes("buy") || dirRaw === "long" ? "BUY" : dirRaw.includes("sell") || dirRaw === "short" ? "SELL" : null;
     if (!dir || !sym) continue;
 
-    const entryTime = parseMT4Date(g(cells, idxEntryTime)) ?? parseISODate(g(cells, idxEntryTime));
-    const exitTime = parseMT4Date(g(cells, idxExitTime)) ?? parseISODate(g(cells, idxExitTime));
+    let entryTime = parseMT4Date(g(cells, idxEntryTime)) ?? parseISODate(g(cells, idxEntryTime));
+    let exitTime = parseMT4Date(g(cells, idxExitTime)) ?? parseISODate(g(cells, idxExitTime));
+    if (!entryTime && exitTime) {
+      entryTime = exitTime;
+      if (!warnedSingleTime) { warnings.push(`${formatLabel}: fișierul are un singur câmp de timp per rând — ora de intrare a fost aproximată cu ora de ieșire`); warnedSingleTime = true; }
+    }
+    if (!exitTime && entryTime) exitTime = entryTime;
     if (!entryTime || !exitTime) { warnings.push(`Dată invalidă linia ${i + 1}`); continue; }
+
+    let entryPrice = parseFloat(g(cells, idxEntryPrice));
+    let exitPrice = parseFloat(g(cells, idxExitPrice));
+    if (isNaN(entryPrice) && !isNaN(exitPrice)) {
+      entryPrice = exitPrice;
+      if (!warnedSinglePrice) { warnings.push(`${formatLabel}: fișierul are un singur preț per rând — verifică P&L manual`); warnedSinglePrice = true; }
+    }
+    if (isNaN(exitPrice) && !isNaN(entryPrice)) exitPrice = entryPrice;
 
     const pnl = parseFloat(g(cells, idxNet) || g(cells, idxGross)) || 0;
     const commission = parseFloat(g(cells, idxComm)) || 0;
 
     trades.push({
-      brokerTradeId: g(cells, idxId) || `ct_${i}`,
+      brokerTradeId: g(cells, idxId) || `${formatLabel.replace(/[^a-z0-9]/gi, "").toLowerCase()}_${i}`,
       symbol: sym,
       direction: dir,
       entryTime,
       exitTime,
-      entryPrice: parseFloat(g(cells, idxEntryPrice)) || 0,
-      exitPrice: parseFloat(g(cells, idxExitPrice)) || 0,
+      entryPrice: entryPrice || 0,
+      exitPrice: exitPrice || 0,
       lotSize: parseFloat(g(cells, idxVol)) || 0,
       stopLoss: parseFloat(g(cells, idxSL)) || undefined,
       takeProfit: parseFloat(g(cells, idxTP)) || undefined,
@@ -296,7 +344,28 @@ export function parseCTraderCSV(csv: string): ParseResult {
     });
   }
 
-  return { trades, format: "cTrader CSV", warnings };
+  return { trades, format: formatLabel, warnings };
+}
+
+// ─── cTrader CSV parser ────────────────────────────────────────────────────────
+
+export function parseCTraderCSV(csv: string): ParseResult {
+  return parseFlexibleCSV(csv, "cTrader CSV");
+}
+
+// ─── TradeLocker CSV parser ────────────────────────────────────────────────────
+
+export function parseTradeLockerCSV(csv: string): ParseResult {
+  return parseFlexibleCSV(csv, "TradeLocker CSV");
+}
+
+// ─── DXtrade (DevExperts) CSV parser ───────────────────────────────────────────
+// Documented export columns: Date and Time, Symbol, Status, Side, Filled Volume,
+// Fill Price, Commission, Take profit, Stop loss (order/fill blotter, not
+// paired entry/exit rows — handled via the single-timestamp/price fallback above).
+
+export function parseDXtradeCSV(csv: string): ParseResult {
+  return parseFlexibleCSV(csv, "DXtrade CSV");
 }
 
 // ─── CSV line parser (handles quoted fields) ──────────────────────────────────

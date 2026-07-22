@@ -35,8 +35,7 @@
     "logout": "Deconectare",
     "new": "NOU",
     "roadmap": "Roadmap",
-    "institutional": "Metrici Pro",
-    "excursion": "Analiză R"
+    "institutional": "Metrici Pro"
   },
   "banner": {
     "trialLabel": "PRO Trial",
@@ -2267,8 +2266,7 @@
     "vs13": "Genomul Pieței — pattern-matching pe regimuri istorice: „ziua de azi seamănă 87% cu 14 martie 2023 — uite cum ai tranzacționat TU atunci”",
     "vs15": "Cutia Neagră — după un cont spulberat, AI-ul produce o anchetă în stil aviatic: cronologia „zborului”, decizia fatală, factorii contribuitori și recomandările ca accidentul să nu se repete",
     "vs25": "Ritualul Zilnic — un centru de comandă care te întâmpină în fiecare dimineață cu briefing-ul tău personal (știri pe perechile tale, focusul zilei de la AI Coach, sesiunile pieței) și te ține legat prin seria de disciplină pe care nu vrei să o rupi: frica de a pierde progresul te aduce înapoi zilnic",
-    "sh23": "Metrici instituționale: Sharpe, Sortino, Calmar, expectancy (R) + vedere de portofoliu agregată pe toate conturile",
-    "sh24": "Analiză R-multiple + MAE/MFE — distribuția rezultatelor în R și unde-ți sunt stop-urile prea strânse / cât profit lași pe masă"
+    "sh23": "Metrici instituționale: Sharpe, Sortino, Calmar, expectancy (R) + vedere de portofoliu agregată pe toate conturile"
   },
   "contactPage": {
     "metaTitle": "Contact — TradeGx",
@@ -2900,39 +2898,5 @@
     "pw2": "Expectancy în R + profit factor",
     "pw3": "Vedere agregată pe toate conturile",
     "pw4": "Defalcare de performanță per cont"
-  },
-  "excursion": {
-    "metaTitle": "Analiză R & MAE/MFE — TradeGX",
-    "title": "Analiză R & Excursii",
-    "subtitle": "Rezultatele tale în R + unde-ți sunt stop-urile prea strânse și cât profit lași pe masă.",
-    "rDistribution": "Distribuția rezultatelor (R-multiple)",
-    "expectancy": "Expectancy",
-    "avgWin": "Câștig mediu",
-    "avgLoss": "Pierdere medie",
-    "best": "Cel mai bun",
-    "rNote": "{withR} din {total} tranzacții au risc înregistrat. R = profit / risc.",
-    "scatterTitle": "MAE vs MFE (în R)",
-    "scatterHint": "Fiecare punct = o tranzacție. X = cât a mers împotriva ta, Y = cât a mers în favoarea ta.",
-    "computing": "Calculez din lumânări reale…",
-    "insufficient": "Prea puține tranzacții cu SL pentru analiză.",
-    "excError": "Nu am putut calcula excursiile acum.",
-    "winners": "Câștigătoare",
-    "losers": "Pierzătoare",
-    "stopInsightTitle": "Stop-ul tău e prea larg?",
-    "stopInsight": "Câștigătoarele merg în medie doar {mae}R împotriva ta înainte să meargă în profit.",
-    "stopTip": "Un stop mai strâns ți-ar reduce riscul fără să pierzi aceste tranzacții.",
-    "stopOk": "Stop-ul pare bine calibrat pentru volatilitatea ta.",
-    "mfeInsightTitle": "Profit lăsat pe masă?",
-    "mfeInsight": "Câștigătoarele ating în medie {mfe}R în profit maxim.",
-    "mfeTip": "Dacă închizi mult sub acest nivel, iei în calcul un target mai mare sau trailing stop.",
-    "medianMAE": "MAE median (împotriva ta)",
-    "sample": "Eșantion",
-    "note": "MAE/MFE calculate din lumânări H1 reale, ultimele ~80 tranzacții cu SL. Educațional, nu sfat financiar.",
-    "emptyR": "Adaugă tranzacții cu risc înregistrat ca să-ți analizăm rezultatele în R.",
-    "paywallDesc": "Analiza R-multiple și MAE/MFE (unde-ți sunt stop-urile prea strânse) sunt disponibile în planul PRO.",
-    "pw1": "Distribuția rezultatelor în R",
-    "pw2": "Expectancy + câștig/pierdere medie în R",
-    "pw3": "MAE/MFE din lumânări reale",
-    "pw4": "Insight-uri pe stop-uri și target-uri"
   }
 }
