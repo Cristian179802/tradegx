@@ -36,6 +36,31 @@ export function detectInstrumentType(symbol: string): string {
   return "CFD";
 }
 
+// ─── Parse with an explicit platform hint (user's dialog choice wins) ─────────
+
+export function parseByPlatform(platform: string, content: string, filename: string): ParseResult {
+  const trimmed = content.trimStart();
+  // HTML statements are self-describing regardless of the picked platform
+  if (filename.toLowerCase().endsWith(".html") || filename.toLowerCase().endsWith(".htm") || trimmed.startsWith("<")) {
+    return parseMT4HTML(content);
+  }
+  switch (platform) {
+    case "mt4":
+    case "mt5": {
+      const r = parseMT4CSV(content);
+      return r.trades.length > 0 ? r : autoDetectAndParse(content, filename);
+    }
+    case "ctrader":
+      return parseCTraderCSV(content);
+    case "tradelocker":
+      return parseTradeLockerCSV(content);
+    case "dxtrade":
+      return parseDXtradeCSV(content);
+    default:
+      return autoDetectAndParse(content, filename);
+  }
+}
+
 // ─── Auto-detect format and parse ─────────────────────────────────────────────
 
 export function autoDetectAndParse(content: string, filename: string): ParseResult {
@@ -57,8 +82,30 @@ export function autoDetectAndParse(content: string, filename: string): ParseResu
     return parseCTraderCSV(content);
   }
 
-  // MT4/MT5 CSV — default
-  return parseMT4CSV(content);
+  // DXtrade (DevExperts) CSV — fill/order blotter with distinctive headers
+  const low = content.toLowerCase();
+  if (
+    low.includes("filled volume") ||
+    low.includes("fill price") ||
+    (low.includes("date and time") && low.includes("side"))
+  ) {
+    return parseDXtradeCSV(content);
+  }
+
+  // TradeLocker CSV — filename hint (no confirmed unique header signature)
+  if (lower.includes("tradelocker")) {
+    return parseTradeLockerCSV(content);
+  }
+
+  // MT4/MT5 CSV — default; if it yields nothing, fall back to the universal
+  // header-driven engine so unrecognized broker exports still import.
+  const mt4Result = parseMT4CSV(content);
+  if (mt4Result.trades.length > 0) return mt4Result;
+
+  const universal = parseUniversalBrokerCSV(content, "CSV broker");
+  if (universal.trades.length > 0) return universal;
+
+  return mt4Result;
 }
 
 // ─── MT4 date parser ───────────────────────────────────────────────────────────
@@ -297,6 +344,229 @@ export function parseCTraderCSV(csv: string): ParseResult {
   }
 
   return { trades, format: "cTrader CSV", warnings };
+}
+
+// ─── Universal broker CSV engine (TradeLocker / DXtrade / generic) ────────────
+//
+// Header-driven, fuzzy column matching so we handle multiple broker export
+// dialects without one hand-written parser per broker. Two modes, auto-detected:
+//
+//   PAIRED  — the export has distinct entry AND exit price+time columns
+//             (closed-positions report, e.g. TradeLocker "Export account
+//             History"). Each row is one completed round-trip trade.
+//
+//   BLOTTER — the export is a single-timestamp fill/order log (e.g. DXtrade:
+//             Date and Time · Side · Fill Price · Filled Volume). Fills are
+//             paired FIFO per symbol into round-trip trades. Money P&L is taken
+//             from a realized-P&L column when present; otherwise it is derived
+//             from price difference × volume and a warning is surfaced so the
+//             import UI can flag that per-point value may need adjustment.
+
+function buildFuzzyCols(headers: string[]) {
+  const col = (names: string[]) =>
+    names.map((n) => headers.findIndex((h) => h === n)).find((i) => i >= 0) ??
+    names.map((n) => headers.findIndex((h) => h.includes(n))).find((i) => i >= 0) ??
+    -1;
+  return {
+    id: col(["position id", "positionid", "order id", "orderid", "trade id", "deal id", "id", "ticket"]),
+    symbol: col(["symbol", "instrument", "market", "ticker", "product"]),
+    dir: col(["direction", "side", "type", "b/s", "action"]),
+    vol: col(["filled volume", "volume", "size", "lots", "quantity", "qty", "amount", "units"]),
+    entryPrice: col(["entry price", "open price", "opening price", "avg entry", "entry"]),
+    entryTime: col(["entry time", "open time", "opening time", "open date", "entry date"]),
+    exitPrice: col(["exit price", "close price", "closing price", "avg exit", "exit"]),
+    exitTime: col(["exit time", "close time", "closing time", "close date", "exit date"]),
+    price: col(["fill price", "price", "avg price", "average price", "executed price"]),
+    time: col(["date and time", "date/time", "datetime", "time", "date", "timestamp"]),
+    pnl: col(["net p&l", "net profit", "realized p&l", "realized pnl", "gross p&l", "profit", "p&l", "pnl", "p/l"]),
+    comm: col(["commission", "comm", "fee", "fees"]),
+    swap: col(["swap", "rollover", "financing", "interest"]),
+    sl: col(["stop loss", "stoploss", "s/l"]),
+    tp: col(["take profit", "takeprofit", "t/p"]),
+    status: col(["status", "state"]),
+  };
+}
+
+function normalizeDirection(raw: string): "BUY" | "SELL" | null {
+  const d = raw.toLowerCase().trim();
+  if (d.includes("buy") || d === "long" || d === "b") return "BUY";
+  if (d.includes("sell") || d === "short" || d === "s") return "SELL";
+  return null;
+}
+
+function parseAnyDate(raw: string): Date | null {
+  return parseMT4Date(raw) ?? parseISODate(raw);
+}
+
+// numbers may arrive as "1,234.56", "(123.45)" for negatives, or "1.234,56" (EU)
+function parseNumber(raw: string): number {
+  if (!raw) return 0;
+  let s = raw.trim().replace(/\s/g, "");
+  let neg = false;
+  if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+  s = s.replace(/[^0-9.,\-]/g, "");
+  // EU decimal (1.234,56) → strip dots, comma→dot; else strip thousands commas
+  if (/,\d{1,2}$/.test(s) && s.includes(".")) s = s.replace(/\./g, "").replace(",", ".");
+  else s = s.replace(/,/g, "");
+  const n = parseFloat(s);
+  if (!Number.isFinite(n)) return 0;
+  return neg ? -Math.abs(n) : n;
+}
+
+function locateHeaderRow(lines: string[]): number {
+  for (let i = 0; i < Math.min(lines.length, 8); i++) {
+    const low = lines[i].toLowerCase();
+    if (/(symbol|instrument|market)/.test(low) && /(side|direction|type|price|volume|quantity)/.test(low)) return i;
+  }
+  return 0;
+}
+
+export function parseUniversalBrokerCSV(csv: string, label: string): ParseResult {
+  const warnings: string[] = [];
+  const lines = csv.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length < 2) return { trades: [], format: label, warnings: ["Fișier gol sau fără date."] };
+
+  const headerIdx = locateHeaderRow(lines);
+  const headers = parseCSVLine(lines[headerIdx]).map((h) => h.toLowerCase().trim());
+  const c = buildFuzzyCols(headers);
+  const g = (cells: string[], idx: number) => (idx >= 0 ? (cells[idx] ?? "").trim() : "");
+
+  const hasPair = c.entryPrice >= 0 && c.exitPrice >= 0 && c.entryTime >= 0 && c.exitTime >= 0;
+
+  if (hasPair) {
+    // ── PAIRED mode: one closed round-trip per row ──────────────────────────
+    const trades: ParsedTrade[] = [];
+    for (let i = headerIdx + 1; i < lines.length; i++) {
+      const cells = parseCSVLine(lines[i]);
+      if (cells.length < 4) continue;
+      const sym = g(cells, c.symbol).toUpperCase().replace(/\s/g, "");
+      const dir = normalizeDirection(g(cells, c.dir));
+      if (!sym || !dir) continue;
+      const entryTime = parseAnyDate(g(cells, c.entryTime));
+      const exitTime = parseAnyDate(g(cells, c.exitTime));
+      if (!entryTime || !exitTime) { warnings.push(`Dată invalidă linia ${i + 1}`); continue; }
+      trades.push({
+        brokerTradeId: g(cells, c.id) || `${label.slice(0, 3).toLowerCase()}_${i}`,
+        symbol: sym,
+        direction: dir,
+        entryTime,
+        exitTime,
+        entryPrice: parseNumber(g(cells, c.entryPrice)),
+        exitPrice: parseNumber(g(cells, c.exitPrice)),
+        lotSize: parseNumber(g(cells, c.vol)),
+        stopLoss: c.sl >= 0 && g(cells, c.sl) ? parseNumber(g(cells, c.sl)) || undefined : undefined,
+        takeProfit: c.tp >= 0 && g(cells, c.tp) ? parseNumber(g(cells, c.tp)) || undefined : undefined,
+        pnlMoney: parseNumber(g(cells, c.pnl)),
+        commission: parseNumber(g(cells, c.comm)),
+        swap: parseNumber(g(cells, c.swap)),
+        instrumentType: detectInstrumentType(sym),
+      });
+    }
+    return { trades, format: `${label} (poziții închise)`, warnings };
+  }
+
+  // ── BLOTTER mode: FIFO-pair fills into round-trips ────────────────────────
+  const priceIdx = c.price >= 0 ? c.price : c.entryPrice;
+  const timeIdx = c.time >= 0 ? c.time : c.entryTime;
+  if (priceIdx < 0 || timeIdx < 0 || c.symbol < 0 || c.dir < 0) {
+    return { trades: [], format: label, warnings: ["Nu am putut identifica coloanele necesare (simbol / direcție / preț / timp)."] };
+  }
+
+  interface Fill {
+    time: Date; symbol: string; side: "BUY" | "SELL"; price: number;
+    volume: number; commission: number; swap: number; pnl: number; hasPnl: boolean; id: string;
+  }
+  const fills: Fill[] = [];
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    const cells = parseCSVLine(lines[i]);
+    if (cells.length < 4) continue;
+    // skip non-executed rows when a status column exists
+    if (c.status >= 0) {
+      const st = g(cells, c.status).toLowerCase();
+      if (st && !/(fill|filled|closed|executed|done|complete)/.test(st)) continue;
+    }
+    const sym = g(cells, c.symbol).toUpperCase().replace(/\s/g, "");
+    const side = normalizeDirection(g(cells, c.dir));
+    const time = parseAnyDate(g(cells, timeIdx));
+    const volume = parseNumber(g(cells, c.vol));
+    const price = parseNumber(g(cells, priceIdx));
+    if (!sym || !side || !time || volume <= 0) continue;
+    const pnlRaw = c.pnl >= 0 ? g(cells, c.pnl) : "";
+    fills.push({
+      time, symbol: sym, side, price, volume,
+      commission: parseNumber(g(cells, c.comm)),
+      swap: parseNumber(g(cells, c.swap)),
+      pnl: parseNumber(pnlRaw), hasPnl: pnlRaw !== "",
+      id: g(cells, c.id) || `${i}`,
+    });
+  }
+
+  fills.sort((a, b) => a.time.getTime() - b.time.getTime());
+
+  interface OpenLot { side: "BUY" | "SELL"; volume: number; price: number; time: Date; commission: number; id: string; }
+  const books = new Map<string, OpenLot[]>();
+  const trades: ParsedTrade[] = [];
+  let approxPnl = false;
+
+  for (const f of fills) {
+    const book = books.get(f.symbol) ?? [];
+    let remaining = f.volume;
+    // a fill closes opposite-side open lots FIFO
+    while (remaining > 0 && book.length > 0 && book[0].side !== f.side) {
+      const lot = book[0];
+      const matched = Math.min(remaining, lot.volume);
+      const posDir = lot.side; // position direction = the opening side
+      const entryPrice = lot.price;
+      const exitPrice = f.price;
+      // proportional commission for the matched slice
+      const commEntry = lot.volume > 0 ? (lot.commission * matched) / lot.volume : 0;
+      const commExit = f.volume > 0 ? (f.commission * matched) / f.volume : 0;
+      let pnlMoney: number;
+      if (f.hasPnl) {
+        pnlMoney = f.volume > 0 ? (f.pnl * matched) / f.volume : f.pnl;
+      } else {
+        const diff = posDir === "BUY" ? exitPrice - entryPrice : entryPrice - exitPrice;
+        pnlMoney = diff * matched;
+        approxPnl = true;
+      }
+      trades.push({
+        brokerTradeId: `${f.symbol}_${lot.id}_${f.id}`,
+        symbol: f.symbol,
+        direction: posDir,
+        entryTime: lot.time,
+        exitTime: f.time,
+        entryPrice,
+        exitPrice,
+        lotSize: matched,
+        pnlMoney,
+        commission: commEntry + commExit,
+        swap: f.swap,
+        instrumentType: detectInstrumentType(f.symbol),
+      });
+      lot.volume -= matched;
+      remaining -= matched;
+      if (lot.volume <= 1e-9) book.shift();
+    }
+    // any leftover opens a new lot in the fill's own direction
+    if (remaining > 1e-9) {
+      book.push({ side: f.side, volume: remaining, price: f.price, time: f.time, commission: f.commission, id: f.id });
+    }
+    books.set(f.symbol, book);
+  }
+
+  const stillOpen = [...books.values()].reduce((n, b) => n + b.length, 0);
+  if (stillOpen > 0) warnings.push(`${stillOpen} poziție(i) încă deschisă(e) — ignorate (doar tranzacțiile închise sunt importate).`);
+  if (approxPnl) warnings.push("P&L calculat din diferența de preț × volum (exportul nu conține P&L realizat) — verifică valoarea per punct.");
+
+  return { trades, format: `${label} (blotter FIFO)`, warnings };
+}
+
+export function parseTradeLockerCSV(csv: string): ParseResult {
+  return parseUniversalBrokerCSV(csv, "TradeLocker CSV");
+}
+
+export function parseDXtradeCSV(csv: string): ParseResult {
+  return parseUniversalBrokerCSV(csv, "DXtrade CSV");
 }
 
 // ─── CSV line parser (handles quoted fields) ──────────────────────────────────

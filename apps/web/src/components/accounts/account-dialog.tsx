@@ -480,7 +480,7 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
   const [type, setType]         = React.useState<AccountTyp>("LIVE");
   const [currency, setCur]      = React.useState("USD");
   const [broker, setBroker]     = React.useState("");
-  const [platform, setPlat]     = React.useState<"mt4" | "mt5" | "ctrader">("mt5");
+  const [platform, setPlat]     = React.useState<"mt4" | "mt5" | "ctrader" | "tradelocker" | "dxtrade">("mt5");
   const [loading, setLoading]   = React.useState(false);
   const [done, setDone]         = React.useState(false);
   const [error, setError]       = React.useState("");
@@ -496,6 +496,7 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
       fd.append("currency", currency);
       fd.append("balance", "0");
       fd.append("broker", broker);
+      fd.append("platform", platform);
       const res = await fetch("/api/accounts/import", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? t("importErr")); return; }
@@ -521,6 +522,11 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
     mt4: t("hintMt4"),
     mt5: t("hintMt5"),
     ctrader: t("hintCtrader"),
+    tradelocker: t("hintTradelocker"),
+    dxtrade: t("hintDxtrade"),
+  };
+  const platformLabel: Record<typeof platform, string> = {
+    mt4: "MT4", mt5: "MT5", ctrader: "cTrader", tradelocker: "TradeLocker", dxtrade: "DXtrade",
   };
 
   return (
@@ -529,13 +535,13 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
         <ChevronLeft className="w-4 h-4" />{t("back")}
       </button>
 
-      <div className="grid grid-cols-3 gap-2">
-        {(["mt4", "mt5", "ctrader"] as const).map(p => (
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+        {(["mt4", "mt5", "ctrader", "tradelocker", "dxtrade"] as const).map(p => (
           <button key={p} onClick={() => setPlat(p)}
-            className={cn("py-2 rounded-xl border text-sm font-bold transition-all",
+            className={cn("py-2 px-1 rounded-xl border text-xs sm:text-[13px] font-bold transition-all truncate",
               platform === p ? "bg-indigo-500/15 border-indigo-500/50 text-indigo-300"
                 : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
-            {p === "ctrader" ? "cTrader" : p.toUpperCase()}
+            {platformLabel[p]}
           </button>
         ))}
       </div>

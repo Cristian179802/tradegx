@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { autoDetectAndParse, detectInstrumentType } from "@/lib/parsers/index";
+import { autoDetectAndParse, parseByPlatform, detectInstrumentType } from "@/lib/parsers/index";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     const currency = (formData.get("currency") as string) || "USD";
     const balance = parseFloat((formData.get("balance") as string) || "0");
     const broker = (formData.get("broker") as string) || "";
+    const platform = ((formData.get("platform") as string) || "").toLowerCase();
     const tradingAccountId = formData.get("tradingAccountId") as string | null;
 
     if (!file) {
@@ -29,8 +30,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Fișierul este gol" }, { status: 400 });
     }
 
-    // Parse
-    const { trades, format, warnings } = autoDetectAndParse(content, file.name);
+    // Parse — the platform picked in the dialog is authoritative; fall back to
+    // content auto-detection when none was provided.
+    const { trades, format, warnings } = platform
+      ? parseByPlatform(platform, content, file.name)
+      : autoDetectAndParse(content, file.name);
 
     if (trades.length === 0) {
       return NextResponse.json({

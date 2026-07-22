@@ -1646,7 +1646,9 @@
     "titleMetaapi": "Conectare automată (MT4 / MT5)",
     "titleCsv": "Import fișier",
     "titleFormEdit": "Editează cont",
-    "titleFormNew": "Cont manual"
+    "titleFormNew": "Cont manual",
+    "hintTradelocker": "TradeLocker → Accounts → View account → secțiunea Trade History → cele 3 puncte → „Export account History” → CSV",
+    "hintDxtrade": "DXtrade → Positions / Orders → Export → CSV. E un jurnal de execuții — le combinăm automat în tranzacții (FIFO)."
   },
   "backtesting": {
     "stCustom": "Personalizată",

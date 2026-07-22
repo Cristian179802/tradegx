@@ -1646,7 +1646,9 @@
     "titleMetaapi": "Automatic connection (MT4 / MT5)",
     "titleCsv": "Import file",
     "titleFormEdit": "Edit account",
-    "titleFormNew": "Manual account"
+    "titleFormNew": "Manual account",
+    "hintTradelocker": "TradeLocker → Accounts → View account → Trade History section → the 3-dots menu → “Export account History” → CSV",
+    "hintDxtrade": "DXtrade → Positions / Orders → Export → CSV. It is a fills log — we pair them into round-trip trades automatically (FIFO)."
   },
   "backtesting": {
     "stCustom": "Custom",
