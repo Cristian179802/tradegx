@@ -92,7 +92,8 @@
     "worstTrade": "Worst trade",
     "avgWin": "Avg win",
     "avgLoss": "Avg loss",
-    "addTradeBtn": "Add trade"
+    "addTradeBtn": "Add trade",
+    "daysShort": "days"
   },
   "edge": {
     "subtitle": "The statistical engine that shows you exactly where you make and lose money — by symbol, setup, killzone, day, hour and duration.",

@@ -245,7 +245,9 @@ export function Sidebar() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.12 }}
-                  className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.12em] px-4 pt-4 pb-1.5 select-none"
+                  // zinc-700 (#3f3f46) pe fundal aproape negru = ~2:1 contrast,
+                  // practic ilizibil. --ink-3 urcă la ~6:1.
+                  className="text-[9px] font-black text-[#8b93a5] uppercase tracking-[0.12em] px-4 pt-4 pb-1.5 select-none"
                 >
                   {t(group.label)}
                 </motion.p>
@@ -269,7 +271,7 @@ export function Sidebar() {
                     "relative flex items-center gap-3 mx-2 px-2.5 py-[7px] rounded-xl text-sm transition-all duration-200 group cyber-scan",
                     isActive
                       ? cn("nav-item-active text-white font-semibold", colors.icon)
-                      : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/40",
+                      : "text-[#8b93a5] hover:text-[#f2f4f8] hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/40",
                     locked && "opacity-40 cursor-not-allowed"
                   )}
                 >
@@ -290,7 +292,7 @@ export function Sidebar() {
                     "w-[17px] h-[17px] shrink-0 transition-all duration-200",
                     isActive
                       ? cn(colors.icon)
-                      : "text-zinc-600 group-hover:text-zinc-300"
+                      : "text-[#5d6577] group-hover:text-[#c3c9d6]"
                   )} />
 
                   {/* Label */}
@@ -309,12 +311,14 @@ export function Sidebar() {
                   </AnimatePresence>
 
                   {expanded && item.proOnly && !isPro && (
-                    <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] px-1.5 py-0 h-4 font-bold">
+                    // PRO = accentul de brand. Ambra era o culoare decorativă
+                    // în plus, iar verdele de la „NOU" fura semantica P&L.
+                    <Badge className="bg-indigo-500/12 border border-indigo-500/25 text-indigo-300 text-[9px] px-1.5 py-0 h-4 font-bold">
                       PRO
                     </Badge>
                   )}
                   {expanded && item.badge && !item.proOnly && (
-                    <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0 h-4 font-bold">
+                    <Badge className="bg-violet-500/12 border border-violet-500/25 text-violet-300 text-[9px] px-1.5 py-0 h-4 font-bold">
                       {item.badge === "NOU" ? t("new") : item.badge}
                     </Badge>
                   )}

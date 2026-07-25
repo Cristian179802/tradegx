@@ -16,7 +16,8 @@ export default async function DashboardLayout({
   if (!session?.user) redirect("/login");
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#09090b" }}>
+    // tg-grain: aceeași textură ca pe landing, ca interiorul să nu pară alt produs.
+    <div className="tg-grain flex h-screen overflow-hidden" style={{ background: "var(--s-0)" }}>
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Topbar />

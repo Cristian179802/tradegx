@@ -383,15 +383,18 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           accent="indigo"
           delay={60}
         />
+        {/* Profit factor nu e nici câștig nici pierdere — e o metrică de calitate.
+            Ambra o făcea să pară avertizare și adăuga o a cincea culoare pe rând.
+            Verde/roșu rămân rezervate pentru PnL și drawdown. */}
         <KPICard
           label={t("profitFactor")}
           value={profitFactor !== null ? profitFactor.toFixed(2) : "—"}
           sub={profitFactor !== null ? (profitFactor >= 1.5 ? t("excellent") : profitFactor >= 1 ? t("positive") : t("negative")) : "—"}
           trend={profitFactor !== null ? (profitFactor >= 1 ? "up" : "down") : "neutral"}
           sparkData={sparklines.profitFactor}
-          sparkColor="#f59e0b"
+          sparkColor="#818cf8"
           icon={Flame}
-          accent="amber"
+          accent="indigo"
           delay={120}
         />
         <KPICard
@@ -417,61 +420,31 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* ── Streak Row ─────────────────────────────────────────────────────── */}
+      {/* ── Rând secundar: streak + săptămâna curentă ──────────────────────────
+          Ierarhie: acesta e context, nu titlu. Avea trei bare colorate cu glow
+          puternic (una pe ambră) care țipau mai tare decât KPI-urile de sus.
+          Acum: suprafețe neutre identice, accentul apare doar pe pictogramă, iar
+          valoarea rămâne eroul. Etichetele erau zinc-600 (~2.9:1) → --ink-4. */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-in-up delay-100">
-        {/* Streak */}
-        <div className="relative rounded-2xl border border-amber-500/25 overflow-hidden bg-zinc-900/80 px-5 py-4 flex items-center gap-4 hover:border-amber-400/50 transition-all group cursor-default"
-          style={{ background: "linear-gradient(135deg, rgba(24,24,28,0.97) 0%, rgba(15,15,18,0.99) 100%)" }}>
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl bg-amber-400 shadow-[2px_0_12px_rgba(245,158,11,0.7)]" />
-          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-amber-500/10 to-transparent" />
-          <div className="relative w-10 h-10 rounded-xl border border-amber-400/30 bg-amber-500/20 flex items-center justify-center text-xl shrink-0">
-            🔥
+        {[
+          { key: "streak", Icon: Flame,     value: String(streak), suffix: t("daysShort"), label: t("streakLabel") },
+          { key: "week",   Icon: BarChart2, value: String(weekStats.count), label: t("weekTrades") },
+          { key: "wr",     Icon: Target,    value: weekStats.winRate !== null ? `${weekStats.winRate.toFixed(0)}%` : "—", label: t("weekWinRate") },
+        ].map((c) => (
+          <div key={c.key} className="tg-surface rounded-2xl px-5 py-4 flex items-center gap-4 cursor-default transition-colors hover:border-indigo-500/30">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
+              style={{ background: "var(--accent-soft)", borderColor: "var(--accent-line)", color: "var(--accent)" }}>
+              <c.Icon className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[22px] font-black num tracking-tight leading-none" style={{ color: "var(--ink-1)" }}>
+                {c.value}
+                {c.suffix && <span className="text-sm font-bold ml-1" style={{ color: "var(--ink-4)" }}>{c.suffix}</span>}
+              </p>
+              <p className="text-[9px] font-black uppercase tracking-[0.1em] mt-1" style={{ color: "var(--ink-4)" }}>{c.label}</p>
+            </div>
           </div>
-          <div className="relative">
-            <p className="text-[22px] font-black num tracking-tight text-amber-300 leading-none">
-              {streak}<span className="text-sm font-bold text-amber-500/70 ml-1">zile</span>
-            </p>
-            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">{t("streakLabel")}</p>
-          </div>
-          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 bg-amber-500/20" />
-        </div>
-
-        {/* Trades this week */}
-        <div className="relative rounded-2xl border border-violet-500/25 overflow-hidden bg-zinc-900/80 px-5 py-4 flex items-center gap-4 hover:border-violet-400/50 transition-all group cursor-default"
-          style={{ background: "linear-gradient(135deg, rgba(24,24,28,0.97) 0%, rgba(15,15,18,0.99) 100%)" }}>
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl bg-violet-400 shadow-[2px_0_12px_rgba(139,92,246,0.7)]" />
-          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-violet-500/10 to-transparent" />
-          <div className="relative w-10 h-10 rounded-xl border border-violet-400/30 bg-violet-500/20 flex items-center justify-center shrink-0">
-            <BarChart2 className="w-5 h-5 text-violet-300" />
-          </div>
-          <div className="relative">
-            <p className="text-[22px] font-black num tracking-tight text-violet-200 leading-none">{weekStats.count}</p>
-            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">{t("weekTrades")}</p>
-          </div>
-          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 bg-violet-500/20" />
-        </div>
-
-        {/* Win rate this week */}
-        <div className="relative rounded-2xl border border-indigo-500/25 overflow-hidden bg-zinc-900/80 px-5 py-4 flex items-center gap-4 hover:border-indigo-400/50 transition-all group cursor-default"
-          style={{ background: "linear-gradient(135deg, rgba(24,24,28,0.97) 0%, rgba(15,15,18,0.99) 100%)" }}>
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl bg-indigo-400 shadow-[2px_0_12px_rgba(99,102,241,0.7)]" />
-          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-indigo-500/10 to-transparent" />
-          <div className="relative w-10 h-10 rounded-xl border border-indigo-400/30 bg-indigo-500/20 flex items-center justify-center shrink-0">
-            <Target className="w-5 h-5 text-indigo-300" />
-          </div>
-          <div className="relative">
-            <p className="text-[22px] font-black num tracking-tight text-indigo-200 leading-none">
-              {weekStats.winRate !== null ? `${weekStats.winRate.toFixed(0)}%` : "—"}
-            </p>
-            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-1">
-              {t("weekWinRate")}
-              {weekStats.count > 0 && (
-                <span className="text-zinc-700 normal-case tracking-normal"> · {weekStats.count} trades</span>
-              )}
-            </p>
-          </div>
-          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 bg-indigo-500/20" />
-        </div>
+        ))}
       </div>
 
       {/* ── Middle Row: Chart + Breakdown ──────────────────────────────────── */}
