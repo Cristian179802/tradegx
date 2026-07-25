@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { CommunityClient } from "./community-client";
 
-export const metadata: Metadata = { title: "Comunitate — TradeGX" };
+export const metadata: Metadata = { title: "Comunitate — TradeGx" };
 
 export default async function CommunityPage() {
   const session = await auth();

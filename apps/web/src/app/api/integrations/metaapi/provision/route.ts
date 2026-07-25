@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // 1. Create account in MetaAPI using TradeGX's platform token
+    // 1. Create account in MetaAPI using TradeGx's platform token
     let metaApiAccountId: string;
 
     try {

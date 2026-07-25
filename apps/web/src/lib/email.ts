@@ -15,7 +15,7 @@ export async function sendVerificationEmail(
   await getResend().emails.send({
     from: FROM,
     to: email,
-    subject: "Verifică adresa de email — TradeGX",
+    subject: "Verifică adresa de email — TradeGx",
     html: `
 <!DOCTYPE html>
 <html>
@@ -29,7 +29,7 @@ export async function sendVerificationEmail(
       <span style="font-size: 18px; font-weight: 700; color: #fafafa;">Trade<span style="color: #34d399;">GX</span></span>
     </div>
 
-    <h1 style="font-size: 22px; font-weight: 700; color: #fafafa; margin: 0 0 12px;">Bun venit la TradeGX!</h1>
+    <h1 style="font-size: 22px; font-weight: 700; color: #fafafa; margin: 0 0 12px;">Bun venit la TradeGx!</h1>
     <p style="color: #a1a1aa; font-size: 15px; line-height: 1.6; margin: 0 0 28px;">
       Verifică adresa de email pentru a-ți activa contul și a începe perioada de probă PRO de 14 zile.
     </p>
@@ -45,7 +45,7 @@ export async function sendVerificationEmail(
 
     <hr style="border: none; border-top: 1px solid #27272a; margin: 24px 0;">
     <p style="color: #52525b; font-size: 12px; margin: 0;">
-      TradeGX · Trading Journal Pro · <a href="${APP_URL}" style="color: #818cf8; text-decoration: none;">${APP_URL}</a>
+      TradeGx · Trading Journal Pro · <a href="${APP_URL}" style="color: #818cf8; text-decoration: none;">${APP_URL}</a>
     </p>
   </div>
 </body>
@@ -62,7 +62,7 @@ export async function sendPasswordResetEmail(
   await getResend().emails.send({
     from: FROM,
     to: email,
-    subject: "Resetează parola — TradeGX",
+    subject: "Resetează parola — TradeGx",
     html: `
 <!DOCTYPE html>
 <html>
@@ -92,7 +92,7 @@ export async function sendPasswordResetEmail(
 
     <hr style="border: none; border-top: 1px solid #27272a; margin: 24px 0;">
     <p style="color: #52525b; font-size: 12px; margin: 0;">
-      TradeGX · Trading Journal Pro · <a href="${APP_URL}" style="color: #818cf8; text-decoration: none;">${APP_URL}</a>
+      TradeGx · Trading Journal Pro · <a href="${APP_URL}" style="color: #818cf8; text-decoration: none;">${APP_URL}</a>
     </p>
   </div>
 </body>

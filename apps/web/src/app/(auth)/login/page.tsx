@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 
 export const metadata: Metadata = {
-  title: "Autentificare — TradeGX",
+  title: "Autentificare — TradeGx",
 };
 
 export default function LoginPage() {

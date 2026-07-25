@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "metaApiAccountId și tradingAccountId sunt obligatorii" }, { status: 400 });
   }
 
-  // Verify ownership of the TradeGX account
+  // Verify ownership of the TradeGx account
   const tradingAccount = await prisma.tradingAccount.findFirst({
     where: { id: tradingAccountId, userId: session.user.id },
   });

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { AIChatClient } from "./chat-client";
 import type { TraderStatsType } from "@/app/api/ai-assistant/chat/route";
 
-export const metadata: Metadata = { title: "AI Coach — TradeGX" };
+export const metadata: Metadata = { title: "AI Coach — TradeGx" };
 
 async function getTraderStats(userId: string): Promise<TraderStatsType> {
   const [accounts, trades, user] = await Promise.all([

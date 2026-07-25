@@ -131,7 +131,7 @@ async function buildTraderStats(userId: string): Promise<TraderStats> {
 }
 
 function buildSystemPrompt(s: TraderStats, mode: string): string {
-  return `Ești **TradeGX AI Coach** — un coach de trading de elită cu expertiză în Smart Money Concepts, ICT methodology, psihologie trading și risk management profesionist.
+  return `Ești **TradeGx AI Coach** — un coach de trading de elită cu expertiză în Smart Money Concepts, ICT methodology, psihologie trading și risk management profesionist.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 PROFIL: ${s.userName} | ${s.accountName} (${s.accountType})

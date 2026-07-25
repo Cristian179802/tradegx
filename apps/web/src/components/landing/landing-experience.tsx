@@ -10,13 +10,13 @@ import {
 import {
   BarChart3, Brain, BookOpen, Wifi, Shield, Calculator, GraduationCap,
   FlaskConical, Target, ArrowRight, CheckCircle2, Sparkles, ChevronRight,
-  Lock, Users, Zap, Activity, TrendingUp, Layers, ChevronDown, Telescope,
+  Lock, Users, Zap, Activity, TrendingUp, Layers, Telescope,
   Copy, Flame, Orbit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
-import { EASE, Reveal, FloatIdle, BreathingGlow, MarketBackdrop } from "@/components/landing/fx";
+import { EASE, Reveal, BreathingGlow, MarketBackdrop } from "@/components/landing/fx";
 import { HeroCinematic } from "@/components/landing/hero-cinematic";
 import { MagneticButton } from "@/components/landing/parallax";
 
@@ -56,16 +56,6 @@ function HudCorners({ rgb = "129,140,248", size = 14, inset = 10, opacity = 0.55
   );
 }
 
-// Linie-fascicul între secțiuni (divider luminos)
-function BeamDivider() {
-  return (
-    <div className="relative h-px max-w-4xl mx-auto overflow-visible" aria-hidden>
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/35 to-transparent" />
-      <div className="absolute left-1/2 -translate-x-1/2 -top-[2px] w-24 h-[5px] bg-indigo-400/40 blur-[6px] rounded-full" />
-    </div>
-  );
-}
-
 const STEP_META = [{ Icon: Wifi, rgb: "129,140,248" }, { Icon: BookOpen, rgb: "167,139,250" }, { Icon: Target, rgb: "52,211,153" }];
 const COMMIT_META = [{ Icon: Lock, rgb: "52,211,153" }, { Icon: Shield, rgb: "129,140,248" }, { Icon: Users, rgb: "167,139,250" }];
 const STAT_META = [{ v: 40, suffix: "+", rgb: "129,140,248", Icon: BarChart3 }, { v: 99.9, suffix: "%", decimals: 1, rgb: "52,211,153", Icon: Activity }, { v: 2, prefix: "< ", suffix: "s", rgb: "251,191,36", Icon: Zap }, { v: 0, custom: "E2E", rgb: "251,113,133", Icon: Lock }];
@@ -82,7 +72,7 @@ export function LandingExperience() {
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
-    <div className="relative min-h-screen bg-[#08080b] text-white overflow-x-hidden">
+    <div className="tg-grain relative min-h-screen text-white overflow-x-hidden" style={{ background: "var(--s-0)" }}>
       {/* Bară progres scroll sus */}
       <motion.div style={{ scaleX }} className="fixed top-0 left-0 right-0 h-0.5 z-[60] origin-left bg-gradient-to-r from-indigo-500 via-violet-500 to-emerald-400" />
 
@@ -93,7 +83,6 @@ export function LandingExperience() {
       <Hero t={t} />
       <StatsStrip t={t} />
       <Features t={t} />
-      <BeamDivider />
       <NumbersAct t={t} />
       <HowItWorks t={t} />
       <Trust t={t} />
@@ -112,11 +101,16 @@ type TT = ReturnType<typeof useTranslations>;
 // ── Navbar ───────────────────────────────────────────────────────────────────
 function Navbar({ t }: { t: TT }) {
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 border-b border-zinc-800/40 bg-[#08080b]/70 backdrop-blur-2xl">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-14">
+    // Fundal mai opac (70% → 88%): la 70% textul secțiunilor care trecea pe
+    // dedesubt rămânea parțial vizibil și titlurile arătau „retezate".
+    <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-2xl"
+      style={{ background: "rgba(7,8,12,0.88)", borderBottom: "1px solid var(--line-1)", height: "var(--nav-h)" }}>
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-full">
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="w-8 h-8 relative flex items-center justify-center shrink-0 rounded-xl bg-zinc-900 border border-zinc-800 group-hover:border-indigo-500/40 transition-all overflow-hidden">
-            <Image src="/logo.jpg" alt="TradeGx" width={32} height={32} className="object-contain" style={{ mixBlendMode: "screen" }} />
+            {/* priority: logo-ul e în viewport de la început — fără el apărea un
+                pătrat gri gol până se descărca imaginea. */}
+            <Image src="/logo.jpg" alt="TradeGx" width={32} height={32} priority className="object-contain" style={{ mixBlendMode: "screen" }} />
           </div>
           <span className="font-black text-white tracking-tight text-[15px]">Trade<span className="gradient-text-indigo">Gx</span></span>
         </Link>
@@ -140,44 +134,28 @@ function Navbar({ t }: { t: TT }) {
 function Hero({ t }: { t: TT }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const textY = useTransform(scrollYProgress, [0, 1], [0, 90]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const textScale = useTransform(scrollYProgress, [0, 1], [1, 1.06]); // camera zoom
-  const mockY = useTransform(scrollYProgress, [0, 1], [0, 180]);
-  const mockScale = useTransform(scrollYProgress, [0, 1], [1, 0.94]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, 70]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
+  const textScale = useTransform(scrollYProgress, [0, 1], [1, 1.04]); // camera zoom
+  // Deplasare redusă: parallax-ul mare împingea mock-ul în afara cadrului.
+  const mockY = useTransform(scrollYProgress, [0, 1], [0, 70]);
+  const mockScale = useTransform(scrollYProgress, [0, 1], [1, 0.97]);
 
   const words = t("heroTitle1").split(" ");
 
   return (
-    <section ref={ref} className="relative min-h-[100vh] pt-32 pb-20 px-6 overflow-hidden">
-      {/* Aurora — blob-uri statice care plutesc lent (transform only) */}
-      <div className="absolute inset-0 hero-grid-bg opacity-[0.22] pointer-events-none" />
-      <motion.div animate={{ x: [0, 40, 0], y: [0, -30, 0] }} transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[10%] left-[15%] w-[620px] h-[620px] bg-indigo-600/14 rounded-full blur-[120px] pointer-events-none" />
-      <motion.div animate={{ x: [0, -50, 0], y: [0, 40, 0] }} transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[20%] right-[10%] w-[520px] h-[520px] bg-violet-600/12 rounded-full blur-[120px] pointer-events-none" />
+    <section ref={ref} className="relative pt-28 pb-24 px-6">
+      {/* Decorul stă într-un strat propriu cu overflow-hidden. Secțiunea NU mai
+          taie conținutul — de asta mock-ul apărea retezat când urca parallax-ul. */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+        <div className="absolute inset-0 hero-grid-bg opacity-[0.16]" />
+        <motion.div animate={{ x: [0, 40, 0], y: [0, -30, 0] }} transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[8%] left-[12%] w-[620px] h-[620px] bg-indigo-600/12 rounded-full blur-[130px]" />
+        <motion.div animate={{ x: [0, -50, 0], y: [0, 40, 0] }} transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[18%] right-[8%] w-[520px] h-[520px] bg-violet-600/10 rounded-full blur-[130px]" />
 
-      {/* Scenă cinematică: imaginea Bull vs Bear + SMC + nebula */}
-      <HeroCinematic />
-
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none" />
-
-      {/* HUD: rame de colț pe tot viewportul hero */}
-      <div className="absolute inset-x-4 top-20 bottom-4 pointer-events-none hidden md:block" aria-hidden>
-        <HudCorners rgb="129,140,248" size={22} inset={0} opacity={0.35} />
-      </div>
-
-      {/* HUD: readout mono sub navbar (decor tehnic) */}
-      <div className="absolute top-[4.2rem] inset-x-0 hidden md:flex justify-center pointer-events-none" aria-hidden>
-        <div className="flex items-center gap-5 font-mono text-[9px] tracking-[0.25em] text-zinc-600 uppercase">
-          <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />SYS ONLINE</span>
-          <span className="opacity-40">|</span>
-          <span>MT4 · MT5 · TV</span>
-          <span className="opacity-40">|</span>
-          <span className="text-indigo-400/70">AI CORE ACTIVE</span>
-          <span className="opacity-40">|</span>
-          <span>E2E SECURE</span>
-        </div>
+        {/* Scenă cinematică: orizontul Bull vs Bear */}
+        <HeroCinematic />
       </div>
 
       <motion.div style={{ y: textY, opacity: textOpacity, scale: textScale }} className="relative z-10 max-w-4xl mx-auto text-center">
@@ -188,27 +166,29 @@ function Hero({ t }: { t: TT }) {
           </div>
         </Reveal>
 
-        <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.02] mb-6">
+        <h1 className="tg-display mb-6" style={{ color: "var(--ink-1)" }}>
           <span className="inline-block">
             {words.map((w, i) => (
               <motion.span key={i} className="inline-block mr-[0.25em]"
-                initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
+                initial={{ opacity: 0, y: 24, filter: "blur(4px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 0.7, delay: 0.1 + i * 0.08, ease: EASE }}>
+                transition={{ duration: 0.6, delay: 0.08 + i * 0.07, ease: EASE }}>
                 {w}
               </motion.span>
             ))}
           </span>
           <br />
-          <motion.span className="relative inline-block bg-gradient-to-r from-indigo-400 via-violet-400 to-purple-400 bg-clip-text text-transparent"
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35, ease: EASE }}>
+          {/* Gradient mai luminos: violetul închis pe fundal negru pica sub
+              pragul de contrast și titlul „murdărea". */}
+          <motion.span className="relative inline-block bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-200 bg-clip-text text-transparent"
+            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.32, ease: EASE }}>
             {t("heroTitle2")}
           </motion.span>
         </h1>
 
         <Reveal delay={0.5}>
-          <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
-            {t.rich("heroSubtitle", { b: (c) => <strong className="text-zinc-200">{c}</strong> })}
+          <p className="tg-lead max-w-2xl mx-auto mb-10">
+            {t.rich("heroSubtitle", { b: (c) => <strong style={{ color: "var(--ink-1)" }} className="font-semibold">{c}</strong> })}
           </p>
         </Reveal>
 
@@ -297,37 +277,32 @@ function Hero({ t }: { t: TT }) {
         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-16 bg-indigo-500/12 blur-2xl rounded-full pointer-events-none" />
       </motion.div>
 
-      {/* Indicator scroll */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.2, duration: 1 }}
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 pointer-events-none">
-        <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-600">{t("heroScroll")}</span>
-        <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
-          <ChevronDown className="w-4 h-4 text-indigo-400/70" />
-        </motion.div>
-      </motion.div>
     </section>
   );
 }
 
 // ── Stats strip ──────────────────────────────────────────────────────────────
+// Disciplină: patru culori decorative diferite arătau ca un joc. Acum o singură
+// suprafață neutră + accentul de brand pe cifre. `-mt-4` a dispărut: banda
+// intra peste cockpit-ul din hero. FloatIdle scos — plutirea simultană a patru
+// carduri concura cu parallax-ul de deasupra.
 function StatsStrip({ t }: { t: TT }) {
   const labels = ["stat1", "stat2", "stat3", "stat4"];
   return (
-    <section className="relative px-6 -mt-4 pb-8">
+    <section className="relative px-6 pt-6 pb-14">
       <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
         {STAT_META.map((s, i) => (
-          <Reveal key={i} delay={i * 0.08}>
-            <FloatIdle amount={5} duration={5 + i} delay={i * 0.4}>
-              <div className="rounded-2xl border p-4 text-center bg-zinc-900/50 backdrop-blur-xl shadow-lg shadow-black/30" style={{ borderColor: `rgba(${s.rgb},0.28)`, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 30px -14px rgba(${s.rgb},0.4)` }}>
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto mb-2 border" style={{ background: `rgba(${s.rgb},0.12)`, borderColor: `rgba(${s.rgb},0.25)`, color: `rgb(${s.rgb})` }}>
-                  <s.Icon className="w-4 h-4" />
-                </div>
-                <p className="text-2xl font-black num" style={{ color: `rgb(${s.rgb})` }}>
-                  {s.custom ? s.custom : <CountOnView value={s.v} decimals={s.decimals ?? 0} prefix={s.prefix ?? ""} suffix={s.suffix ?? ""} />}
-                </p>
-                <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">{t(labels[i])}</p>
+          <Reveal key={i} delay={i * 0.07}>
+            <div className="tg-surface rounded-2xl p-4 text-center backdrop-blur-xl">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto mb-2 border"
+                style={{ background: "var(--accent-soft)", borderColor: "var(--accent-line)", color: "var(--accent)" }}>
+                <s.Icon className="w-4 h-4" />
               </div>
-            </FloatIdle>
+              <p className="text-2xl font-black num" style={{ color: "var(--ink-1)" }}>
+                {s.custom ? s.custom : <CountOnView value={s.v} decimals={s.decimals ?? 0} prefix={s.prefix ?? ""} suffix={s.suffix ?? ""} />}
+              </p>
+              <p className="text-[11px] mt-0.5 font-medium" style={{ color: "var(--ink-4)" }}>{t(labels[i])}</p>
+            </div>
           </Reveal>
         ))}
       </div>
@@ -402,56 +377,33 @@ function BentoTile({
         <div className="absolute -inset-12 opacity-40 pointer-events-none" style={{ background: `radial-gradient(ellipse at 80% 0%, rgba(${rgb},0.14), transparent 60%)` }} />
         <div className="relative flex items-center gap-2 mb-3" style={{ transform: "translateZ(30px)" }}>
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border" style={{ background: `rgba(${rgb},0.16)`, borderColor: `rgba(${rgb},0.3)`, color: `rgb(${rgb})` }}><Icon className="w-4 h-4" /></div>
-          <span className="text-[13px] font-bold text-zinc-100 leading-tight">{label}</span>
+          <span className="text-[13px] font-bold leading-tight" style={{ color: "var(--ink-1)" }}>{label}</span>
         </div>
-        <div className="relative" style={{ transform: "translateZ(20px)" }}>{children}</div>
+        {/* Coloană pe toată înălțimea: tile-urile înalte (row-span-2) rămâneau cu
+            un gol mare jos pentru că conținutul se aduna sus. Acum copiii pot
+            folosi `mt-auto` ca să ancoreze la bază. */}
+        <div className="relative flex flex-col" style={{ transform: "translateZ(20px)", height: "calc(100% - 2.5rem)" }}>{children}</div>
       </Tilt3D>
     </motion.div>
-  );
-}
-
-// Fundal decorativ: lumânări care plutesc (temă trading)
-function CandlesBg() {
-  const candles = React.useMemo(
-    () => Array.from({ length: 40 }, (_, i) => ({
-      up: Math.random() > 0.45,
-      h: 20 + Math.random() * 70,
-      wick: 12 + Math.random() * 22,
-      y: Math.random() * 40,
-      x: i * 26,
-    })), []);
-  return (
-    <div className="absolute inset-x-0 bottom-0 h-64 overflow-hidden pointer-events-none opacity-[0.13]">
-      <motion.div className="absolute bottom-10 left-0 flex items-end gap-3 w-max"
-        animate={{ x: ["0%", "-50%"] }} transition={{ duration: 40, repeat: Infinity, ease: "linear" }}>
-        {[...candles, ...candles].map((c, i) => {
-          const col = c.up ? "#34d399" : "#f43f5e";
-          return (
-            <svg key={i} width="14" height="160" viewBox="0 0 14 160" style={{ transform: `translateY(${c.y}px)` }}>
-              <line x1="7" y1={80 - c.wick} x2="7" y2={80 + c.h + c.wick} stroke={col} strokeWidth="1.5" />
-              <rect x="2" y={80} width="10" height={c.h} rx="1.5" fill={col} />
-            </svg>
-          );
-        })}
-      </motion.div>
-    </div>
   );
 }
 
 // ── Features — bento grid cu mini-mock-uri reale ale funcțiilor ───────────────
 function Features({ t }: { t: TT }) {
   return (
-    <section id="features" className="relative py-24 px-6 overflow-hidden">
-      {/* Fundal futurist: grilă în perspectivă + glow + lumânări */}
-      <div className="tg-grid-floor" />
-      <CandlesBg />
-      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 8%, rgba(99,102,241,0.10), transparent 55%)" }} />
+    <section id="features" className="tg-anchor tg-section relative px-6 overflow-hidden">
+      {/* Un singur element de fundal. Grila în perspectivă PLUS 40 de lumânări
+          saturate erau două efecte care se concurau și scoteau ochiul din grid —
+          care e vedeta secțiunii. Am păstrat doar lumina de sus. */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 6%, rgba(109,117,246,0.10), transparent 58%)" }} />
       <div className="relative z-10 max-w-6xl mx-auto">
         <SectionHeader t={t} num="01" rgb="129,140,248" icon={Layers} badge={t("featuresBadge")} title={t("featuresTitle")} sub={t("featuresSub")} />
 
-        <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 md:auto-rows-[168px] md:grid-flow-dense">
+        {/* auto-rows-min în loc de 168px fix: rândurile se strâng pe conținut.
+            Cu înălțime fixă, tile-urile scurte rămâneau cu 40-100px de gol. */}
+        <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 md:auto-rows-min md:grid-flow-dense">
           {/* AI Signals — tile mare */}
-          <BentoTile span="col-span-2 md:row-span-2" rgb="129,140,248" Icon={Brain} label={t("f2T")}>
+          <BentoTile span="col-span-2" rgb="109,117,246" Icon={Brain} label={t("f2T")}>
             <span className="absolute top-4 right-4 text-[9px] font-black text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded-full px-2 py-0.5">HPS</span>
             <div className="rounded-xl border border-zinc-800/70 bg-zinc-950/50 p-3 mt-1">
               <div className="flex items-center justify-between mb-2.5">
@@ -473,11 +425,11 @@ function Features({ t }: { t: TT }) {
                 <span className="text-[10px] font-black text-emerald-400 num">82%</span>
               </div>
             </div>
-            <p className="text-[11px] text-zinc-500 mt-3 leading-relaxed">{t("f2D")}</p>
+            <p className="text-[11px] mt-auto pt-3 leading-relaxed" style={{ color: "var(--ink-4)" }}>{t("f2D")}</p>
           </BentoTile>
 
           {/* Analytics */}
-          <BentoTile span="col-span-2" rgb="167,139,250" Icon={BarChart3} label={t("f1T")} delay={0.05}>
+          <BentoTile span="col-span-2" rgb="139,92,246" Icon={BarChart3} label={t("f1T")} delay={0.05}>
             <svg viewBox="0 0 300 54" className="w-full h-12">
               <defs><linearGradient id="bt-an" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#a78bfa" stopOpacity="0.35" /><stop offset="100%" stopColor="#a78bfa" stopOpacity="0" /></linearGradient></defs>
               <path d="M0 46 C40 42 60 30 90 32 C130 35 150 14 190 12 C230 10 250 24 300 4" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" />
@@ -490,7 +442,7 @@ function Features({ t }: { t: TT }) {
           </BentoTile>
 
           {/* Journal */}
-          <BentoTile span="col-span-1" rgb="52,211,153" Icon={BookOpen} label={t("f3T")} delay={0.1}>
+          <BentoTile span="col-span-1" rgb="109,117,246" Icon={BookOpen} label={t("f3T")} delay={0.1}>
             <div className="rounded-lg bg-zinc-950/50 border border-zinc-800/60 p-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-zinc-200">GBP/USD</span>
@@ -503,7 +455,7 @@ function Features({ t }: { t: TT }) {
           </BentoTile>
 
           {/* Broker sync */}
-          <BentoTile span="col-span-1" rgb="251,191,36" Icon={Wifi} label={t("f4T")} delay={0.15}>
+          <BentoTile span="col-span-1" rgb="109,117,246" Icon={Wifi} label={t("f4T")} delay={0.15}>
             <div className="rounded-lg bg-zinc-950/50 border border-zinc-800/60 p-2.5">
               <div className="flex items-center gap-1.5 mb-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -515,7 +467,7 @@ function Features({ t }: { t: TT }) {
           </BentoTile>
 
           {/* Risk Manager */}
-          <BentoTile span="col-span-2" rgb="251,113,133" Icon={Shield} label={t("f5T")} delay={0.1}>
+          <BentoTile span="col-span-2" rgb="109,117,246" Icon={Shield} label={t("f5T")} delay={0.1}>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[9px] text-zinc-600 uppercase font-bold tracking-wide mb-1">{t("btRiskPerTrade")}</p>
@@ -533,17 +485,17 @@ function Features({ t }: { t: TT }) {
           </BentoTile>
 
           {/* Lot Calculator */}
-          <BentoTile span="col-span-1" rgb="56,189,248" Icon={Calculator} label={t("f6T")} delay={0.15}>
+          <BentoTile span="col-span-1" rgb="109,117,246" Icon={Calculator} label={t("f6T")} delay={0.15}>
             <div className="text-center py-1">
-              <p className="text-3xl font-black text-sky-300 num leading-none">0.52</p>
+              <p className="text-3xl font-black num leading-none" style={{ color: "var(--accent)" }}>0.52</p>
               <p className="text-[9px] text-zinc-600 mt-1">EURUSD · 20 pips</p>
             </div>
           </BentoTile>
 
           {/* Backtesting */}
-          <BentoTile span="col-span-1" rgb="244,63,94" Icon={FlaskConical} label={t("f8T")} delay={0.2}>
+          <BentoTile span="col-span-1" rgb="139,92,246" Icon={FlaskConical} label={t("f8T")} delay={0.2}>
             <svg viewBox="0 0 120 40" className="w-full h-9">
-              {[18, 28, 22, 34, 26, 32].map((h, i) => <rect key={i} x={i * 20 + 2} y={38 - h} width={14} height={h} rx={2} fill="#fb7185" opacity={0.4 + (h / 34) * 0.5} />)}
+              {[18, 28, 22, 34, 26, 32].map((h, i) => <rect key={i} x={i * 20 + 2} y={38 - h} width={14} height={h} rx={2} fill="#8b5cf6" opacity={0.4 + (h / 34) * 0.5} />)}
             </svg>
             <p className="text-[10px] text-zinc-500 mt-1">+$536 · <span className="text-zinc-300 num">PF 1.11</span></p>
           </BentoTile>
@@ -579,15 +531,18 @@ function Features({ t }: { t: TT }) {
 function NumbersAct({ t }: { t: TT }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const chartY = useTransform(scrollYProgress, [0, 1], [60, -60]);
-  const k1 = useTransform(scrollYProgress, [0, 1], [70, -70]);
-  const k2 = useTransform(scrollYProgress, [0, 1], [110, -50]);
-  const k3 = useTransform(scrollYProgress, [0, 1], [40, -110]);
-  const k4 = useTransform(scrollYProgress, [0, 1], [90, -60]);
+  const chartY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  // Cardul de jos primește MEREU un offset mai mare decât cel de sus (+35px
+  // constant), deci distanța dintre ele nu poate scădea. Înainte k1/k3 se
+  // apropiau cu 30px+ și se suprapuneau peste gap-ul de 20px.
+  const k1 = useTransform(scrollYProgress, [0, 1], [20, -40]);   // stânga sus
+  const k3 = useTransform(scrollYProgress, [0, 1], [55, -5]);    // stânga jos
+  const k2 = useTransform(scrollYProgress, [0, 1], [20, -40]);   // dreapta sus
+  const k4 = useTransform(scrollYProgress, [0, 1], [55, -5]);    // dreapta jos
 
   return (
-    <section ref={ref} className="relative py-28 px-6 overflow-hidden">
-      <div className="absolute inset-0 hero-grid-bg opacity-[0.14] pointer-events-none" />
+    <section ref={ref} className="tg-section relative px-6 overflow-hidden">
+      <div className="absolute inset-0 hero-grid-bg opacity-[0.12] pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[380px] bg-indigo-600/10 rounded-full blur-[130px] pointer-events-none" />
 
       <div className="relative max-w-5xl mx-auto">
@@ -656,7 +611,7 @@ function Kpi({ rgb, Icon, label, children }: { rgb: string; Icon: React.Componen
 // ── How it works ─────────────────────────────────────────────────────────────
 function HowItWorks({ t }: { t: TT }) {
   return (
-    <section id="how-it-works" className="relative py-24 px-6 bg-zinc-900/20">
+    <section id="how-it-works" className="tg-anchor tg-section relative px-6" style={{ background: "var(--s-1)" }}>
       <div className="max-w-5xl mx-auto">
         <SectionHeader t={t} num="03" rgb="167,139,250" icon={ChevronRight} badge={t("howBadge")} title={t("howTitle")} sub={t("howSub")} />
         <div className="relative mt-14">
@@ -693,7 +648,7 @@ function HowItWorks({ t }: { t: TT }) {
 // ── Trust ────────────────────────────────────────────────────────────────────
 function Trust({ t }: { t: TT }) {
   return (
-    <section className="relative py-24 px-6">
+    <section className="tg-section relative px-6">
       <div className="max-w-5xl mx-auto">
         <SectionHeader t={t} num="04" rgb="52,211,153" icon={Shield} badge={t("transpBadge")} title={t("transpTitle")} sub={t("transpSub")} />
         <div className="mt-14 grid md:grid-cols-3 gap-4">
@@ -755,7 +710,7 @@ function VisionTeaser({ t }: { t: TT }) {
     })), []);
 
   return (
-    <section className="relative py-28 px-6 overflow-hidden">
+    <section className="tg-section relative px-6 overflow-hidden">
       {/* cer înstelat + nebuloasă violetă */}
       <div className="absolute inset-0 pointer-events-none">
         {stars.map((st, i) => (

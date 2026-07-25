@@ -36,7 +36,7 @@ export function PrivacyTab() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `TradeGX-data-${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `TradeGx-data-${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
       toast({ title: t("exportDoneTitle"), description: t("exportDoneDesc") });

@@ -1,4 +1,4 @@
-﻿// ─── TradeGX Backtesting Engine ───────────────────────────────────────────
+﻿// ─── TradeGx Backtesting Engine ───────────────────────────────────────────
 // Pure functions — no I/O, no Prisma. Receives candles + config, returns results.
 
 import type { Candle } from "./yahoo-finance";

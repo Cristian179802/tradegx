@@ -10,7 +10,7 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   const team = await prisma.team.findUnique({ where: { id }, select: { name: true } });
-  return { title: team ? `${team.name} — TradeGX Comunitate` : "Comunitate" };
+  return { title: team ? `${team.name} — TradeGx Comunitate` : "Comunitate" };
 }
 
 export default async function TeamPage({ params }: Props) {

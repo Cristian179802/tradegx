@@ -20,7 +20,7 @@ export async function GET() {
   try {
     const accounts = await listAccounts(integration.apiKey);
 
-    // Fetch user's TradeGX accounts to show linking status
+    // Fetch user's TradeGx accounts to show linking status
     const tradingAccounts = await prisma.tradingAccount.findMany({
       where: { userId: session.user.id },
       select: { id: true, name: true, type: true, metaApiId: true },

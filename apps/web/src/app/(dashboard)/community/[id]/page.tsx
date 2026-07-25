@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props) {
     where: { id },
     select: { title: true },
   });
-  return { title: post?.title ?? "Postare — TradeGX Comunitate" };
+  return { title: post?.title ?? "Postare — TradeGx Comunitate" };
 }
 
 export default async function PostPage({ params }: Props) {

@@ -4,15 +4,18 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { ParallaxScene, ParallaxLayer } from "@/components/landing/parallax";
 
-// ── Hero cinematic (institutional) ───────────────────────────────────────────
-// Ziduri de candele roșu/verde, embers în centru, etichete SMC, nebula.
-// Slot pentru imagine reală: pune un render în /public/hero-battle.jpg și apare
-// automat ca centru al scenei (behind text). Totul pe canvas/transform (GPU).
+// ── Hero cinematic ───────────────────────────────────────────────────────────
+// Principiul de compoziție: textul trăiește în spațiu negativ CURAT, iar drama
+// vizuală stă jos, ca un orizont. Imaginea nu mai concurează cu titlul — e
+// gradată puternic (desaturată + întunecată) și mascată să dispară complet în
+// treimea de sus. Patru straturi reținute în locul a opt zgomotoase.
 
 const reduced = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// ── Nebula + stele + ceață (canvas, 1 rAF, ușor) ─────────────────────────────
+// ── Nebuloasă rece (canvas, 1 rAF) ───────────────────────────────────────────
+// Doar ceață + stele, în paleta de accent. Fără portocaliu/embers: culoarea
+// caldă ieșea din paleta de brand și făcea imaginea „murdară".
 function NebulaCanvas() {
   const ref = React.useRef<HTMLCanvasElement>(null);
   React.useEffect(() => {
@@ -24,8 +27,8 @@ function NebulaCanvas() {
     type Star = { x: number; y: number; r: number; a: number; tw: number };
     let stars: Star[] = [];
     const fog = [
-      { x: 0.28, y: 0.4, hue: "99,102,241", dx: 0.06, dy: 0.03, px: 0, py: 0 },
-      { x: 0.72, y: 0.5, hue: "139,92,246", dx: -0.05, dy: 0.03, px: 0, py: 0 },
+      { x: 0.30, y: 0.35, hue: "109,117,246", dx: 0.05, dy: 0.02, px: 0, py: 0 },
+      { x: 0.70, y: 0.55, hue: "139,92,246",  dx: -0.04, dy: 0.02, px: 0, py: 0 },
     ];
 
     function init() {
@@ -35,9 +38,9 @@ function NebulaCanvas() {
       canvas!.width = Math.floor(w * dpr); canvas!.height = Math.floor(h * dpr);
       canvas!.style.width = w + "px"; canvas!.style.height = h + "px";
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-      stars = Array.from({ length: Math.min(120, Math.round((w * h) / 14000)) }, () => ({
-        x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.2 + 0.2,
-        a: Math.random(), tw: Math.random() * 0.015 + 0.003,
+      stars = Array.from({ length: Math.min(90, Math.round((w * h) / 18000)) }, () => ({
+        x: Math.random() * w, y: Math.random() * h * 0.7, r: Math.random() * 1.1 + 0.2,
+        a: Math.random(), tw: Math.random() * 0.012 + 0.003,
       }));
       for (const f of fog) { f.px = f.x * w; f.py = f.y * h; }
     }
@@ -50,12 +53,12 @@ function NebulaCanvas() {
         if (!rm) { f.px += f.dx; f.py += f.dy; const rr = Math.max(w, h) * 0.55; if (f.px < -rr) f.px = w + rr; if (f.px > w + rr) f.px = -rr; }
         const rr = Math.max(w, h) * 0.55;
         const g = ctx!.createRadialGradient(f.px, f.py, 0, f.px, f.py, rr);
-        g.addColorStop(0, `rgba(${f.hue},0.05)`); g.addColorStop(1, `rgba(${f.hue},0)`);
+        g.addColorStop(0, `rgba(${f.hue},0.045)`); g.addColorStop(1, `rgba(${f.hue},0)`);
         ctx!.fillStyle = g; ctx!.fillRect(0, 0, w, h);
       }
       for (const s of stars) {
         if (!rm) { s.a += s.tw; if (s.a > 1 || s.a < 0) s.tw *= -1; }
-        ctx!.globalAlpha = 0.2 + Math.abs(s.a) * 0.5;
+        ctx!.globalAlpha = 0.15 + Math.abs(s.a) * 0.4;
         ctx!.beginPath(); ctx!.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx!.fillStyle = "#c7d2fe"; ctx!.fill();
       }
@@ -68,154 +71,85 @@ function NebulaCanvas() {
   return <canvas ref={ref} className="absolute inset-0 w-full h-full" />;
 }
 
-// ── Zid de candele (o parte) — dens, cu glow, perspectivă ────────────────────
-function CandleWall({ side }: { side: "left" | "right" }) {
-  const bull = side === "right";
-  const col = bull ? "52,211,153" : "244,63,94";
-  const N = 16;
+// ── Orizont: zid de candele stilizat, jos, ca linie de teren ─────────────────
+// Fallback când imaginea lipsește — dar și el trăieşte DOAR jos.
+function CandleHorizon() {
+  const N = 34;
   const candles = React.useMemo(() => {
-    let base = 0.5;
-    return Array.from({ length: N }, (_, i) => {
-      base += (bull ? 1 : -1) * (0.02 + Math.random() * 0.05);
-      base = Math.max(0.12, Math.min(0.9, base));
-      const bodyUp = Math.random() > (bull ? 0.32 : 0.68);
-      const depth = i / N; // spre centru = mai aproape
-      const near = side === "right" ? depth : 1 - depth;
-      return { base, bodyUp, near, h: 26 + Math.random() * 46 };
+    let base = 0.45;
+    return Array.from({ length: N }, () => {
+      base += (Math.random() - 0.42) * 0.09;
+      base = Math.max(0.14, Math.min(0.88, base));
+      return { base, up: Math.random() > 0.42, h: 18 + Math.random() * 40 };
     });
-  }, [bull, side]);
-
-  return (
-    <div className={`absolute top-[12%] bottom-[22%] ${side === "left" ? "left-0" : "right-0"} w-[42%] md:w-[36%]`}
-      style={{ perspective: "700px", maskImage: `linear-gradient(to ${side === "left" ? "right" : "left"}, #000 40%, transparent)`, WebkitMaskImage: `linear-gradient(to ${side === "left" ? "right" : "left"}, #000 40%, transparent)` }}>
-      <div className="absolute inset-0" style={{ transform: side === "left" ? "rotateY(18deg)" : "rotateY(-18deg)", transformOrigin: side === "left" ? "left center" : "right center" }}>
-        {candles.map((c, i) => {
-          const x = side === "right" ? (100 - (i + 1) * (100 / N)) : (i * (100 / N));
-          const yTop = (1 - c.base) * 60; // %
-          const glow = 0.15 + c.near * 0.45;
-          const wcol = c.bodyUp ? col : (bull ? "16,120,90" : "150,40,55");
-          return (
-            <div key={i} className="absolute" style={{ left: `${x}%`, top: `${yTop}%`, width: `${100 / N * 0.58}%` }}>
-              <div className="mx-auto w-px" style={{ height: 10 + c.near * 10, background: `rgba(${col},${0.4 + c.near * 0.4})` }} />
-              <div className="rounded-[2px]" style={{
-                height: c.h + c.near * 22,
-                background: `linear-gradient(180deg, rgba(${wcol},${glow + 0.25}), rgba(${wcol},${glow}))`,
-                boxShadow: `0 0 ${8 + c.near * 16}px rgba(${col},${glow})`,
-                filter: c.near < 0.35 ? "blur(1.2px)" : "none",
-              }} />
-            </div>
-          );
-        })}
-      </div>
-      {/* lumină laterală */}
-      <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at ${side === "left" ? "0% 50%" : "100% 50%"}, rgba(${col},0.14), transparent 60%)` }} />
-    </div>
-  );
-}
-
-// ── Embers în centru (canvas ușor) ───────────────────────────────────────────
-function Embers() {
-  const ref = React.useRef<HTMLCanvasElement>(null);
-  React.useEffect(() => {
-    const canvas = ref.current; if (!canvas) return;
-    const ctx = canvas.getContext("2d"); if (!ctx) return;
-    if (reduced()) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    let w = 0, h = 0, raf = 0;
-    type P = { x: number; y: number; vy: number; vx: number; r: number; life: number; max: number; hot: boolean };
-    let ps: P[] = [];
-    function init() {
-      const p = canvas!.parentElement; w = p ? p.clientWidth : 400; h = p ? p.clientHeight : 400;
-      canvas!.width = Math.floor(w * dpr); canvas!.height = Math.floor(h * dpr);
-      canvas!.style.width = w + "px"; canvas!.style.height = h + "px";
-      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    init(); window.addEventListener("resize", init);
-    function spawn(): P {
-      return { x: w / 2 + (Math.random() - 0.5) * w * 0.28, y: h * 0.62 + Math.random() * 40, vy: -(0.3 + Math.random() * 1.1), vx: (Math.random() - 0.5) * 0.6, r: 0.6 + Math.random() * 1.8, life: 0, max: 60 + Math.random() * 80, hot: Math.random() > 0.5 };
-    }
-    for (let i = 0; i < 26; i++) { const p = spawn(); p.life = Math.random() * p.max; ps.push(p); }
-    function frame() {
-      ctx!.clearRect(0, 0, w, h);
-      for (const p of ps) {
-        p.x += p.vx; p.y += p.vy; p.vy *= 0.995; p.life++;
-        if (p.life > p.max) Object.assign(p, spawn());
-        const t = 1 - p.life / p.max;
-        ctx!.globalAlpha = t * 0.8;
-        ctx!.beginPath(); ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx!.fillStyle = p.hot ? "#fbbf24" : "#f97316";
-        ctx!.shadowColor = p.hot ? "rgba(251,191,36,0.8)" : "rgba(249,115,22,0.8)";
-        ctx!.shadowBlur = 6; ctx!.fill();
-      }
-      ctx!.globalAlpha = 1; ctx!.shadowBlur = 0;
-      raf = requestAnimationFrame(frame);
-    }
-    raf = requestAnimationFrame(frame);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", init); };
   }, []);
-  return <canvas ref={ref} className="absolute inset-0 w-full h-full" />;
-}
-
-// ── Etichete SMC (ca în referință) ───────────────────────────────────────────
-function SmcLabel({ text, cls, color, box }: { text: string; cls: string; color: "red" | "green" | "zinc"; box?: boolean }) {
-  const c = color === "red" ? "244,63,94" : color === "green" ? "52,211,153" : "161,161,170";
   return (
-    <motion.div className={`absolute ${cls}`} animate={{ opacity: [0.45, 0.8, 0.45] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
-      <div className="text-[9px] md:text-[10px] font-black tracking-widest uppercase" style={{ color: `rgb(${c})`, textShadow: `0 0 12px rgba(${c},0.5)` }}>{text}</div>
-      {box && <div className="mt-1 rounded-sm border border-dashed" style={{ width: 70, height: 26, borderColor: `rgba(${c},0.5)`, background: `rgba(${c},0.06)` }} />}
-    </motion.div>
+    <div className="absolute inset-x-0 bottom-0 h-[42%]"
+      style={{ maskImage: "linear-gradient(to top, #000 20%, transparent 95%)", WebkitMaskImage: "linear-gradient(to top, #000 20%, transparent 95%)" }}>
+      {candles.map((c, i) => {
+        // Verde/roșu aici e semantic (bull/bear), nu decor — singura excepție.
+        const col = c.up ? "52,211,153" : "251,92,114";
+        return (
+          <div key={i} className="absolute bottom-0" style={{ left: `${(i / N) * 100}%`, width: `${(100 / N) * 0.55}%` }}>
+            <div className="rounded-[1px]" style={{
+              height: c.h + c.base * 60,
+              background: `linear-gradient(180deg, rgba(${col},0.30), rgba(${col},0.06))`,
+              boxShadow: `0 0 14px rgba(${col},0.14)`,
+            }} />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
 // ── Compunerea ───────────────────────────────────────────────────────────────
 export function HeroCinematic() {
   const [imgOk, setImgOk] = React.useState(true);
+
   return (
     <ParallaxScene className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* L1 nebula (subtilă în spate) */}
-      <div className="absolute inset-0" style={{ opacity: 0.55 }}><NebulaCanvas /></div>
+      {/* L1 — nebuloasă rece, foarte discretă */}
+      <div className="absolute inset-0" style={{ opacity: 0.5 }}><NebulaCanvas /></div>
 
+      {/* L2 — imaginea ca ORIZONT: gradată tare, mascată să dispară sus.
+             Titlul stă peste canvas curat, deci contrastul e garantat. */}
       {imgOk ? (
-        /* Imaginea reală = centrul scenei (breathing zoom + parallax) */
-        <ParallaxLayer depth={12} className="absolute inset-0">
+        <ParallaxLayer depth={10} className="absolute inset-0">
           <motion.img
             src="/hero-battle.jpg"
             alt=""
             aria-hidden
             onError={() => setImgOk(false)}
-            className="absolute inset-0 w-full h-full object-cover object-center select-none"
-            style={{ filter: "brightness(0.5) saturate(0.95)" }}
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 0.62, scale: [1.05, 1.1, 1.05] }}
-            transition={{ opacity: { duration: 1.1, ease: "easeOut" }, scale: { duration: 24, repeat: Infinity, ease: "easeInOut" } }}
+            className="absolute inset-x-0 bottom-0 h-[72%] w-full object-cover select-none"
+            style={{
+              objectPosition: "center 28%",
+              filter: "grayscale(0.62) brightness(0.34) contrast(1.18)",
+              maskImage: "linear-gradient(to top, #000 0%, rgba(0,0,0,0.72) 26%, rgba(0,0,0,0.22) 52%, transparent 76%)",
+              WebkitMaskImage: "linear-gradient(to top, #000 0%, rgba(0,0,0,0.72) 26%, rgba(0,0,0,0.22) 52%, transparent 76%)",
+            }}
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 0.85, scale: [1.04, 1.08, 1.04] }}
+            transition={{ opacity: { duration: 1.4, ease: "easeOut" }, scale: { duration: 30, repeat: Infinity, ease: "easeInOut" } }}
           />
         </ParallaxLayer>
       ) : (
-        /* Fallback desenat dacă imaginea lipsește */
-        <>
-          <ParallaxLayer depth={18} className="absolute inset-0">
-            <CandleWall side="left" />
-            <CandleWall side="right" />
-          </ParallaxLayer>
-          <ParallaxLayer depth={10} className="absolute inset-0">
-            <div className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 w-[60%] h-[55%]"><Embers /></div>
-          </ParallaxLayer>
-        </>
+        <ParallaxLayer depth={14} className="absolute inset-0"><CandleHorizon /></ParallaxLayer>
       )}
 
-      {/* Etichete SMC — holograme peste scenă */}
-      <ParallaxLayer depth={26} className="absolute inset-0 hidden sm:block">
-        <SmcLabel text="Bearish Order Block" cls="top-[15%] left-[3%]" color="red" box />
-        <SmcLabel text="FVG" cls="top-[40%] left-[4%]" color="red" />
-        <SmcLabel text="Bullish Order Block" cls="top-[24%] right-[3%]" color="green" box />
-        <SmcLabel text="FVG" cls="top-[46%] right-[5%]" color="green" />
-        <SmcLabel text="Liquidity" cls="top-[42%] left-1/2 -translate-x-1/2" color="zinc" />
-        <SmcLabel text="BOS" cls="top-[68%] left-1/2 -translate-x-1/2" color="zinc" />
-      </ParallaxLayer>
+      {/* L3 — o singură sursă de lumină: fascicul de accent de sub orizont.
+             Momentul „semnătură": pare că scena e luminată din spate. */}
+      <div className="absolute inset-x-0 bottom-[26%] h-px pointer-events-none"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(109,117,246,0.5) 35%, rgba(167,139,250,0.55) 50%, rgba(109,117,246,0.5) 65%, transparent)" }} />
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-[20%] w-[70%] h-40 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(109,117,246,0.16), transparent 70%)" }} />
 
-      {/* Măști întunecate — textul iese clar în evidență */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,8,11,0.95) 0%, rgba(8,8,11,0.55) 24%, rgba(8,8,11,0.35) 45%, rgba(8,8,11,0.45) 62%, rgba(8,8,11,0.92) 92%)" }} />
-      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 40%, transparent 22%, rgba(8,8,11,0.5) 78%)" }} />
+      {/* L4 — vignetă: închide marginile ca o lentilă, ține ochiul în centru */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 42%, transparent 30%, rgba(7,8,12,0.55) 82%)" }} />
+      {/* Fade jos, ca secțiunea următoare să se lege fără cusătură */}
+      <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none"
+        style={{ background: "linear-gradient(to top, #07080c 10%, transparent)" }} />
     </ParallaxScene>
   );
 }

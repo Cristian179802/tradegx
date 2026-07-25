@@ -7,7 +7,7 @@ import "./globals.css";
 
 const SEO = {
   ro: {
-    title: "TradeGX — Jurnal de Trading Profesional",
+    title: "TradeGx — Jurnal de Trading Profesional",
     description:
       "Jurnalul de trading profesional pentru traderii SMC și ICT. Urmărește performanța, jurnalizează fiecare setup și lasă AI-ul să îți identifice edge-ul.",
     ogDescription: "Jurnalul de trading profesional pentru traderii SMC și ICT.",
@@ -27,7 +27,7 @@ const SEO = {
     ],
   },
   en: {
-    title: "TradeGX — Professional Trading Journal",
+    title: "TradeGx — Professional Trading Journal",
     description:
       "The professional trading journal for SMC and ICT traders. Track performance, journal every setup and let AI pinpoint your edge.",
     ogDescription: "The professional trading journal for SMC and ICT traders.",
@@ -68,22 +68,22 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: {
       default: seo.title,
-      template: "%s — TradeGX",
+      template: "%s — TradeGx",
     },
     description: seo.description,
     keywords: [...seo.keywords],
-    authors: [{ name: "TradeGX" }],
-    creator: "TradeGX",
+    authors: [{ name: "TradeGx" }],
+    creator: "TradeGx",
     openGraph: {
       type: "website",
       locale: seo.ogLocale,
       title: seo.title,
       description: seo.ogDescription,
-      siteName: "TradeGX",
+      siteName: "TradeGx",
     },
     twitter: {
       card: "summary_large_image",
-      title: "TradeGX",
+      title: "TradeGx",
       description: seo.twitterDescription,
     },
     robots: {

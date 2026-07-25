@@ -256,7 +256,7 @@ function MetaApiPanel() {
             </div>
           </div>
 
-          {/* Link to TradeGX account */}
+          {/* Link to TradeGx account */}
           <div className="space-y-2">
             <Label className="text-zinc-400 text-xs flex items-center gap-1">
               <Link2 className="w-3 h-3" /> {t("linkToAccount")}

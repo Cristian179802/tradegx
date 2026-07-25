@@ -22,7 +22,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       <div className="relative z-10 flex items-center justify-between p-6">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 relative flex items-center justify-center shrink-0 rounded-xl bg-zinc-900/80 border border-zinc-800 group-hover:border-indigo-500/30 transition-colors overflow-hidden">
-            <Image src="/logo.jpg" alt="TradeGX" width={32} height={32} className="object-contain" style={{ mixBlendMode: "screen" }} />
+            <Image src="/logo.jpg" alt="TradeGx" width={32} height={32} className="object-contain" style={{ mixBlendMode: "screen" }} />
           </div>
           <span className="font-black text-white tracking-tight">
             Trade<span className="gradient-text-indigo">GX</span>
@@ -58,7 +58,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       {/* Footer */}
       <div className="relative z-10 text-center pb-6">
         <p className="text-zinc-700 text-xs">
-          &copy; {new Date().getFullYear()} TradeGX. {t("allRights")}
+          &copy; {new Date().getFullYear()} TradeGx. {t("allRights")}
         </p>
       </div>
 
