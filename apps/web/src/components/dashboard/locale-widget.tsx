@@ -114,8 +114,12 @@ export function LocaleWidget() {
           boxShadow: "var(--el-2)",
         }}
       >
-        <span className="text-sm leading-none">{currentTz?.flag ?? "🌍"}</span>
+        {/* Pictogramă, nu emoji de steag: Windows NU randează steagurile și le
+            înlocuiește cu literele țării, deci pastila arăta „RO 01:50" — ca un
+            rest de debug, nu ca un ceas. */}
+        <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--accent)" }} />
         <span className="font-mono tabular-nums tracking-wide">{timeStr || "──:──:──"}</span>
+        <span className="text-[10px] font-mono" style={{ color: "var(--ink-4)" }}>{currentTz?.offset}</span>
       </button>
 
       {/* ── Popover ───────────────────────────────────────────── */}
