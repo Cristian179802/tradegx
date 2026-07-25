@@ -23,10 +23,10 @@ export async function sendVerificationEmail(
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #09090b; color: #fafafa; margin: 0; padding: 40px 20px;">
   <div style="max-width: 480px; margin: 0 auto; background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 40px;">
     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 32px;">
-      <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-        <span style="color: white; font-weight: 900; font-size: 11px;">GX</span>
+      <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+        <span style="color: white; font-weight: 900; font-size: 11px;">Gx</span>
       </div>
-      <span style="font-size: 18px; font-weight: 700; color: #fafafa;">Trade<span style="color: #34d399;">GX</span></span>
+      <span style="font-size: 18px; font-weight: 700; color: #fafafa;">Trade<span style="color: #818cf8;">Gx</span></span>
     </div>
 
     <h1 style="font-size: 22px; font-weight: 700; color: #fafafa; margin: 0 0 12px;">Bun venit la TradeGx!</h1>
@@ -70,10 +70,10 @@ export async function sendPasswordResetEmail(
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #09090b; color: #fafafa; margin: 0; padding: 40px 20px;">
   <div style="max-width: 480px; margin: 0 auto; background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 40px;">
     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 32px;">
-      <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-        <span style="color: white; font-weight: 900; font-size: 11px;">GX</span>
+      <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+        <span style="color: white; font-weight: 900; font-size: 11px;">Gx</span>
       </div>
-      <span style="font-size: 18px; font-weight: 700; color: #fafafa;">Trade<span style="color: #34d399;">GX</span></span>
+      <span style="font-size: 18px; font-weight: 700; color: #fafafa;">Trade<span style="color: #818cf8;">Gx</span></span>
     </div>
 
     <h1 style="font-size: 22px; font-weight: 700; color: #fafafa; margin: 0 0 12px;">Resetare parolă</h1>

@@ -25,7 +25,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
             <Image src="/logo.jpg" alt="TradeGx" width={32} height={32} className="object-contain" style={{ mixBlendMode: "screen" }} />
           </div>
           <span className="font-black text-white tracking-tight">
-            Trade<span className="gradient-text-indigo">GX</span>
+            Trade<span className="gradient-text-indigo">Gx</span>
           </span>
         </Link>
 

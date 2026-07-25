@@ -97,7 +97,7 @@ export default function PricingPage() {
               <TrendingUp className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="font-bold tracking-tight">
-              Trade<span className="text-emerald-400">GX</span>
+              Trade<span className="gradient-text-indigo">Gx</span>
             </span>
           </Link>
           <div className="flex items-center gap-3">
