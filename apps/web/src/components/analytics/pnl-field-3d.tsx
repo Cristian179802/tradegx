@@ -49,8 +49,11 @@ export function PnlField3D({
     [cells]
   );
 
+  const touch = React.useRef(false);
+
   function onPointerDown(e: React.PointerEvent) {
     (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+    touch.current = e.pointerType === "touch";
     drag.current = { x: e.clientX, y: e.clientY, e: elev, a: azim };
     setDragging(true);
   }
@@ -58,8 +61,12 @@ export function PnlField3D({
     const d = drag.current;
     if (!d) return;
     // Limitele împiedică privirea „de sub podea", unde scena devine ilizibilă.
-    setElev(Math.max(-84, Math.min(-16, d.e - (e.clientY - d.y) * 0.35)));
     setAzim(d.a + (e.clientX - d.x) * 0.35);
+    // Pe touch NU preluăm axa verticală: aceea rămâne a paginii (vezi
+    // `touchAction: pan-y` mai jos). Altfel degetul ar rămâne blocat în grafic.
+    if (!touch.current) {
+      setElev(Math.max(-84, Math.min(-16, d.e - (e.clientY - d.y) * 0.35)));
+    }
   }
   function endDrag() { drag.current = null; setDragging(false); }
 
@@ -70,7 +77,12 @@ export function PnlField3D({
     <div className="relative">
       <div
         className="relative select-none cursor-grab active:cursor-grabbing overflow-hidden rounded-xl"
-        style={{ height: 380, perspective: 1300, touchAction: "none" }}
+        // pan-y, NU none: cu `none` scena devenea o zonă de 288×380px în care
+        // scroll-ul vertical al paginii era mort pe telefon — degetul ateriza
+        // acolo și pagina nu se mai mișca. Acum verticala rămâne a paginii, iar
+        // glisarea orizontală rotește câmpul. Unghiul de elevație se reglează
+        // cu mouse-ul sau se readuce cu butonul Resetează.
+        style={{ height: 380, perspective: 1300, touchAction: "pan-y" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
