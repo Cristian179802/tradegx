@@ -23,11 +23,14 @@ import {
   Loader2, ChevronLeft, CheckCircle2, AlertCircle,
   Upload, FileText, X, User2, ChevronRight,
   Copy, Check, Download, Plug,
+  // Lock trebuie importat explicit: fără el, TS îl rezolvă la interfața DOM
+  // `Lock` (Web Locks API) și eroarea nu spune deloc că lipsește un import.
+  Lock,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Step = "method" | "ea" | "metaapi" | "csv" | "form";
+type Step = "method" | "ea" | "metaapi" | "tradelocker" | "csv" | "form";
 type AccountTyp = "DEMO" | "CHALLENGE" | "LIVE";
 
 interface AccountDialogProps {
@@ -120,6 +123,24 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
           </p>
         </div>
         <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-sky-400 transition-colors shrink-0 mt-1" />
+      </button>
+
+      {/* TradeLocker — conectare directă prin API-ul brokerului */}
+      <button
+        onClick={() => onSelect("tradelocker")}
+        className="w-full flex items-start gap-4 p-5 rounded-2xl border-2 border-violet-500/40 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/5 hover:border-violet-400/70 hover:from-violet-500/16 transition-all text-left group relative overflow-hidden"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center shrink-0 text-2xl">
+          🔗
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-bold text-white text-base">{t("tlTitle")}</span>
+            <Badge className="bg-violet-500/20 border border-violet-500/30 text-violet-300 text-[10px] px-1.5 py-0">API</Badge>
+          </div>
+          <p className="text-sm text-zinc-400 leading-relaxed">{t("tlDesc")}</p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-violet-400 transition-colors shrink-0 mt-1" />
       </button>
 
       {/* CSV + Manual — secundare, mai mici */}
@@ -464,6 +485,151 @@ function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuc
           ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("connecting")}</>
           : <><Plug className="w-4 h-4 mr-2" />{t("connectAccount")}</>}
       </Button>
+    </div>
+  );
+}
+
+// ─── Step: TradeLocker (conectare directă prin API) ──────────────────────────
+//
+// Doi pași într-un ecran: autentificare, apoi alegerea contului. Nu cerem
+// utilizatorului să copieze niciun token — brokerul emite unul la login, iar
+// parola trece o singură dată prin server, spre TradeLocker, și nu se salvează.
+
+interface TlAccountRow { id: string; accNum: number; name?: string; currency?: string; accountBalance?: number }
+
+function StepTradeLocker({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess: () => void; onClose: () => void }) {
+  const t = useTranslations("accountDialog");
+  const { toast } = useToast();
+  const [env, setEnv] = React.useState<"demo" | "live">("demo");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [server, setServer] = React.useState("");
+  const [accounts, setAccounts] = React.useState<TlAccountRow[] | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+  async function connect() {
+    if (!email.trim() || !password || !server.trim()) { setError(t("credsRequired")); return; }
+    setBusy(true); setError("");
+    try {
+      const res = await fetch("/api/integrations/tradelocker/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password, server: server.trim(), env }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? t("connectErr")); return; }
+      setAccounts(data.accounts as TlAccountRow[]);
+    } catch { setError(t("netErr")); }
+    finally { setBusy(false); }
+  }
+
+  async function importAccount(a: TlAccountRow) {
+    setBusy(true); setError("");
+    try {
+      const res = await fetch("/api/integrations/tradelocker/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tradeLockerAccountId: a.id, accNum: a.accNum,
+          name: a.name, currency: a.currency,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? t("importErr")); return; }
+      toast({ title: t("tlImported", { n: data.imported }), description: data.warning });
+      onSuccess(); onClose();
+    } catch { setError(t("netErrShort")); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="space-y-4">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
+        <ChevronLeft className="w-4 h-4" />{t("back")}
+      </button>
+
+      {accounts === null ? (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            {(["demo", "live"] as const).map((e) => (
+              <button key={e} onClick={() => setEnv(e)}
+                className={cn("py-2 rounded-xl border text-sm font-bold transition-all",
+                  env === e ? "bg-violet-500/15 border-violet-500/50 text-violet-300"
+                    : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
+                {e === "demo" ? t("tlEnvDemo") : t("tlEnvLive")}
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">{t("tlEmail")}</label>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email"
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" placeholder="trader@exemplu.com" />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">{t("tlPassword")}</label>
+              <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password"
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-600" placeholder="••••••••" />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">{t("tlServer")}</label>
+              <Input value={server} onChange={(e) => setServer(e.target.value)}
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 font-mono placeholder:text-zinc-600" placeholder="OSP-DEMO" />
+              <p className="text-[10px] text-zinc-600 mt-1">{t("tlServerHint")}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 bg-violet-500/8 border border-violet-500/20 rounded-xl px-3 py-2.5">
+            <Lock className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
+            <p className="text-[11px] text-zinc-400 leading-relaxed">{t("tlNoPassStored")}</p>
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-rose-300">{error}</p>
+            </div>
+          )}
+
+          <Button onClick={connect} disabled={busy} size="lg" className="w-full">
+            {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("tlConnecting")}</>
+                  : <><Plug className="w-4 h-4 mr-2" />{t("tlConnect")}</>}
+          </Button>
+        </>
+      ) : (
+        <>
+          <p className="text-sm font-semibold text-zinc-200">{t("tlPickAccount")}</p>
+          <div className="space-y-2 max-h-72 overflow-y-auto">
+            {accounts.map((a) => (
+              <button key={`${a.id}-${a.accNum}`} onClick={() => importAccount(a)} disabled={busy}
+                className="w-full tg-surface rounded-xl px-4 py-3 flex items-center justify-between text-left transition-colors hover:border-violet-500/40 disabled:opacity-50">
+                <div>
+                  <p className="text-sm font-bold" style={{ color: "var(--ink-1)" }}>{a.name || `#${a.accNum}`}</p>
+                  <p className="text-[11px] font-mono" style={{ color: "var(--ink-4)" }}>accNum {a.accNum} · {a.currency ?? "—"}</p>
+                </div>
+                {a.accountBalance !== undefined && (
+                  <span className="text-sm font-black num" style={{ color: "var(--ink-2)" }}>
+                    {a.accountBalance.toLocaleString()} {a.currency ?? ""}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          {error && (
+            <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-rose-300">{error}</p>
+            </div>
+          )}
+          {busy && (
+            <p className="text-xs text-zinc-500 flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />{t("tlImporting")}
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -825,10 +991,11 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
   }, [open, isEdit]);
 
   const TITLES: Record<Step, string> = {
-    method:  t("titleMethod"),
-    ea:      t("titleEa"),
-    metaapi: t("titleMetaapi"),
-    csv:     t("titleCsv"),
+    method:      t("titleMethod"),
+    ea:          t("titleEa"),
+    metaapi:     t("titleMetaapi"),
+    tradelocker: t("titleTradelocker"),
+    csv:         t("titleCsv"),
     form:    isEdit ? t("titleFormEdit") : t("titleFormNew"),
   };
 
@@ -842,6 +1009,7 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
         {step === "method"  && <StepMethod onSelect={setStep} />}
         {step === "ea"      && <StepEA onBack={() => setStep("method")} onDone={() => { onSuccess(); onClose(); }} />}
         {step === "metaapi" && <StepMetaApi onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
+        {step === "tradelocker" && <StepTradeLocker onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
         {step === "csv"     && <StepCSV onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
         {step === "form"   && (
           <StepForm

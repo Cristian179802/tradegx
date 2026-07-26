@@ -92,6 +92,8 @@ enum BrokerSource {
   TRADINGVIEW
   MANUAL
   METAAPI
+  TRADELOCKER
+  DXTRADE
 }
 
 enum EmotionalState {
@@ -382,6 +384,10 @@ model TradingAccount {
   metaApiId    String?
   brokerSource BrokerSource?
   lastSyncedAt DateTime?
+  // Identificatori neutri pentru brokerii care nu trec prin MetaAPI
+  // (TradeLocker cere id-ul contului ȘI accNum ca antet la fiecare cerere).
+  brokerAccountId String?
+  brokerAccNum    Int?
 
   trades Trade[]
 
