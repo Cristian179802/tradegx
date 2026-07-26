@@ -280,7 +280,7 @@ export function Sidebar() {
                   <Icon className={cn(
                     "w-[17px] h-[17px] shrink-0 transition-all duration-200 relative z-[1]",
                     isActive
-                      ? "text-indigo-200 drop-shadow-[0_0_6px_rgba(109,117,246,0.85)]"
+                      ? "text-indigo-200 drop-shadow-[0_0_3px_rgba(109,117,246,0.35)]"
                       : "text-[#5d6577] group-hover:text-[#c3c9d6]"
                   )} />
 

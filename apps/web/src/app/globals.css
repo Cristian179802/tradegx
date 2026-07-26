@@ -315,8 +315,8 @@
   /* ── Neon line ───────────────────────────────────────────────────────── */
   .neon-line-indigo {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.6), rgba(139,92,246,0.4), transparent);
-    box-shadow: 0 0 8px rgba(99,102,241,0.4);
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.34), rgba(139,92,246,0.22), transparent);
+    box-shadow: 0 0 5px rgba(99,102,241,0.18);
   }
   .neon-line-emerald {
     height: 1px;
@@ -1192,8 +1192,12 @@ tr.cyber-row:hover {
 
   /* ── Accent unic de brand ────────────────────────────────────────────── */
   --accent:      #6d75f6;
-  --accent-soft: rgba(109,117,246,0.13);
-  --accent-line: rgba(109,117,246,0.34);
+  --accent-soft: rgba(109,117,246,0.11);
+  /* Coborât de la 0.34: linia de accent apare pe muchia fiecărei suprafețe și
+     a fiecărui hairline de inițializare — la 0.34 se adunau și tot interiorul
+     părea aprins. Un accent discret repetat de 20 de ori citește mai scump
+     decât unul puternic. */
+  --accent-line: rgba(109,117,246,0.22);
 
   /* ── Semantic: DOAR pentru date P&L ──────────────────────────────────── */
   --gain: #34d399;
@@ -1366,8 +1370,8 @@ tr.cyber-row:hover {
   background: linear-gradient(
     105deg,
     transparent 32%,
-    rgba(255, 255, 255, 0.20) 46%,
-    rgba(255, 255, 255, 0.05) 55%,
+    rgba(255, 255, 255, 0.13) 46%,
+    rgba(255, 255, 255, 0.04) 55%,
     transparent 70%
   );
   background-size: 240% 100%;
@@ -1396,21 +1400,21 @@ tr.cyber-row:hover {
 }
 .tg-btn-primary {
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.13);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.36),
+    inset 0 1px 0 rgba(255,255,255,0.26),
     inset 0 -1px 0 rgba(0,0,0,0.30),
     0 1px 2px rgba(0,0,0,0.50),
-    0 8px 22px -9px rgba(109,117,246,0.60);
+    0 5px 14px -10px rgba(109,117,246,0.32);
 }
 .tg-btn-primary:hover {
-  border-color: rgba(255,255,255,0.24);
+  border-color: rgba(255,255,255,0.19);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.46),
+    inset 0 1px 0 rgba(255,255,255,0.32),
     inset 0 -1px 0 rgba(0,0,0,0.30),
     0 1px 2px rgba(0,0,0,0.50),
-    0 14px 34px -10px rgba(109,117,246,0.85),
-    0 0 0 1px rgba(109,117,246,0.45);
+    0 9px 22px -13px rgba(109,117,246,0.45),
+    0 0 0 1px rgba(109,117,246,0.22);
 }
 .tg-btn-primary:active:not(:disabled) {
   box-shadow:
@@ -1435,9 +1439,9 @@ tr.cyber-row:hover {
   color: var(--ink-1);
   border-color: var(--accent-line);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.14),
-    0 0 0 1px var(--accent-line),
-    0 10px 26px -12px rgba(109,117,246,0.45);
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 0 1px rgba(109,117,246,0.20),
+    0 7px 18px -15px rgba(109,117,246,0.28);
 }
 .tg-btn-outline:active:not(:disabled) {
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.4);
@@ -1460,18 +1464,18 @@ tr.cyber-row:hover {
 }
 .tg-btn-destructive {
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.12);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.32),
+    inset 0 1px 0 rgba(255,255,255,0.24),
     inset 0 -1px 0 rgba(0,0,0,0.28),
     0 1px 2px rgba(0,0,0,0.5),
-    0 8px 22px -9px rgba(251,92,114,0.55);
+    0 5px 14px -10px rgba(251,92,114,0.30);
 }
 .tg-btn-destructive:hover {
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.42),
-    0 14px 34px -10px rgba(251,92,114,0.8),
-    0 0 0 1px rgba(251,92,114,0.45);
+    inset 0 1px 0 rgba(255,255,255,0.30),
+    0 9px 22px -13px rgba(251,92,114,0.42),
+    0 0 0 1px rgba(251,92,114,0.20);
 }
 
 /* ── Secundar: suprafață neutră ridicată ────────────────────────────────── */
@@ -1508,7 +1512,7 @@ tr.cyber-row:hover {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.10) 48%, transparent 66%);
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.06) 48%, transparent 66%);
   background-size: 220% 100%;
   background-position: 150% 0;
   opacity: 0;
@@ -1526,22 +1530,24 @@ tr.cyber-row:hover {
    Șina e ::after ca să nu ceară un nod suplimentar în DOM. */
 .tg-nav-on {
   background: linear-gradient(90deg,
-    rgba(109,117,246,0.20) 0%,
-    rgba(109,117,246,0.07) 45%,
+    rgba(109,117,246,0.13) 0%,
+    rgba(109,117,246,0.045) 45%,
     transparent 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.10),
-    0 6px 18px -10px rgba(109,117,246,0.75);
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 3px 12px -11px rgba(109,117,246,0.35);
 }
 .tg-nav-on::after {
   content: "";
   position: absolute;
   left: 0; top: 50%;
   transform: translateY(-50%);
-  width: 2.5px; height: 62%;
+  width: 2px; height: 58%;
   border-radius: 0 3px 3px 0;
-  background: linear-gradient(180deg, #9aa1ff, #6d75f6);
-  box-shadow: 0 0 10px 1px rgba(109,117,246,0.9), 0 0 24px rgba(109,117,246,0.45);
+  background: linear-gradient(180deg, #8b93f2, #6d75f6);
+  /* Un singur halou moale, fără inel de dispersie: șina trebuie doar să
+     marcheze poziția, nu să lumineze camera. */
+  box-shadow: 0 0 5px rgba(109,117,246,0.40);
   pointer-events: none;
 }
 
@@ -1554,8 +1560,8 @@ tr.cyber-row:hover {
   width: 1px;
   background: linear-gradient(180deg,
     transparent,
-    rgba(109,117,246,0.38) 16%,
-    rgba(109,117,246,0.10) 60%,
+    rgba(109,117,246,0.20) 16%,
+    rgba(109,117,246,0.06) 60%,
     transparent);
   pointer-events: none;
   z-index: 1;
@@ -1605,12 +1611,12 @@ tr.cyber-row:hover {
   padding: 1px;                 /* grosimea inelului */
   background: conic-gradient(
     from var(--tg-ir-angle, 135deg),
-    rgba(109,117,246,0)   0deg,
-    rgba(109,117,246,0.75) 55deg,
-    rgba(167,139,250,0.85) 110deg,
-    rgba(96,214,255,0.70) 165deg,
-    rgba(109,117,246,0)   225deg,
-    rgba(109,117,246,0)   360deg
+    rgba(109,117,246,0)    0deg,
+    rgba(109,117,246,0.38) 55deg,
+    rgba(167,139,250,0.45) 110deg,
+    rgba(96,214,255,0.34)  165deg,
+    rgba(109,117,246,0)    225deg,
+    rgba(109,117,246,0)    360deg
   );
   /* Taie interiorul: rămâne doar rama de 1px */
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -1632,7 +1638,7 @@ tr.cyber-row:hover {
   border-radius: inherit;
   background: radial-gradient(
     120px circle at var(--tg-ir-x, 50%) var(--tg-ir-y, 0%),
-    rgba(255,255,255,0.10),
+    rgba(255,255,255,0.06),
     transparent 60%
   );
   opacity: 0;
