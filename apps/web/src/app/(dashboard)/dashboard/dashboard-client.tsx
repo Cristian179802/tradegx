@@ -452,7 +452,11 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               <c.Icon className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[22px] font-black num tracking-tight leading-none" style={{ color: "var(--ink-1)" }}>
+              {/* Zero/gol se estompează: o valoare inexistentă nu trebuie să
+                  aibă greutatea vizuală a unui rezultat real. Altfel „0" arată
+                  ca o cifră stricată, nu ca „încă nimic". */}
+              <p className="text-[22px] font-black num tracking-tight leading-none"
+                style={{ color: c.value === "0" || c.value === "—" ? "var(--ink-4)" : "var(--ink-1)" }}>
                 {/* pornesc după rândul de KPI-uri, ca să continue cascada */}
                 <RollingNumber value={c.value} delay={560 + i * 70} />
                 {c.suffix && <span className="text-sm font-bold ml-1" style={{ color: "var(--ink-4)" }}>{c.suffix}</span>}
