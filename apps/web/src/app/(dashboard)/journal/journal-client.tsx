@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { useState, useMemo } from "react";
+import { useState, useMemo, type CSSProperties } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -107,26 +107,52 @@ function fmtTime(iso: string, locale: string) {
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
+// Trei registre, nu două.
+//
+// Bug-ul de dinainte: un singur `positive: boolean` vopsea în ROȘU orice
+// metrică aflată sub prag. Așa, un R:R de 1:1.44 apărea roșu (fiindcă pragul
+// era 1.5) și o completare a jurnalului de 77% apărea roșie (pragul 80%).
+// Ambele sunt rezultate bune sau neutre — roșul îi spunea userului „ai o
+// problemă" acolo unde nu avea. Culoarea mințea despre date.
+//
+//   pnl     → verde/roșu, DOAR pentru bani câștigați/pierduți
+//   quality → accent când atinge ținta, cerneală normală când nu. NICIODATĂ roșu:
+//             „încă nu ești la țintă" nu e același lucru cu „ai pierdut"
+//   neutral → doar un număr
+type StatTone = "pnl" | "quality" | "neutral";
+
 function StatCard({
   label,
   value,
   sub,
-  positive,
+  tone = "neutral",
+  good,
 }: {
   label: string;
   value: string;
   sub?: string;
-  positive?: boolean;
+  tone?: StatTone;
+  /** pentru „pnl": e profit? · pentru „quality": atinge ținta? */
+  good?: boolean;
 }) {
-  const accentBg = positive === true ? "kpi-profit border-emerald-500/20" : positive === false ? "kpi-loss border-rose-500/20" : "border-zinc-800";
-  const valueClass = positive === true ? "text-emerald-400 neon-emerald" : positive === false ? "text-rose-400 neon-rose" : "text-zinc-100";
+  let border = "border-zinc-800";
+  let valueStyle: CSSProperties = { color: "var(--ink-1)" };
+
+  if (tone === "pnl" && good !== undefined) {
+    border = good ? "border-emerald-500/20" : "border-rose-500/20";
+    valueStyle = { color: good ? "var(--gain)" : "var(--loss)" };
+  } else if (tone === "quality") {
+    border = good ? "border-indigo-500/25" : "border-zinc-800";
+    valueStyle = { color: good ? "var(--accent)" : "var(--ink-2)" };
+  }
+
   return (
-    <div className={`bg-zinc-900/80 border rounded-2xl p-4 card-3d ${accentBg}`}>
-      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider mb-2">{label}</p>
-      <p className={`text-2xl font-black num tracking-tight ${valueClass}`}>
+    <div className={`tg-surface tg-boot rounded-2xl p-4 ${border}`}>
+      <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--ink-4)" }}>{label}</p>
+      <p className="text-2xl font-black num tracking-tight" style={valueStyle}>
         {value}
       </p>
-      {sub && <p className="text-[11px] text-zinc-500 mt-1">{sub}</p>}
+      {sub && <p className="text-[11px] mt-1" style={{ color: "var(--ink-4)" }}>{sub}</p>}
     </div>
   );
 }
@@ -397,7 +423,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-emerald">{t("pageTitle")}</h1>
+          <h1 className="text-2xl font-black tracking-tight">{t("pageTitle")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {t("pageSub")}
           </p>
@@ -421,30 +447,38 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
           value={String(stats.totalTrades)}
           sub={t("subJournaled", { n: stats.journaled })}
         />
+        {/* Win rate = metrică de calitate, nu sumă de bani → nu roșu sub 50% */}
         <StatCard
           label={t("kWinRate")}
           value={stats.winRate !== null ? `${stats.winRate.toFixed(1)}%` : "—"}
-          positive={stats.winRate !== null ? stats.winRate >= 50 : undefined}
+          tone="quality"
+          good={stats.winRate !== null ? stats.winRate >= 50 : undefined}
           sub={t("subWL", { w: stats.wins, l: stats.losses })}
         />
+        {/* Singurul card cu semantică P&L reală din acest rând */}
         <StatCard
           label={t("kNetProfit")}
           value={stats.netPnl >= 0 ? `+${stats.netPnl.toFixed(2)}` : stats.netPnl.toFixed(2)}
-          positive={stats.netPnl >= 0}
+          tone="pnl"
+          good={stats.netPnl >= 0}
           sub={stats.currency}
         />
         <StatCard
           label={t("kAvgRR")}
           value={stats.avgRR !== null ? `1:${stats.avgRR.toFixed(2)}` : "—"}
-          positive={stats.avgRR !== null ? stats.avgRR >= 1.5 : undefined}
+          tone="quality"
+          good={stats.avgRR !== null ? stats.avgRR >= 1.5 : undefined}
           sub={stats.avgRR !== null ? (stats.avgRR >= 2 ? t("excellent") : t("toImprove")) : "—"}
         />
-        <StatCard label={t("kWins")} value={String(stats.wins)} positive={stats.wins > 0} />
-        <StatCard label={t("kLosses")} value={String(stats.losses)} positive={stats.losses === 0} />
+        {/* Numărătoare de tranzacții: verdele/roșul aici ar sugera că „83
+            pierderi" e un verdict, când e doar un total. Rămân neutre. */}
+        <StatCard label={t("kWins")} value={String(stats.wins)} />
+        <StatCard label={t("kLosses")} value={String(stats.losses)} />
         <StatCard
           label={t("kJournaled")}
           value={`${journaledPct}%`}
-          positive={journaledPct >= 80}
+          tone="quality"
+          good={journaledPct >= 80}
           sub={journaledPct >= 80 ? t("excellent") : t("addMore")}
         />
       </div>

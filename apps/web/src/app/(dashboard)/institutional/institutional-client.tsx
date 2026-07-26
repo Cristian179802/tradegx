@@ -69,7 +69,7 @@ export function InstitutionalClient({ data }: { data: InstitutionalData }) {
       <div className="mb-6">
         <div className="flex items-center gap-2">
           <Landmark className="w-5 h-5 text-indigo-400" />
-          <h1 className="text-2xl font-black tracking-tight neon-indigo">{t("title")}</h1>
+          <h1 className="text-2xl font-black tracking-tight">{t("title")}</h1>
         </div>
         <p className="text-sm text-zinc-500 mt-0.5">{t("subtitle")}</p>
       </div>

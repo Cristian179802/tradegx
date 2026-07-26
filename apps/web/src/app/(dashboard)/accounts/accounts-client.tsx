@@ -122,7 +122,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-indigo">{t("title")}</h1>
+          <h1 className="text-2xl font-black tracking-tight">{t("title")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {accounts.length > 0
               ? t("countConnected", { count: accounts.length })

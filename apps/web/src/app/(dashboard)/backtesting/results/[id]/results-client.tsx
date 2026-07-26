@@ -362,7 +362,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
             style={{ background: backtest.strategy.color ?? "#6366f1" }}
           />
           <div>
-            <h1 className={cn("text-xl font-bold neon-violet")}>{backtest.strategy.name}</h1>
+            <h1 className={cn("text-xl font-bold")} style={{ color: "var(--ink-1)" }}>{backtest.strategy.name}</h1>
             <p className="text-xs text-zinc-500">
               {STRATEGY_TYPE_LABELS[backtest.strategy.type] ?? backtest.strategy.type}
               {" · "}{backtest.symbol} {backtest.timeframe}

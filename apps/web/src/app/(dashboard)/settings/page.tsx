@@ -79,7 +79,7 @@ export default async function SettingsPage() {
 
       <div className="flex items-start justify-between gap-4 relative">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-indigo">{t("title")}</h1>
+          <h1 className="text-2xl font-black tracking-tight">{t("title")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5 leading-relaxed">{t("subtitle")}</p>
         </div>
       </div>

@@ -73,7 +73,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight neon-violet">{t("title")}</h1>
+          <h1 className="text-2xl font-black tracking-tight">{t("title")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {total > 0 ? (
               <span>{t("count", { count: total })}</span>
