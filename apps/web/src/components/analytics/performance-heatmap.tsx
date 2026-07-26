@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Clock, TrendingUp, TrendingDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PnlField3D } from "@/components/analytics/pnl-field-3d";
 
 interface RawTrade { time: string; pnl: number; }
 type Metric = "pnl" | "winrate" | "count";
@@ -19,6 +20,7 @@ export function PerformanceHeatmap() {
   const [currency, setCurrency] = React.useState("USD");
   const [loading, setLoading] = React.useState(true);
   const [metric, setMetric] = React.useState<Metric>("pnl");
+  const [view, setView] = React.useState<"2d" | "3d">("2d");
   const [hover, setHover] = React.useState<{ d: number; h: number } | null>(null);
 
   React.useEffect(() => {
@@ -102,28 +104,54 @@ export function PerformanceHeatmap() {
     <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-amber-500/12 border border-amber-500/20 flex items-center justify-center">
-            <Clock className="w-4 h-4 text-amber-400" />
+          {/* Ambra era o culoare decorativă în plus; accentul de brand e regula. */}
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: "var(--accent-soft)", border: "1px solid var(--accent-line)" }}>
+            <Clock className="w-4 h-4" style={{ color: "var(--accent)" }} />
           </div>
           <div>
             <h2 className="text-sm font-bold text-zinc-200">{t("title")}</h2>
-            <p className="text-[11px] text-zinc-600">{t("subtitle")}</p>
+            <p className="text-[11px]" style={{ color: "var(--ink-4)" }}>{t("subtitle")}</p>
           </div>
         </div>
-        {/* Selector metrică */}
-        <div className="flex items-center gap-0.5 bg-zinc-800 rounded-lg p-0.5">
-          {([["pnl", "P&L"], ["winrate", "Win %"], ["count", t("metricVolume")]] as [Metric, string][]).map(([m, label]) => (
-            <button
-              key={m}
-              onClick={() => setMetric(m)}
-              className={cn(
-                "text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all",
-                metric === m ? "bg-indigo-600 text-white" : "text-zinc-500 hover:text-zinc-300"
-              )}
-            >
-              {label}
-            </button>
-          ))}
+
+        <div className="flex items-center gap-2">
+          {/* Mod de reprezentare. 2D e mai bun la scanat (toate celulele
+              vizibile, fără ocluziune); 3D e mai bun la comparat mărimi
+              (înălțimea se compară imediat, intensitatea culorii nu). Aceleași
+              date, aceleași insight-uri — doar reprezentarea diferă. */}
+          <div className="flex items-center gap-0.5 bg-zinc-800 rounded-lg p-0.5">
+            {(["2d", "3d"] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={cn(
+                  "text-[11px] font-bold px-2.5 py-1 rounded-md transition-all uppercase",
+                  view === v ? "bg-indigo-600 text-white" : "text-zinc-500 hover:text-zinc-300"
+                )}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+
+          {/* Metrica are sens doar pe heatmap: în 3D înălțimea e mereu |P&L|. */}
+          {view === "2d" && (
+            <div className="flex items-center gap-0.5 bg-zinc-800 rounded-lg p-0.5">
+              {([["pnl", "P&L"], ["winrate", "Win %"], ["count", t("metricVolume")]] as [Metric, string][]).map(([m, label]) => (
+                <button
+                  key={m}
+                  onClick={() => setMetric(m)}
+                  className={cn(
+                    "text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all",
+                    metric === m ? "bg-indigo-600 text-white" : "text-zinc-500 hover:text-zinc-300"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -134,6 +162,17 @@ export function PerformanceHeatmap() {
           {t("empty")}
         </p>
       ) : (
+        <>
+        {view === "3d" ? (
+          <PnlField3D
+            cells={grid.flatMap((row, d) =>
+              row.map((c, h) => ({ day: d, hour: h, pnl: c.pnl, count: c.count, wins: c.wins }))
+                 .filter((c) => c.count > 0)
+            )}
+            dayLabels={DAYS_SHORT}
+            money={money}
+          />
+        ) : (
         <>
           {/* Tooltip activ */}
           <div className="h-6 mb-1 text-center">
@@ -187,8 +226,11 @@ export function PerformanceHeatmap() {
               ))}
             </div>
           </div>
+        </>
+        )}
 
-          {/* Insight-uri */}
+          {/* Insight-uri — comune ambelor moduri: cea mai bună fereastră și cea
+              de evitat sunt aceleași indiferent de reprezentare. */}
           {best.best.d >= 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
               <div className="rounded-xl bg-emerald-500/8 border border-emerald-500/20 px-3 py-2.5 flex items-center gap-2">
