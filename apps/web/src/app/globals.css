@@ -1326,6 +1326,87 @@ tr.cyber-row:hover {
   z-index: 1;
 }
 
+/* ── Respirația stratului ambiental ────────────────────────────────────────
+   Foarte lentă și de amplitudine mică: trebuie perceput periferic, nu privit.
+   Un puls agresiv ar deveni enervant în 30 de secunde. */
+@keyframes tg-ambient-breathe {
+  0%, 100% { opacity: 0.72; }
+  50%      { opacity: 1; }
+}
+.tg-ambient-breathe {
+  animation: tg-ambient-breathe 4s ease-in-out infinite;
+}
+
+/* ── Material holografic: iridescență thin-film pe muchie ──────────────────
+   Fizica pe care o imităm: o peliculă subțire (baloane de săpun, benzi
+   holografice) descompune lumina în funcție de unghi. Traducerea în UI = un
+   inel de 1px cu gradient unghiular multi-hue care se rotește după cursor.
+
+   Regula care ține efectul elegant: iridescența stă EXCLUSIV pe bordură,
+   niciodată peste conținut. Masca de mai jos taie interiorul, deci textul
+   rămâne pe fundal curat, la contrast plin.
+
+   --tg-ir-angle e actualizat din JS la mișcarea cursorului (vezi useIridescent).
+   Fără JS, unghiul rămâne pe valoarea implicită și efectul e static, nu rupt. */
+@property --tg-ir-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 135deg;
+}
+
+.tg-iridescent {
+  position: relative;
+  isolation: isolate;
+}
+.tg-iridescent::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;                 /* grosimea inelului */
+  background: conic-gradient(
+    from var(--tg-ir-angle, 135deg),
+    rgba(109,117,246,0)   0deg,
+    rgba(109,117,246,0.75) 55deg,
+    rgba(167,139,250,0.85) 110deg,
+    rgba(96,214,255,0.70) 165deg,
+    rgba(109,117,246,0)   225deg,
+    rgba(109,117,246,0)   360deg
+  );
+  /* Taie interiorul: rămâne doar rama de 1px */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 420ms ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.tg-iridescent:hover::after { opacity: 1; }
+
+/* Specular: o pată de lumină rece care urmărește cursorul, peste bordură.
+   --tg-ir-x/y vin tot din JS, în procente. */
+.tg-iridescent::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(
+    120px circle at var(--tg-ir-x, 50%) var(--tg-ir-y, 0%),
+    rgba(255,255,255,0.10),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 420ms ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.tg-iridescent:hover::before { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-iridescent::after, .tg-iridescent::before { transition: none; }
+}
+
 /* ── Focus vizibil, accesibil și de brand ──────────────────────────────────
    Niciodată `outline: none` fără înlocuitor — navigarea cu tastatura trebuie
    să fie evidentă. */

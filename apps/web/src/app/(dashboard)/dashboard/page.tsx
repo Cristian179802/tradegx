@@ -205,6 +205,15 @@ export default async function DashboardPage() {
         winRate,
         profitFactor,
         maxDrawdown: maxDD > 0 ? maxDD : null,
+        // Cel mai strict prag de drawdown definit pe conturi (challenge-urile
+        // prop firm au reguli dure). Alimentează stratul ambiental: interfața
+        // se încălzește pe măsură ce te apropii de el. null = niciun cont nu
+        // are regulă setată, deci nu avem de ce avertiza.
+        maxDrawdownLimit: accounts.reduce<number | null>((min, a) => {
+          const v = a.maxDrawdownPct !== null ? Number(a.maxDrawdownPct) : null;
+          if (v === null || v <= 0) return min;
+          return min === null ? v : Math.min(min, v);
+        }, null),
         wins,
         losses,
         bestTrade,

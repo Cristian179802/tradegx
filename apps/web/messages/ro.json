@@ -93,7 +93,8 @@
     "avgWin": "Avg câștig",
     "avgLoss": "Avg pierdere",
     "addTradeBtn": "Adaugă tranzacție",
-    "daysShort": "zile"
+    "daysShort": "zile",
+    "ambientRisk": "Risc: {pct}% din limita de drawdown"
   },
   "edge": {
     "subtitle": "Motorul statistic care îți arată exact unde câștigi și unde pierzi bani — pe simbol, setup, killzone, zi, oră și durată.",

@@ -14,7 +14,9 @@ import { TelegramChannelCard } from "@/components/telegram-channel-card";
 import { EconomicCountdown } from "@/components/dashboard/economic-countdown";
 import { DailyReviewCard } from "@/components/dashboard/daily-review-card";
 import { OnboardingGuide } from "@/components/dashboard/onboarding-guide";
+import { AmbientState } from "@/components/dashboard/ambient-state";
 import { RollingNumber } from "@/components/ui/rolling-number";
+import { useIridescent } from "@/components/ui/use-iridescent";
 import { cn } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -27,6 +29,8 @@ interface DashboardData {
   winRate: number | null;
   profitFactor: number | null;
   maxDrawdown: number | null;
+  /** Cel mai strict prag de drawdown de pe conturi; null = nicio regulă setată. */
+  maxDrawdownLimit: number | null;
   wins: number;
   losses: number;
   bestTrade: number;
@@ -174,10 +178,13 @@ const ACCENT_MAP = {
 
 function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, accent = "indigo", delay = 0 }: KPICardProps) {
   const a = ACCENT_MAP[accent];
+  const ir = useIridescent<HTMLDivElement>();
   return (
     <div
+      ref={ir.ref}
+      onMouseMove={ir.onMouseMove}
       className={cn(
-        "relative rounded-2xl border overflow-hidden transition-all duration-300 group cursor-default tg-boot tg-boot-edge",
+        "relative rounded-2xl border overflow-hidden transition-all duration-300 group cursor-default tg-boot tg-boot-edge tg-iridescent",
         a.card
       )}
       style={{
@@ -289,7 +296,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const {
-    userName, totalTrades, netPnl, winRate, profitFactor, maxDrawdown,
+    userName, totalTrades, netPnl, winRate, profitFactor, maxDrawdown, maxDrawdownLimit,
     wins, losses, bestTrade, worstTrade, avgWin, avgLoss, currency,
     tradingStreak, weekTradeCount, weekWinRate,
     recentTrades, pairPerformance, sparklines,
@@ -311,6 +318,11 @@ export function DashboardClient({ data }: { data: DashboardData }) {
 
   return (
     <div className="space-y-5 pb-4 relative">
+      {/* Interfața conștientă: marginea ecranului reacționează la cât de
+          aproape ești de limita ta reală de drawdown. Nu randează nimic dacă
+          nu ai o regulă setată sau dacă ești sub 50% din ea. */}
+      <AmbientState drawdownPct={maxDrawdown} drawdownLimitPct={maxDrawdownLimit} />
+
       {/* Ambient orbs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
         <div className="orb orb-indigo absolute w-[600px] h-[600px] -top-40 -left-40 opacity-40" style={{ animationDelay: '0s' }} />
