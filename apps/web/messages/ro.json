@@ -1227,7 +1227,28 @@
       "Joi",
       "Vin",
       "Sâm"
-    ]
+    ],
+    "dayShort": [
+      "Lu",
+      "Ma",
+      "Mi",
+      "Jo",
+      "Vi",
+      "Sâ",
+      "Du"
+    ],
+    "spaceTitle": "Spațiul P&L — zi × oră",
+    "spaceSub": "Când chiar câștigi. Trage ca să rotești câmpul.",
+    "spaceProfit": "Profit",
+    "spaceLoss": "Pierdere",
+    "spaceHeight": "înălțime = mărime",
+    "spaceReset": "Resetează",
+    "spaceDragHint": "trage pentru a roti",
+    "spaceEmpty": "Nu ai încă destule tranzacții pentru a construi spațiul P&L.",
+    "spaceCellMeta": "{count} tranzacții · {wins} câștigate",
+    "spaceAxisDay": "Zi",
+    "spaceAxisHour": "Oră",
+    "spaceAxisTrades": "Tranzacții"
   },
   "signals": {
     "sesAsian": "Sesiune Asia",

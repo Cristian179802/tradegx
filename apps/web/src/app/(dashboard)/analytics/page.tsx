@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AnalyticsClient } from "./analytics-client";
 import { PerformanceHeatmap } from "@/components/analytics/performance-heatmap";
+import { PnlSpace3D } from "@/components/analytics/pnl-space-3d";
+import { buildPnlSpace } from "@/lib/pnl-space";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("analytics");
@@ -70,6 +72,11 @@ export default async function AnalyticsPage() {
   }
 
   const primaryCurrency = accounts[0]?.currency ?? "USD";
+
+  // Câmpul volumetric: P&L pe zi a săptămânii × oră de intrare.
+  const pnlSpace = buildPnlSpace(
+    closedTrades.map((t) => ({ entryTime: t.entryTime, pnlMoney: t.pnlMoney !== null ? Number(t.pnlMoney) : null }))
+  );
   const initialBalance = accounts.reduce((sum, a) => sum + Number(a.initialBalance), 0);
 
   // Helper: use exitTime when available, fall back to entryTime (MT5 imports may lack exitTime)
@@ -250,6 +257,7 @@ export default async function AnalyticsPage() {
         </div>
       </div>
       <AnalyticsClient data={data} />
+      <PnlSpace3D space={pnlSpace} currency={primaryCurrency} />
       <PerformanceHeatmap />
     </div>
   );

@@ -1227,7 +1227,28 @@
       "Thu",
       "Fri",
       "Sat"
-    ]
+    ],
+    "dayShort": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "spaceTitle": "P&L space — day × hour",
+    "spaceSub": "When you actually win. Drag to rotate the field.",
+    "spaceProfit": "Profit",
+    "spaceLoss": "Loss",
+    "spaceHeight": "height = magnitude",
+    "spaceReset": "Reset",
+    "spaceDragHint": "drag to rotate",
+    "spaceEmpty": "Not enough trades yet to build the P&L space.",
+    "spaceCellMeta": "{count} trades · {wins} won",
+    "spaceAxisDay": "Day",
+    "spaceAxisHour": "Hour",
+    "spaceAxisTrades": "Trades"
   },
   "signals": {
     "sesAsian": "Asia session",
