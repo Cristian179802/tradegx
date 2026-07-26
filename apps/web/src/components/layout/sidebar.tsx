@@ -160,7 +160,9 @@ export function Sidebar() {
       animate={{ width: sidebarCollapsed ? 64 : 240 }}
       transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
       className={cn(
-        "relative flex-shrink-0 h-screen border-r border-zinc-800/60 flex flex-col overflow-visible",
+        // tg-sidebar-edge: muchia dinspre conținut e aprinsă, deci panoul se
+        // citește ca suprafață separată, nu ca o coloană plată lipită de fundal.
+        "tg-sidebar-edge relative flex-shrink-0 h-screen flex flex-col overflow-visible",
         // Pe mobil: drawer fix peste conținut, lățime fixă, glisare cu transform
         "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-[60] max-md:!w-[264px] max-md:transition-transform max-md:duration-300",
         mobileSidebarOpen ? "max-md:translate-x-0 max-md:shadow-2xl max-md:shadow-black/60" : "max-md:-translate-x-full",
@@ -258,9 +260,6 @@ export function Sidebar() {
               const Icon = item.icon;
               const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
               const locked = item.proOnly && !isPro;
-              const colorKey = item.color ?? "indigo";
-              const colors = COLOR_MAP[colorKey] ?? COLOR_MAP.indigo;
-              const indicatorClass = INDICATOR_MAP[colorKey] ?? INDICATOR_MAP.indigo;
 
               return (
                 <Link
@@ -268,30 +267,20 @@ export function Sidebar() {
                   href={locked ? "/pricing" : item.href}
                   onClick={() => setMobileSidebarOpen(false)}
                   className={cn(
-                    "relative flex items-center gap-3 mx-2 px-2.5 py-[7px] rounded-xl text-sm transition-all duration-200 group cyber-scan",
+                    "tg-nav flex items-center gap-3 mx-2 px-2.5 py-2 rounded-xl text-sm group",
                     isActive
-                      ? cn("nav-item-active text-white font-semibold", colors.icon)
-                      : "text-[#8b93a5] hover:text-[#f2f4f8] hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/40",
+                      ? "tg-nav-on text-white font-semibold border border-indigo-500/30"
+                      : "text-[#8b93a5] hover:text-[#f2f4f8] border border-transparent hover:border-zinc-700/40",
                     locked && "opacity-40 cursor-not-allowed"
                   )}
                 >
-                  {/* Neon active indicator */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-active-bar"
-                      className={cn(
-                        "absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full",
-                        indicatorClass
-                      )}
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                    />
-                  )}
-
-                  {/* Icon */}
+                  {/* Icon — cel activ primește un halou fin, ca un LED aprins */}
+                  {/* Haloul e clasă, nu `style`: tipul Icon din NAV_GROUPS
+                      acceptă doar className. */}
                   <Icon className={cn(
-                    "w-[17px] h-[17px] shrink-0 transition-all duration-200",
+                    "w-[17px] h-[17px] shrink-0 transition-all duration-200 relative z-[1]",
                     isActive
-                      ? cn(colors.icon)
+                      ? "text-indigo-200 drop-shadow-[0_0_6px_rgba(109,117,246,0.85)]"
                       : "text-[#5d6577] group-hover:text-[#c3c9d6]"
                   )} />
 

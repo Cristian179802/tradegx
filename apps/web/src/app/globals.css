@@ -1326,6 +1326,245 @@ tr.cyber-row:hover {
   z-index: 1;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTOANE — material, nu dreptunghi colorat
+   ───────────────────────────────────────────────────────────────────────────
+   Ce face un buton să pară hardware scump, nu un div cu background:
+     1. LUMINĂ STRATIFICATĂ — muchia de sus aprinsă, gradient mai luminos sus,
+        umbră interioară jos. Așa arată un comutator iluminat real.
+     2. MASĂ LA APĂSARE — coboară 1px, se strânge, iar umbra se prăbușește
+        înăuntru. Butonul trebuie să pară că are greutate.
+     3. SHEEN — o singură trecere rapidă de lumină la hover, nu o buclă.
+        Buclele obosesc; o trecere unică e un reflex, ca pe metal lustruit.
+     4. BLOOM — halou exterior care crește la hover, în accentul de brand.
+
+   NOTĂ TEHNICĂ: fundalul e declarat în `:where()` (specificitate 0), ca orice
+   clasă Tailwind `bg-*` pusă la locul folosirii să câștige. Astfel materialul
+   (lumină, umbre, apăsare, sheen) se aplică peste tot, dar culoarea rămâne
+   controlabilă punctual — nu strică butoanele care au deja o culoare semantică.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tg-btn {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition:
+    transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 240ms ease,
+    border-color 240ms ease,
+    color 200ms ease;
+}
+
+/* Sheen: bară de lumină înclinată care traversează o singură dată */
+.tg-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.20) 46%,
+    rgba(255, 255, 255, 0.05) 55%,
+    transparent 70%
+  );
+  background-size: 240% 100%;
+  background-position: 165% 0;
+  opacity: 0;
+}
+.tg-btn:hover::before {
+  opacity: 1;
+  animation: tg-sheen 700ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@keyframes tg-sheen {
+  from { background-position: 165% 0; }
+  to   { background-position: -65% 0; }
+}
+
+/* Apăsarea: coboară + se strânge, umbra intră înăuntru */
+.tg-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+}
+
+/* ── Primar: umplut, cu lumină stratificată ─────────────────────────────── */
+:where(.tg-btn-primary) {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.17), rgba(255,255,255,0) 45%),
+    linear-gradient(180deg, #6d75f6 0%, #5a44e0 100%);
+}
+.tg-btn-primary {
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.36),
+    inset 0 -1px 0 rgba(0,0,0,0.30),
+    0 1px 2px rgba(0,0,0,0.50),
+    0 8px 22px -9px rgba(109,117,246,0.60);
+}
+.tg-btn-primary:hover {
+  border-color: rgba(255,255,255,0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.46),
+    inset 0 -1px 0 rgba(0,0,0,0.30),
+    0 1px 2px rgba(0,0,0,0.50),
+    0 14px 34px -10px rgba(109,117,246,0.85),
+    0 0 0 1px rgba(109,117,246,0.45);
+}
+.tg-btn-primary:active:not(:disabled) {
+  box-shadow:
+    inset 0 2px 7px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* ── Contur: sticlă întunecată cu inel fin ──────────────────────────────── */
+:where(.tg-btn-outline) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
+}
+.tg-btn-outline {
+  color: var(--ink-2);
+  border: 1px solid var(--line-2);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.09),
+    0 2px 8px -4px rgba(0,0,0,0.6);
+}
+.tg-btn-outline:hover {
+  color: var(--ink-1);
+  border-color: var(--accent-line);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 0 0 1px var(--accent-line),
+    0 10px 26px -12px rgba(109,117,246,0.45);
+}
+.tg-btn-outline:active:not(:disabled) {
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.4);
+}
+
+/* ── Fantomă: minimal, doar lumină la hover ─────────────────────────────── */
+.tg-btn-ghost { color: var(--ink-3); border: 1px solid transparent; }
+:where(.tg-btn-ghost) { background: transparent; }
+.tg-btn-ghost:hover {
+  color: var(--ink-1);
+  border-color: var(--line-1);
+}
+.tg-btn-ghost:hover::before { opacity: 0.5; }
+
+/* ── Distructiv: același material, culoarea de pierdere ─────────────────── */
+:where(.tg-btn-destructive) {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0) 45%),
+    linear-gradient(180deg, #fb5c72 0%, #d92d4a 100%);
+}
+.tg-btn-destructive {
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.32),
+    inset 0 -1px 0 rgba(0,0,0,0.28),
+    0 1px 2px rgba(0,0,0,0.5),
+    0 8px 22px -9px rgba(251,92,114,0.55);
+}
+.tg-btn-destructive:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.42),
+    0 14px 34px -10px rgba(251,92,114,0.8),
+    0 0 0 1px rgba(251,92,114,0.45);
+}
+
+/* ── Secundar: suprafață neutră ridicată ────────────────────────────────── */
+:where(.tg-btn-secondary) { background: var(--s-3); }
+.tg-btn-secondary {
+  color: var(--ink-1);
+  border: 1px solid var(--line-2);
+  box-shadow: inset 0 1px 0 var(--line-top), 0 2px 8px -4px rgba(0,0,0,0.6);
+}
+.tg-btn-secondary:hover { border-color: var(--accent-line); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-btn:hover::before { animation: none; opacity: 0; }
+  .tg-btn:active:not(:disabled) { transform: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MENIU — rânduri de instrument, nu linkuri
+   ───────────────────────────────────────────────────────────────────────────
+   Ce am schimbat față de varianta veche: `.cyber-scan` rula o animație în
+   BUCLĂ de 4s pe fiecare rând. Cincisprezece elemente care pulsează la infinit
+   nu arată futurist — arată agitat, și consumă baterie degeaba. Lumina apare
+   acum doar ca reacție la prezența cursorului: o singură trecere, ca un reflex.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tg-nav {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: color 180ms ease, background 220ms ease, border-color 220ms ease;
+}
+.tg-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.10) 48%, transparent 66%);
+  background-size: 220% 100%;
+  background-position: 150% 0;
+  opacity: 0;
+}
+.tg-nav:hover::before {
+  opacity: 1;
+  animation: tg-nav-sweep 620ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@keyframes tg-nav-sweep {
+  from { background-position: 150% 0; }
+  to   { background-position: -55% 0; }
+}
+
+/* Activ: capsulă aprinsă + șină de lumină pe muchia din stânga.
+   Șina e ::after ca să nu ceară un nod suplimentar în DOM. */
+.tg-nav-on {
+  background: linear-gradient(90deg,
+    rgba(109,117,246,0.20) 0%,
+    rgba(109,117,246,0.07) 45%,
+    transparent 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    0 6px 18px -10px rgba(109,117,246,0.75);
+}
+.tg-nav-on::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 2.5px; height: 62%;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, #9aa1ff, #6d75f6);
+  box-shadow: 0 0 10px 1px rgba(109,117,246,0.9), 0 0 24px rgba(109,117,246,0.45);
+  pointer-events: none;
+}
+
+/* Panoul de meniu citit ca suprafață separată, aprinsă pe muchia dinspre
+   conținut — nu ca o coloană plată lipită de fundal. */
+.tg-sidebar-edge::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 1px;
+  background: linear-gradient(180deg,
+    transparent,
+    rgba(109,117,246,0.38) 16%,
+    rgba(109,117,246,0.10) 60%,
+    transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-nav:hover::before { animation: none; opacity: 0; }
+}
+
 /* ── Respirația stratului ambiental ────────────────────────────────────────
    Foarte lentă și de amplitudine mică: trebuie perceput periferic, nu privit.
    Un puls agresiv ar deveni enervant în 30 de secunde. */
