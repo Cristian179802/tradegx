@@ -14,6 +14,7 @@ import { TelegramChannelCard } from "@/components/telegram-channel-card";
 import { EconomicCountdown } from "@/components/dashboard/economic-countdown";
 import { DailyReviewCard } from "@/components/dashboard/daily-review-card";
 import { OnboardingGuide } from "@/components/dashboard/onboarding-guide";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { cn } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -176,7 +177,7 @@ function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, 
   return (
     <div
       className={cn(
-        "relative rounded-2xl border overflow-hidden transition-all duration-300 group cursor-default animate-fade-in-up",
+        "relative rounded-2xl border overflow-hidden transition-all duration-300 group cursor-default tg-boot tg-boot-edge",
         a.card
       )}
       style={{
@@ -201,17 +202,18 @@ function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, 
           )}
         </div>
 
-        {/* Value */}
+        {/* Valoarea — odometru mecanic. Întârzierea e aceeași cu a cardului,
+            deci cifrele pornesc exact când panoul termină de aprins. */}
         <p className={cn(
           "text-[22px] font-black num tracking-tight leading-none mb-1 animate-number-glow",
           a.value
         )}>
-          {value}
+          <RollingNumber value={value} delay={delay + 260} />
         </p>
 
         {/* Sub + trend */}
         <div className="flex items-center justify-between mt-1.5">
-          <p className="text-[11px] text-zinc-500 truncate flex-1">{sub}</p>
+          <p className="text-[11px] truncate flex-1" style={{ color: "var(--ink-3)" }}>{sub}</p>
           {trend && trend !== "neutral" && (
             <span className={cn(
               "flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ml-1",
@@ -225,7 +227,7 @@ function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, 
         </div>
 
         {/* Bottom label */}
-        <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.1em] mt-2">{label}</p>
+        <p className="text-[9px] font-black uppercase tracking-[0.1em] mt-2" style={{ color: "var(--ink-4)" }}>{label}</p>
       </div>
 
       {/* Corner glow on hover */}
@@ -425,20 +427,22 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           puternic (una pe ambră) care țipau mai tare decât KPI-urile de sus.
           Acum: suprafețe neutre identice, accentul apare doar pe pictogramă, iar
           valoarea rămâne eroul. Etichetele erau zinc-600 (~2.9:1) → --ink-4. */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-in-up delay-100">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { key: "streak", Icon: Flame,     value: String(streak), suffix: t("daysShort"), label: t("streakLabel") },
           { key: "week",   Icon: BarChart2, value: String(weekStats.count), label: t("weekTrades") },
           { key: "wr",     Icon: Target,    value: weekStats.winRate !== null ? `${weekStats.winRate.toFixed(0)}%` : "—", label: t("weekWinRate") },
-        ].map((c) => (
-          <div key={c.key} className="tg-surface rounded-2xl px-5 py-4 flex items-center gap-4 cursor-default transition-colors hover:border-indigo-500/30">
+        ].map((c, i) => (
+          <div key={c.key} className="tg-surface tg-boot rounded-2xl px-5 py-4 flex items-center gap-4 cursor-default transition-colors hover:border-indigo-500/30"
+            style={{ animationDelay: `${300 + i * 70}ms` }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
               style={{ background: "var(--accent-soft)", borderColor: "var(--accent-line)", color: "var(--accent)" }}>
               <c.Icon className="w-5 h-5" />
             </div>
             <div>
               <p className="text-[22px] font-black num tracking-tight leading-none" style={{ color: "var(--ink-1)" }}>
-                {c.value}
+                {/* pornesc după rândul de KPI-uri, ca să continue cascada */}
+                <RollingNumber value={c.value} delay={560 + i * 70} />
                 {c.suffix && <span className="text-sm font-bold ml-1" style={{ color: "var(--ink-4)" }}>{c.suffix}</span>}
               </p>
               <p className="text-[9px] font-black uppercase tracking-[0.1em] mt-1" style={{ color: "var(--ink-4)" }}>{c.label}</p>

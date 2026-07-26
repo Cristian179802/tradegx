@@ -1294,6 +1294,38 @@ tr.cyber-row:hover {
   .tg-section { padding-top: var(--sp-section); padding-bottom: var(--sp-section); }
 }
 
+/* ── Secvență de inițializare („power-on") ─────────────────────────────────
+   Panourile nu apar: se APRIND. Diferența față de un fade-up banal e scara —
+   un panou care crește de la 98.5% pare că primește curent, nu că alunecă.
+   Se rezolvă complet într-o stare curată, deci nu costă nimic în lizibilitate.
+   Guard-ul global de prefers-reduced-motion de mai jos le neutralizează. */
+@keyframes tg-power-on {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.985); }
+  55%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.tg-boot {
+  animation: tg-power-on 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Hairline care se desenează singur pe muchia de sus, ca o linie de scanare */
+@keyframes tg-scan-in {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+.tg-boot-edge::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
+  transform-origin: center;
+  animation: tg-scan-in 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* ── Focus vizibil, accesibil și de brand ──────────────────────────────────
    Niciodată `outline: none` fără înlocuitor — navigarea cu tastatura trebuie
    să fie evidentă. */
