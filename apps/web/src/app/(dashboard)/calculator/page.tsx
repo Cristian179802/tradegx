@@ -31,7 +31,7 @@ export default async function CalculatorPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight">{t("title")}</h1>
+        <h1 className="text-2xl font-black tracking-tight tg-title">{t("title")}</h1>
         <p className="text-sm text-zinc-500 mt-1">
           {t("subtitle")}
         </p>

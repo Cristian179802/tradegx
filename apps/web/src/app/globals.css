@@ -1671,3 +1671,42 @@ tr.cyber-row:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEMPERAREA LUMINII PE TEXT
+   ───────────────────────────────────────────────────────────────────────────
+   Clasele .neon-* aveau text-shadow la 0.9/0.6/0.3 pe trei straturi ȘI o
+   animație `neon-pulse-* 3s infinite`. Adică valorile din Calculator, Risk
+   Manager, rezultate backtest, tabelul de tranzacții și conturi luceau tare
+   ȘI pulsau permanent.
+   Două probleme separate:
+     · prea aprins — haloul îneca literele și făcea textul greu de citit
+     · pulsul infinit — o cifră care palpită la nesfârșit fură atenția non-stop;
+       într-o aplicație financiară exact cifra trebuie citită calm, nu urmărită
+   Aici păstrez lucirea (culoarea rămâne, deci semantica P&L e intactă) dar o
+   cobor la nivel de semnalizare retroiluminată și opresc pulsul.
+   Regulile stau la finalul fișierului, nelayerizate, ca să bată definițiile
+   anterioare fără `!important`.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neon-emerald, .neon-rose, .neon-indigo, .neon-amber, .neon-violet {
+  animation: none;
+}
+.neon-emerald { text-shadow: 0 0 11px rgba(52,211,153,0.30), 0 0 28px rgba(52,211,153,0.10); }
+.neon-rose    { text-shadow: 0 0 11px rgba(251,92,114,0.30), 0 0 28px rgba(251,92,114,0.10); }
+.neon-indigo  { text-shadow: 0 0 11px rgba(129,140,248,0.30), 0 0 28px rgba(129,140,248,0.10); }
+.neon-amber   { text-shadow: 0 0 11px rgba(251,191,36,0.28), 0 0 28px rgba(251,191,36,0.09); }
+.neon-violet  { text-shadow: 0 0 11px rgba(167,139,250,0.30), 0 0 28px rgba(167,139,250,0.10); }
+
+/* ── Titluri de pagină ─────────────────────────────────────────────────────
+   Le făcusem complet plate când am unificat cele patru tratamente diferite.
+   Unificarea a fost corectă (patru culori de titlu pe patru pagini rupeau
+   senzația de produs unitar), dar am pierdut lucirea odată cu ea.
+   Aici o aduc înapoi într-o singură formă: literele rămân albe — deci se
+   citesc perfect — iar haloul de accent le face să pară că emit lumină.
+   Alb cu halou colorat = semnalizare retroiluminată. Literă colorată cu halou
+   de aceeași culoare = reclamă de neon. */
+.tg-title {
+  color: var(--ink-1);
+  text-shadow: 0 0 16px rgba(109,117,246,0.32), 0 0 42px rgba(109,117,246,0.13);
+}

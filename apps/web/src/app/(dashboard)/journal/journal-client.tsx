@@ -423,7 +423,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight">{t("pageTitle")}</h1>
+          <h1 className="text-2xl font-black tracking-tight tg-title">{t("pageTitle")}</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {t("pageSub")}
           </p>

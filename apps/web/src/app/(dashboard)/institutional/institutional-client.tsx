@@ -33,7 +33,7 @@ export function InstitutionalClient({ data }: { data: InstitutionalData }) {
     return (
       <div className="max-w-2xl mx-auto py-20 text-center">
         <Landmark className="w-10 h-10 text-zinc-700 mx-auto mb-4" />
-        <h1 className="text-xl font-black text-zinc-200">{t("title")}</h1>
+        <h1 className="text-xl font-black text-zinc-200 tg-title">{t("title")}</h1>
         <p className="text-sm text-zinc-500 mt-2">{t("empty")}</p>
       </div>
     );
@@ -69,7 +69,7 @@ export function InstitutionalClient({ data }: { data: InstitutionalData }) {
       <div className="mb-6">
         <div className="flex items-center gap-2">
           <Landmark className="w-5 h-5 text-indigo-400" />
-          <h1 className="text-2xl font-black tracking-tight">{t("title")}</h1>
+          <h1 className="text-2xl font-black tracking-tight tg-title">{t("title")}</h1>
         </div>
         <p className="text-sm text-zinc-500 mt-0.5">{t("subtitle")}</p>
       </div>

@@ -339,7 +339,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               Live
             </span>
           </div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight">
+          <h1 className="text-2xl font-black text-zinc-100 tracking-tight tg-title">
             {greeting(userName, {
               morning: t("greetingMorning"),
               day: t("greetingDay"),
