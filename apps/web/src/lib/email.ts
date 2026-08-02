@@ -1,10 +1,36 @@
 ﻿import { Resend } from "resend";
 
+// ── Configurare email ────────────────────────────────────────────────────────
+//
+// Trei capcane reparate aici, toate descoperite pentru că nu ajungeau emailurile
+// de verificare la înregistrare:
+//
+// 1. Cheia lipsă trecea drept "re_placeholder" — deci `new Resend(...)` reușea,
+//    apelul pleca și eșua abia la Resend, cu un mesaj greu de legat de cauză.
+//    Acum lipsa cheii e o eroare explicită, spusă pe șleau.
+// 2. Expeditorul implicit era `noreply@TradeGX.io` — alt domeniu decât cel al
+//    site-ului (tradegx.com). Resend refuză trimiterea de pe domenii
+//    neverificate, deci fiecare email pica.
+// 3. `APP_URL` cădea pe `http://localhost:3000` — deci chiar dacă emailul ar fi
+//    plecat, linkul de verificare ducea la localhost pentru fiecare utilizator.
+//    În producție cade acum pe domeniul real.
+
 function getResend() {
-  return new Resend(process.env.RESEND_API_KEY ?? "re_placeholder");
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    throw new Error(
+      "RESEND_API_KEY lipsește — niciun email nu poate fi trimis. " +
+      "Setează-o în variabilele de mediu."
+    );
+  }
+  return new Resend(key);
 }
-const FROM = process.env.RESEND_FROM_EMAIL ?? "noreply@TradeGX.io";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+const FROM = process.env.RESEND_FROM_EMAIL ?? "noreply@tradegx.com";
+
+const APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL ??
+  (process.env.NODE_ENV === "production" ? "https://www.tradegx.com" : "http://localhost:3000");
 
 export async function sendVerificationEmail(
   email: string,

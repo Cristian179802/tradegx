@@ -86,16 +86,27 @@ export async function POST(request: Request) {
 
     const token = await generateVerificationToken(email);
 
+    // Contul rămâne creat chiar dacă emailul nu pleacă — dar NU mai înghițim
+    // eroarea. `catch {}` gol însemna că nici userul, nici logurile nu aflau
+    // vreodată că trimiterea a eșuat: exact motivul pentru care lipsa
+    // configurării Resend a trecut neobservată.
+    let emailSent = false;
+    let emailError: string | undefined;
     try {
       await sendVerificationEmail(email, token);
-    } catch {
-      // Don't fail registration if email fails — user can resend
+      emailSent = true;
+    } catch (err) {
+      emailError = err instanceof Error ? err.message : String(err);
+      console.error("[REGISTER] Trimiterea emailului de verificare a eșuat:", emailError);
     }
 
     return NextResponse.json(
       {
         success: true,
-        message: "Cont creat. Verifică emailul pentru a-l activa.",
+        message: emailSent
+          ? "Cont creat. Verifică emailul pentru a-l activa."
+          : "Cont creat, dar nu am putut trimite emailul de verificare. Poți cere retrimiterea.",
+        emailSent,
         userId: user.id,
       },
       { status: 201 }
