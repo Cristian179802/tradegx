@@ -30,7 +30,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Step = "method" | "ea" | "metaapi" | "tradelocker" | "csv" | "form";
+type Step = "method" | "ea" | "metaapi" | "tradelocker" | "exchange" | "csv" | "form";
 type AccountTyp = "DEMO" | "CHALLENGE" | "LIVE";
 
 interface AccountDialogProps {
@@ -141,6 +141,24 @@ function StepMethod({ onSelect }: { onSelect: (s: Step) => void }) {
           <p className="text-sm text-zinc-400 leading-relaxed">{t("tlDesc")}</p>
         </div>
         <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-violet-400 transition-colors shrink-0 mt-1" />
+      </button>
+
+      {/* Burse crypto — API nativ, gratuit */}
+      <button
+        onClick={() => onSelect("exchange")}
+        className="w-full flex items-start gap-4 p-5 rounded-2xl border-2 border-amber-500/35 bg-gradient-to-br from-amber-500/8 to-orange-500/4 hover:border-amber-400/60 hover:from-amber-500/14 transition-all text-left group relative overflow-hidden"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-amber-500/18 border border-amber-500/30 flex items-center justify-center shrink-0 text-2xl">
+          ₿
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="font-bold text-white text-base">{t("exTitle")}</span>
+            <Badge className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] px-1.5 py-0">{t("free")}</Badge>
+          </div>
+          <p className="text-sm text-zinc-400 leading-relaxed">{t("exDesc")}</p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors shrink-0 mt-1" />
       </button>
 
       {/* CSV + Manual — secundare, mai mici */}
@@ -634,6 +652,141 @@ function StepTradeLocker({ onBack, onSuccess, onClose }: { onBack: () => void; o
   );
 }
 
+// ─── Step: Bursă crypto (Binance / Bybit) ────────────────────────────────────
+//
+// Avertismentul despre chei read-only e afișat proeminent, nu ascuns în text
+// mic: un jurnal nu are nevoie de drept de tranzacționare sau retragere, iar
+// utilizatorii lipesc adesea chei cu toate permisiunile din reflex.
+
+function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess: () => void; onClose: () => void }) {
+  const t = useTranslations("accountDialog");
+  const { toast } = useToast();
+  const [provider, setProvider] = React.useState<"binance" | "bybit">("bybit");
+  const [apiKey, setApiKey] = React.useState("");
+  const [apiSecret, setApiSecret] = React.useState("");
+  const [connected, setConnected] = React.useState<{ equity: number; currency: string } | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+  async function connect() {
+    if (!apiKey.trim() || !apiSecret.trim()) { setError(t("credsRequired")); return; }
+    setBusy(true); setError("");
+    try {
+      const res = await fetch("/api/integrations/exchange/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider, apiKey: apiKey.trim(), apiSecret: apiSecret.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? t("connectErr")); return; }
+      setConnected({ equity: data.equity ?? 0, currency: data.currency ?? "USDT" });
+      // Secretul nu mai e necesar în memoria paginii după validare.
+      setApiSecret("");
+    } catch { setError(t("netErr")); }
+    finally { setBusy(false); }
+  }
+
+  async function runImport() {
+    setBusy(true); setError("");
+    try {
+      const res = await fetch("/api/integrations/exchange/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? t("importErr")); return; }
+      toast({ title: t("exImported", { n: data.imported }), description: data.note });
+      onSuccess(); onClose();
+    } catch { setError(t("netErrShort")); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="space-y-4">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
+        <ChevronLeft className="w-4 h-4" />{t("back")}
+      </button>
+
+      <div>
+        <p className="text-xs text-zinc-400 mb-1.5">{t("exPickProvider")}</p>
+        <div className="grid grid-cols-2 gap-2">
+          {(["bybit", "binance"] as const).map((p) => (
+            <button key={p} onClick={() => { setProvider(p); setConnected(null); }}
+              className={cn("py-2 rounded-xl border text-sm font-bold transition-all capitalize",
+                provider === p ? "bg-amber-500/15 border-amber-500/50 text-amber-300"
+                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")}>
+              {p === "binance" ? "Binance" : "Bybit"}
+            </button>
+          ))}
+        </div>
+        <p className="text-[10px] text-zinc-600 mt-1.5">
+          {provider === "binance" ? t("exBinanceNote") : t("exBybitNote")}
+        </p>
+      </div>
+
+      {/* Avertisment de securitate — deliberat înaintea câmpurilor */}
+      <div className="flex items-start gap-2 bg-amber-500/8 border border-amber-500/25 rounded-xl px-3 py-2.5">
+        <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+        <p className="text-[11px] text-zinc-300 leading-relaxed font-medium">{t("exReadOnlyWarn")}</p>
+      </div>
+
+      {connected === null ? (
+        <>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">{t("exApiKey")}</label>
+              <Input value={apiKey} onChange={(e) => setApiKey(e.target.value)}
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 font-mono text-xs placeholder:text-zinc-600" placeholder="…" />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">{t("exApiSecret")}</label>
+              <Input value={apiSecret} onChange={(e) => setApiSecret(e.target.value)} type="password"
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 font-mono text-xs placeholder:text-zinc-600" placeholder="••••••••" />
+              <p className="text-[10px] text-zinc-600 mt-1 flex items-center gap-1">
+                <Lock className="w-3 h-3" />{t("exEncrypted")}
+              </p>
+            </div>
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-rose-300">{error}</p>
+            </div>
+          )}
+
+          <Button onClick={connect} disabled={busy} size="lg" className="w-full">
+            {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("exConnecting")}</>
+                  : <><Plug className="w-4 h-4 mr-2" />{t("exConnect")}</>}
+          </Button>
+        </>
+      ) : (
+        <>
+          <div className="tg-surface rounded-xl px-4 py-3 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <p className="text-sm" style={{ color: "var(--ink-2)" }}>
+              {t("exConnected", { equity: connected.equity.toLocaleString(), currency: connected.currency })}
+            </p>
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-rose-300">{error}</p>
+            </div>
+          )}
+
+          <Button onClick={runImport} disabled={busy} size="lg" className="w-full">
+            {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("exImporting")}</>
+                  : <><Download className="w-4 h-4 mr-2" />{t("exImport")}</>}
+          </Button>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Step: CSV Import ─────────────────────────────────────────────────────────
 
 function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess: () => void; onClose: () => void }) {
@@ -995,6 +1148,7 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
     ea:          t("titleEa"),
     metaapi:     t("titleMetaapi"),
     tradelocker: t("titleTradelocker"),
+    exchange:    t("titleExchange"),
     csv:         t("titleCsv"),
     form:    isEdit ? t("titleFormEdit") : t("titleFormNew"),
   };
@@ -1010,6 +1164,7 @@ export function AccountDialog({ open, onClose, onSuccess, account }: AccountDial
         {step === "ea"      && <StepEA onBack={() => setStep("method")} onDone={() => { onSuccess(); onClose(); }} />}
         {step === "metaapi" && <StepMetaApi onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
         {step === "tradelocker" && <StepTradeLocker onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
+        {step === "exchange" && <StepExchange onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
         {step === "csv"     && <StepCSV onBack={() => setStep("method")} onSuccess={onSuccess} onClose={onClose} />}
         {step === "form"   && (
           <StepForm

@@ -94,6 +94,8 @@ enum BrokerSource {
   METAAPI
   TRADELOCKER
   DXTRADE
+  BINANCE
+  BYBIT
 }
 
 enum EmotionalState {
