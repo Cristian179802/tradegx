@@ -525,6 +525,7 @@ function StepTradeLocker({ onBack, onSuccess, onClose }: { onBack: () => void; o
   const [accounts, setAccounts] = React.useState<TlAccountRow[] | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [progress, setProgress] = React.useState("");
 
   async function connect() {
     if (!email.trim() || !password || !server.trim()) { setError(t("credsRequired")); return; }
@@ -542,23 +543,42 @@ function StepTradeLocker({ onBack, onSuccess, onClose }: { onBack: () => void; o
     finally { setBusy(false); }
   }
 
+  // Reluabil, ca la burse: 3 ani de istoric pot depăși o invocare serverless,
+  // deci chemăm până hasMore=false și arătăm progresul.
   async function importAccount(a: TlAccountRow) {
     setBusy(true); setError("");
     try {
-      const res = await fetch("/api/integrations/tradelocker/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tradeLockerAccountId: a.id, accNum: a.accNum,
-          name: a.name, currency: a.currency,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error ?? t("importErr")); return; }
-      toast({ title: t("tlImported", { n: data.imported }), description: data.warning });
-      onSuccess(); onClose();
+      let acctId: string | undefined;
+      let totalImported = 0;
+      let warning: string | undefined;
+
+      for (let round = 0; round < 200; round++) {
+        const res = await fetch("/api/integrations/tradelocker/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tradeLockerAccountId: a.id, accNum: a.accNum,
+            name: a.name, currency: a.currency,
+            tradingAccountId: acctId,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setError(data.error ?? t("importErr")); return; }
+
+        totalImported += data.imported ?? 0;
+        acctId = data.tradingAccountId ?? acctId;
+        warning = data.warning ?? warning;
+        setProgress(t("exImportProgress", { pct: data.progressPct ?? 100, n: totalImported }));
+
+        if (!data.hasMore) {
+          toast({ title: t("tlImported", { n: totalImported }), description: warning });
+          onSuccess(); onClose();
+          return;
+        }
+      }
+      setError(t("importErr"));
     } catch { setError(t("netErrShort")); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setProgress(""); }
   }
 
   return (
@@ -667,6 +687,7 @@ function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSu
   const [connected, setConnected] = React.useState<{ equity: number; currency: string } | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [progress, setProgress] = React.useState("");
 
   async function connect() {
     if (!apiKey.trim() || !apiSecret.trim()) { setError(t("credsRequired")); return; }
@@ -686,20 +707,41 @@ function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSu
     finally { setBusy(false); }
   }
 
+  // Import reluabil: serverul procesează în felii (2 ani de Bybit nu încap
+  // într-o invocare serverless) și răspunde cu hasMore + cursor; noi chemăm în
+  // buclă și afișăm progresul, până se termină tot istoricul disponibil.
   async function runImport() {
     setBusy(true); setError("");
     try {
-      const res = await fetch("/api/integrations/exchange/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error ?? t("importErr")); return; }
-      toast({ title: t("exImported", { n: data.imported }), description: data.note });
-      onSuccess(); onClose();
+      let cursor: string | undefined;
+      let acctId: string | undefined;
+      let totalImported = 0;
+      let note: string | undefined;
+
+      for (let round = 0; round < 200; round++) {
+        const res = await fetch("/api/integrations/exchange/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider, cursor, tradingAccountId: acctId }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setError(data.error ?? t("importErr")); return; }
+
+        totalImported += data.imported ?? 0;
+        acctId = data.tradingAccountId ?? acctId;
+        cursor = data.cursor;
+        note = data.note ?? note;
+        setProgress(t("exImportProgress", { pct: data.progressPct ?? 100, n: totalImported }));
+
+        if (!data.hasMore) {
+          toast({ title: t("exImported", { n: totalImported }), description: note });
+          onSuccess(); onClose();
+          return;
+        }
+      }
+      setError(t("importErr"));
     } catch { setError(t("netErrShort")); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setProgress(""); }
   }
 
   return (
@@ -778,7 +820,7 @@ function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSu
           )}
 
           <Button onClick={runImport} disabled={busy} size="lg" className="w-full">
-            {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("exImporting")}</>
+            {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{progress || t("exImporting")}</>
                   : <><Download className="w-4 h-4 mr-2" />{t("exImport")}</>}
           </Button>
         </>

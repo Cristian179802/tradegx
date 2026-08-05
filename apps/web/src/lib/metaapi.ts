@@ -68,18 +68,27 @@ export async function getDeals(
 ): Promise<MetaApiDeal[]> {
   const fromStr = from.toISOString();
   const toStr = to.toISOString();
-  const url = `${BASE}/users/current/accounts/${accountId}/history-deals/time/${fromStr}/${toStr}?limit=1000`;
 
-  const res = await fetch(url, {
-    headers: { "auth-token": token },
-    signal: AbortSignal.timeout(30000),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`MetaAPI deals ${res.status}: ${text}`);
+  // Paginare prin offset: varianta veche lua O SINGURĂ pagină de 1000, deci un
+  // cont activ pe o perioadă lungă era trunchiat silențios la primele 1000 de
+  // deals. Acum citim până când o pagină vine incompletă.
+  const all: MetaApiDeal[] = [];
+  for (let offset = 0; offset < 100_000; offset += 1000) {
+    const url = `${BASE}/users/current/accounts/${accountId}/history-deals/time/${fromStr}/${toStr}?offset=${offset}&limit=1000`;
+    const res = await fetch(url, {
+      headers: { "auth-token": token },
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`MetaAPI deals ${res.status}: ${text}`);
+    }
+    const data = await res.json();
+    const page: MetaApiDeal[] = Array.isArray(data) ? data : (data.deals ?? data.data ?? []);
+    all.push(...page);
+    if (page.length < 1000) break;
   }
-  const data = await res.json();
-  return Array.isArray(data) ? data : (data.deals ?? data.data ?? []);
+  return all;
 }
 
 // ─── Instrument type detection ────────────────────────────────────────────────

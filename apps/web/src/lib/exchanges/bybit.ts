@@ -83,17 +83,25 @@ export interface ExchangeTrade {
   commission: number;
 }
 
-export async function getClosedTrades(
+// Adâncimea maximă documentată: titlul oficial al endpoint-ului e
+// „Get Closed PnL (2 years)". Cerem tot ce ține bursa, nu o felie arbitrară.
+export const BYBIT_MAX_HISTORY_MS = 2 * 365 * 86_400_000;
+export { WINDOW_MS as BYBIT_WINDOW_MS };
+
+// O SINGURĂ fereastră (≤7 zile, regula API-ului), cu paginare prin cursor.
+// Bucla peste ferestre stă în ruta de sync, ca importul să poată fi RELUAT:
+// 2 ani = ~104 ferestre, prea mult pentru o singură invocare serverless —
+// serverul procesează cât încape în buget și clientul continuă de unde a rămas.
+export async function getClosedTradesWindow(
   apiKey: string,
   apiSecret: string,
-  sinceMs: number
+  startMs: number,
+  endMs: number
 ): Promise<ExchangeTrade[]> {
   const out: ExchangeTrade[] = [];
-  const now = Date.now();
-
-  // Ferestre de 7 zile, de la `sinceMs` până acum.
-  for (let start = sinceMs; start < now; start += WINDOW_MS) {
-    const end = Math.min(start + WINDOW_MS, now);
+  {
+    const start = startMs;
+    const end = Math.min(endMs, startMs + WINDOW_MS);
     let cursor = "";
 
     // Paginare în interiorul ferestrei.

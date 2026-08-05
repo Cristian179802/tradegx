@@ -6,26 +6,31 @@ import type { ExchangeTrade } from "./bybit";
 // Semnare verificată în documentația oficială: antetul `X-MBX-APIKEY` duce
 // cheia, iar `signature` din query e HMAC-SHA256 peste ÎNTREGUL query string.
 //
-// TREI CONSTRÂNGERI REALE, toate capabile să facă o implementare să pară că
-// „nu găsește tranzacții":
-//   1. `/fapi/v1/income` păstrează doar ULTIMELE 3 LUNI de istoric.
-//   2. Fără startTime/endTime întoarce doar ultimele 7 zile.
-//   3. `/fapi/v1/userTrades` cere OBLIGATORIU un `symbol` — nu există „dă-mi
-//      toate execuțiile". Nu poți lista istoricul fără să știi ce s-a tranzacționat.
+// LIMITELE REALE, citate din documentație — cerem maximul, dar maximul e al lor:
+//   · `/fapi/v1/userTrades`: „Only support querying trade in the past 6 months"
+//     → ADÂNCIMEA MAXIMĂ ABSOLUTĂ prin API e 6 luni. Mai vechi există doar în
+//     exportul CSV din interfața Binance (importul nostru CSV îl acceptă).
+//   · `/fapi/v1/income`: păstrează doar ultimele 3 LUNI.
+//   · `/fapi/v1/userTrades` cere OBLIGATORIU `symbol` — nu există „toate
+//     execuțiile"; fără discovery nu știi ce să ceri.
+//   · `fromId` NU se combină cu startTime/endTime — sunt moduri exclusive.
 //
-// De aici strategia în doi pași, care ocolește elegant constrângerea 3:
-//   pasul 1 — `/fapi/v1/income?incomeType=REALIZED_PNL` NU cere symbol, deci ne
-//             spune exact CE simboluri au fost tranzacționate și când
-//   pasul 2 — pentru fiecare simbol descoperit, `/fapi/v1/userTrades` dă
-//             execuțiile cu preț, cantitate și sens, pe care le împerechem FIFO
-//             în tranzacții cu intrare ȘI ieșire
+// STRATEGIA DE ADÂNCIME MAXIMĂ:
+//   discovery = simbolurile din income (3 luni) ∪ pozițiile deschise acum.
+//   Pentru fiecare simbol: MERS PE fromId de la 0 — întoarce tot ce ține bursa
+//   (6 luni), în pagini de 1000, de obicei 1-3 cereri per simbol. E singura
+//   cale către toate cele 6 luni: modul cu startTime/endTime e limitat la
+//   ferestre de 7 zile (26 de cereri per simbol pentru același rezultat).
 //
-// Spot are aceeași limitare per-simbol la `/api/v3/myTrades`, fără echivalent
-// de tip „income", deci aici acoperim Futures — ce jurnalizează efectiv un
-// trader cu levier.
+// LIMITARE ONESTĂ, nerezolvabilă prin API: un simbol tranzacționat ultima dată
+// acum 3-6 luni nu apare nici în income (3 luni), nici în pozițiile curente —
+// deci nu poate fi DESCOPERIT automat, deși execuțiile lui ar fi accesibile.
+// Pentru acela: exportul CSV din Binance + importul nostru CSV.
 
 const FAPI = "https://fapi.binance.com";
-const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
+export const BINANCE_MAX_HISTORY_MS = 180 * 86_400_000; // 6 luni — plafonul userTrades
+const INCOME_MAX_MS = 90 * 86_400_000;                  // 3 luni — plafonul income
+const WEEK_MS = 7 * 86_400_000;
 
 function signed(secret: string, params: Record<string, string | number>): string {
   const qs = new URLSearchParams(
@@ -65,44 +70,74 @@ export async function validateKeys(
   };
 }
 
-interface IncomeRow { symbol?: string; incomeType?: string; income?: string; time?: number }
+interface IncomeRow { symbol?: string; time?: number }
 interface UserTrade {
   id?: number; orderId?: number; symbol?: string; side?: string;
   price?: string; qty?: string; realizedPnl?: string; commission?: string; time?: number;
 }
+interface AccountPosition { symbol?: string; entryPrice?: string; positionAmt?: string }
 
-/** Pasul 1: ce simboluri au fost tranzacționate (nu cere `symbol`). */
-async function discoverSymbols(
-  apiKey: string, apiSecret: string, startMs: number
-): Promise<string[]> {
+/**
+ * Ce simboluri au fost tranzacționate: income (max 3 luni — plafonul lui) plus
+ * pozițiile deschise acum (prind simboluri active fără P&L realizat recent).
+ */
+export async function discoverSymbols(apiKey: string, apiSecret: string): Promise<string[]> {
   const symbols = new Set<string>();
   const now = Date.now();
-  // Ferestre de 7 zile ca să nu depindem de comportamentul implicit al API-ului.
-  const WEEK = 7 * 24 * 60 * 60 * 1000;
 
-  for (let start = startMs; start < now; start += WEEK) {
+  for (let start = now - INCOME_MAX_MS; start < now; start += WEEK_MS) {
     const rows = await get<IncomeRow[]>(apiKey, apiSecret, "/fapi/v1/income", {
       incomeType: "REALIZED_PNL",
       startTime: start,
-      endTime: Math.min(start + WEEK, now),
+      endTime: Math.min(start + WEEK_MS, now),
       limit: 1000,
     });
     for (const r of rows) if (r.symbol) symbols.add(r.symbol);
   }
+
+  // Pozițiile deschise: simboluri în lucru chiar acum.
+  const acc = await get<{ positions?: AccountPosition[] }>(apiKey, apiSecret, "/fapi/v2/account");
+  for (const p of acc.positions ?? []) {
+    if (p.symbol && Math.abs(Number(p.positionAmt ?? 0)) > 0) symbols.add(p.symbol);
+  }
+
   return [...symbols];
 }
 
-/** Pasul 2: execuțiile pe un simbol, împerecheate FIFO în tranzacții închise. */
-async function tradesForSymbol(
-  apiKey: string, apiSecret: string, symbol: string, startMs: number
+/**
+ * Toate execuțiile disponibile pentru un simbol (mers pe fromId, de la cea mai
+ * veche păstrată de bursă), împerecheate FIFO în tranzacții închise.
+ *
+ * Un simbol se procesează ATOMIC (toate execuțiile lui într-o singură trecere):
+ * împerecherea FIFO ruptă în bucăți ar produce perechi greșite. De aceea
+ * cursorul de reluare al sync-ului e LA NIVEL DE SIMBOL, nu de timp.
+ */
+export async function tradesForSymbol(
+  apiKey: string,
+  apiSecret: string,
+  symbol: string,
+  sinceMs: number
 ): Promise<ExchangeTrade[]> {
-  const fills = await get<UserTrade[]>(apiKey, apiSecret, "/fapi/v1/userTrades", {
-    symbol,
-    startTime: startMs,
-    limit: 1000,
-  });
+  const fills: UserTrade[] = [];
+  let fromId = 0;
 
-  const sorted = [...fills].sort((a, b) => (a.time ?? 0) - (b.time ?? 0));
+  for (let page = 0; page < 100; page++) {
+    const rows = await get<UserTrade[]>(apiKey, apiSecret, "/fapi/v1/userTrades", {
+      symbol,
+      fromId,
+      limit: 1000,
+    });
+    fills.push(...rows);
+    if (rows.length < 1000) break;
+    const lastId = rows[rows.length - 1]?.id;
+    if (lastId === undefined) break;
+    fromId = lastId + 1;
+  }
+
+  const sorted = fills
+    .filter((f) => Number(f.time ?? 0) >= sinceMs)
+    .sort((a, b) => (a.time ?? 0) - (b.time ?? 0));
+
   const book: { side: "BUY" | "SELL"; qty: number; price: number; time: Date; comm: number; id: string }[] = [];
   const out: ExchangeTrade[] = [];
 
@@ -121,8 +156,8 @@ async function tradesForSymbol(
       const matched = Math.min(remaining, lot.qty);
       const commEntry = lot.qty > 0 ? (lot.comm * matched) / lot.qty : 0;
       const commExit = qty > 0 ? (comm * matched) / qty : 0;
-      // Binance raportează realizedPnl pe execuția care închide — îl repartizăm
-      // proporțional pe porțiunea împerecheată, deci nu îl estimăm noi.
+      // P&L raportat de bursă pe execuția de închidere, repartizat proporțional
+      // pe porțiunea împerecheată — nu îl estimăm noi (funding + taxe l-ar strica).
       const pnl = qty > 0 ? (realized * matched) / qty : realized;
 
       out.push({
@@ -152,25 +187,4 @@ async function tradesForSymbol(
   }
 
   return out;
-}
-
-export async function getClosedTrades(
-  apiKey: string,
-  apiSecret: string,
-  sinceMs: number
-): Promise<{ trades: ExchangeTrade[]; symbols: string[]; truncated: boolean }> {
-  // Istoricul nu există mai vechi de 3 luni; cerem oricum de la limita reală,
-  // ca să nu facem zeci de cereri pentru perioade goale.
-  const floor = Date.now() - THREE_MONTHS_MS;
-  const truncated = sinceMs < floor;
-  const start = Math.max(sinceMs, floor);
-
-  const symbols = await discoverSymbols(apiKey, apiSecret, start);
-  const trades: ExchangeTrade[] = [];
-  for (const s of symbols) {
-    // Secvențial, intenționat: Binance are limite de greutate pe minut, iar
-    // cererile paralele pe multe simboluri duc rapid la 418/429.
-    trades.push(...(await tradesForSymbol(apiKey, apiSecret, s, start)));
-  }
-  return { trades, symbols, truncated };
 }

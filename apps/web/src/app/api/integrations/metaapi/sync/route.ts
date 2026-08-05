@@ -16,7 +16,10 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
-  const { metaApiAccountId, tradingAccountId, daysBack = 90 } = body;
+  // 5 ani, nu 90 de zile: MetaAPI păstrează istoricul complet al terminalului,
+  // deci felia de 90 de zile era o limitare a noastră, nu a lor. getDeals
+  // paginează acum prin offset, deci volumul nu mai e o problemă.
+  const { metaApiAccountId, tradingAccountId, daysBack = 1825 } = body;
 
   if (!metaApiAccountId || !tradingAccountId) {
     return NextResponse.json({ error: "metaApiAccountId și tradingAccountId sunt obligatorii" }, { status: 400 });

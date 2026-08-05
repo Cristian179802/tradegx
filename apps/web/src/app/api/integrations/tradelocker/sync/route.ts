@@ -2,18 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
-  authenticate, getOrdersHistory, pairFills, type TradeLockerEnv,
+  ordersHistoryColumns, getOrdersHistoryWindow, pairFills,
+  TRADELOCKER_MAX_HISTORY_MS, TRADELOCKER_WINDOW_MS,
+  type TradeLockerEnv, type TlFill,
 } from "@/lib/tradelocker";
 import { detectInstrumentType } from "@/lib/parsers/index";
 
 // POST /api/integrations/tradelocker/sync
 //
-// Pasul 2: leagă un cont TradeLocker la un cont TradeGx și importă istoricul.
-// Reapelat, aduce doar ce e nou (sincronizare incrementală de la lastSyncedAt).
+// ADÂNCIME MAXIMĂ: TradeLocker nu documentează retenție → mergem 3 ani în urmă
+// (platforma există din ~2022). Cererea NU se face dintr-o bucată: API-ul are
+// plafon de rânduri per răspuns FĂRĂ paginare, deci „tot istoricul" într-o
+// singură cerere ar fi trunchiat silențios — exact ce vrem să evităm. Ferestre
+// de 14 zile, config-ul de coloane citit o singură dată.
 //
-// Corp: { tradeLockerAccountId, accNum, name?, currency?, tradingAccountId? }
-//   · cu `tradingAccountId` → leagă la un cont existent
-//   · fără → creează un cont TradeGx nou
+// Împerecherea FIFO vrea toate execuțiile într-o trecere (o poziție ținută
+// peste graniță între două bucăți nu s-ar mai împerechea), de aceea bugetul e
+// generos (40s, maxDuration 60) ca importul să încapă de obicei într-o singură
+// invocare: 3 ani ≈ 78 de ferestre. Reluarea (hasMore + lastSyncedAt) rămâne
+// plasă de siguranță pentru conturi uriașe sau API lent.
+
+export const maxDuration = 60;
+const BUDGET_MS = 40_000;
+const DAY_MS = 86_400_000;
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -45,9 +56,8 @@ export async function POST(req: NextRequest) {
 
   const cfg = (integration.config ?? {}) as Record<string, unknown>;
   const env: TradeLockerEnv = cfg.env === "live" ? "live" : "demo";
-  let token = integration.apiKey;
+  const token = integration.apiKey;
 
-  // Contul TradeGx țintă
   let account = body.tradingAccountId
     ? await prisma.tradingAccount.findFirst({ where: { id: body.tradingAccountId, userId } })
     : await prisma.tradingAccount.findFirst({ where: { userId, brokerAccountId: tlId } });
@@ -74,20 +84,24 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Incremental: de la ultima sincronizare, cu o zi de suprapunere ca să nu
-  // pierdem ordine închise chiar la graniță. Duplicatele sunt oprite oricum
-  // mai jos, prin brokerTradeId.
-  const fromMs = account.lastSyncedAt
-    ? account.lastSyncedAt.getTime() - 86_400_000
-    : undefined;
+  const now = Date.now();
+  const floor = now - TRADELOCKER_MAX_HISTORY_MS;
+  let start = account.lastSyncedAt
+    ? Math.max(account.lastSyncedAt.getTime() - DAY_MS, floor)
+    : floor;
 
-  let fills;
+  const t0 = Date.now();
+  const fills: TlFill[] = [];
   try {
-    fills = await getOrdersHistory(env, token, tlId, accNum, fromMs);
+    const columns = await ordersHistoryColumns(env, token, accNum);
+    while (start < now && Date.now() - t0 < BUDGET_MS) {
+      const end = Math.min(start + TRADELOCKER_WINDOW_MS, now);
+      fills.push(...(await getOrdersHistoryWindow(env, token, tlId, accNum, columns, start, end)));
+      start = end;
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "";
-    // Token expirat → reautentificare, dacă avem datele necesare în config.
-    if (/\b401\b|\b403\b/.test(msg) && typeof cfg.email === "string" && typeof cfg.server === "string") {
+    if (/\b401\b|\b403\b/.test(msg)) {
       return NextResponse.json(
         { error: "Sesiunea TradeLocker a expirat. Reconectează-te.", needsReconnect: true },
         { status: 401 }
@@ -98,56 +112,64 @@ export async function POST(req: NextRequest) {
 
   const { trades, openLots } = pairFills(fills);
 
-  let imported = 0, skipped = 0;
-  for (const t of trades) {
-    const exists = await prisma.trade.findFirst({
-      where: { accountId: account.id, brokerTradeId: t.brokerTradeId },
-      select: { id: true },
-    });
-    if (exists) { skipped++; continue; }
+  // Dedup în lot + față de bază, apoi createMany — nu findFirst+create per rând.
+  const seen = new Set<string>();
+  const unique = trades.filter((t) => {
+    if (seen.has(t.brokerTradeId)) return false;
+    seen.add(t.brokerTradeId);
+    return true;
+  });
+  const existing = await prisma.trade.findMany({
+    where: { accountId: account.id, brokerTradeId: { in: unique.map((t) => t.brokerTradeId) } },
+    select: { brokerTradeId: true },
+  });
+  const have = new Set(existing.map((e) => e.brokerTradeId));
+  const fresh = unique.filter((t) => !have.has(t.brokerTradeId));
 
-    // P&L din diferența de preț × volum. TradeLocker nu dă P&L realizat pe
-    // ordin, deci îl derivăm — la fel ca la importul de blotter CSV.
-    const diff = t.direction === "BUY" ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice;
-    const pnl = diff * t.lotSize;
-
-    await prisma.trade.create({
-      data: {
-        accountId: account.id,
-        symbol: t.symbol,
-        instrumentType: detectInstrumentType(t.symbol) as never,
-        direction: t.direction,
-        entryPrice: t.entryPrice,
-        entryTime: t.entryTime,
-        exitPrice: t.exitPrice,
-        exitTime: t.exitTime,
-        lotSize: t.lotSize,
-        pnlMoney: pnl,
-        pnlPercent: 0,
-        commission: t.commission,
-        swap: 0,
-        status: "CLOSED",
-        brokerSource: "TRADELOCKER",
-        brokerTradeId: t.brokerTradeId,
-        durationMinutes: Math.max(0, Math.round((t.exitTime.getTime() - t.entryTime.getTime()) / 60000)),
-        tags: [],
-      },
+  for (let i = 0; i < fresh.length; i += 500) {
+    await prisma.trade.createMany({
+      data: fresh.slice(i, i + 500).map((t) => {
+        const diff = t.direction === "BUY" ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice;
+        return {
+          accountId: account!.id,
+          symbol: t.symbol,
+          instrumentType: detectInstrumentType(t.symbol) as never,
+          direction: t.direction,
+          entryPrice: t.entryPrice,
+          entryTime: t.entryTime,
+          exitPrice: t.exitPrice,
+          exitTime: t.exitTime,
+          lotSize: t.lotSize,
+          // P&L derivat din preț × volum — TradeLocker nu dă P&L realizat pe ordin.
+          pnlMoney: diff * t.lotSize,
+          pnlPercent: 0,
+          commission: t.commission,
+          swap: 0,
+          status: "CLOSED" as never,
+          brokerSource: "TRADELOCKER" as never,
+          brokerTradeId: t.brokerTradeId,
+          durationMinutes: Math.max(0, Math.round((t.exitTime.getTime() - t.entryTime.getTime()) / 60000)),
+          tags: [],
+        };
+      }),
     });
-    imported++;
   }
 
   await prisma.tradingAccount.update({
     where: { id: account.id },
-    data: { lastSyncedAt: new Date() },
+    data: { lastSyncedAt: new Date(start) },
   });
 
+  const hasMore = start < now;
   return NextResponse.json({
     success: true,
     tradingAccountId: account.id,
-    imported,
-    skipped,
+    imported: fresh.length,
+    skipped: trades.length - fresh.length,
     fills: fills.length,
     openPositions: openLots,
+    hasMore,
+    progressPct: Math.min(100, Math.round(((start - floor) / (now - floor)) * 100)),
     warning: openLots > 0
       ? `${openLots} poziție(i) încă deschisă(e) — vor apărea după închidere.`
       : undefined,

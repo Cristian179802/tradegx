@@ -195,16 +195,26 @@ export function rowsToFills(rows: unknown[], columns: string[]): TlFill[] {
   return out;
 }
 
-export async function getOrdersHistory(
+// Adâncimea primei sincronizări: TradeLocker nu documentează o limită de
+// retenție, dar platforma există din ~2022 — 3 ani acoperă practic orice cont.
+export const TRADELOCKER_MAX_HISTORY_MS = 3 * 365 * 86_400_000;
+// Fereastra per cerere: documentația menționează un plafon de RÂNDURI per
+// răspuns (fără cursor de paginare!) — o cerere „tot istoricul" ar fi trunchiată
+// SILENȚIOS. 14 zile țin și un scalper activ sub plafon.
+export const TRADELOCKER_WINDOW_MS = 14 * 86_400_000;
+
+// O singură fereastră. `columns` vine din exterior ca /trade/config să fie
+// citit O DATĂ per sincronizare, nu la fiecare din zecile de ferestre.
+export async function getOrdersHistoryWindow(
   env: TradeLockerEnv,
   token: string,
   accountId: string,
   accNum: number,
-  fromMs?: number
+  columns: string[],
+  fromMs: number,
+  toMs: number
 ): Promise<TlFill[]> {
-  const columns = await ordersHistoryColumns(env, token, accNum);
-  const qs = fromMs ? `?from=${fromMs}&to=${Date.now()}` : "";
-  const raw = await req(env, `/trade/accounts/${accountId}/ordersHistory${qs}`, {
+  const raw = await req(env, `/trade/accounts/${accountId}/ordersHistory?from=${fromMs}&to=${toMs}`, {
     headers: { Authorization: `Bearer ${token}` },
     accNum,
   });

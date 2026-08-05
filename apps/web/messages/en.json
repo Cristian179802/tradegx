@@ -1674,7 +1674,7 @@
     "hintDxtrade": "DXtrade → Positions / Orders → Export → CSV. It is a fills log — we pair them into round-trip trades automatically (FIFO).",
     "titleTradelocker": "Connect TradeLocker",
     "tlTitle": "TradeLocker — direct connection",
-    "tlDesc": "Sign in with your account details. We import your history and keep it synced.",
+    "tlDesc": "Sign in with your account details. We import all available history and keep it synced.",
     "tlEnv": "Environment",
     "tlEnvDemo": "Demo",
     "tlEnvLive": "Live",
@@ -1685,7 +1685,7 @@
     "tlConnect": "Connect",
     "tlConnecting": "Connecting…",
     "tlPickAccount": "Pick the account to import",
-    "tlImport": "Import history",
+    "tlImport": "Import all available history",
     "tlImporting": "Importing…",
     "tlImported": "{n} trades imported",
     "tlNoPassStored": "Your password is not stored — we only keep the session token issued by TradeLocker.",
@@ -1701,11 +1701,12 @@
     "exConnect": "Verify and connect",
     "exConnecting": "Checking keys…",
     "exConnected": "Connected · balance {equity} {currency}",
-    "exImport": "Import history (90 days)",
+    "exImport": "Import all available history",
     "exImporting": "Importing…",
     "exImported": "{n} trades imported",
-    "exBinanceNote": "Binance: USDⓈ-M Futures. Available history is 3 months at most.",
-    "exBybitNote": "Bybit: linear (USDT) contracts. Imported from closed positions reported by the exchange."
+    "exBinanceNote": "Binance: USDⓈ-M Futures. The API offers 6 months of history at most — for older data, use Binance CSV export.",
+    "exBybitNote": "Bybit: linear (USDT) contracts. Imports up to 2 years, as far back as the exchange keeps.",
+    "exImportProgress": "{pct}% · {n} trades"
   },
   "backtesting": {
     "stCustom": "Custom",

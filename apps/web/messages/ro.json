@@ -1674,7 +1674,7 @@
     "hintDxtrade": "DXtrade → Positions / Orders → Export → CSV. E un jurnal de execuții — le combinăm automat în tranzacții (FIFO).",
     "titleTradelocker": "Conectează TradeLocker",
     "tlTitle": "TradeLocker — conectare directă",
-    "tlDesc": "Autentificare cu datele contului. Importăm istoricul și îl păstrăm sincronizat.",
+    "tlDesc": "Autentificare cu datele contului. Importăm tot istoricul disponibil și îl păstrăm sincronizat.",
     "tlEnv": "Mediu",
     "tlEnvDemo": "Demo",
     "tlEnvLive": "Live",
@@ -1685,7 +1685,7 @@
     "tlConnect": "Conectează",
     "tlConnecting": "Mă conectez…",
     "tlPickAccount": "Alege contul de importat",
-    "tlImport": "Importă istoricul",
+    "tlImport": "Importă tot istoricul disponibil",
     "tlImporting": "Import în curs…",
     "tlImported": "{n} tranzacții importate",
     "tlNoPassStored": "Parola nu este salvată — păstrăm doar tokenul de sesiune emis de TradeLocker.",
@@ -1701,11 +1701,12 @@
     "exConnect": "Verifică și conectează",
     "exConnecting": "Verific cheile…",
     "exConnected": "Conectat · sold {equity} {currency}",
-    "exImport": "Importă istoricul (90 zile)",
+    "exImport": "Importă tot istoricul disponibil",
     "exImporting": "Import în curs…",
     "exImported": "{n} tranzacții importate",
-    "exBinanceNote": "Binance: acoperim Futures USDⓈ-M. Istoricul disponibil e de maxim 3 luni.",
-    "exBybitNote": "Bybit: contracte liniare (USDT). Import din pozițiile închise raportate de bursă."
+    "exBinanceNote": "Binance: Futures USDⓈ-M. API-ul oferă maxim 6 luni de istoric — pentru mai vechi, folosește exportul CSV din Binance.",
+    "exBybitNote": "Bybit: contracte liniare (USDT). Se importă până la 2 ani, cât păstrează bursa.",
+    "exImportProgress": "{pct}% · {n} tranzacții"
   },
   "backtesting": {
     "stCustom": "Personalizată",
