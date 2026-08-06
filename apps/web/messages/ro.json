@@ -192,11 +192,11 @@
     "portalBtn": "Facturi & metodă de plată",
     "keepPro": "Păstrează PRO după trial",
     "activatePro": "Activează PRO",
-    "monthlyBtn": "Lunar — {price}$/lună",
-    "annualBtn": "Anual — {price}$/lună",
+    "monthlyBtn": "Lunar — €{price}/lună",
+    "annualBtn": "Anual — €{price}/lună",
     "colStandard": "Standard",
     "colFree": "Gratuit",
-    "perMonth": "{price}$/lună",
+    "perMonth": "€{price}/lună",
     "choosePro": "Alege PRO",
     "f1": "Jurnal de tranzacții + import CSV",
     "f2": "Academie completă (41 lecții + quiz-uri + certificat)",
@@ -220,7 +220,8 @@
     "faq2Title": "Anulezi oricând",
     "faq2Body": "Fără contracte, fără perioade minime. La anulare păstrezi PRO până la finalul perioadei plătite.",
     "faq3Title": "Datele tale rămân intacte",
-    "faq3Body": "La trecerea pe Standard nu se șterge nimic: jurnalul, statisticile și progresul din Academie te așteaptă exact cum le-ai lăsat."
+    "faq3Body": "La trecerea pe Standard nu se șterge nimic: jurnalul, statisticile și progresul din Academie te așteaptă exact cum le-ai lăsat.",
+    "annualSub": "€100/an · economisești €20"
   },
   "alertsPage": {
     "title": "Alerte AI",

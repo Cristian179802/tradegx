@@ -765,7 +765,7 @@ function Pricing({ t }: { t: TT }) {
           <Reveal>
             <div className="rounded-3xl border border-zinc-800/80 bg-zinc-900/50 p-7 h-full">
               <p className="text-sm font-black text-zinc-300 mb-1">{t("standardName")}</p>
-              <p className="text-4xl font-black mb-1">0$</p>
+              <p className="text-4xl font-black mb-1">€0</p>
               <p className="text-xs text-zinc-600 mb-5">{t("freeForever")}</p>
               <ul className="space-y-2.5 mb-7">
                 {["std1", "std2", "std3", "std4", "std5"].map((k) => (
@@ -782,7 +782,10 @@ function Pricing({ t }: { t: TT }) {
                 <p className="text-sm font-black text-indigo-300">{t("proName")}</p>
                 <span className="text-[9px] font-black uppercase tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/40 rounded-full px-2 py-0.5">{t("recommended")}</span>
               </div>
-              <p className="text-4xl font-black mb-1">12$<span className="text-base font-bold text-zinc-500">{t("perMonth")}</span></p>
+              {/* Echivalentul lunar al planului anual (100€ ÷ 12). Nota de mai
+                  jos spune explicit că prețul lunar simplu e 10€ — altfel cifra
+                  ar părea o reducere nemotivată. */}
+              <p className="text-4xl font-black mb-1">€8,33<span className="text-base font-bold text-zinc-500">{t("perMonth")}</span></p>
               <p className="text-xs text-zinc-600 mb-5">{t("proPriceNote")}</p>
               <ul className="space-y-2.5 mb-7">
                 {["pro1", "pro2", "pro3", "pro4", "pro5", "pro6"].map((k, idx) => (

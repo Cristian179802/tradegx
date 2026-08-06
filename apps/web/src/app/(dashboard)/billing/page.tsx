@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { useTranslations, useLocale } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PRICE_MONTHLY, PRICE_ANNUAL, PRICE_ANNUAL_PER_MONTH } from "@/lib/pricing";
 
 // ── Abonament & Facturare ───────────────────────────────────────────────────
 // Pagina care explică omului EXACT ce cumpără: planul curent, comparația
@@ -127,10 +128,17 @@ export default function BillingPage() {
     ? Math.max(1, Math.ceil((new Date(sub.trialEnd).getTime() - Date.now()) / 86_400_000))
     : 0;
 
-  const monthly = data?.prices.monthly.amount ?? 19;
-  const annual = data?.prices.annual.amount ?? 144;
-  const annualPerMonth = data?.prices.annual.perMonth ?? 12;
+  // Valorile de rezervă vin din sursa unică, nu scrise de mână: dacă ruta nu
+  // răspunde, pagina arată tot prețul corect, nu unul vechi de acum trei luni.
+  const monthly = data?.prices.monthly.amount ?? PRICE_MONTHLY;
+  const annual = data?.prices.annual.amount ?? PRICE_ANNUAL;
+  const annualPerMonth = data?.prices.annual.perMonth ?? PRICE_ANNUAL_PER_MONTH;
   const savingsPct = Math.round((1 - annualPerMonth / monthly) * 100);
+
+  // 100/12 = 8,3333… — fără formatare s-ar afișa toate zecimalele. Întregii
+  // rămân întregi (10, nu 10,00).
+  const money = (n: number) =>
+    Number.isInteger(n) ? String(n) : n.toFixed(2).replace(".", ",");
 
   return (
     <div className="space-y-6 pb-10 max-w-4xl">
@@ -244,7 +252,7 @@ export default function BillingPage() {
                     : "border-zinc-800 bg-zinc-900/60 text-zinc-500 hover:text-zinc-300"
                 )}
               >
-                {t("annualBtn", { price: annualPerMonth })}
+                {t("annualBtn", { price: money(annualPerMonth) })}
                 <span className="absolute -top-2 -right-2 text-[9px] font-black bg-emerald-500 text-zinc-950 rounded-full px-1.5 py-0.5">
                   -{savingsPct}%
                 </span>
@@ -265,7 +273,7 @@ export default function BillingPage() {
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/70 to-transparent" />
                 <p className="text-xs font-black text-indigo-300">PRO</p>
                 <p className="text-[10px] text-indigo-400/80 font-bold mt-0.5">
-                  {t("perMonth", { price: period === "annual" ? annualPerMonth : monthly })}
+                  {t("perMonth", { price: money(period === "annual" ? annualPerMonth : monthly) })}
                 </p>
               </div>
 

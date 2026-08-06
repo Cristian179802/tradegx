@@ -192,11 +192,11 @@
     "portalBtn": "Invoices & payment method",
     "keepPro": "Keep PRO after trial",
     "activatePro": "Activate PRO",
-    "monthlyBtn": "Monthly — ${price}/month",
-    "annualBtn": "Annual — ${price}/month",
+    "monthlyBtn": "Monthly — €{price}/mo",
+    "annualBtn": "Annual — €{price}/mo",
     "colStandard": "Standard",
     "colFree": "Free",
-    "perMonth": "${price}/month",
+    "perMonth": "€{price}/mo",
     "choosePro": "Choose PRO",
     "f1": "Trade journal + CSV import",
     "f2": "Full Academy (41 lessons + quizzes + certificate)",
@@ -220,7 +220,8 @@
     "faq2Title": "Cancel anytime",
     "faq2Body": "No contracts, no minimum periods. When you cancel, you keep PRO until the end of the paid period.",
     "faq3Title": "Your data stays intact",
-    "faq3Body": "Nothing is deleted when you move to Standard: your journal, statistics and Academy progress are waiting exactly as you left them."
+    "faq3Body": "Nothing is deleted when you move to Standard: your journal, statistics and Academy progress are waiting exactly as you left them.",
+    "annualSub": "€100/year · save €20"
   },
   "alertsPage": {
     "title": "AI Alerts",

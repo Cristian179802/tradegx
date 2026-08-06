@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  PRICE_MONTHLY, PRICE_ANNUAL, PRICE_ANNUAL_PER_MONTH, CURRENCY,
+} from "@/lib/pricing";
 
 // Returns plan info + current subscription — no secret keys exposed to client
 export async function GET() {
@@ -30,9 +33,16 @@ export async function GET() {
   return NextResponse.json({
     stripeConfigured,
     subscription: subscription ?? null,
+    // Sumele vin din lib/pricing — sursa unică. Erau scrise de mână aici, deci
+    // rămâneau în urmă la fiecare schimbare de preț.
     prices: {
-      monthly: { amount: 19, period: "monthly" },
-      annual: { amount: 144, perMonth: 12, period: "annual" },
+      monthly: { amount: PRICE_MONTHLY, period: "monthly", currency: CURRENCY },
+      annual: {
+        amount: PRICE_ANNUAL,
+        perMonth: PRICE_ANNUAL_PER_MONTH,
+        period: "annual",
+        currency: CURRENCY,
+      },
     },
   });
 }
