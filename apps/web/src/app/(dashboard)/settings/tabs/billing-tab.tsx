@@ -141,7 +141,7 @@ export function BillingTab({
             {/* Monthly */}
             <div className="rounded-2xl border border-zinc-700/80 bg-zinc-900/80 p-5">
               <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">{t("monthly")}</p>
-              <p className="text-3xl font-black text-zinc-100 mb-4">$19 <span className="text-sm font-normal text-zinc-500">{t("perMonth")}</span></p>
+              <p className="text-3xl font-black text-zinc-100 mb-4">€10 <span className="text-sm font-normal text-zinc-500">{t("perMonth")}</span></p>
               <ul className="space-y-1.5 mb-5">
                 {PRO_FEATURES.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-xs text-zinc-400">
@@ -158,7 +158,7 @@ export function BillingTab({
             <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-500/8 to-violet-500/5 p-5 relative">
               <span className="absolute -top-2.5 left-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-lg shadow-indigo-500/20">{t("discountBadge")}</span>
               <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">{t("annual")}</p>
-              <p className="text-3xl font-black text-zinc-100 mb-1">$12 <span className="text-sm font-normal text-zinc-500">{t("perMonth")}</span></p>
+              <p className="text-3xl font-black text-zinc-100 mb-1">€8,33 <span className="text-sm font-normal text-zinc-500">{t("perMonth")}</span></p>
               <p className="text-xs text-zinc-500 mb-4">{t("annualSub")}</p>
               <ul className="space-y-1.5 mb-5">
                 {PRO_FEATURES.map((f) => (

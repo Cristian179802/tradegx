@@ -38,6 +38,14 @@ const FEATURES = [
   { label: "pf16", free: false, pro: true },
   { label: "pf17", free: false, pro: true },
   { label: "pf18", free: false, pro: true },
+  // Adăugate după sesiunile de dezvoltare recente. Toate sunt LIVE — lista de
+  // preț nu promite nimic care nu există deja în aplicație.
+  { label: "pf19", free: false, pro: true },  // Binance + Bybit nativ
+  { label: "pf20", free: false, pro: true },  // metrici instituționale
+  { label: "pf21", free: false, pro: true },  // analiză 3D zi × oră
+  { label: "pf22", free: true,  pro: true },  // overlay SMC pe grafice
+  { label: "pf23", free: false, pro: true },  // istoric complet la import
+  { label: "pf24", free: true,  pro: true },  // notificări browser + Telegram
 ];
 
 const FAQ = [
@@ -82,10 +90,14 @@ export default function PricingPage() {
     }
   }
 
-  const monthlyPrice = 19;
-  const annualMonthly = 12;
-  const displayPrice = annual ? annualMonthly : monthlyPrice;
-  const savings = Math.round(((monthlyPrice - annualMonthly) / monthlyPrice) * 100);
+  // Sursa de adevăr sunt cele două prețuri din Stripe: €10/lună și €100/an.
+  // Echivalentul lunar al planului anual se CALCULEAZĂ din total, ca să nu apară
+  // niciodată o nepotrivire între ce scrie pe pagină și ce se încasează.
+  const monthlyPrice = 10;
+  const annualTotal = 100;
+  const annualMonthly = annualTotal / 12; // 8,33
+  const displayPrice = annual ? annualMonthly.toFixed(2) : String(monthlyPrice);
+  const savings = Math.round(((monthlyPrice - annualMonthly) / monthlyPrice) * 100); // 17%
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
@@ -161,7 +173,7 @@ export default function PricingPage() {
               <p className="text-zinc-500 text-sm">{t("freeDesc")}</p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-black text-white">$0</span>
+              <span className="text-4xl font-black text-white">€0</span>
               <span className="text-zinc-500 text-sm ml-2">{t("forever")}</span>
             </div>
             <Link href="/register">
@@ -221,11 +233,11 @@ export default function PricingPage() {
               </p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-black text-white num">${displayPrice}</span>
+              <span className="text-4xl font-black text-white num">€{displayPrice}</span>
               <span className="text-zinc-500 text-sm ml-2">{t("perMonth")}</span>
               {annual && (
                 <p className="text-xs text-zinc-500 mt-1">
-                  {t("billedAnnual", { x: annualMonthly * 12 })}
+                  {t("billedAnnual", { x: annualTotal })}
                 </p>
               )}
             </div>

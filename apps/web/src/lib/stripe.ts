@@ -21,12 +21,12 @@ export const PLANS = {
   FREE: { name: "Free", price: 0, priceId: null },
   PRO_MONTHLY: {
     name: "Pro Lunar",
-    price: 19,
+    price: 10,
     priceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID ?? "",
   },
   PRO_ANNUAL: {
     name: "Pro Anual",
-    price: 144,
+    price: 100,
     priceId: process.env.STRIPE_PRO_ANNUAL_PRICE_ID ?? "",
   },
 } as const;
