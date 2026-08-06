@@ -8,7 +8,7 @@ export default function AIAssistantLoading() {
           <div className="h-4 w-60 bg-zinc-800/50 rounded-lg animate-pulse" />
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-zinc-900/80 border border-zinc-800/60 rounded-xl px-3 py-1.5 animate-pulse">
+          <div className="flex items-center gap-1.5 tg-panel border rounded-xl px-3 py-1.5 animate-pulse">
             <div className="w-2 h-2 rounded-full bg-emerald-500/60" />
             <div className="h-3 w-16 bg-zinc-800/50 rounded" />
           </div>
@@ -17,7 +17,7 @@ export default function AIAssistantLoading() {
       </div>
 
       {/* Chat messages area */}
-      <div className="flex-1 bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-5 overflow-hidden animate-pulse space-y-5">
+      <div className="flex-1 tg-panel border rounded-2xl p-5 overflow-hidden animate-pulse space-y-5">
         {/* AI message */}
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/30 to-violet-500/20 border border-indigo-500/20 shrink-0" />
@@ -56,7 +56,7 @@ export default function AIAssistantLoading() {
       </div>
 
       {/* Input area */}
-      <div className="shrink-0 bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-3 flex items-end gap-3 animate-pulse">
+      <div className="shrink-0 tg-panel border rounded-2xl p-3 flex items-end gap-3 animate-pulse">
         <div className="flex-1 h-11 bg-zinc-800/60 rounded-xl" />
         <div className="h-11 w-11 bg-indigo-500/20 border border-indigo-500/20 rounded-xl shrink-0" />
       </div>

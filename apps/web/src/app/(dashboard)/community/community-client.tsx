@@ -238,7 +238,7 @@ function TeamCard({
     : null;
 
   return (
-    <div className="group relative bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-all duration-200">
+    <div className="group relative tg-panel border rounded-2xl overflow-hidden hover:border-zinc-700 transition-all duration-200">
       {/* Top color strip */}
       <div className={`h-1 w-full bg-gradient-to-r ${grad}`} />
 

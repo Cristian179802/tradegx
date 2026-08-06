@@ -328,7 +328,7 @@ export function BacktestingClient({
               ? (stat.icon as unknown as React.ComponentType<{ className?: string }>)
               : (stat.icon as React.ComponentType<{ className?: string }>);
             return (
-              <div key={stat.label} className="bg-zinc-900/80 border border-zinc-800/60 rounded-xl p-3 card-3d">
+              <div key={stat.label} className="tg-panel border rounded-xl p-3 card-3d">
                 <div className="flex items-center gap-2 mb-1">
                   <Icon className={cn("h-3.5 w-3.5", stat.color)} />
                   <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wide">{stat.label}</span>

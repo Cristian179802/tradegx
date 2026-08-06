@@ -428,7 +428,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
             {t("pageSub")}
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-900/80 border border-zinc-800/80 rounded-xl px-3 py-2">
+        <div className="flex items-center gap-2 text-xs text-zinc-500 tg-panel border rounded-xl px-3 py-2">
           <div className="w-5 h-5 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
             <BookOpen className="w-3 h-3 text-indigo-400" />
           </div>

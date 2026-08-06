@@ -99,7 +99,7 @@ export function ScreenshotGallery({
       {/* Upload controls */}
       <div className="flex items-center gap-2 flex-wrap">
         {/* Type selector as pill buttons */}
-        <div className="flex items-center bg-zinc-900/80 border border-zinc-800/80 rounded-xl p-0.5 gap-0.5">
+        <div className="flex items-center tg-panel border rounded-xl p-0.5 gap-0.5">
           {(["ENTRY", "EXIT", "ANALYSIS"] as const).map((pill) => (
             <button
               key={pill}

@@ -264,7 +264,7 @@ function CommentItem({
     <div className="flex gap-3">
       <UserAvatar user={comment.user} size={8} />
       <div className="flex-1 min-w-0">
-        <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl rounded-tl-sm px-4 py-3">
+        <div className="tg-panel border rounded-2xl rounded-tl-sm px-4 py-3">
           <div className="flex items-center gap-2 mb-1.5">
             <span className="text-xs font-semibold text-zinc-300">
               {comment.user.name ?? "Trader"}
@@ -381,7 +381,7 @@ export function PostClient({
       </Link>
 
       {/* ── Post card ───────────────────────────────────────── */}
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden">
+      <div className="tg-panel border rounded-2xl overflow-hidden">
         {/* Card header */}
         <div className="px-6 pt-6 pb-4">
           <div className="flex items-start gap-3">

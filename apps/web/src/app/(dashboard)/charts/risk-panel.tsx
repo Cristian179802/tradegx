@@ -201,7 +201,7 @@ export function RiskPanel({
 
                 {/* Rigla verticală + inputuri */}
                 <div className="flex gap-3">
-                  <div ref={trackRef} className="relative w-16 rounded-xl bg-zinc-900/60 border border-zinc-800" style={{ height: 240, touchAction: "none" }}>
+                  <div ref={trackRef} className="relative w-16 rounded-xl tg-panel border" style={{ height: 240, touchAction: "none" }}>
                     {/* zona de profit */}
                     <div className="absolute left-1 right-1 rounded-sm pointer-events-none" style={{ top: `${zoneTop(entry, tp)}%`, height: `${zoneH(entry, tp)}%`, background: "linear-gradient(180deg, rgba(52,211,153,0.25), rgba(52,211,153,0.08))" }} />
                     {/* zona de risc */}

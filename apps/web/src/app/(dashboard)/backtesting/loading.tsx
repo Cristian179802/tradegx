@@ -15,7 +15,7 @@ export default function BacktestingLoading() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-4 animate-pulse"
+            className="tg-panel border rounded-2xl p-4 animate-pulse"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-center gap-2 mb-3">
@@ -28,7 +28,7 @@ export default function BacktestingLoading() {
       </div>
 
       {/* Backtests table */}
-      <div className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl overflow-hidden animate-pulse">
+      <div className="tg-panel border rounded-2xl overflow-hidden animate-pulse">
         {/* Table header */}
         <div className="h-11 border-b border-zinc-800/80 bg-zinc-900 flex items-center gap-4 px-5">
           {[120, 80, 80, 70, 70, 60].map((w, i) => (

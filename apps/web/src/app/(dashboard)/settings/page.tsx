@@ -85,7 +85,7 @@ export default async function SettingsPage() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-5 relative">
-        <TabsList className="bg-zinc-900/80 border border-zinc-800/80 p-1 h-auto flex-wrap gap-1 rounded-2xl backdrop-blur-sm">
+        <TabsList className="tg-panel border p-1 h-auto flex-wrap gap-1 rounded-2xl backdrop-blur-sm">
           {TABS.map((tab) => (
             <TabsTrigger
               key={tab.value}

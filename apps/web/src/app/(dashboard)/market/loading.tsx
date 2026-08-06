@@ -26,7 +26,7 @@ export default function MarketLoading() {
         {Array.from({ length: 12 }).map((_, i) => (
           <div
             key={i}
-            className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-4 animate-pulse"
+            className="tg-panel border rounded-2xl p-4 animate-pulse"
             style={{ animationDelay: `${i * 40}ms` }}
           >
             <div className="flex items-start justify-between mb-3">

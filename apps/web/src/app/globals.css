@@ -1710,3 +1710,36 @@ tr.cyber-row:hover {
   color: var(--ink-1);
   text-shadow: 0 0 16px rgba(109,117,246,0.32), 0 0 42px rgba(109,117,246,0.13);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PROPAGAREA SISTEMULUI PE PAGINILE RĂMASE
+   ───────────────────────────────────────────────────────────────────────────
+   Aplicația avea ~800 de clase `text-zinc-500/600/700` și ~70 de suprafețe
+   `bg-zinc-900/… border-zinc-800/…`, moștenite dinainte de sistemul de design.
+   Le-am înlocuit AICI, nu în 15 fișiere: o redefinire a claselor prinde tot
+   dintr-o dată, nu poate scăpa un fișier, și nu riscă 800 de editări manuale.
+
+   Două probleme rezolvate simultan:
+   1. CONTRAST — zinc-600 (#52525b) pe fundal aproape negru dă ~2.9:1, sub
+      pragul de lizibilitate. zinc-700 e și mai rău (~2:1).
+   2. TEMPERATURĂ — zinc e o gamă de gri CALD, iar suprafețele noastre
+      (--s-*) sunt reci. Amestecul făcea interfața să pară murdară. Rampa
+      --ink-* e rece, deci totul se așază pe aceeași temperatură.
+
+   Sunt ridicări blânde, nu dramatice: --ink-4 (#5d6577) e doar puțin peste
+   zinc-600, cât să treacă pragul de citit.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.text-zinc-700 { color: var(--ink-4); }
+.text-zinc-600 { color: var(--ink-4); }
+.text-zinc-500 { color: var(--ink-3); }
+.text-zinc-400 { color: var(--ink-2); }
+
+/* Suprafață moștenită → materialul nou. Păstrează `border` pentru lățime, dar
+   primește fundalul, hairline-ul de sus și umbra stratificată. */
+.tg-panel {
+  position: relative;
+  background: var(--s-2);
+  border-color: var(--line-1);
+  box-shadow: var(--el-2), inset 0 1px 0 var(--line-top);
+}

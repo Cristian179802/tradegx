@@ -15,7 +15,7 @@ export default function AccountsLoading() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-5 animate-pulse"
+            className="tg-panel border rounded-2xl p-5 animate-pulse"
             style={{ animationDelay: `${i * 80}ms` }}
           >
             {/* Account header */}
@@ -76,7 +76,7 @@ export default function AccountsLoading() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="bg-zinc-900/80 border border-zinc-800/60 rounded-xl p-3.5 animate-pulse"
+            className="tg-panel border rounded-xl p-3.5 animate-pulse"
             style={{ animationDelay: `${i * 50}ms` }}
           >
             <div className="h-2.5 w-20 bg-zinc-800/50 rounded mb-2" />

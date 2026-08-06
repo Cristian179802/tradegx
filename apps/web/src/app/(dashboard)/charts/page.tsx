@@ -250,7 +250,7 @@ export default function ChartsPage() {
         <div className="flex-1" />
 
         {/* Layout multi-chart */}
-        <div className="flex items-center gap-0.5 bg-zinc-900/70 border border-zinc-800 rounded-lg p-0.5">
+        <div className="flex items-center gap-0.5 tg-panel border rounded-lg p-0.5">
           {LAYOUTS.map((lo) => (
             <button
               key={lo.n}
@@ -267,7 +267,7 @@ export default function ChartsPage() {
         </div>
 
         {/* Timeframe */}
-        <div className="flex items-center gap-0.5 bg-zinc-900/70 border border-zinc-800 rounded-lg p-0.5">
+        <div className="flex items-center gap-0.5 tg-panel border rounded-lg p-0.5">
           {TIMEFRAMES.map((tf) => (
             <button
               key={tf.v}

@@ -14,7 +14,7 @@ export default function CommunityLoading() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-zinc-900/80 border border-zinc-800/60 rounded-xl p-1 w-fit animate-pulse">
+      <div className="flex gap-1 tg-panel border rounded-xl p-1 w-fit animate-pulse">
         {[80, 70, 60].map((w, i) => (
           <div key={i} className="h-7 bg-zinc-800/70 rounded-lg" style={{ width: w }} />
         ))}
@@ -26,7 +26,7 @@ export default function CommunityLoading() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-5 animate-pulse"
+              className="tg-panel border rounded-2xl p-5 animate-pulse"
               style={{ animationDelay: `${i * 80}ms` }}
             >
               {/* Post header */}
@@ -57,7 +57,7 @@ export default function CommunityLoading() {
         {/* Sidebar */}
         <div className="space-y-4">
           {/* Top traders */}
-          <div className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-4 animate-pulse">
+          <div className="tg-panel border rounded-2xl p-4 animate-pulse">
             <div className="h-4 w-28 bg-zinc-800/80 rounded-lg mb-4" />
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex items-center gap-2.5 py-2">
@@ -72,7 +72,7 @@ export default function CommunityLoading() {
             ))}
           </div>
           {/* Teams */}
-          <div className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-4 animate-pulse">
+          <div className="tg-panel border rounded-2xl p-4 animate-pulse">
             <div className="h-4 w-20 bg-zinc-800/80 rounded-lg mb-4" />
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center gap-2.5 py-2">

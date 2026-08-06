@@ -350,11 +350,11 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           <p className="text-sm text-zinc-500 mt-0.5">{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 bg-zinc-900/80 border border-zinc-800/60 rounded-xl px-3 py-2">
+          <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 tg-panel border rounded-xl px-3 py-2">
             <CalendarDays className="w-3.5 h-3.5 text-zinc-500" />
             <span className="capitalize text-zinc-400 font-medium">{todayLocalized(locale)}</span>
           </div>
-          <div className="flex items-center gap-2 bg-zinc-900/80 border border-zinc-800/60 rounded-xl px-3 py-2">
+          <div className="flex items-center gap-2 tg-panel border rounded-xl px-3 py-2">
             <span className="live-dot" />
             <span className="font-mono text-xs text-zinc-300 num tracking-wider">{currentTime}</span>
           </div>
@@ -471,7 +471,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 animate-fade-in-up delay-200">
 
         {/* Live TradingView Chart */}
-        <div className="lg:col-span-3 bg-zinc-900/80 border border-zinc-800/70 rounded-2xl overflow-hidden premium-card flex flex-col" style={{ height: 520 }}>
+        <div className="lg:col-span-3 tg-panel border rounded-2xl overflow-hidden premium-card flex flex-col" style={{ height: 520 }}>
           {/* Header — înălțime fixă, nu se strânge */}
           <div className="shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/60 bg-zinc-900/60">
             <div className="flex items-center gap-2.5">
@@ -492,7 +492,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         </div>
 
         {/* Performance Breakdown */}
-        <div className="lg:col-span-1 bg-zinc-900/80 border border-zinc-800/70 rounded-2xl p-5 flex flex-col premium-card">
+        <div className="lg:col-span-1 tg-panel border rounded-2xl p-5 flex flex-col premium-card">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="w-7 h-7 rounded-lg bg-violet-500/12 border border-violet-500/20 flex items-center justify-center">
               <Award className="w-3.5 h-3.5 text-violet-400" />
@@ -534,7 +534,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         <MarketSessions />
 
         {/* Pair Performance */}
-        <div className="bg-zinc-900/80 border border-zinc-800/70 rounded-2xl p-5 premium-card">
+        <div className="tg-panel border rounded-2xl p-5 premium-card">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-amber-500/12 border border-amber-500/20 flex items-center justify-center">
@@ -579,7 +579,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         </div>
 
         {/* Recent Trades */}
-        <div className="bg-zinc-900/80 border border-zinc-800/70 rounded-2xl p-5 premium-card">
+        <div className="tg-panel border rounded-2xl p-5 premium-card">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center">

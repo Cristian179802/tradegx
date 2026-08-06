@@ -17,7 +17,7 @@ export default function ChartsLoading() {
       {/* Symbol search + timeframe bar */}
       <div className="flex items-center gap-3">
         <div className="h-9 w-48 bg-zinc-800/70 rounded-xl animate-pulse" />
-        <div className="flex gap-1 bg-zinc-900/80 border border-zinc-800/60 rounded-xl p-0.5">
+        <div className="flex gap-1 tg-panel border rounded-xl p-0.5">
           {["1M", "5M", "15M", "1H", "4H", "1D", "1W"].map((tf) => (
             <div key={tf} className="h-7 w-9 bg-zinc-800/50 rounded-lg animate-pulse" />
           ))}
@@ -30,7 +30,7 @@ export default function ChartsLoading() {
       </div>
 
       {/* Chart area */}
-      <div className="flex-1 bg-zinc-900/80 border border-zinc-800/60 rounded-2xl overflow-hidden animate-pulse" style={{ height: "calc(100% - 120px)", minHeight: 400 }}>
+      <div className="flex-1 tg-panel border rounded-2xl overflow-hidden animate-pulse" style={{ height: "calc(100% - 120px)", minHeight: 400 }}>
         {/* Price axis + chart */}
         <div className="flex h-full">
           <div className="flex-1 flex flex-col h-full p-4">

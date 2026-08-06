@@ -23,7 +23,7 @@ export default function AlertsLoading() {
         ].map((item, i) => (
           <div
             key={i}
-            className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-4 animate-pulse"
+            className="tg-panel border rounded-2xl p-4 animate-pulse"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-center gap-2 mb-3">
@@ -47,7 +47,7 @@ export default function AlertsLoading() {
         {Array.from({ length: 7 }).map((_, i) => (
           <div
             key={i}
-            className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl px-5 py-4 flex items-start gap-4 animate-pulse"
+            className="tg-panel border rounded-2xl px-5 py-4 flex items-start gap-4 animate-pulse"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             {/* Severity icon */}

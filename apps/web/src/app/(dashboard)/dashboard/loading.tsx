@@ -15,7 +15,7 @@ export default function DashboardLoading() {
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
-            className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-4 space-y-3 animate-pulse"
+            className="tg-panel border rounded-2xl p-4 space-y-3 animate-pulse"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-center justify-between">
@@ -33,7 +33,7 @@ export default function DashboardLoading() {
       {/* Equity curve + recent trades */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Equity curve — wide */}
-        <div className="lg:col-span-2 bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-5 animate-pulse">
+        <div className="lg:col-span-2 tg-panel border rounded-2xl p-5 animate-pulse">
           <div className="flex items-center justify-between mb-5">
             <div className="space-y-1.5">
               <div className="h-4 w-28 bg-zinc-800 rounded-lg" />
@@ -64,7 +64,7 @@ export default function DashboardLoading() {
         </div>
 
         {/* Recent trades */}
-        <div className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-5 animate-pulse">
+        <div className="tg-panel border rounded-2xl p-5 animate-pulse">
           <div className="h-4 w-32 bg-zinc-800 rounded-lg mb-4" />
           <div className="space-y-2.5">
             {Array.from({ length: 7 }, (_, i) => (
@@ -89,7 +89,7 @@ export default function DashboardLoading() {
 
       {/* Bottom row — pair perf + win/loss + quick stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-5 animate-pulse space-y-3">
+        <div className="tg-panel border rounded-2xl p-5 animate-pulse space-y-3">
           <div className="h-4 w-36 bg-zinc-800 rounded-lg" />
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="space-y-1">
@@ -104,7 +104,7 @@ export default function DashboardLoading() {
           ))}
         </div>
 
-        <div className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-5 animate-pulse">
+        <div className="tg-panel border rounded-2xl p-5 animate-pulse">
           <div className="h-4 w-28 bg-zinc-800 rounded-lg mb-4" />
           <div className="flex items-center justify-center h-36">
             <div className="w-32 h-32 rounded-full border-[10px] border-zinc-800/60 bg-transparent" />
@@ -119,7 +119,7 @@ export default function DashboardLoading() {
           </div>
         </div>
 
-        <div className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl p-5 animate-pulse space-y-3">
+        <div className="tg-panel border rounded-2xl p-5 animate-pulse space-y-3">
           <div className="h-4 w-24 bg-zinc-800 rounded-lg" />
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex items-center justify-between py-1.5 border-b border-zinc-800/40 last:border-0">

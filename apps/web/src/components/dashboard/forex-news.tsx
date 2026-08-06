@@ -57,7 +57,7 @@ export function ForexNews({ className }: { className?: string }) {
   }, [load]);
 
   return (
-    <div className={cn("bg-zinc-900/80 border border-zinc-800/70 rounded-2xl overflow-hidden premium-card flex flex-col", className)}>
+    <div className={cn("tg-panel border rounded-2xl overflow-hidden premium-card flex flex-col", className)}>
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/60">
         <div className="flex items-center gap-2.5">

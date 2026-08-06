@@ -66,7 +66,7 @@ function PostCard({ post, onReact, onDelete, currentUserId }: {
   const t = useTranslations("communityDetail");
   const map = Object.fromEntries(post.reactions.map((r) => [r.emoji, r]));
   return (
-    <article className="group bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-all">
+    <article className="group tg-panel border rounded-2xl overflow-hidden hover:border-zinc-700 transition-all">
       <div className="p-5">
         <div className="flex items-start gap-3 mb-3">
           <UserAvatar user={post.user} size={9} />

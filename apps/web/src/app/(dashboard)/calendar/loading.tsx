@@ -45,7 +45,7 @@ export default function CalendarLoading() {
             {Array.from({ length: group.events }).map((_, i) => (
               <div
                 key={i}
-                className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl px-5 py-3.5 flex items-center gap-4 animate-pulse"
+                className="tg-panel border rounded-2xl px-5 py-3.5 flex items-center gap-4 animate-pulse"
                 style={{ animationDelay: `${(gi * 5 + i) * 55}ms` }}
               >
                 {/* Impact dot */}

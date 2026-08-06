@@ -18,7 +18,7 @@ export default function JournalLoading() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="bg-zinc-900/80 border border-zinc-800/60 rounded-xl p-3.5 animate-pulse"
+            className="tg-panel border rounded-xl p-3.5 animate-pulse"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -43,7 +43,7 @@ export default function JournalLoading() {
         {Array.from({ length: 6 }, (_, i) => (
           <div
             key={i}
-            className="bg-zinc-900/80 border border-zinc-800/60 rounded-2xl overflow-hidden animate-pulse"
+            className="tg-panel border rounded-2xl overflow-hidden animate-pulse"
             style={{ animationDelay: `${i * 70}ms` }}
           >
             <div className="flex items-center gap-4 px-5 py-4">

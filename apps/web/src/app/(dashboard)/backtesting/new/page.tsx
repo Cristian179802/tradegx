@@ -744,7 +744,7 @@ function CustomStrategyForm({
       </div>
 
       {/* Strategy preview */}
-      <div className="rounded-lg bg-zinc-900/60 border border-zinc-800 p-3 text-[11px] text-zinc-500 leading-relaxed">
+      <div className="rounded-lg tg-panel border p-3 text-[11px] text-zinc-500 leading-relaxed">
         <span className="text-zinc-400 font-medium">{t("summary")}</span>
         {rules.entryLong.length > 0
           ? t("buyWhen", { cond: rules.entryLong.map(c =>
@@ -979,7 +979,7 @@ export default function NewStrategyPage() {
         <div className={cn(isCustom ? "space-y-5" : "grid md:grid-cols-2 gap-6")}>
           {isCustom ? (
             <>
-              <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5">
+              <div className="tg-panel border rounded-2xl p-5">
                 <div className="flex items-center gap-2 pb-3 mb-4 border-b border-zinc-800">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ec489920" }}>
                     <Wand2 className="h-4 w-4" style={{ color: "#ec4899" }} />
@@ -993,7 +993,7 @@ export default function NewStrategyPage() {
                 />
               </div>
 
-              <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5 flex gap-6">
+              <div className="tg-panel border rounded-2xl p-5 flex gap-6">
                 <div className="flex-1 space-y-4">
                   <div>
                     <label className="text-xs text-zinc-400 block mb-1">{t("nameLabel")}</label>
@@ -1016,7 +1016,7 @@ export default function NewStrategyPage() {
             </>
           ) : (
             <>
-              <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5 space-y-5">
+              <div className="tg-panel border rounded-2xl p-5 space-y-5">
                 <div className="flex items-center gap-2 pb-3 border-b border-zinc-800">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${selectedStratDef.color}20` }}>
                     <selectedStratDef.icon className="h-4 w-4" style={{ color: selectedStratDef.color }} />
@@ -1035,7 +1035,7 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="space-y-4">
-                <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-5 space-y-4">
+                <div className="tg-panel border rounded-2xl p-5 space-y-4">
                   <h3 className="text-sm font-bold text-zinc-200">{t("saveStrategy")}</h3>
                   <div>
                     <label className="text-xs text-zinc-400 block mb-1">{t("nameLabel")}</label>
@@ -1054,7 +1054,7 @@ export default function NewStrategyPage() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-4">
+                <div className="tg-panel border rounded-2xl p-4">
                   <p className="text-xs text-zinc-500 mb-3 font-medium">{t("previewStrategy")}</p>
                   <div className="flex items-center gap-2.5">
                     <div className="w-3 h-3 rounded-full" style={{ background: selectedColor }} />
@@ -1086,7 +1086,7 @@ export default function NewStrategyPage() {
 
       {/* STEP 3 — Run Config */}
       {step === 3 && (
-        <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-6 space-y-6">
+        <div className="tg-panel border rounded-2xl p-6 space-y-6">
           <h2 className="text-base font-semibold text-zinc-200 pb-3 border-b border-zinc-800">
             {t("runConfig")}
           </h2>

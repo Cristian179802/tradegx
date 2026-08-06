@@ -349,7 +349,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
         </button>
 
         {/* ── Steps ────────────────────────────────────────────────── */}
-        <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 space-y-2">
+        <div className="tg-panel border rounded-xl p-3 space-y-2">
           <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{t("install4")}</p>
           {steps.map((s, i) => (
             <div key={i} className="flex items-start gap-2">
