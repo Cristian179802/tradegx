@@ -112,24 +112,31 @@ export default function PricingPage() {
               Trade<span className="gradient-text-indigo">Gx</span>
             </span>
           </Link>
+          {/* Navbarul ținea „Autentificare" și „Perioadă de probă gratuită"
+              hardcodate, deși `useSession` era deja disponibil în pagină și
+              folosit mai jos în corp. Un utilizator conectat, venit din
+              aplicație ca să se aboneze, era întâmpinat cu invitația de a-și
+              face cont — exact în momentul in care voia să plătească. */}
           <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800"
-              >
-                {t("navLogin")}
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
-              >
-                {t("navTrial")}
-              </Button>
-            </Link>
+            {session ? (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="ghost" size="sm">{t("navDashboard")}</Button>
+                </Link>
+                <Link href="/billing">
+                  <Button size="sm">{t("navBilling")}</Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">{t("navLogin")}</Button>
+                </Link>
+                <Link href="/register">
+                  <Button size="sm">{t("navTrial")}</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

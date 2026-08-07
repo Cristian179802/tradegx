@@ -341,7 +341,10 @@ export function Sidebar() {
               <p className="text-zinc-500 text-[10px] leading-relaxed">
                 {tc("trialActiveDesc")}
               </p>
-              <Link href="/pricing" className="mt-1.5 flex items-center gap-1 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
+              {/* /billing, nu /pricing: sidebar-ul apare doar utilizatorilor
+                  conectați, iar /pricing e pagina de achiziție. Trimitea omul
+                  care voia să plătească înapoi în pâlnia de marketing. */}
+              <Link href="/billing" className="mt-1.5 flex items-center gap-1 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
                 <Zap className="w-2.5 h-2.5" />
                 {tc("upgradeNow")}
               </Link>

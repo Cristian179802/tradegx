@@ -2240,7 +2240,9 @@
     "pf22": "Grafice cu overlay SMC automat (order blocks, FVG, BOS/CHoCH)",
     "pf23": "Import istoric complet (până la 2 ani, cât păstrează brokerul)",
     "pf24": "Notificări browser + Telegram pentru alerte și semnale",
-    "saveBadge": "Economisești {pct}%"
+    "saveBadge": "Economisești {pct}%",
+    "navDashboard": "Panou de control",
+    "navBilling": "Abonament"
   },
   "legalCommon": {
     "backToSite": "Înapoi la site",
