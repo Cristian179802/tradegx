@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useSession } from "next-auth/react";
 import {
   motion, useScroll, useTransform, useInView,
 } from "framer-motion";
@@ -100,6 +101,7 @@ type TT = ReturnType<typeof useTranslations>;
 
 // ── Navbar ───────────────────────────────────────────────────────────────────
 function Navbar({ t }: { t: TT }) {
+  const { data: session } = useSession();
   return (
     // Fundal mai opac (70% → 88%): la 70% textul secțiunilor care trecea pe
     // dedesubt rămânea parțial vizibil și titlurile arătau „retezate".
@@ -122,8 +124,14 @@ function Navbar({ t }: { t: TT }) {
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher compact />
-          <Link href="/login" className="hidden sm:block"><Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white hover:bg-zinc-800/80 text-[13px] font-medium">{t("login")}</Button></Link>
-          <Link href="/register"><Button size="sm" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25 text-[13px] font-bold gap-1.5"><Sparkles className="w-3.5 h-3.5" />{t("tryFree")}</Button></Link>
+          {session ? (
+            <Link href="/dashboard"><Button size="sm" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25 text-[13px] font-bold gap-1.5"><ArrowRight className="w-3.5 h-3.5" />{t("goToApp")}</Button></Link>
+          ) : (
+            <>
+              <Link href="/login" className="hidden sm:block"><Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white hover:bg-zinc-800/80 text-[13px] font-medium">{t("login")}</Button></Link>
+              <Link href="/register"><Button size="sm" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25 text-[13px] font-bold gap-1.5"><Sparkles className="w-3.5 h-3.5" />{t("tryFree")}</Button></Link>
+            </>
+          )}
         </div>
       </div>
     </nav>

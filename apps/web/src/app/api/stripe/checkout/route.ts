@@ -89,11 +89,19 @@ export async function POST(req: NextRequest) {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: successUrl ?? `${baseUrl}/settings?tab=billing&success=true`,
+      // /billing, nu /settings?tab=billing: pagina de settings nu citește
+      // parametrul `tab`, deci clientul care plătea ateriza pe tabul implicit
+      // (profil), fără nicio confirmare. /billing arată planul și data următoarei
+      // facturări — adică exact ce vrea să vadă cineva care a dat banii.
+      success_url: successUrl ?? `${baseUrl}/billing?success=true`,
       cancel_url: cancelUrl ?? `${baseUrl}/pricing`,
+      // Fără trial la plată — trial-ul de 14 zile e gestionat de noi, în baza de
+      // date, nu de Stripe. „Fără trial" se exprimă prin ABSENȚA câmpului:
+      // trial_period_days: 0 e respins de Stripe cu „The minimum number of trial
+      // period days is 1", iar cererea eșua înainte de a se crea sesiunea de
+      // plată. Nimeni nu putea să se aboneze.
       subscription_data: {
         metadata: { userId: session.user.id },
-        trial_period_days: 0,
       },
       allow_promotion_codes: true,
       billing_address_collection: "auto",

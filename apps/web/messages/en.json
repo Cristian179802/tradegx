@@ -2159,7 +2159,8 @@
     "visCta": "Explore the full vision",
     "heroScroll": "Scroll",
     "heroCoach": "You exited your last 3 GBP/USD trades too early. Let the TP do its job.",
-    "heroCoachLabel": "AI Coach · live"
+    "heroCoachLabel": "AI Coach · live",
+    "goToApp": "Dashboard"
   },
   "pricing": {
     "navLogin": "Sign in",

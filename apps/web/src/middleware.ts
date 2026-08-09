@@ -49,6 +49,15 @@ export default auth((req: NextRequest & { auth: { user?: { id?: string; role?: s
     publicRoutes.includes(pathname) ||
     publicPrefixes.some((prefix) => pathname.startsWith(prefix));
 
+  // Cine e deja conectat nu are ce căuta pe login/register. Landing-ul nu se uită
+  // la sesiune (arată mereu „Autentificare" + „Încearcă gratuit"), așa că un
+  // utilizator existent care revenea pe site era plimbat prin pâlnia de
+  // înregistrare cu contul lui deja activ în browser. Garda de aici acoperă și
+  // cele cinci CTA „Începe gratuit" din pagină, nu doar meniul.
+  if ((pathname === "/login" || pathname === "/register") && req.auth?.user?.id) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
   if (isPublic) {
     return NextResponse.next();
   }
