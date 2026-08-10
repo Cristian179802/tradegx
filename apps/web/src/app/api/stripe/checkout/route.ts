@@ -87,7 +87,12 @@ export async function POST(req: NextRequest) {
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
-      payment_method_types: ["card"],
+      // Fără payment_method_types: lista fixă ["card"] SUPRASCRIA configurația din
+      // Dashboard, deci metodele activate acolo (PayPal, Bancontact, Klarna…) nu
+      // apăreau niciodată la plată. Apple Pay și Link se vedeau doar fiindcă fac
+      // parte din familia „card". Omis, Stripe folosește metodele activate în
+      // Dashboard și le filtrează singur după ce suportă abonamente, valută și
+      // țara clientului — o singură sursă de adevăr, administrabilă fără deploy.
       line_items: [{ price: priceId, quantity: 1 }],
       // /billing, nu /settings?tab=billing: pagina de settings nu citește
       // parametrul `tab`, deci clientul care plătea ateriza pe tabul implicit

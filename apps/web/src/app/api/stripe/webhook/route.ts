@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import type Stripe from "stripe";
+// `periodOf` și `upsertSubscription` stăteau aici. Le-am mutat în lib/stripe-sync
+// fiindcă reconcilierea din /api/stripe/plans are nevoie de exact aceleași reguli,
+// iar o a doua copie s-ar fi desincronizat de prima.
+import { periodOf, upsertSubscription } from "@/lib/stripe-sync";
 
 // `export const config = { api: { bodyParser: false } }` era o convenție de
 // Pages Router — în App Router nu face NIMIC. Nu era o problemă doar pentru că
@@ -112,88 +116,4 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ received: true });
-}
-
-/**
- * Perioada curentă a abonamentului.
- *
- * ATENȚIE — SCHIMBARE DE API CARE RUPEA PLĂȚILE:
- * În versiunile noi (aici `2026-04-22.dahlia`, stripe v22), `current_period_start`
- * și `current_period_end` NU mai există pe obiectul Subscription — au fost mutate
- * pe fiecare SUBSCRIPTION ITEM. Codul vechi citea `sub.current_period_end`, primea
- * `undefined`, iar `new Date(undefined * 1000)` producea Invalid Date. Prisma
- * refuza data invalidă, handler-ul arunca, webhook-ul întorcea 500, Stripe reîncerca
- * și eșua din nou — deci abonamentul NU se activa niciodată. Clientul plătea și
- * rămânea pe FREE.
- *
- * Cast-urile `as any` din handler sunt motivul pentru care TypeScript nu a prins-o.
- *
- * Citim de pe item, cu fallback pe rădăcină pentru conturi rămase pe API vechi.
- * Dacă tot lipsesc, întoarcem null (coloanele sunt nullable) — mai bine fără dată
- * decât cu una invalidă care blochează activarea.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function periodOf(sub: any): { start: Date | null; end: Date | null } {
-  const item = sub?.items?.data?.[0];
-  const rawStart = item?.current_period_start ?? sub?.current_period_start;
-  const rawEnd = item?.current_period_end ?? sub?.current_period_end;
-  const toDate = (v: unknown): Date | null => {
-    const n = Number(v);
-    if (!Number.isFinite(n) || n <= 0) return null;
-    const d = new Date(n * 1000);
-    return Number.isNaN(d.getTime()) ? null : d;
-  };
-  return { start: toDate(rawStart), end: toDate(rawEnd) };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function upsertSubscription(userId: string, sub: any) {
-  const priceId = sub.items.data[0]?.price.id;
-  const proMonthlyId = process.env.STRIPE_PRO_MONTHLY_PRICE_ID;
-  const proAnnualId = process.env.STRIPE_PRO_ANNUAL_PRICE_ID;
-
-  const isPro = priceId === proMonthlyId || priceId === proAnnualId;
-  const { start, end } = periodOf(sub);
-
-  const statusMap: Record<string, string> = {
-    active: "ACTIVE",
-    past_due: "PAST_DUE",
-    canceled: "CANCELLED",
-    trialing: "TRIALING",
-    unpaid: "PAST_DUE",
-    paused: "CANCELLED",
-    incomplete: "PAST_DUE",
-    incomplete_expired: "CANCELLED",
-  };
-
-  await prisma.subscription.upsert({
-    where: { userId },
-    create: {
-      userId,
-      stripeCustomerId: sub.customer as string,
-      stripeSubId: sub.id,
-      plan: isPro ? "PRO" : "FREE",
-      status: (statusMap[sub.status] ?? "ACTIVE") as never,
-      currentPeriodStart: start,
-      currentPeriodEnd: end,
-      cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
-    },
-    update: {
-      stripeSubId: sub.id,
-      plan: isPro ? "PRO" : "FREE",
-      status: (statusMap[sub.status] ?? "ACTIVE") as never,
-      currentPeriodStart: start,
-      currentPeriodEnd: end,
-      cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
-    },
-  });
-
-  // Dacă preț-ul nu se potrivește cu niciunul configurat, userul rămâne pe FREE
-  // deși a plătit. Semnalăm zgomotos: e o greșeală de configurare, nu de client.
-  if (!isPro) {
-    console.warn(
-      `[stripe] priceId "${priceId}" nu corespunde nici cu STRIPE_PRO_MONTHLY_PRICE_ID ` +
-      `nici cu STRIPE_PRO_ANNUAL_PRICE_ID — user ${userId} rămâne pe FREE.`
-    );
-  }
 }
