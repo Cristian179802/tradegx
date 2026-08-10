@@ -26,7 +26,16 @@ function getResend() {
   return new Resend(key);
 }
 
-const FROM = process.env.RESEND_FROM_EMAIL ?? "noreply@tradegx.com";
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? "noreply@tradegx.com";
+
+// Expeditor CU nume afișat. Trimiteam adresa golașă, deci în inbox apărea
+// „noreply@tradegx.com" în loc de „TradeGx" — arată ca mesaj automat de la un
+// necunoscut, iar filtrele penalizează exact asta. Primul email a aterizat în Spam.
+const FROM = `TradeGx <${FROM_ADDRESS}>`;
+
+// Adresă reală de răspuns. Un „noreply" fără nicio cale de întoarcere e un semnal
+// negativ pentru filtre și o frustrare pentru client, care nu are cui răspunde.
+const REPLY_TO = process.env.SUPPORT_EMAIL ?? "contact@tradegx.com";
 
 const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ??
@@ -41,7 +50,21 @@ export async function sendVerificationEmail(
   await getResend().emails.send({
     from: FROM,
     to: email,
+    reply_to: REPLY_TO,
     subject: "Verifică adresa de email — TradeGx",
+    // Alternativa text simplu. Trimiteam DOAR HTML, iar lipsa părții text e unul
+    // dintre semnalele clasice de spam: orice expeditor legitim trimite
+    // multipart/alternative. Contează și pentru clienții care citesc în text.
+    text: [
+      "Bun venit la TradeGx!",
+      "",
+      "Verifică adresa de email pentru a-ți activa contul și a începe perioada de probă PRO de 14 zile:",
+      verifyUrl,
+      "",
+      "Linkul expiră în 24 de ore. Dacă nu ai creat un cont, poți ignora acest email.",
+      "",
+      `TradeGx · Trading Journal Pro · ${APP_URL}`,
+    ].join("\n"),
     html: `
 <!DOCTYPE html>
 <html>
@@ -88,7 +111,18 @@ export async function sendPasswordResetEmail(
   await getResend().emails.send({
     from: FROM,
     to: email,
+    reply_to: REPLY_TO,
     subject: "Resetează parola — TradeGx",
+    text: [
+      "Resetare parolă TradeGx",
+      "",
+      "Ai cerut resetarea parolei. Deschide linkul de mai jos pentru a-ți alege una nouă:",
+      resetUrl,
+      "",
+      "Linkul expiră în 1 oră. Dacă nu ai cerut tu resetarea, ignoră acest email — parola rămâne neschimbată.",
+      "",
+      `TradeGx · Trading Journal Pro · ${APP_URL}`,
+    ].join("\n"),
     html: `
 <!DOCTYPE html>
 <html>
