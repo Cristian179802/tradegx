@@ -267,6 +267,33 @@ function resampleH4(candles: Candle[]): Candle[] {
   return result;
 }
 
+/**
+ * Traduce simbolul nostru în tickerul Yahoo.
+ *
+ * NORMALIZAREA E ESENȚIALĂ, și lipsa ei rupea complet alertele de preț:
+ * în watchlist simbolurile sunt salvate CU slash („EUR/USD"), iar cheile din
+ * SYMBOL_MAP sunt fără („EURUSD"). Căutarea directă rata, se cădea pe fallback
+ * și se cerea de la Yahoo „EUR%2FUSD" — simbol inexistent. Răspuns 404,
+ * `fetchLatestPrice` întorcea null, pragul nu se evalua niciodată.
+ *
+ * Verificat pe date reale: „EUR/USD" → null, „EURUSD=X" → 1.1543.
+ * Toate cele 4 alerte active în producție erau afectate; două aveau pragul
+ * depășit de multă vreme (EUR/USD peste 1.095, XAU/USD peste 2400) și tot nu se
+ * declanșaseră.
+ */
+function toYahooSymbol(symbol: string, unknownAsFx = false): string {
+  const raw = symbol.toUpperCase();
+  const key = raw.replace(/[^A-Z0-9]/g, ""); // „EUR/USD" → „EURUSD"
+  const mapped = SYMBOL_MAP[raw] ?? SYMBOL_MAP[key];
+  if (mapped) return mapped;
+
+  // Necunoscut: dacă vine în formatul nostru cu slash e aproape sigur o pereche
+  // valutară, deci încercăm forma Yahoo „EURUSD=X". Altfel îl trimitem neatins,
+  // ca să funcționeze tickerele native („GC=F", „^GSPC", „AAPL").
+  if (raw.includes("/") || unknownAsFx) return `${key}=X`;
+  return raw;
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function fetchHistoricalCandles(
@@ -275,7 +302,7 @@ export async function fetchHistoricalCandles(
   startDate: Date,
   endDate: Date
 ): Promise<Candle[]> {
-  const yahooSymbol = SYMBOL_MAP[symbol.toUpperCase()] ?? `${symbol.toUpperCase()}=X`;
+  const yahooSymbol = toYahooSymbol(symbol, true);
   const tf = INTERVAL_MAP[timeframe] ?? { yahoo: "1d", maxDays: 3600 };
 
   const startMs = startDate.getTime();
@@ -314,7 +341,7 @@ export async function fetchHistoricalCandles(
 // Folosește meta.regularMarketPrice din endpoint-ul v8 chart — un singur
 // request per simbol, fără crumb (endpoint public).
 export async function fetchLatestPrice(symbol: string): Promise<number | null> {
-  const yahooSymbol = SYMBOL_MAP[symbol.toUpperCase()] ?? symbol.toUpperCase();
+  const yahooSymbol = toYahooSymbol(symbol);
   try {
     const res = await fetch(
       `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?interval=1d&range=1d`,
