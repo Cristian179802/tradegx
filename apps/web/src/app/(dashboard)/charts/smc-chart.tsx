@@ -1,13 +1,26 @@
 "use client";
 
 import * as React from "react";
-import { createChart, CrosshairMode, type IChartApi, type ISeriesApi, type UTCTimestamp } from "lightweight-charts";
+import { createChart, CrosshairMode, type IChartApi, type IPriceLine, type ISeriesApi, type UTCTimestamp } from "lightweight-charts";
 import { detectSMC, type SmcResult, type SmcCandle } from "@tradegx/core";
 import { Loader2 } from "lucide-react";
 import { useLivePrice } from "@/lib/use-live-price";
 import { cn } from "@/lib/utils";
 
 export interface SmcToggles { ob: boolean; fvg: boolean; liq: boolean; struct: boolean }
+
+interface ChartTrade {
+  id: string;
+  direction: "BUY" | "SELL";
+  status: string;
+  entryPrice: number | null;
+  entryTime: number;
+  exitPrice: number | null;
+  exitTime: number | null;
+  stopLoss: number | null;
+  takeProfit: number | null;
+  pnl: number | null;
+}
 
 const COL = {
   bullFill: "rgba(52,211,153,0.13)", bullLine: "rgba(52,211,153,0.55)",
@@ -37,6 +50,9 @@ export function SmcChart({
   // Ultima lumânare încărcată. O ținem ca să o putem rescrie la fiecare tick:
   // `series.update()` cere obiectul întreg, nu doar prețul de închidere.
   const lastBarRef = React.useRef<SmcCandle | null>(null);
+  // Liniile SL/TP/entry adăugate pe serie. Le ținem ca să le putem scoate la
+  // schimbarea simbolului — altfel s-ar aduna una peste alta.
+  const tradeLinesRef = React.useRef<IPriceLine[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(false);
 
@@ -208,6 +224,96 @@ export function SmcChart({
 
   // Redesenează când se schimbă toggle-urile
   React.useEffect(() => { draw(); }, [toggles, draw]);
+
+  // ── Tranzacțiile mele, desenate pe grafic ──
+  //
+  // Ăsta e motivul pentru care merită un grafic propriu: widgetul TradingView nu
+  // are cum să vadă jurnalul tău. Intrările apar ca săgeți pe lumânarea exactă,
+  // ieșirile ca puncte colorate după rezultat.
+  //
+  // Liniile SL/TP se desenează DOAR pentru pozițiile încă deschise. Pentru 227
+  // de tranzacții închise ar fi 450 de linii orizontale — un grafic ilizibil.
+  React.useEffect(() => {
+    let cancelled = false;
+    const series = seriesRef.current;
+    if (!series) return;
+
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/charts/trades?symbol=${encodeURIComponent(symbol)}`,
+          { cache: "no-store" }
+        );
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        const trades: ChartTrade[] = data.trades ?? [];
+        if (cancelled || !seriesRef.current) return;
+
+        const css = getComputedStyle(document.documentElement);
+        const tok = (n: string, f: string) => css.getPropertyValue(n).trim() || f;
+        const gain = tok("--gain", "#34d399");
+        const loss = tok("--loss", "#fb5c72");
+        const accent = tok("--accent", "#6d75f6");
+
+        // Marcaje: săgeată la intrare, cerc la ieșire.
+        const markers = trades.flatMap((tr) => {
+          const isBuy = tr.direction === "BUY";
+          const items: {
+            time: UTCTimestamp; position: "aboveBar" | "belowBar";
+            color: string; shape: "arrowUp" | "arrowDown" | "circle"; text: string;
+          }[] = [{
+            time: tr.entryTime as UTCTimestamp,
+            position: isBuy ? "belowBar" : "aboveBar",
+            color: accent,
+            shape: isBuy ? "arrowUp" : "arrowDown",
+            text: isBuy ? "BUY" : "SELL",
+          }];
+
+          if (tr.exitTime != null) {
+            const won = (tr.pnl ?? 0) >= 0;
+            items.push({
+              time: tr.exitTime as UTCTimestamp,
+              position: isBuy ? "aboveBar" : "belowBar",
+              color: won ? gain : loss,
+              shape: "circle",
+              // Rezultatul pe marcaj: vezi direct dacă tranzacția a mers, fără
+              // să deschizi jurnalul.
+              text: tr.pnl == null ? "" : `${tr.pnl >= 0 ? "+" : ""}${Math.round(tr.pnl)}`,
+            });
+          }
+          return items;
+        });
+
+        // lightweight-charts cere marcajele ordonate crescător după timp.
+        markers.sort((a, b) => (a.time as number) - (b.time as number));
+        seriesRef.current.setMarkers(markers as never);
+
+        // Curățăm liniile de la simbolul precedent înainte să punem altele.
+        for (const l of tradeLinesRef.current) {
+          try { seriesRef.current.removePriceLine(l); } catch { /* deja scoasă */ }
+        }
+        tradeLinesRef.current = [];
+
+        for (const tr of trades) {
+          if (tr.exitTime != null) continue; // doar pozițiile deschise
+          const add = (price: number | null, color: string, title: string) => {
+            if (price == null || !seriesRef.current) return;
+            tradeLinesRef.current.push(
+              seriesRef.current.createPriceLine({
+                price, color, lineWidth: 1, lineStyle: 2,
+                axisLabelVisible: true, title,
+              })
+            );
+          };
+          add(tr.entryPrice, accent, "ENTRY");
+          add(tr.stopLoss, loss, "SL");
+          add(tr.takeProfit, gain, "TP");
+        }
+      } catch { /* graficul rămâne funcțional și fără marcaje */ }
+    })();
+
+    return () => { cancelled = true; };
+  }, [symbol, timeframe]);
 
   // ── Prețul viu rescrie ultima lumânare ──
   //
