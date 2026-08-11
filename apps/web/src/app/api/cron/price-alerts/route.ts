@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fetchLatestPrice } from "@/lib/yahoo-finance";
+// Prețul vine prin stratul de rutare: cripto de la Binance (live), restul de
+// la Yahoo. Înainte totul trecea prin Yahoo, care e măsurabil în urmă la cripto.
+import { fetchSpotPrice } from "@/lib/price-feed";
 import { notifyTelegram } from "@/lib/telegram";
 import { sendPushToUser } from "@/lib/push";
 import { sendWebPushToUser } from "@/lib/web-push";
@@ -32,7 +34,7 @@ export async function GET(req: NextRequest) {
   const symbols = [...new Set(items.map((i) => i.symbol))];
   const prices = new Map<string, number>();
   for (const s of symbols) {
-    const p = await fetchLatestPrice(s);
+    const p = await fetchSpotPrice(s);
     if (p != null) prices.set(s, p);
     await new Promise((r) => setTimeout(r, 120)); // politețe cu Yahoo
   }

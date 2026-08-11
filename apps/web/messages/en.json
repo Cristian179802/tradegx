@@ -383,7 +383,7 @@
     "invalidPriceDesc": "Enter positive numeric values.",
     "alertsDisabled": "Alerts for {symbol} have been disabled",
     "alertSet": "Alert set on {symbol}",
-    "alertSetDesc": "You get an in-app + Telegram notification when the price hits the level (checked every ~10 min).",
+    "alertSetDesc": "You get an on-screen notification (phone + desktop), in-app and on Telegram when the price hits your threshold. Checked every ~1 min. Metals and indices are quoted with a ~10 min delay by the data provider.",
     "saveError": "Save error",
     "noResults": "Try another search term",
     "addedBtn": "Added",

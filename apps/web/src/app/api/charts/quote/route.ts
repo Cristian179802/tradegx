@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
-import { fetchLatestPrice } from "@/lib/yahoo-finance";
+// Prețul vine prin stratul de rutare: cripto de la Binance (live), restul de
+// la Yahoo. Înainte totul trecea prin Yahoo, care e măsurabil în urmă la cripto.
+import { fetchSpotPrice, priceFreshness } from "@/lib/price-feed";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,7 +17,7 @@ export async function GET(req: NextRequest) {
     .toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
 
   const [price, account] = await Promise.all([
-    fetchLatestPrice(symbol).catch(() => null),
+    fetchSpotPrice(symbol).catch(() => null),
     prisma.tradingAccount.findFirst({
       where: { userId, isActive: true },
       orderBy: { createdAt: "asc" },
@@ -31,6 +33,10 @@ export async function GET(req: NextRequest) {
     ok: true,
     symbol,
     price,
+    // Cât de proaspăt e prețul, ca interfața să nu prezinte drept „live" o
+    // cotație de futures pe care Yahoo o întârzie 10 minute. „live" = Binance,
+    // „near" = valute Yahoo (sub un minut), „delayed" = metale/indici/energie.
+    freshness: priceFreshness(symbol),
     balance: account ? Number(account.balance) : 10000,
     currency: account?.currency ?? "USD",
   });

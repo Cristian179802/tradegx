@@ -383,7 +383,7 @@
     "invalidPriceDesc": "Introdu valori numerice pozitive.",
     "alertsDisabled": "Alertele pentru {symbol} au fost dezactivate",
     "alertSet": "Alertă setată pe {symbol}",
-    "alertSetDesc": "Primești notificare in-app + Telegram când prețul atinge pragul (verificare la ~10 min).",
+    "alertSetDesc": "Primești notificare pe ecran (telefon + desktop), în aplicație și pe Telegram când prețul atinge pragul. Verificare la ~1 min. Metalele și indicii au cotația întârziată ~10 min de furnizorul de date.",
     "saveError": "Eroare la salvare",
     "noResults": "Încearcă alt termen de căutare",
     "addedBtn": "Adăugat",
