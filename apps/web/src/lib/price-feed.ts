@@ -19,30 +19,9 @@
 // Yahoo; se rezolvă doar cu un furnizor plătit.
 
 import { fetchLatestPrice as fetchYahooPrice } from "@/lib/yahoo-finance";
+import { binancePair } from "@/lib/crypto-pairs";
 
-/**
- * Cripto → perechea Binance echivalentă.
- *
- * Cotăm în USDT, nu USD: USDT e practic la paritate (diferență de ordinul
- * 0,02%), iar perechile USDT au de departe cea mai mare lichiditate, deci
- * prețul e cel mai reprezentativ.
- */
-const BINANCE_PAIRS: Record<string, string> = {
-  BTCUSD: "BTCUSDT", ETHUSD: "ETHUSDT", BNBUSD: "BNBUSDT",
-  SOLUSD: "SOLUSDT", XRPUSD: "XRPUSDT", ADAUSD: "ADAUSDT",
-  DOGEUSD: "DOGEUSDT", AVAXUSD: "AVAXUSDT", LINKUSD: "LINKUSDT",
-  DOTUSD: "DOTUSDT", LTCUSD: "LTCUSDT", TRXUSD: "TRXUSDT",
-  ATOMUSD: "ATOMUSDT", NEARUSD: "NEARUSDT", APTUSD: "APTUSDT",
-  ARBUSD: "ARBUSDT", OPUSD: "OPUSDT", INJUSD: "INJUSDT",
-  SUIUSD: "SUIUSDT", TONUSD: "TONUSDT",
-  // Perechile pe USDT scrise direct, dacă cineva le salvează așa
-  BTCUSDT: "BTCUSDT", ETHUSDT: "ETHUSDT", SOLUSDT: "SOLUSDT",
-};
-
-/** „BTC/USD" → „BTCUSD", ca să se potrivească cu cheile de mai sus. */
-function normalize(symbol: string): string {
-  return symbol.toUpperCase().replace(/[^A-Z0-9]/g, "");
-}
+export { priceFreshness } from "@/lib/crypto-pairs";
 
 async function fetchBinancePrice(pair: string): Promise<number | null> {
   try {
@@ -69,24 +48,10 @@ async function fetchBinancePrice(pair: string): Promise<number | null> {
  * null ca „nu știu prețul", NU ca zero.
  */
 export async function fetchSpotPrice(symbol: string): Promise<number | null> {
-  const pair = BINANCE_PAIRS[normalize(symbol)];
+  const pair = binancePair(symbol);
   if (pair) {
     const live = await fetchBinancePrice(pair);
     if (live !== null) return live;
   }
   return fetchYahooPrice(symbol);
-}
-
-/**
- * Cât de proaspăt e prețul pentru un instrument, ca să putem fi sinceri în
- * interfață în loc să promitem „live" peste tot.
- */
-export function priceFreshness(symbol: string): "live" | "near" | "delayed" {
-  const key = normalize(symbol);
-  if (BINANCE_PAIRS[key]) return "live";
-  // Futures pe metale și indici — Yahoo le întârzie 10 minute.
-  if (/^(XAU|XAG|XPT)USD$|^(US30|NAS100|SP500|US2000)$|^(CRUDE|BRENT|NATGAS)$/.test(key)) {
-    return "delayed";
-  }
-  return "near";
 }

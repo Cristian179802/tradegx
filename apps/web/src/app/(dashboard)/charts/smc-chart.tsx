@@ -4,6 +4,8 @@ import * as React from "react";
 import { createChart, CrosshairMode, type IChartApi, type ISeriesApi, type UTCTimestamp } from "lightweight-charts";
 import { detectSMC, type SmcResult, type SmcCandle } from "@tradegx/core";
 import { Loader2 } from "lucide-react";
+import { useLivePrice } from "@/lib/use-live-price";
+import { cn } from "@/lib/utils";
 
 export interface SmcToggles { ob: boolean; fvg: boolean; liq: boolean; struct: boolean }
 
@@ -32,10 +34,15 @@ export function SmcChart({
   const seriesRef = React.useRef<ISeriesApi<"Candlestick"> | null>(null);
   const smcRef = React.useRef<SmcResult | null>(null);
   const togglesRef = React.useRef(toggles);
+  // Ultima lumânare încărcată. O ținem ca să o putem rescrie la fiecare tick:
+  // `series.update()` cere obiectul întreg, nu doar prețul de închidere.
+  const lastBarRef = React.useRef<SmcCandle | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(false);
 
   togglesRef.current = toggles;
+
+  const { price: livePrice, freshness, streaming } = useLivePrice(symbol);
 
   // ── Desenarea overlay-ului SMC pe canvas, sincron cu chartul ──
   const draw = React.useCallback(() => {
@@ -102,7 +109,9 @@ export function SmcChart({
     // Lichiditate: linii orizontale aurii punctate + etichetă BSL/SSL
     if (t.liq) for (const lv of smc.liquidity) {
       const y = yOf(lv.price);
-      if (y == null) return;
+      // `continue`, nu `return`: cu return, un singur nivel ieșit din ecran
+      // oprea desenarea tuturor celor următoare ȘI a structurii de dedesubt.
+      if (y == null) continue;
       ctx.strokeStyle = COL.liq;
       ctx.lineWidth = 1;
       ctx.setLineDash([5, 4]);
@@ -131,17 +140,31 @@ export function SmcChart({
   // ── Init chart o singură dată ──
   React.useEffect(() => {
     if (!wrapRef.current) return;
+
+    // Culorile vin din sistemul de design, citite la runtime. Erau scrise de
+    // mână aici (`#09090b`, `#f43f5e`), deci graficul rămânea în urmă la fiecare
+    // ajustare a paletei — și roșul lui nu era roșul nostru de pierdere.
+    const css = getComputedStyle(document.documentElement);
+    const token = (name: string, fallback: string) =>
+      css.getPropertyValue(name).trim() || fallback;
+
+    const bg    = token("--s-0", "#07080c");
+    const ink   = token("--ink-3", "#8b93a5");
+    const line  = token("--line-1", "rgba(39,39,42,1)");
+    const gain  = token("--gain", "#34d399");
+    const loss  = token("--loss", "#fb5c72");
+
     const chart = createChart(wrapRef.current, {
-      layout: { background: { color: "#09090b" }, textColor: "#a1a1aa", fontFamily: "ui-sans-serif, system-ui" },
-      grid: { vertLines: { color: "rgba(39,39,42,0.5)" }, horzLines: { color: "rgba(39,39,42,0.5)" } },
+      layout: { background: { color: bg }, textColor: ink, fontFamily: "ui-sans-serif, system-ui" },
+      grid: { vertLines: { color: line }, horzLines: { color: line } },
       crosshair: { mode: CrosshairMode.Normal },
-      rightPriceScale: { borderColor: "rgba(39,39,42,1)" },
-      timeScale: { borderColor: "rgba(39,39,42,1)", timeVisible: true, secondsVisible: false },
+      rightPriceScale: { borderColor: line },
+      timeScale: { borderColor: line, timeVisible: true, secondsVisible: false },
       autoSize: true,
     });
     const series = chart.addCandlestickSeries({
-      upColor: "#34d399", downColor: "#f43f5e", borderVisible: false,
-      wickUpColor: "#34d399", wickDownColor: "#f43f5e",
+      upColor: gain, downColor: loss, borderVisible: false,
+      wickUpColor: gain, wickDownColor: loss,
     });
     chartRef.current = chart;
     seriesRef.current = series;
@@ -165,6 +188,7 @@ export function SmcChart({
         if (cancelled) return;
         const candles: SmcCandle[] = data.candles;
         seriesRef.current?.setData(candles as never);
+        lastBarRef.current = candles[candles.length - 1] ?? null;
         chartRef.current?.timeScale().fitContent();
         const smc = detectSMC(candles, 6);
         smcRef.current = smc;
@@ -185,10 +209,58 @@ export function SmcChart({
   // Redesenează când se schimbă toggle-urile
   React.useEffect(() => { draw(); }, [toggles, draw]);
 
+  // ── Prețul viu rescrie ultima lumânare ──
+  //
+  // Nu adăugăm o lumânare nouă la fiecare tick — o extindem pe cea în curs, cum
+  // face orice platformă: închiderea urmează prețul, iar maximul și minimul se
+  // lărgesc doar dacă prețul le depășește. Așa lumânarea „crește" în timp real
+  // în loc să sară.
+  React.useEffect(() => {
+    const series = seriesRef.current;
+    const last = lastBarRef.current;
+    if (!series || !last || livePrice == null) return;
+
+    const updated: SmcCandle = {
+      ...last,
+      close: livePrice,
+      high: Math.max(last.high, livePrice),
+      low: Math.min(last.low, livePrice),
+    };
+    lastBarRef.current = updated;
+    series.update(updated as never);
+  }, [livePrice]);
+
+  // Cifre semnificative după virgulă: 5 la valute (unde mișcarea e în puncte a
+  // patra zecimală), 2 la aur, indici și cripto. Un BTC afișat cu 5 zecimale ar
+  // fi ilizibil, un EUR/USD cu 2 ar părea nemișcat.
+  const decimals = livePrice != null && livePrice < 20 ? 5 : 2;
+
   return (
     <div className="relative h-full w-full">
       <div ref={wrapRef} className="absolute inset-0" />
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
+
+      {/* Prețul viu. Fără text tradus: doar cifra, un punct colorat pentru
+          starea fluxului și, la instrumentele întârziate, minutele de decalaj —
+          „min" se citește la fel în ambele limbi. */}
+      {livePrice != null && (
+        <div className="absolute top-2 right-2 z-20 flex items-center gap-2 rounded-lg border border-[color:var(--line-1)] bg-[color:var(--s-1)]/90 px-2.5 py-1 backdrop-blur-sm pointer-events-none">
+          <span
+            className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              freshness === "delayed" ? "bg-zinc-500"
+                : streaming ? "bg-emerald-400 animate-pulse"
+                : "bg-amber-400"
+            )}
+          />
+          <span className="text-[13px] font-bold tabular-nums text-[color:var(--ink-1)]">
+            {livePrice.toFixed(decimals)}
+          </span>
+          {freshness === "delayed" && (
+            <span className="text-[9px] font-semibold text-zinc-500">10 min</span>
+          )}
+        </div>
+      )}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/40 backdrop-blur-[1px] z-10">
           <div className="flex items-center gap-2 text-xs text-zinc-400"><Loader2 className="w-4 h-4 animate-spin text-indigo-400" />{loadingLabel}</div>
