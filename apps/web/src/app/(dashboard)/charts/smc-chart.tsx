@@ -6,6 +6,7 @@ import { detectSMC, type SmcResult, type SmcCandle } from "@tradegx/core";
 import { Loader2 } from "lucide-react";
 import { useLivePrice } from "@/lib/use-live-price";
 import { cn } from "@/lib/utils";
+import { normalizeSymbol } from "@/lib/symbols";
 
 export interface SmcToggles { ob: boolean; fvg: boolean; liq: boolean; struct: boolean }
 
@@ -53,12 +54,46 @@ export function SmcChart({
   // Liniile SL/TP/entry adăugate pe serie. Le ținem ca să le putem scoate la
   // schimbarea simbolului — altfel s-ar aduna una peste alta.
   const tradeLinesRef = React.useRef<IPriceLine[]>([]);
+  // Alerta de preț a simbolului, dacă e în watchlist. O ținem în ref, nu în
+  // stare: se schimbă la fiecare pixel de tragere, iar o re-randare React pe
+  // fiecare mișcare de mouse ar face graficul să sacadeze.
+  const alertRef = React.useRef<{ id: string; above: number | null; below: number | null } | null>(null);
+  const alertLinesRef = React.useRef<{ above: IPriceLine | null; below: IPriceLine | null }>({ above: null, below: null });
+  const handleAboveRef = React.useRef<HTMLDivElement>(null);
+  const handleBelowRef = React.useRef<HTMLDivElement>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(false);
 
   togglesRef.current = toggles;
 
   const { price: livePrice, freshness, streaming } = useLivePrice(symbol);
+
+  // ── Mânerele de tragere ale alertelor ──
+  //
+  // Nu desenăm mânerele pe canvas: canvasul e `pointer-events-none`, iar dacă
+  // i-am da evenimente ar înghiți panoramarea graficului. În schimb punem două
+  // benzi subțiri de 12px, invizibile, exact peste linii. Doar ele prind mouse-ul;
+  // restul graficului rămâne complet normal.
+  //
+  // Poziționarea se face direct pe nodurile DOM, nu prin stare React: se
+  // recalculează la fiecare mișcare a scalei, iar un setState acolo ar produce
+  // o buclă de randare.
+  const syncHandles = React.useCallback(() => {
+    const series = seriesRef.current;
+    const a = alertRef.current;
+    const pairs: [("above" | "below"), HTMLDivElement | null][] = [
+      ["above", handleAboveRef.current],
+      ["below", handleBelowRef.current],
+    ];
+    for (const [kind, el] of pairs) {
+      if (!el) continue;
+      const price = a ? a[kind] : null;
+      const y = price != null && series ? series.priceToCoordinate(price) : null;
+      if (y == null) { el.style.display = "none"; continue; }
+      el.style.display = "block";
+      el.style.top = `${(y as unknown as number) - 6}px`;
+    }
+  }, []);
 
   // ── Desenarea overlay-ului SMC pe canvas, sincron cu chartul ──
   const draw = React.useCallback(() => {
@@ -151,7 +186,10 @@ export function SmcChart({
       const tw = ctx.measureText(label).width;
       ctx.fillText(label, Math.min(rightEdge - tw, x + 3), y - 3);
     }
-  }, []);
+
+    // Mânerele alertelor urmăresc scala împreună cu tot restul.
+    syncHandles();
+  }, [syncHandles]);
 
   // ── Init chart o singură dată ──
   React.useEffect(() => {
@@ -315,6 +353,101 @@ export function SmcChart({
     return () => { cancelled = true; };
   }, [symbol, timeframe]);
 
+  // ── Alertele de preț: linii pe grafic, trase cu mouse-ul ──
+  const loadAlerts = React.useCallback(async () => {
+    const series = seriesRef.current;
+    if (!series) return;
+
+    // Curățăm liniile precedente înainte de orice.
+    for (const kind of ["above", "below"] as const) {
+      const l = alertLinesRef.current[kind];
+      if (l) { try { series.removePriceLine(l); } catch { /* deja scoasă */ } }
+      alertLinesRef.current[kind] = null;
+    }
+    alertRef.current = null;
+
+    try {
+      const res = await fetch("/api/watchlist", { cache: "no-store" });
+      if (!res.ok) return;
+      const items: { id: string; symbol: string; alertAbove: string | number | null; alertBelow: string | number | null }[] = await res.json();
+
+      // Potrivire pe simbol normalizat: în watchlist scrie „EUR/USD", graficul
+      // primește „EURUSD". Fără normalizare nu s-ar găsi niciodată.
+      const wanted = normalizeSymbol(symbol);
+      const item = items.find((i) => normalizeSymbol(i.symbol) === wanted);
+      if (!item) { syncHandles(); return; }
+
+      const num = (v: unknown) => (v == null ? null : Number(v));
+      alertRef.current = { id: item.id, above: num(item.alertAbove), below: num(item.alertBelow) };
+
+      const css = getComputedStyle(document.documentElement);
+      const tok = (n: string, f: string) => css.getPropertyValue(n).trim() || f;
+
+      const mk = (price: number | null, color: string, title: string) => {
+        if (price == null || !seriesRef.current) return null;
+        return seriesRef.current.createPriceLine({
+          price, color, lineWidth: 2, lineStyle: 1,
+          axisLabelVisible: true, title,
+        });
+      };
+      alertLinesRef.current.above = mk(alertRef.current.above, tok("--gain", "#34d399"), "ALERT ▲");
+      alertLinesRef.current.below = mk(alertRef.current.below, tok("--loss", "#fb5c72"), "ALERT ▼");
+      syncHandles();
+    } catch { /* graficul funcționează și fără alerte */ }
+  }, [symbol, syncHandles]);
+
+  React.useEffect(() => { void loadAlerts(); }, [loadAlerts]);
+
+  /**
+   * Tragerea unui prag. Pointer events, nu mouse: merg identic cu degetul pe
+   * telefon, unde un trader chiar vrea să miște un stop din mers.
+   *
+   * Salvăm o singură dată, la eliberare — nu la fiecare pixel. Altfel am trimite
+   * sute de cereri pentru o singură ajustare.
+   */
+  const startDrag = (kind: "above" | "below") => (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const move = (ev: PointerEvent) => {
+      const series = seriesRef.current, wrap = wrapRef.current, a = alertRef.current;
+      if (!series || !wrap || !a) return;
+      const rect = wrap.getBoundingClientRect();
+      const p = series.coordinateToPrice(ev.clientY - rect.top);
+      if (p == null) return;
+      a[kind] = p as unknown as number;
+      alertLinesRef.current[kind]?.applyOptions({ price: a[kind] as number });
+      syncHandles();
+    };
+
+    const up = async () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      const a = alertRef.current;
+      if (!a) return;
+      const value = a[kind];
+      if (value == null) return;
+      try {
+        const res = await fetch("/api/watchlist", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: a.id,
+            [kind === "above" ? "alertAbove" : "alertBelow"]: Number(value.toFixed(5)),
+          }),
+        });
+        // 402 = fără PRO, 4xx = respins. Reîncărcăm din server ca linia să sară
+        // înapoi la valoarea reală, în loc să mintă că s-a salvat.
+        if (!res.ok) await loadAlerts();
+      } catch {
+        await loadAlerts();
+      }
+    };
+
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+
   // ── Prețul viu rescrie ultima lumânare ──
   //
   // Nu adăugăm o lumânare nouă la fiecare tick — o extindem pe cea în curs, cum
@@ -345,6 +478,23 @@ export function SmcChart({
     <div className="relative h-full w-full">
       <div ref={wrapRef} className="absolute inset-0" />
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
+
+      {/* Mânerele alertelor: benzi de 12px exact peste linii. Invizibile, dar
+          apucabile — cu mouse-ul sau cu degetul. `touchAction: none` doar aici,
+          ca gestul de tragere să nu fie confundat cu derularea paginii; restul
+          graficului își păstrează gesturile intacte. */}
+      <div
+        ref={handleAboveRef}
+        onPointerDown={startDrag("above")}
+        style={{ display: "none", touchAction: "none" }}
+        className="absolute left-0 right-0 h-3 z-20 cursor-ns-resize"
+      />
+      <div
+        ref={handleBelowRef}
+        onPointerDown={startDrag("below")}
+        style={{ display: "none", touchAction: "none" }}
+        className="absolute left-0 right-0 h-3 z-20 cursor-ns-resize"
+      />
 
       {/* Prețul viu. Fără text tradus: doar cifra, un punct colorat pentru
           starea fluxului și, la instrumentele întârziate, minutele de decalaj —
