@@ -8,10 +8,16 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitle"), description: t("metaDesc") };
 }
 
-const SHIPPED = ["sh1","sh2","sh3","sh4","sh5","sh6","sh7","sh8","sh9","sh10","sh11","sh12","sh13","sh14","sh15","sh16","sh17","sh18","sh19","sh20","sh21","sh22","sh23"];
-const IN_PROGRESS = ["ip1"];
-const PLANNED = ["pl8","pl15","pl10","pl11","pl12","pl14","pl13","pl3","pl4","pl1","pl5","pl16","pl7"];
-const VISION = ["vs1","vs25","vs2","vs3","vs15","vs10","vs11","vs12","vs4","vs5","vs6","vs13","vs7","vs8","vs9"];
+// Listele reflectă ce e ÎN COD, nu ce ne-am propus. Verificat pe 16 august 2026:
+// „ip1" (cTrader/TradeLocker/DXtrade) era prezentat ca un tot, dar doar
+// TradeLocker are sincronizare live; celelalte două au doar import CSV, iar API-ul
+// lor live depinde de aprobări externe. Spart în sh24/sh25 (livrate) + pl17
+// (blocat de furnizori). „pl10" pretindea că lipsește conectarea la Binance/Bybit,
+// deși e livrată — a rămas doar partea de futures și acțiuni.
+const SHIPPED = ["sh1","sh2","sh3","sh4","sh5","sh6","sh7","sh8","sh9","sh10","sh11","sh12","sh13","sh14","sh15","sh16","sh17","sh18","sh19","sh20","sh21","sh22","sh23","sh24","sh25","sh26"];
+const IN_PROGRESS = ["ip2"];
+const PLANNED = ["pl8","pl17","pl15","pl10","pl11","pl12","pl14","pl13","pl3","pl4","pl1","pl5","pl16","pl7"];
+const VISION = ["vs25","vs2","vs3","vs15","vs10","vs11","vs12","vs4","vs5","vs6","vs13","vs7","vs8","vs9"];
 
 function List({
   items,
