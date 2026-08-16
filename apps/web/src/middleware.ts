@@ -49,12 +49,16 @@ export default auth((req: NextRequest & { auth: { user?: { id?: string; role?: s
     publicRoutes.includes(pathname) ||
     publicPrefixes.some((prefix) => pathname.startsWith(prefix));
 
-  // Cine e deja conectat nu are ce căuta pe login/register. Landing-ul nu se uită
-  // la sesiune (arată mereu „Autentificare" + „Încearcă gratuit"), așa că un
-  // utilizator existent care revenea pe site era plimbat prin pâlnia de
-  // înregistrare cu contul lui deja activ în browser. Garda de aici acoperă și
-  // cele cinci CTA „Începe gratuit" din pagină, nu doar meniul.
-  if ((pathname === "/login" || pathname === "/register") && req.auth?.user?.id) {
+  // Utilizatorul conectat care nimerește pe /register e trimis în aplicație:
+  // e deja client, nu are ce căuta în pâlnia de înregistrare, iar cele cinci
+  // CTA „Începe gratuit" din landing duc toate acolo.
+  //
+  // /login NU e inclus, deliberat. Sesiunea ține 30 de zile, deci cineva care
+  // revine pe site e recunoscut automat — dar trebuie să poată alege oricând să
+  // intre cu alt cont. Redirecționarea de aici îi lua exact această opțiune și
+  // făcea pagina de autentificare inaccesibilă. Pe un calculator folosit de mai
+  // multe persoane, asta chiar blochează pe cineva afară din contul lui.
+  if (pathname === "/register" && req.auth?.user?.id) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 

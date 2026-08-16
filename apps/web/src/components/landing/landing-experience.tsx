@@ -125,7 +125,15 @@ function Navbar({ t }: { t: TT }) {
         <div className="flex items-center gap-2">
           <LanguageSwitcher compact />
           {session ? (
-            <Link href="/dashboard"><Button size="sm" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25 text-[13px] font-bold gap-1.5"><ArrowRight className="w-3.5 h-3.5" />{t("goToApp")}</Button></Link>
+            // Conectat: intrarea în aplicație e acțiunea principală, DAR
+            // „Autentificare" rămâne vizibilă. Sesiunea ține 30 de zile, deci pe
+            // un calculator folosit de mai multe persoane cineva trebuie să poată
+            // intra cu contul lui fără să caute prin meniuri cum să iasă din al
+            // altuia.
+            <>
+              <Link href="/login" className="hidden sm:block"><Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white hover:bg-zinc-800/80 text-[13px] font-medium">{t("login")}</Button></Link>
+              <Link href="/dashboard"><Button size="sm" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/25 text-[13px] font-bold gap-1.5"><ArrowRight className="w-3.5 h-3.5" />{t("goToApp")}</Button></Link>
+            </>
           ) : (
             <>
               <Link href="/login" className="hidden sm:block"><Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white hover:bg-zinc-800/80 text-[13px] font-medium">{t("login")}</Button></Link>
