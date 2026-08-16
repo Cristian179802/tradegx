@@ -148,6 +148,17 @@ export async function POST(req: NextRequest) {
         },
       });
     } else {
+      await prisma.tradingAccount.updateMany({
+      where: { userId: session.user.id, isActive: true },
+      data: { isActive: false },
+    });
+
+    // Contul nou devine SINGURUL activ. `isActive` are implicit `true` in
+    // schema, iar nimeni nu le stingea pe celelalte — asa se ajungea la mai
+    // multe conturi active simultan, iar aplicatia alegea pe cel mai vechi
+    // (findFirst + orderBy createdAt asc). Efectul: conectai Binance si vedeai
+    // in continuare datele contului precedent.
+
       tradingAccount = await prisma.tradingAccount.create({
         data: {
           userId: session.user.id,
