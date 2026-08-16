@@ -2922,7 +2922,7 @@
     "note": "Calcul pe soldul contului tău: {balance} {currency}. Trage mânerele sau scrie prețurile."
   },
   "chartSmc": {
-    "button": "Structură",
+    "button": "Graficul meu",
     "legend": "Overlay:",
     "ob": "Order Blocks",
     "fvg": "Fair Value Gaps",

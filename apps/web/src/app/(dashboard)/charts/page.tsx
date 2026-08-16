@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { TradingViewChart } from "./tradingview-chart";
 import { AnalyzePanel } from "./analyze-panel";
 import { RiskPanel } from "./risk-panel";
-import { SmcChart, type SmcToggles } from "./smc-chart";
+import { SmcChart, CHART_INDICATORS, type SmcToggles, type ChartType } from "./smc-chart";
 import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2, Brain, Crosshair, Boxes } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -122,12 +122,17 @@ export default function ChartsPage() {
   const [search, setSearch] = React.useState("");
   const [favorites, setFavorites] = React.useState<string[]>(["EURUSD", "XAUUSD", "BTCUSD", "NAS100"]);
   const [studies, setStudies] = React.useState<string[]>([]);
+  const [myInd, setMyInd] = React.useState<string[]>(["ema21", "volume"]);
+  const [chartType, setChartType] = React.useState<ChartType>("candles");
   const [indOpen, setIndOpen] = React.useState(false);
   const [activeGroup, setActiveGroup] = React.useState(0);
   const [zen, setZen] = React.useState(false);
   const [aiOpen, setAiOpen] = React.useState(false);
   const [riskOpen, setRiskOpen] = React.useState(false);
-  const [smcMode, setSmcMode] = React.useState(false);
+  // Graficul propriu e implicit: are pretul viu, tranzactiile si alertele tale.
+  // Widgetul TradingView ramane la un click, pentru cand vrei datele lor de bursa
+  // la aur si indici, unde sunt mai proaspete decat ce luam gratuit de la Yahoo.
+  const [smcMode, setSmcMode] = React.useState(true);
   const [smcToggles, setSmcToggles] = React.useState<SmcToggles>({ ob: true, fvg: true, liq: true, struct: true });
   const indRef = React.useRef<HTMLDivElement>(null);
   const tAI = useTranslations("chartAI");
@@ -309,7 +314,51 @@ export default function ChartsPage() {
               </div>
               <p className="text-[10px] text-zinc-600 mb-3">{t("indicatorsHint")}</p>
               <div className="space-y-3 max-h-[52vh] overflow-y-auto pr-1">
-                {INDICATOR_GROUPS.map((grp) => (
+                {smcMode ? (
+                  /* Pe graficul propriu, meniul comanda indicatorii NOSTRI.
+                     ID-urile TradingView („MAExp@tv-basicstudies") functioneaza
+                     doar in widgetul lor, deci acolo ar fi fost butoane moarte. */
+                  <>
+                    <div className="grid grid-cols-2 gap-1">
+                      {(["candles", "heikin"] as const).map((ct) => (
+                        <button
+                          key={ct}
+                          onClick={() => setChartType(ct)}
+                          className={cn(
+                            "text-[11px] px-2 py-1.5 rounded-lg font-medium text-left transition-all border",
+                            chartType === ct
+                              ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-200"
+                              : "bg-zinc-800/40 border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                          )}
+                        >
+                          {ct === "candles" ? "Candles" : "Heikin-Ashi"}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {CHART_INDICATORS.map((ind) => {
+                        const on = myInd.includes(ind.id);
+                        return (
+                          <button
+                            key={ind.id}
+                            onClick={() =>
+                              setMyInd((prev) =>
+                                prev.includes(ind.id) ? prev.filter((x) => x !== ind.id) : [...prev, ind.id]
+                              )
+                            }
+                            className={cn(
+                              "text-[11px] px-2 py-1.5 rounded-lg font-medium text-left transition-all border",
+                              on ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-200" : "bg-zinc-800/40 border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                            )}
+                          >
+                            {on ? "✓ " : ""}{ind.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  INDICATOR_GROUPS.map((grp) => (
                   <div key={grp.cat}>
                     <p className="text-[9px] font-black uppercase tracking-wider text-zinc-600 mb-1.5">{t(grp.cat)}</p>
                     <div className="grid grid-cols-2 gap-1">
@@ -330,7 +379,8 @@ export default function ChartsPage() {
                       })}
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -460,6 +510,8 @@ export default function ChartsPage() {
               symbol={active.symbol}
               timeframe={active.timeframe}
               toggles={smcToggles}
+              indicators={myInd}
+              chartType={chartType}
               errorLabel={tSmc("noData")}
               loadingLabel={tSmc("loading")}
             />

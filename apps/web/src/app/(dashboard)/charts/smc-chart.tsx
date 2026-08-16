@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useLivePrice } from "@/lib/use-live-price";
 import { cn } from "@/lib/utils";
 import { normalizeSymbol } from "@/lib/symbols";
+import { sma, ema, bollinger, vwap, rsi, macd, atr, heikinAshi, type Bar } from "@/lib/indicators";
 
 export interface SmcToggles { ob: boolean; fvg: boolean; liq: boolean; struct: boolean }
 
@@ -32,8 +33,29 @@ const COL = {
   bos: "rgba(148,163,184,0.9)", choch: "rgba(251,191,36,0.95)",
 };
 
+/** Indicatorii pe care îi poate desena graficul. Ordinea e cea din meniu. */
+export const CHART_INDICATORS = [
+  { id: "ema9",   group: "trend", name: "EMA 9" },
+  { id: "ema21",  group: "trend", name: "EMA 21" },
+  { id: "ema50",  group: "trend", name: "EMA 50" },
+  { id: "ema200", group: "trend", name: "EMA 200" },
+  { id: "sma50",  group: "trend", name: "SMA 50" },
+  { id: "sma200", group: "trend", name: "SMA 200" },
+  { id: "bb",     group: "trend", name: "Bollinger" },
+  { id: "vwap",   group: "trend", name: "VWAP" },
+  { id: "volume", group: "osc",   name: "Volume" },
+  { id: "rsi",    group: "osc",   name: "RSI 14" },
+  { id: "macd",   group: "osc",   name: "MACD" },
+  { id: "atr",    group: "osc",   name: "ATR 14" },
+] as const;
+
+/** Doar ce chiar desenăm. „line"/„area" ar cere alt tip de serie — nu le
+ * declarăm până nu există, ca meniul să nu ofere opțiuni moarte. */
+export type ChartType = "candles" | "heikin";
+
 export function SmcChart({
   symbol, timeframe, toggles, onResult, errorLabel, loadingLabel,
+  indicators = [], chartType = "candles",
 }: {
   symbol: string;
   timeframe: string;
@@ -41,6 +63,8 @@ export function SmcChart({
   onResult?: (r: SmcResult | null) => void;
   errorLabel: string;
   loadingLabel: string;
+  indicators?: string[];
+  chartType?: ChartType;
 }) {
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -61,6 +85,10 @@ export function SmcChart({
   const alertLinesRef = React.useRef<{ above: IPriceLine | null; below: IPriceLine | null }>({ above: null, below: null });
   const handleAboveRef = React.useRef<HTMLDivElement>(null);
   const handleBelowRef = React.useRef<HTMLDivElement>(null);
+  // Lumânările brute, ca să putem recalcula indicatorii fără să cerem din nou
+  // de la server la fiecare bifă din meniu.
+  const barsRef = React.useRef<SmcCandle[]>([]);
+  const indSeriesRef = React.useRef<ISeriesApi<"Line" | "Histogram">[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(false);
 
@@ -94,6 +122,108 @@ export function SmcChart({
       el.style.top = `${(y as unknown as number) - 6}px`;
     }
   }, []);
+
+  // ── Indicatorii ──
+  //
+  // lightweight-charts v4 nu are panouri separate. Trucul standard: oscilatorul
+  // primește propria scală de preț, înghesuită în ultimii 22% din înălțime prin
+  // `scaleMargins`. Volumul la fel, în ultimii 12%. Așa arată ca panouri, fără
+  // un al doilea grafic de sincronizat.
+  //
+  // Un singur oscilator odată. Trei suprapuse în aceeași bandă de 22% ar fi
+  // ilizibile, iar comutarea între ele e mai rapidă decât descâlcirea lor.
+  const rebuildIndicators = React.useCallback(() => {
+    const chart = chartRef.current;
+    const bars = barsRef.current;
+    if (!chart) return;
+
+    for (const s of indSeriesRef.current) {
+      try { chart.removeSeries(s); } catch { /* deja scoasă */ }
+    }
+    indSeriesRef.current = [];
+    if (bars.length === 0) return;
+
+    const css = getComputedStyle(document.documentElement);
+    const tok = (n: string, f: string) => css.getPropertyValue(n).trim() || f;
+    const gain = tok("--gain", "#34d399");
+    const loss = tok("--loss", "#fb5c72");
+    const accent = tok("--accent", "#6d75f6");
+
+    const closes = bars.map((b) => b.close);
+    const times = bars.map((b) => b.time as UTCTimestamp);
+    const has = (id: string) => indicators.includes(id);
+
+    // Punctele cu null se OMIT, nu se trimit ca zero — o EMA care începe de la
+    // zero desenează o linie verticală uriașă până la primul preț real.
+    const line = (vals: (number | null)[], color: string, width: 1 | 2 = 1, scaleId?: string) => {
+      const s = chart.addLineSeries({
+        color, lineWidth: width, priceLineVisible: false, lastValueVisible: false,
+        crosshairMarkerVisible: false,
+        ...(scaleId ? { priceScaleId: scaleId } : {}),
+      });
+      s.setData(vals.map((v, i) => (v == null ? null : { time: times[i], value: v }))
+        .filter(Boolean) as never);
+      indSeriesRef.current.push(s);
+      return s;
+    };
+
+    if (has("ema9"))   line(ema(closes, 9), "#38bdf8");
+    if (has("ema21"))  line(ema(closes, 21), accent);
+    if (has("ema50"))  line(ema(closes, 50), "#fbbf24");
+    if (has("ema200")) line(ema(closes, 200), "#f472b6", 2);
+    if (has("sma50"))  line(sma(closes, 50), "#a78bfa");
+    if (has("sma200")) line(sma(closes, 200), "#94a3b8", 2);
+
+    if (has("bb")) {
+      const b = bollinger(closes, 20, 2);
+      line(b.upper, "rgba(129,140,248,0.55)");
+      line(b.mid,   "rgba(129,140,248,0.35)");
+      line(b.lower, "rgba(129,140,248,0.55)");
+    }
+    if (has("vwap")) line(vwap(bars as Bar[]), "#facc15", 2);
+
+    if (has("volume")) {
+      const s = chart.addHistogramSeries({
+        priceScaleId: "vol", priceFormat: { type: "volume" },
+        priceLineVisible: false, lastValueVisible: false,
+      });
+      s.setData(bars.map((b, i) => ({
+        time: times[i],
+        value: (b as unknown as { v?: number }).v ?? 0,
+        color: b.close >= b.open ? `${gain}55` : `${loss}55`,
+      })) as never);
+      chart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.88, bottom: 0 } });
+      indSeriesRef.current.push(s);
+    }
+
+    // Oscilatorul: primul bifat câștigă banda de jos.
+    const osc = ["rsi", "macd", "atr"].find(has);
+    if (osc) {
+      if (osc === "rsi") {
+        line(rsi(closes, 14), accent, 1, "osc");
+        // Pragurile 30/70 desenate ca linii plate — reperele fără de care RSI
+        // nu spune nimic.
+        line(closes.map(() => 70), "rgba(148,163,184,0.28)", 1, "osc");
+        line(closes.map(() => 30), "rgba(148,163,184,0.28)", 1, "osc");
+      } else if (osc === "macd") {
+        const m = macd(closes, 12, 26, 9);
+        line(m.line, accent, 1, "osc");
+        line(m.signal, "#fbbf24", 1, "osc");
+        const h = chart.addHistogramSeries({
+          priceScaleId: "osc", priceLineVisible: false, lastValueVisible: false,
+        });
+        h.setData(m.hist.map((v, i) => (v == null ? null : {
+          time: times[i], value: v, color: v >= 0 ? `${gain}88` : `${loss}88`,
+        })).filter(Boolean) as never);
+        indSeriesRef.current.push(h);
+      } else {
+        line(atr(bars as Bar[], 14), "#fbbf24", 1, "osc");
+      }
+      chart.priceScale("osc").applyOptions({ scaleMargins: { top: 0.78, bottom: 0.02 } });
+    }
+  }, [indicators]);
+
+  React.useEffect(() => { rebuildIndicators(); }, [rebuildIndicators]);
 
   // ── Desenarea overlay-ului SMC pe canvas, sincron cu chartul ──
   const draw = React.useCallback(() => {
@@ -241,8 +371,16 @@ export function SmcChart({
         const data = await res.json();
         if (cancelled) return;
         const candles: SmcCandle[] = data.candles;
-        seriesRef.current?.setData(candles as never);
-        lastBarRef.current = candles[candles.length - 1] ?? null;
+        // Heikin-Ashi netezește trendul, dar prețurile rezultate sunt medii, nu
+        // cotații reale. Detecția SMC rămâne pe lumânările BRUTE — un order block
+        // calculat pe medii ar arăta niveluri care nu există în piață.
+        const shown = chartType === "heikin"
+          ? (heikinAshi(candles as Bar[]) as unknown as SmcCandle[])
+          : candles;
+        seriesRef.current?.setData(shown as never);
+        lastBarRef.current = shown[shown.length - 1] ?? null;
+        barsRef.current = candles;
+        rebuildIndicators();
         chartRef.current?.timeScale().fitContent();
         const smc = detectSMC(candles, 6);
         smcRef.current = smc;
@@ -258,7 +396,7 @@ export function SmcChart({
       }
     })();
     return () => { cancelled = true; };
-  }, [symbol, timeframe, draw, onResult]);
+  }, [symbol, timeframe, chartType, draw, onResult, rebuildIndicators]);
 
   // Redesenează când se schimbă toggle-urile
   React.useEffect(() => { draw(); }, [toggles, draw]);
@@ -352,6 +490,7 @@ export function SmcChart({
 
     return () => { cancelled = true; };
   }, [symbol, timeframe]);
+
 
   // ── Alertele de preț: linii pe grafic, trase cu mouse-ul ──
   const loadAlerts = React.useCallback(async () => {

@@ -2922,7 +2922,7 @@
     "note": "Computed on your account balance: {balance} {currency}. Drag the handles or type prices."
   },
   "chartSmc": {
-    "button": "Structure",
+    "button": "My chart",
     "legend": "Overlay:",
     "ob": "Order Blocks",
     "fvg": "Fair Value Gaps",

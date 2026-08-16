@@ -323,34 +323,10 @@ export function Sidebar() {
 
       {/* Bottom section */}
       <div className="border-t border-zinc-800/50 p-2.5 space-y-1.5">
-        {/* Trial / PRO banner */}
-        <AnimatePresence>
-          {expanded && session?.user?.isTrialing && (
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              className="relative overflow-hidden bg-gradient-to-br from-indigo-500/12 via-violet-500/8 to-transparent border border-indigo-500/25 rounded-xl p-2.5 mb-1"
-            >
-              {/* Animated top line */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent" />
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <Sparkles className="w-3 h-3 text-indigo-400" />
-                <span className="text-indigo-300 text-[11px] font-bold">{tc("trialActive")}</span>
-              </div>
-              <p className="text-zinc-500 text-[10px] leading-relaxed">
-                {tc("trialActiveDesc")}
-              </p>
-              {/* /billing, nu /pricing: sidebar-ul apare doar utilizatorilor
-                  conectați, iar /pricing e pagina de achiziție. Trimitea omul
-                  care voia să plătească înapoi în pâlnia de marketing. */}
-              <Link href="/billing" className="mt-1.5 flex items-center gap-1 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
-                <Zap className="w-2.5 h-2.5" />
-                {tc("upgradeNow")}
-              </Link>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Cardul de trial a fost scos din bara laterală: bannerul de sus
+            („PRO Trial — mai ai N zile") spune deja același lucru, cu aceeași
+            acțiune. Două îndemnuri identice pe același ecran nu conving mai
+            mult, doar ocupă spațiu și fac interfața să pară insistentă. */}
 
         {/* User menu */}
         <DropdownMenu>
