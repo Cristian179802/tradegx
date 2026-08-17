@@ -1,0 +1,55 @@
+name: Exchange sync cron
+
+# Sincronizează conturile de bursă (Binance, Bybit) la ~5 minute.
+# Necesită secretul CRON_SECRET în GitHub (Settings → Secrets → Actions),
+# cu ACEEAȘI valoare ca variabila CRON_SECRET de pe Vercel.
+#
+# De ce 5 și nu 1: programările GitHub Actions au granularitate de ~5 minute și
+# întârzie des sub încărcare, deci „la un minut" ar fi o promisiune pe care
+# unealta n-o ține. Iar Binance dă 6000 de puncte pe minut per IP, pe același IP
+# cu fluxul de prețuri live al aplicației — un ban temporar de la ei ar lăsa toți
+# utilizatorii fără prețuri, nu doar pe cel care sincroniza.
+#
+# Ruta e mărginită singură: verifică maxim 40 de conturi per rulare și sare peste
+# cele fără activitate (~25 de puncte ca să afli, față de ~485 pentru un import),
+# deci costul nu crește cu numărul de utilizatori.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+# O singură rulare odată. Fără asta, o rulare întârziată s-ar suprapune cu
+# următoarea și amândouă ar sincroniza aceleași conturi în paralel.
+concurrency:
+  group: exchange-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      # O reîncercare înainte de a raporta eșec. Un cold start sau un hop de rețea
+      # nu merită un email de „workflow failed" la fiecare cinci minute — iar un
+      # workflow care țipă degeaba e un workflow pe care îl oprești, și atunci
+      # rămâi fără sincronizare fără să-ți dai seama.
+      - name: Apelează endpoint-ul de sincronizare
+        run: |
+          call() {
+            curl -s -o /tmp/resp.json -w "%{http_code}" --max-time 120 \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              "https://www.tradegx.com/api/cron/exchange-sync"
+          }
+          code=$(call)
+          if [ "$code" != "200" ]; then
+            echo "Prima încercare: $code — reîncerc peste 15s"
+            sleep 15
+            code=$(call)
+          fi
+          cat /tmp/resp.json
+          echo ""
+          if [ "$code" != "200" ]; then
+            echo "Endpoint a răspuns cu $code"
+            exit 1
+          fi

@@ -110,6 +110,45 @@ export async function validateKeys(
   return { equity, currency: "USDT", markets };
 }
 
+/**
+ * S-a întâmplat ceva în cont de la ultima verificare?
+ *
+ * Amprentă peste cantitățile din spot și starea portofelului de futures. ~25 de
+ * puncte de cerere, față de ~485 pentru un import complet — diferența dintre o
+ * sincronizare la 5 minute care se poate susține și una care ne aduce un ban de la
+ * Binance pe IP-ul comun cu prețurile live.
+ *
+ * Ambele piețe sunt opționale: o cheie fără permisiune pe una din ele dă o
+ * amprentă parțială, dar tot stabilă — exact ce ne trebuie de la o amprentă.
+ */
+export async function activityFingerprint(
+  apiKey: string,
+  apiSecret: string
+): Promise<string> {
+  const { spotBalanceFingerprint } = await import("./binance-spot");
+
+  const [spot, futures] = await Promise.allSettled([
+    spotBalanceFingerprint(apiKey, apiSecret),
+    get<{ totalWalletBalance?: string; positions?: AccountPosition[] }>(
+      apiKey, apiSecret, "/fapi/v2/account"
+    ),
+  ]);
+
+  const parts: string[] = [];
+  if (spot.status === "fulfilled") parts.push(`S=${spot.value}`);
+  if (futures.status === "fulfilled") {
+    const open = (futures.value.positions ?? [])
+      .filter((p) => Math.abs(Number(p.positionAmt ?? 0)) > 0)
+      .map((p) => `${p.symbol}:${p.positionAmt}:${p.entryPrice}`)
+      .sort()
+      .join(",");
+    parts.push(`F=${futures.value.totalWalletBalance ?? ""}#${open}`);
+  }
+  if (parts.length === 0) throw new Error("Binance: cont inaccesibil");
+
+  return crypto.createHash("sha256").update(parts.join("||")).digest("hex").slice(0, 32);
+}
+
 interface IncomeRow { symbol?: string; time?: number }
 interface UserTrade {
   id?: number; orderId?: number; symbol?: string; side?: string;

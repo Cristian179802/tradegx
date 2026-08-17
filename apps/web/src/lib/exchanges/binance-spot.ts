@@ -171,6 +171,36 @@ export async function totalEquityUsdt(
 }
 
 /**
+ * Amprenta CANTITĂȚILOR din portofelul Spot.
+ *
+ * Un detector de activitate ieftin, pentru sincronizarea periodică. Un import
+ * complet costă ~485 de puncte din cele 6000 pe minut pe care ni le dă Binance
+ * per IP — iar IP-ul e comun cu fluxul de prețuri live al întregii aplicații. La
+ * fiecare cinci minute, înmulțit cu toți utilizatorii, ajungem la un ban temporar
+ * care lasă pe toată lumea fără prețuri.
+ *
+ * Cheia e că `/api/v3/account` întoarce CANTITĂȚI, nu valori: 20 de puncte, și se
+ * schimbă doar când tranzacționezi sau transferi. Prețul care urcă și coboară nu
+ * le atinge. Deci amprentă neschimbată = n-ai făcut nimic = nu are rost să
+ * interogăm nicio pereche.
+ *
+ * (Totalul evaluat în USDT ar fi fost un detector inutil: se schimbă în fiecare
+ * secundă din mișcarea pieței, deci ar raporta mereu „s-a schimbat ceva".)
+ */
+export async function spotBalanceFingerprint(
+  apiKey: string,
+  apiSecret: string
+): Promise<string> {
+  const acc = await priv<AccountInfo>(apiKey, apiSecret, "/api/v3/account", {
+    omitZeroBalances: "true",
+  });
+  return (acc.balances ?? [])
+    .map((b) => `${b.asset}:${b.free}:${b.locked}`)
+    .sort()
+    .join("|");
+}
+
+/**
  * Activele ținute în afara portofelului Spot: Earn (flexibil și blocat) și Funding.
  *
  * Contează pentru descoperirea perechilor, nu pentru sold: o monedă mutată în Earn
