@@ -114,7 +114,10 @@ export async function POST(req: NextRequest) {
   }
 
   const brokerSource = provider === "bybit" ? ("BYBIT" as const) : ("BINANCE" as const);
-  const label = provider === "bybit" ? "Bybit" : "Binance Futures";
+  // „Binance", nu „Binance Futures": contul acoperă acum ambele piețe. Conturile
+  // create înainte își păstrează numele — e un câmp editabil de utilizator, nu
+  // ne apucăm să-l rescriem peste el.
+  const label = provider === "bybit" ? "Bybit" : "Binance";
 
   let account = body.tradingAccountId
     ? await prisma.tradingAccount.findFirst({ where: { id: body.tradingAccountId, userId } })
@@ -187,13 +190,28 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // ── Binance ──
+    // ── Binance: SPOT + FUTURES ──
+    //
+    // Sunt două burse sub aceeași cheie API, cu hosturi și formate diferite.
+    // Sincronizam doar futures, deci cine cumpără crypto pe spot — majoritatea —
+    // conecta contul cu succes și primea zero tranzacții.
+    //
+    // Fiecare simbol din coadă își duce piața în prefix, `F:` sau `S:`. Un cursor
+    // rămas în zbor de la versiunea anterioară vine fără prefix și e futures,
+    // fiindcă atât exista atunci.
     const { discoverSymbols, tradesForSymbol, BINANCE_MAX_HISTORY_MS } =
       await import("@/lib/exchanges/binance");
+    const { discoverSpotSymbols, spotTradesForSymbol, BINANCE_SPOT_MAX_HISTORY_MS } =
+      await import("@/lib/exchanges/binance-spot");
 
-    const sinceMs = account.lastSyncedAt
+    // Adâncimi diferite pentru că plafoanele lor diferă: futures taie la 6 luni,
+    // spot nu documentează nicio limită.
+    const sinceFutures = account.lastSyncedAt
       ? account.lastSyncedAt.getTime() - DAY_MS
       : Date.now() - BINANCE_MAX_HISTORY_MS;
+    const sinceSpot = account.lastSyncedAt
+      ? account.lastSyncedAt.getTime() - DAY_MS
+      : Date.now() - BINANCE_SPOT_MAX_HISTORY_MS;
 
     let pending: string[]; let total: number;
     if (body.cursor) {
@@ -205,15 +223,46 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Cursor invalid" }, { status: 400 });
       }
     } else {
-      pending = await discoverSymbols(integration.apiKey, apiSecret);
+      // Perechile spot pe care le-am importat deja: singura sursă care ține minte
+      // un activ vândut integral între timp. Fără ea, discovery-ul spot uită
+      // exact tranzacțiile încheiate.
+      const known = await prisma.trade.findMany({
+        where: { accountId: account.id },
+        select: { symbol: true },
+        distinct: ["symbol"],
+        take: 500,
+      });
+      const knownSymbols = known.map((k) => k.symbol);
+
+      // Piețele se interoghează în paralel și independent: o cheie fără
+      // permisiune pe una din ele nu trebuie să anuleze importul de pe cealaltă.
+      const [futuresRes, spotRes] = await Promise.allSettled([
+        discoverSymbols(integration.apiKey, apiSecret),
+        discoverSpotSymbols(integration.apiKey, apiSecret, knownSymbols),
+      ]);
+
+      if (futuresRes.status === "rejected" && spotRes.status === "rejected") {
+        throw futuresRes.reason;
+      }
+
+      pending = [
+        ...(futuresRes.status === "fulfilled" ? futuresRes.value.map((s) => `F:${s}`) : []),
+        ...(spotRes.status === "fulfilled" ? spotRes.value.map((s) => `S:${s}`) : []),
+      ];
       total = pending.length;
     }
 
     // Fiecare simbol e atomic; inserăm după fiecare, ca progresul să fie durabil
     // înainte să-l scoatem din listă.
     while (pending.length > 0 && Date.now() - t0 < BUDGET_MS) {
-      const symbol = pending[0];
-      const trades = await tradesForSymbol(integration.apiKey, apiSecret, symbol, sinceMs);
+      const entry = pending[0];
+      const isSpot = entry.startsWith("S:");
+      const symbol = entry.replace(/^[FS]:/, "");
+
+      const trades = isSpot
+        ? await spotTradesForSymbol(integration.apiKey, apiSecret, symbol, sinceSpot)
+        : await tradesForSymbol(integration.apiKey, apiSecret, symbol, sinceFutures);
+
       const r = await insertTrades(account.id, brokerSource, trades);
       imported += r.imported; skipped += r.skipped;
       pending.shift();
@@ -233,7 +282,7 @@ export async function POST(req: NextRequest) {
       imported, skipped, hasMore,
       cursor: hasMore ? JSON.stringify({ pending, total }) : undefined,
       progressPct: total > 0 ? Math.round(((total - pending.length) / total) * 100) : 100,
-      note: "Binance oferă prin API maxim 6 luni de istoric. Pentru mai vechi: exportul CSV din Binance + importul CSV de aici.",
+      note: "Spot și Futures, amândouă. Futures e plafonat de Binance la 6 luni de istoric; spot merge mai adânc. Pentru un activ cumpărat și vândut integral înainte de conectare: exportul CSV din Binance + importul CSV de aici.",
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Eroare la bursă";

@@ -58,16 +58,45 @@ async function get<T>(
   return res.json() as Promise<T>;
 }
 
-/** Validează cheile citind doar soldul contului de futures. */
+/**
+ * Validează cheile citind doar soldurile — spot ȘI futures, însumate.
+ *
+ * Aici cădea conectarea pentru cine tranzacționează doar spot: verificam
+ * exclusiv `/fapi/v2/account`, iar o cheie fără permisiunea de futures primește
+ * eroare de la Binance. Cheia era bună, contul era bun, dar conectarea eșua.
+ *
+ * Acum e destul ca UNA din cele două piețe să răspundă. Amândouă mute înseamnă
+ * că problema e chiar la chei, și atunci eroarea se propagă — cea de la spot,
+ * fiindcă e piața pe care o are toată lumea.
+ */
 export async function validateKeys(
   apiKey: string,
   apiSecret: string
-): Promise<{ equity: number; currency: string }> {
-  const acc = await get<Record<string, unknown>>(apiKey, apiSecret, "/fapi/v2/account");
-  return {
-    equity: Number(acc.totalWalletBalance ?? 0) || 0,
-    currency: "USDT",
-  };
+): Promise<{ equity: number; currency: string; markets: string[] }> {
+  const { spotEquityUsdt } = await import("./binance-spot");
+
+  const [spot, futures] = await Promise.allSettled([
+    spotEquityUsdt(apiKey, apiSecret),
+    get<Record<string, unknown>>(apiKey, apiSecret, "/fapi/v2/account"),
+  ]);
+
+  const markets: string[] = [];
+  let equity = 0;
+
+  if (spot.status === "fulfilled") {
+    markets.push("spot");
+    equity += spot.value.equity;
+  }
+  if (futures.status === "fulfilled") {
+    markets.push("futures");
+    equity += Number(futures.value.totalWalletBalance ?? 0) || 0;
+  }
+
+  if (markets.length === 0) {
+    throw spot.status === "rejected" ? spot.reason : new Error("Binance: cont inaccesibil");
+  }
+
+  return { equity, currency: "USDT", markets };
 }
 
 interface IncomeRow { symbol?: string; time?: number }

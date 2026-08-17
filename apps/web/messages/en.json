@@ -1721,9 +1721,10 @@
     "exImport": "Import all available history",
     "exImporting": "Importing…",
     "exImported": "{n} trades imported",
-    "exBinanceNote": "Binance: USDⓈ-M Futures. The API offers 6 months of history at most — for older data, use Binance CSV export.",
+    "exBinanceNote": "Binance: Spot AND USDⓈ-M Futures, from the same key. Spot reaches far back; futures is capped by Binance at 6 months — for older history, use the CSV export from Binance.",
     "exBybitNote": "Bybit: linear (USDT) contracts. Imports up to 2 years, as far back as the exchange keeps.",
-    "exImportProgress": "{pct}% · {n} trades"
+    "exImportProgress": "{pct}% · {n} trades",
+    "exMarkets": "Markets read: {markets}"
   },
   "backtesting": {
     "stCustom": "Custom",
@@ -2251,7 +2252,7 @@
     "fq5A": "Yes. The FREE plan includes unlimited journal, CSV import, the full Academy (41 lessons with quizzes and certificate), basic analytics, one trading account and 3 backtests per month. No time limit.",
     "fq6Q": "Are the AI signals investment recommendations?",
     "fq6A": "No. Signals and all AI features are exclusively educational and informational — they do not constitute financial advice. Trading decisions are entirely your own, and trading involves a real risk of loss.",
-    "pf19": "Direct crypto exchange connection (Binance Futures + Bybit, read-only keys)",
+    "pf19": "Direct crypto exchange sync (Binance Spot + Futures, Bybit — read-only keys)",
     "pf20": "Institutional metrics — Sharpe, Sortino, Calmar, expectancy (R)",
     "pf21": "3D analysis: P&L by day × hour, orbitable",
     "pf22": "Charts with automatic SMC overlay (order blocks, FVG, BOS/CHoCH)",

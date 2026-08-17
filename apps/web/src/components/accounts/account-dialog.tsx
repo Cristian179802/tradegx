@@ -684,7 +684,9 @@ function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSu
   const [provider, setProvider] = React.useState<"binance" | "bybit">("bybit");
   const [apiKey, setApiKey] = React.useState("");
   const [apiSecret, setApiSecret] = React.useState("");
-  const [connected, setConnected] = React.useState<{ equity: number; currency: string } | null>(null);
+  const [connected, setConnected] = React.useState<
+    { equity: number; currency: string; markets?: string[] } | null
+  >(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState("");
   const [progress, setProgress] = React.useState("");
@@ -700,7 +702,11 @@ function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSu
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? t("connectErr")); return; }
-      setConnected({ equity: data.equity ?? 0, currency: data.currency ?? "USDT" });
+      setConnected({
+        equity: data.equity ?? 0,
+        currency: data.currency ?? "USDT",
+        markets: Array.isArray(data.markets) ? data.markets : undefined,
+      });
       // Secretul nu mai e necesar în memoria paginii după validare.
       setApiSecret("");
     } catch { setError(t("netErr")); }
@@ -805,11 +811,22 @@ function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSu
         </>
       ) : (
         <>
-          <div className="tg-surface rounded-xl px-4 py-3 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <p className="text-sm" style={{ color: "var(--ink-2)" }}>
-              {t("exConnected", { equity: connected.equity.toLocaleString(), currency: connected.currency })}
-            </p>
+          <div className="tg-surface rounded-xl px-4 py-3 flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm" style={{ color: "var(--ink-2)" }}>
+                {t("exConnected", { equity: connected.equity.toLocaleString(), currency: connected.currency })}
+              </p>
+              {/* Ce piețe răspund la cheia asta. Contează pentru că o cheie Binance
+                  fără permisiune de futures citește doar spot — iar atunci lipsa
+                  tranzacțiilor de pe futures e explicată aici, nu o descoperi după
+                  import întrebându-te ce s-a pierdut. */}
+              {connected.markets && connected.markets.length > 0 && (
+                <p className="text-xs mt-1" style={{ color: "var(--ink-3)" }}>
+                  {t("exMarkets", { markets: connected.markets.join(" + ") })}
+                </p>
+              )}
+            </div>
           </div>
 
           {error && (

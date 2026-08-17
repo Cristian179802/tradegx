@@ -1721,9 +1721,10 @@
     "exImport": "Importă tot istoricul disponibil",
     "exImporting": "Import în curs…",
     "exImported": "{n} tranzacții importate",
-    "exBinanceNote": "Binance: Futures USDⓈ-M. API-ul oferă maxim 6 luni de istoric — pentru mai vechi, folosește exportul CSV din Binance.",
+    "exBinanceNote": "Binance: Spot ȘI Futures USDⓈ-M, din aceeași cheie. Spot merge adânc în istoric; futures e plafonat de Binance la 6 luni — pentru mai vechi, exportul CSV din Binance.",
     "exBybitNote": "Bybit: contracte liniare (USDT). Se importă până la 2 ani, cât păstrează bursa.",
-    "exImportProgress": "{pct}% · {n} tranzacții"
+    "exImportProgress": "{pct}% · {n} tranzacții",
+    "exMarkets": "Piețe citite: {markets}"
   },
   "backtesting": {
     "stCustom": "Personalizată",
@@ -2251,7 +2252,7 @@
     "fq5A": "Da. Planul GRATUIT include jurnal nelimitat, import CSV, Academia completă (41 de lecții cu quiz-uri și certificat), analytics de bază, un cont de trading și 3 backteste pe lună. Fără limită de timp.",
     "fq6Q": "Semnalele AI sunt recomandări de investiții?",
     "fq6A": "Nu. Semnalele și toate funcțiile AI au exclusiv scop educațional și informativ — nu constituie consultanță financiară. Deciziile de tranzacționare îți aparțin în totalitate, iar tradingul implică risc real de pierdere.",
-    "pf19": "Conectare directă bursă crypto (Binance Futures + Bybit, chei read-only)",
+    "pf19": "Conectare directă bursă crypto (Binance Spot + Futures, Bybit — chei read-only)",
     "pf20": "Metrici instituționale — Sharpe, Sortino, Calmar, expectancy (R)",
     "pf21": "Analiză 3D: P&L pe zi × oră, orbitabilă",
     "pf22": "Grafice cu overlay SMC automat (order blocks, FVG, BOS/CHoCH)",
