@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+// Datele apartin contului selectat. Paginile sunt componente de server si
+// interogheaza direct baza de date, deci migrarea rutelor API nu le atingea —
+// antetul arata „Binance Futures" iar cifrele erau tot de pe MT5.
+import { getAccountScope } from "@/lib/account-scope";
 import { redirect } from "next/navigation";
 import { ReportClient } from "./report-client";
 
@@ -29,13 +33,15 @@ export default async function ReportPage() {
 
   const userId = session.user.id;
 
+  const scope = await getAccountScope(userId);
+
   const [accounts, trades] = await Promise.all([
     prisma.tradingAccount.findMany({
       where: { userId },
       select: { currency: true, initialBalance: true, balance: true },
     }),
     prisma.trade.findMany({
-      where: { account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
+      where: { ...scope.where, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
       select: {
         symbol: true, instrumentType: true, setupType: true,
         pnlMoney: true, riskMoney: true, entryTime: true, exitTime: true,

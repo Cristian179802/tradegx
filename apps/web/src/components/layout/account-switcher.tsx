@@ -330,6 +330,32 @@ export function AccountSwitcher() {
             {t("yourAccounts")}
           </DropdownMenuLabel>
 
+          {/* Vederea agregată — utilă, dar ca alegere explicită. Ca implicit,
+              amesteca un FTMO de 100.000 $ cu un Binance de 500 $ intr-o cifră
+              care nu descria niciun cont real. Apare doar de la două conturi în
+              sus: cu unul singur, „toate" și „acela" sunt același lucru. */}
+          {accounts.length > 1 && (
+            <DropdownMenuItem
+              onClick={() => selectAccount(null)}
+              className={cn(
+                "flex items-center gap-3 cursor-pointer rounded-lg px-2 py-2.5 mb-1",
+                "hover:bg-zinc-800 focus:bg-zinc-800 focus:text-zinc-100",
+                !activeAccountId && "bg-zinc-800/60",
+              )}
+            >
+              <span className="w-2 h-2 rounded-full shrink-0 bg-indigo-400" />
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-[13px] font-semibold text-zinc-200 truncate">
+                  {t("allAccounts")}
+                </span>
+                <span className="text-[10px] text-zinc-500 truncate">
+                  {t("allAccountsSub")}
+                </span>
+              </div>
+              {!activeAccountId && <Check className="w-4 h-4 shrink-0 text-indigo-400" />}
+            </DropdownMenuItem>
+          )}
+
           {accounts.map((account) => {
             const cfg = TYPE_CONFIG[account.type];
             return (

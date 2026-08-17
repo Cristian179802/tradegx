@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+// Datele apartin contului selectat. Paginile sunt componente de server si
+// interogheaza direct baza de date, deci migrarea rutelor API nu le atingea —
+// antetul arata „Binance Futures" iar cifrele erau tot de pe MT5.
+import { getAccountScope } from "@/lib/account-scope";
 import { redirect } from "next/navigation";
 import { JournalClient } from "./journal-client";
 
@@ -12,6 +16,8 @@ export default async function JournalPage() {
 
   const userId = session.user.id;
 
+  const scope = await getAccountScope(userId);
+
   const [accounts, rawTrades, wins, grossProfit, grossLoss, rrAgg] = await Promise.all([
     prisma.tradingAccount.findMany({
       where: { userId },
@@ -21,7 +27,7 @@ export default async function JournalPage() {
     }),
 
     prisma.trade.findMany({
-      where: { account: { userId }, status: "CLOSED" },
+      where: { ...scope.where, status: "CLOSED" },
       orderBy: { exitTime: "desc" },
       take: 200,
       select: {
@@ -57,21 +63,21 @@ export default async function JournalPage() {
     }),
 
     prisma.trade.count({
-      where: { account: { userId }, status: "CLOSED", pnlMoney: { gt: 0 } },
+      where: { ...scope.where, status: "CLOSED", pnlMoney: { gt: 0 } },
     }),
 
     prisma.trade.aggregate({
-      where: { account: { userId }, status: "CLOSED", pnlMoney: { gt: 0 } },
+      where: { ...scope.where, status: "CLOSED", pnlMoney: { gt: 0 } },
       _sum: { pnlMoney: true },
     }),
 
     prisma.trade.aggregate({
-      where: { account: { userId }, status: "CLOSED", pnlMoney: { lt: 0 } },
+      where: { ...scope.where, status: "CLOSED", pnlMoney: { lt: 0 } },
       _sum: { pnlMoney: true },
     }),
 
     prisma.trade.aggregate({
-      where: { account: { userId }, status: "CLOSED", riskRewardRatio: { not: null } },
+      where: { ...scope.where, status: "CLOSED", riskRewardRatio: { not: null } },
       _avg: { riskRewardRatio: true },
     }),
   ]);

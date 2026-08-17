@@ -2708,7 +2708,9 @@
     "addNewAccount": "Add new account",
     "addNewSub": "MT4/MT5, cTrader or manual",
     "manageAccounts": "Manage accounts",
-    "manageSub": "Edit or configure the active account"
+    "manageSub": "Edit or configure the active account",
+    "allAccounts": "All accounts",
+    "allAccountsSub": "Aggregated view across all accounts"
   },
   "localeWidget": {
     "title": "Locale preferences",

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+// Datele apartin contului selectat. Paginile sunt componente de server si
+// interogheaza direct baza de date, deci migrarea rutelor API nu le atingea —
+// antetul arata „Binance Futures" iar cifrele erau tot de pe MT5.
+import { getAccountScope } from "@/lib/account-scope";
 import { redirect } from "next/navigation";
 import { DashboardClient } from "./dashboard-client";
 
@@ -12,6 +16,8 @@ export default async function DashboardPage() {
 
   const userId = session.user.id;
   const now = new Date();
+
+  const scope = await getAccountScope(userId);
 
   const [
     accounts,
@@ -31,31 +37,31 @@ export default async function DashboardPage() {
 
     // Overall stats — CLOSED or has pnlMoney (covers MT5 imports)
     prisma.trade.aggregate({
-      where: { account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
+      where: { ...scope.where, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
       _count: { _all: true },
       _sum: { pnlMoney: true },
     }),
 
     // Win count
     prisma.trade.count({
-      where: { account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }], pnlMoney: { gt: 0 } },
+      where: { ...scope.where, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }], pnlMoney: { gt: 0 } },
     }),
 
     // Gross profit
     prisma.trade.aggregate({
-      where: { account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }], pnlMoney: { gt: 0 } },
+      where: { ...scope.where, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }], pnlMoney: { gt: 0 } },
       _sum: { pnlMoney: true },
     }),
 
     // Gross loss
     prisma.trade.aggregate({
-      where: { account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }], pnlMoney: { lt: 0 } },
+      where: { ...scope.where, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }], pnlMoney: { lt: 0 } },
       _sum: { pnlMoney: true },
     }),
 
     // Last 30 settled trades (CLOSED or has pnlMoney)
     prisma.trade.findMany({
-      where: { account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
+      where: { ...scope.where, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
       orderBy: { entryTime: "desc" },
       take: 30,
       select: {
@@ -73,7 +79,7 @@ export default async function DashboardPage() {
     // Top pairs by volume (group by symbol)
     prisma.trade.groupBy({
       by: ["symbol"],
-      where: { account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
+      where: { ...scope.where, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
       _count: { _all: true },
       _sum: { pnlMoney: true },
       orderBy: { _count: { symbol: "desc" } },
@@ -84,7 +90,7 @@ export default async function DashboardPage() {
     // Doar 3 câmpuri → ușor de încărcat chiar și la mii de trade-uri.
     prisma.trade.findMany({
       where: {
-        account: { userId },
+        ...scope.where,
         OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }],
       },
       orderBy: { entryTime: "asc" },

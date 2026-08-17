@@ -3,6 +3,10 @@ import Link from "next/link";
 import { FileDown, Landmark } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
+// Contul selectat. Paginile sunt componente de server și interoghează direct
+// baza de date, deci migrarea rutelor API nu le atingea — antetul arăta un cont
+// iar cifrele veneau din toate.
+import { getAccountScope } from "@/lib/account-scope";
 import { redirect } from "next/navigation";
 import { AnalyticsClient } from "./analytics-client";
 import { PerformanceHeatmap } from "@/components/analytics/performance-heatmap";
@@ -21,6 +25,8 @@ export default async function AnalyticsPage() {
   const { prisma } = await import("@/lib/prisma");
   const userId = session.user.id;
 
+  const scope = await getAccountScope(userId);
+
   const [accounts, closedTrades] = await Promise.all([
     prisma.tradingAccount.findMany({
       where: { userId },
@@ -28,7 +34,7 @@ export default async function AnalyticsPage() {
     }),
     prisma.trade.findMany({
       where: {
-        account: { userId },
+        ...scope.where,
         OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }],
       },
       select: {

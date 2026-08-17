@@ -2708,7 +2708,9 @@
     "addNewAccount": "Adaugă cont nou",
     "addNewSub": "MT4/MT5, cTrader sau manual",
     "manageAccounts": "Gestionează conturi",
-    "manageSub": "Editează sau configurează contul activ"
+    "manageSub": "Editează sau configurează contul activ",
+    "allAccounts": "Toate conturile",
+    "allAccountsSub": "Vedere agregată pe toate conturile"
   },
   "localeWidget": {
     "title": "Preferințe locale",
