@@ -96,7 +96,7 @@
     "addTradeBtn": "Adaugă tranzacție",
     "daysShort": "zile",
     "ambientRisk": "Risc: {pct}% din limita de drawdown",
-    "accountValue": "Valoare cont",
+    "accountValue": "Balanța",
     "atMarket": "la prețul pieței",
     "notSynced": "nesincronizat",
     "withOpen": "{count} poziții deschise"

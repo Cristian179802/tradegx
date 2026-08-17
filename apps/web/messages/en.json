@@ -96,7 +96,7 @@
     "addTradeBtn": "Add trade",
     "daysShort": "days",
     "ambientRisk": "Risk: {pct}% of drawdown limit",
-    "accountValue": "Account value",
+    "accountValue": "Balance",
     "atMarket": "at market price",
     "notSynced": "not synced",
     "withOpen": "{count} open positions"
