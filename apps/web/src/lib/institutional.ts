@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getAccountScope } from "@/lib/account-scope";
 import {
   sharpe, sortino, maxDrawdown, cagr, calmar, edgeMetrics, type EdgeMetrics,
 } from "@tradegx/core";
@@ -70,14 +71,20 @@ function buildDailyEquity(
 }
 
 export async function getInstitutionalData(userId: string): Promise<InstitutionalData> {
+  // Pagina a fost gândită ca vedere de portofoliu — un agregat plus defalcarea
+  // pe conturi. Corect când privești toate conturile, dar derutant când ai ales
+  // unul: „Sharpe" și „max drawdown" descriau atunci un portofoliu imaginar, nu
+  // contul din antet. Cu un cont selectat, portofoliul ESTE acel cont.
+  const scope = await getAccountScope(userId);
+
   const accounts = await prisma.tradingAccount.findMany({
-    where: { userId },
+    where: scope.accountId ? { userId, id: scope.accountId } : { userId },
     select: { id: true, name: true, currency: true, initialBalance: true },
     orderBy: { createdAt: "asc" },
   });
 
   const trades = await prisma.trade.findMany({
-    where: { account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
+    where: { ...scope.where, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
     select: { pnlMoney: true, riskMoney: true, entryTime: true, exitTime: true, accountId: true },
   });
 

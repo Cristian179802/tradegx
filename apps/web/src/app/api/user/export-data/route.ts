@@ -44,7 +44,9 @@ export async function GET() {
       },
     }),
     prisma.trade.findMany({
-      where: { account: { userId } },
+      where: { // INTENTIONAT pe TOATE conturile: exportul GDPR trebuie sa contina tot
+      // ce detinem despre utilizator. NU migra la getAccountScope.
+      account: { userId } },
       include: {
         journalEntry: true,
         screenshots: { select: { url: true, type: true } },

@@ -18,7 +18,10 @@ export async function getTaxReportData(userId: string, yearParam?: string): Prom
   const [accounts, trades] = await Promise.all([
     prisma.tradingAccount.findMany({ where: { userId }, select: { currency: true } }),
     prisma.trade.findMany({
-      where: { account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
+      where: { // INTENTIONAT pe TOATE conturile: impozitul se calculeaza pe persoana,
+      // nu pe cont. Un raport fiscal filtrat pe un singur cont ar fi gresit
+      // legal, nu doar incomplet. NU migra la getAccountScope.
+      account: { userId }, OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] },
       select: { symbol: true, instrumentType: true, pnlMoney: true, entryTime: true, exitTime: true },
     }),
   ]);

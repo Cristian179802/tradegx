@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getAccountScope } from "@/lib/account-scope";
 import { redirect } from "next/navigation";
 import { RiskManagerClient } from "./risk-manager-client";
 
@@ -9,6 +10,11 @@ export const metadata: Metadata = { title: "Risk Manager — TradeGx" };
 export default async function RiskManagerPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+
+  // Riscul se măsoară pe contul pe care tranzacționezi. Pierderea zilei
+  // însumată peste toate conturile nu spune nimic despre limita niciunuia —
+  // și exact limita e ce apără pagina asta.
+  const scope = await getAccountScope(session.user.id);
 
   const [accounts, user, todayTrades, weekTrades] = await Promise.all([
     prisma.tradingAccount.findMany({
@@ -26,7 +32,7 @@ export default async function RiskManagerPage() {
     }),
     prisma.trade.findMany({
       where: {
-        account: { userId: session.user.id },
+        ...scope.where,
         status: "CLOSED",
         exitTime: { gte: new Date(new Date().setHours(0,0,0,0)) },
       },
@@ -34,7 +40,7 @@ export default async function RiskManagerPage() {
     }),
     prisma.trade.findMany({
       where: {
-        account: { userId: session.user.id },
+        ...scope.where,
         status: "CLOSED",
         exitTime: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
       },

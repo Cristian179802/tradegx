@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
+import { getAccountScope } from "@/lib/account-scope";
 import { computeEdges, type EdgeTrade } from "@/lib/edge-finder";
 
 // ── Raport AI săptămânal ────────────────────────────────────────────────────
@@ -21,9 +22,11 @@ export interface WeeklyReport {
 const WEEK = 7 * 24 * 60 * 60 * 1000;
 
 async function tradesBetween(userId: string, from: Date, to: Date) {
+  const scope = await getAccountScope(userId);
+
   return prisma.trade.findMany({
     where: {
-      account: { userId },
+      ...scope.where,
       status: "CLOSED",
       exitTime: { gte: from, lt: to },
     },

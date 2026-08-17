@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getAccountScope } from "@/lib/account-scope";
 import { z } from "zod";
 
 const schema = z.object({
@@ -22,9 +23,11 @@ export async function GET() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
+  const scope = await getAccountScope(session.user.id);
+
   const monthTrades = await prisma.trade.findMany({
     where: {
-      account: { userId: session.user.id },
+      ...scope.where,
       OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }],
       entryTime: { gte: monthStart },
     },

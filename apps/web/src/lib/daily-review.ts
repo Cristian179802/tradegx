@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
+import { getAccountScope } from "@/lib/account-scope";
 
 // ── Rezumat AI de seară — cum a mers ziua de trading + ce să îmbunătățești ────
 
@@ -21,11 +22,13 @@ function dayBoundsUTC() {
 }
 
 export async function generateDailyReview(userId: string): Promise<DailyReview> {
+  const scope = await getAccountScope(userId);
+
   const { start, dateKey } = dayBoundsUTC();
 
   const trades = await prisma.trade.findMany({
     where: {
-      account: { userId },
+      ...scope.where,
       OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }],
       entryTime: { gte: start },
     },

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getAccountScope } from "@/lib/account-scope";
 
 // ── Gamification ────────────────────────────────────────────────────────────
 // Streak-uri și realizări calculate 100% din datele REALE ale utilizatorului
@@ -54,9 +55,11 @@ function computeStreak(activityDays: Set<string>): { current: number; best: numb
 }
 
 export async function getGamification(userId: string): Promise<GamificationData> {
+  const scope = await getAccountScope(userId);
+
   const [trades, revengeAlerts, backtestCount, syncedAccount] = await Promise.all([
     prisma.trade.findMany({
-      where: { account: { userId }, status: "CLOSED" },
+      where: { ...scope.where, status: "CLOSED" },
       select: {
         exitTime: true,
         entryTime: true,
