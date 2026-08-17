@@ -81,6 +81,53 @@ async function insertTrades(
   return { imported: fresh.length, skipped: trades.length - fresh.length };
 }
 
+/**
+ * Scrie în cont soldul REAL de la bursă, la finalul importului.
+ *
+ * Nimeni nu-l scria. Contul se crea cu soldul implicit — zero — iar de acolo
+ * încolo totul se calcula greșit, deși tranzacțiile erau corecte: selectorul de
+ * cont arăta „0,00 USD", profitul net citea ca și cum ăla ar fi tot contul, iar
+ * drawdown-ul se măsura față de un vârf care pornea din zero. Un cont cu 900 de
+ * dolari și pierderi realizate de 740 apărea ca un cont de minus 740.
+ *
+ * `initialBalance` se deduce, nu se inventează: dacă acum ai `equity` și
+ * tranzacțiile închise au dat `Σ pnl`, atunci ai pornit de la `equity − Σ pnl`.
+ * Așa curba de capital se termină exact în soldul real, în loc să plutească.
+ *
+ * Depunerile și retragerile ulterioare strică identitatea asta — soldul rămâne
+ * corect (vine de la bursă), dar punctul de start se rescrie la fiecare sync ca
+ * să închidă socoteala. Alternativa ar fi istoricul de transferuri, care e un
+ * proiect în sine; până atunci, soldul afișat e cel adevărat.
+ */
+async function syncAccountBalance(
+  accountId: string,
+  provider: "bybit" | "binance",
+  apiKey: string,
+  apiSecret: string
+): Promise<void> {
+  try {
+    const mod = provider === "bybit"
+      ? await import("@/lib/exchanges/bybit")
+      : await import("@/lib/exchanges/binance");
+    const { equity } = await mod.validateKeys(apiKey, apiSecret);
+    if (!Number.isFinite(equity) || equity <= 0) return;
+
+    const agg = await prisma.trade.aggregate({
+      where: { accountId },
+      _sum: { pnlMoney: true },
+    });
+    const realized = Number(agg._sum.pnlMoney ?? 0);
+
+    await prisma.tradingAccount.update({
+      where: { id: accountId },
+      data: { balance: equity, initialBalance: equity - realized },
+    });
+  } catch {
+    // Soldul e un plus, nu o condiție: un import reușit nu are voie să eșueze
+    // pentru că bursa n-a răspuns la ultima cerere.
+  }
+}
+
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
@@ -182,6 +229,7 @@ export async function POST(req: NextRequest) {
       });
 
       const hasMore = start < now;
+      if (!hasMore) await syncAccountBalance(account.id, provider, integration.apiKey, apiSecret);
       return NextResponse.json({
         success: true,
         tradingAccountId: account.id,
@@ -285,6 +333,7 @@ export async function POST(req: NextRequest) {
         where: { id: account.id },
         data: { lastSyncedAt: new Date() },
       });
+      await syncAccountBalance(account.id, provider, integration.apiKey, apiSecret);
     }
 
     return NextResponse.json({

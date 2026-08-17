@@ -73,7 +73,18 @@ export async function validateKeys(
   apiKey: string,
   apiSecret: string
 ): Promise<{ equity: number; currency: string; markets: string[] }> {
-  const { spotEquityUsdt } = await import("./binance-spot");
+  const { totalEquityUsdt, spotEquityUsdt } = await import("./binance-spot");
+
+  // Întâi totalul pe toate portofelele — e singurul care se potrivește cu cifra
+  // pe care o vezi în aplicația Binance. Adunarea spot + futures rata tot ce e în
+  // Earn, Funding sau Alpha.
+  try {
+    const { equity, wallets } = await totalEquityUsdt(apiKey, apiSecret);
+    return { equity, currency: "USDT", markets: wallets };
+  } catch {
+    // Cheia nu are permisiunea de citire a portofelelor. Cădem pe ce se poate
+    // citi, ca să nu blocăm conectarea — soldul va fi parțial, dar cheia e bună.
+  }
 
   const [spot, futures] = await Promise.allSettled([
     spotEquityUsdt(apiKey, apiSecret),
@@ -84,11 +95,11 @@ export async function validateKeys(
   let equity = 0;
 
   if (spot.status === "fulfilled") {
-    markets.push("spot");
+    markets.push("Spot");
     equity += spot.value.equity;
   }
   if (futures.status === "fulfilled") {
-    markets.push("futures");
+    markets.push("Futures");
     equity += Number(futures.value.totalWalletBalance ?? 0) || 0;
   }
 

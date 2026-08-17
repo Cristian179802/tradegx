@@ -53,10 +53,12 @@ async function priv<T>(
   apiKey: string,
   apiSecret: string,
   path: string,
-  params: Record<string, string | number> = {}
+  params: Record<string, string | number> = {},
+  method: "GET" | "POST" = "GET"
 ): Promise<T> {
   const qs = signed(apiSecret, { ...params, timestamp: Date.now(), recvWindow: 60000 });
   const res = await fetch(`${SPOT}${path}?${qs}`, {
+    method,
     headers: { "X-MBX-APIKEY": apiKey },
     cache: "no-store",
   });
@@ -132,11 +134,85 @@ async function pairOf(symbol: string): Promise<{ base: string; quote: string } |
   return out;
 }
 
+interface WalletRow { activate?: boolean; balance?: string; walletName?: string }
+
+/**
+ * Valoarea TOTALĂ a contului, pe toate portofelele — exact „Est. Total Value" din
+ * aplicația Binance.
+ *
+ * Un cont Binance nu e un singur portofel. Banii stau împrăștiați pe Spot, Earn,
+ * Funding, Alpha, Futures, Margin, iar `/api/v3/account` vede DOAR Spot. Adunarea
+ * pe bucăți, evaluând fiecare activ după o pereche USDT, se înșela dublu: rata
+ * complet ce e parcat în Earn sau Funding, și evalua la ZERO activele care nu au
+ * pereche spot standard — cazul tokenurilor Alpha, care există în cont și au
+ * valoare reală, dar nu se tranzacționează prin `/api/v3/ticker/price`.
+ *
+ * `/sapi/v1/asset/wallet/balance` mută întrebarea acolo unde e răspunsul: Binance
+ * enumeră portofelele și le evaluează el, în moneda cerută. O cerere, fără nicio
+ * presupunere de-a noastră despre ce activ cât valorează.
+ */
+export async function totalEquityUsdt(
+  apiKey: string,
+  apiSecret: string
+): Promise<{ equity: number; wallets: string[] }> {
+  const rows = await priv<WalletRow[]>(apiKey, apiSecret, "/sapi/v1/asset/wallet/balance", {
+    quoteAsset: "USDT",
+  });
+
+  let equity = 0;
+  const wallets: string[] = [];
+  for (const r of rows) {
+    const v = Number(r.balance ?? 0);
+    if (!(v > 0)) continue;
+    equity += v;
+    if (r.walletName) wallets.push(r.walletName);
+  }
+  return { equity, wallets };
+}
+
+/**
+ * Activele ținute în afara portofelului Spot: Earn (flexibil și blocat) și Funding.
+ *
+ * Contează pentru descoperirea perechilor, nu pentru sold: o monedă mutată în Earn
+ * dispare din `/api/v3/account`, deci perechile ei nu mai erau interogate niciodată
+ * și tranzacțiile ei lipseau din jurnal — deși activul e chiar acolo, în cont.
+ *
+ * Fiecare sursă e independentă: cheile fără permisiunea respectivă primesc eroare
+ * pe una și merg pe celelalte. Ne trebuie doar NUMELE activelor, nu cantitățile,
+ * așa că citim defensiv — răspunsurile diferă în formă (unele au `rows`, altele
+ * sunt tablou direct) și nu vrem să depindem de asta.
+ */
+async function offSpotAssets(apiKey: string, apiSecret: string): Promise<string[]> {
+  const pick = (data: unknown): string[] => {
+    const arr = Array.isArray(data)
+      ? data
+      : Array.isArray((data as { rows?: unknown[] })?.rows)
+        ? (data as { rows: unknown[] }).rows
+        : [];
+    return arr
+      .map((r) => (r as { asset?: string })?.asset)
+      .filter((a): a is string => typeof a === "string" && a.length > 0);
+  };
+
+  const sources = await Promise.allSettled([
+    priv<unknown>(apiKey, apiSecret, "/sapi/v1/simple-earn/flexible/position", { size: 100 }),
+    priv<unknown>(apiKey, apiSecret, "/sapi/v1/simple-earn/locked/position", { size: 100 }),
+    priv<unknown>(apiKey, apiSecret, "/sapi/v1/asset/get-funding-asset", {}, "POST"),
+  ]);
+
+  const out = new Set<string>();
+  for (const s of sources) {
+    if (s.status === "fulfilled") for (const a of pick(s.value)) out.add(a);
+  }
+  return [...out];
+}
+
 /**
  * Soldul contului spot, evaluat în USDT.
  *
- * Folosit la validarea cheilor: o cheie fără permisiune de futures trece pe aici,
- * ca să se poată conecta și cine tranzacționează exclusiv spot.
+ * Rămâne ca plasă de siguranță pentru `totalEquityUsdt` (o cheie fără permisiunea
+ * de citire a portofelelor primește eroare acolo) și ca sursă a listei de active
+ * din portofelul Spot, pentru descoperirea perechilor.
  */
 export async function spotEquityUsdt(
   apiKey: string,
@@ -196,7 +272,18 @@ export async function discoverSpotSymbols(
   apiSecret: string,
   knownSymbols: string[] = []
 ): Promise<string[]> {
-  const { assets } = await spotEquityUsdt(apiKey, apiSecret);
+  // Spot + Earn + Funding. O monedă mutată în Earn nu apare în portofelul Spot,
+  // iar fără ea perechile ei nu s-ar interoga niciodată.
+  const [spotRes, offRes] = await Promise.allSettled([
+    spotEquityUsdt(apiKey, apiSecret),
+    offSpotAssets(apiKey, apiSecret),
+  ]);
+  const assets = [
+    ...(spotRes.status === "fulfilled" ? spotRes.value.assets : []),
+    ...(offRes.status === "fulfilled" ? offRes.value : []),
+  ];
+  if (spotRes.status === "rejected" && offRes.status === "rejected") throw spotRes.reason;
+
   const prices = await loadPrices();
   const exists = (s: string) => prices.has(s);
 
