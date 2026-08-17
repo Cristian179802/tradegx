@@ -315,8 +315,26 @@ export async function discoverSpotSymbols(
   return [...out];
 }
 
+/** Ce ai încă în mână pe o pereche, după ce s-au scăzut vânzările. */
+export interface OpenPosition {
+  symbol: string;
+  qty: number;
+  avgPrice: number;
+  since: Date;
+  commission: number;
+}
+
 /**
- * Toate execuțiile spot ale unei perechi, împerecheate FIFO în tranzacții închise.
+ * Toate execuțiile spot ale unei perechi, împerecheate FIFO în tranzacții închise
+ * — plus ce a rămas neînchis.
+ *
+ * Restul ăsta nu e un rest tehnic, e poziția ta deschisă, și lipsa lui era motivul
+ * pentru care aplicația arăta altceva decât Binance. Un jurnal care afișează doar
+ * tranzacțiile închise spune „ai pierdut 739 de dolari" și tace despre cei 128.000
+ * de HEMI pe care îi ai încă în mână. Binance arată amândouă, deci și noi.
+ *
+ * Loturile rămase se adună într-o SINGURĂ poziție, cu preț mediu ponderat, exact
+ * cum le arată și Binance — o linie per activ, nu treizeci de bucăți de cumpărare.
  *
  * Regula de împerechere e cea a pieței spot, nu a celei de futures: pe spot nu
  * poți vinde ce nu ai, deci o tranzacție e întotdeauna CUMPĂRARE apoi VÂNZARE.
@@ -334,7 +352,8 @@ export async function spotTradesForSymbol(
   apiSecret: string,
   symbol: string,
   sinceMs: number
-): Promise<ExchangeTrade[]> {
+): Promise<{ closed: ExchangeTrade[]; open: OpenPosition | null }> {
+  const EMPTY = { closed: [] as ExchangeTrade[], open: null };
   const fills: SpotFill[] = [];
   let fromId = 0;
 
@@ -352,7 +371,7 @@ export async function spotTradesForSymbol(
       // pot fi delistate — un candidat greșit nu are voie să oprească importul
       // celorlalte. Orice ALTĂ eroare (chei, semnătură, limită de cereri) se
       // propagă, fiindcă acolo reluarea trebuie să eșueze zgomotos.
-      if (err instanceof Error && /-1121|Invalid symbol/i.test(err.message)) return [];
+      if (err instanceof Error && /-1121|Invalid symbol/i.test(err.message)) return EMPTY;
       throw err;
     }
     fills.push(...rows);
@@ -361,7 +380,7 @@ export async function spotTradesForSymbol(
     if (lastId === undefined) break;
     fromId = lastId + 1;
   }
-  if (fills.length === 0) return [];
+  if (fills.length === 0) return EMPTY;
 
   const pair = await pairOf(symbol);
   const base = pair?.base ?? "";
@@ -455,5 +474,21 @@ export async function spotTradesForSymbol(
     // `remaining` rămas = vândut fără cumpărare cunoscută. Se ignoră (vezi mai sus).
   }
 
-  return out.filter((t) => t.exitTime.getTime() >= sinceMs);
+  // Ce a rămas în carte = poziția deschisă. Un singur rând, cu preț mediu ponderat.
+  let open: OpenPosition | null = null;
+  if (book.length > 0) {
+    let qty = 0, cost = 0, comm = 0, since = book[0].time;
+    for (const lot of book) {
+      qty += lot.qty;
+      cost += lot.qty * lot.price;
+      // Comisionul de intrare, doar pentru partea NEVÂNDUTĂ a lotului.
+      comm += lot.qty0 > 0 ? (lot.comm * lot.qty) / lot.qty0 : 0;
+      if (lot.time < since) since = lot.time;
+    }
+    if (qty > 1e-12) {
+      open = { symbol, qty, avgPrice: cost / qty, since, commission: comm };
+    }
+  }
+
+  return { closed: out.filter((t) => t.exitTime.getTime() >= sinceMs), open };
 }

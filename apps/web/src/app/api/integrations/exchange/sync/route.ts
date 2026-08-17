@@ -82,6 +82,64 @@ async function insertTrades(
 }
 
 /**
+ * Scrie poziția deschisă a unei perechi spot — ce ai încă în mână.
+ *
+ * Fără ea, jurnalul spunea „ai pierdut 739 de dolari pe HEMI" și tăcea complet
+ * despre cei 128.000 de HEMI rămași în cont. Binance arată amândouă, una lângă
+ * alta, și de aceea cele două ecrane păreau că se contrazic.
+ *
+ * `pnlMoney` rămâne NULL intenționat. Toate metricile filtrează pe
+ * `status: CLOSED` SAU `pnlMoney != null`, deci o poziție deschisă cu P&L nul nu
+ * atinge win rate-ul, profit factor-ul sau profitul realizat — apare unde trebuie
+ * să apară, ca poziție, și nu contaminează statistica tranzacțiilor încheiate.
+ * P&L-ul flotant se calculează la afișare, din prețul live: e o cifră care se
+ * schimbă în fiecare secundă, nu are ce căuta îngheţată în baza de date.
+ *
+ * Se rescrie la fiecare sync: e o fotografie a prezentului, nu un istoric. Un lot
+ * vândut parțial între două sincronizări trebuie să scadă, nu să se adune.
+ */
+async function writeOpenPosition(
+  accountId: string,
+  symbol: string,
+  open: { symbol: string; qty: number; avgPrice: number; since: Date; commission: number } | null
+): Promise<void> {
+  const brokerTradeId = `bncs_open_${symbol}`;
+
+  if (!open) {
+    // Poziția s-a închis între timp: rândul trebuie să dispară, nu să rămână.
+    await prisma.trade.deleteMany({ where: { accountId, brokerTradeId } });
+    return;
+  }
+
+  const data = {
+    symbol,
+    instrumentType: detectInstrumentType(symbol) as never,
+    direction: "BUY" as never,
+    entryPrice: open.avgPrice,
+    entryTime: open.since,
+    lotSize: open.qty,
+    commission: open.commission,
+    status: "OPEN" as never,
+  };
+
+  const existing = await prisma.trade.findFirst({ where: { accountId, brokerTradeId }, select: { id: true } });
+  if (existing) {
+    await prisma.trade.update({ where: { id: existing.id }, data });
+  } else {
+    await prisma.trade.create({
+      data: {
+        ...data,
+        accountId,
+        brokerSource: "BINANCE" as never,
+        brokerTradeId,
+        swap: 0,
+        tags: [],
+      },
+    });
+  }
+}
+
+/**
  * Scrie în cont soldul REAL de la bursă, la finalul importului.
  *
  * Nimeni nu-l scria. Contul se crea cu soldul implicit — zero — iar de acolo
@@ -318,12 +376,18 @@ export async function POST(req: NextRequest) {
       const isSpot = entry.startsWith("S:");
       const symbol = entry.replace(/^[FS]:/, "");
 
-      const trades = isSpot
-        ? await spotTradesForSymbol(integration.apiKey, apiSecret, symbol, sinceSpot)
-        : await tradesForSymbol(integration.apiKey, apiSecret, symbol, sinceFutures);
-
-      const r = await insertTrades(account.id, brokerSource, trades);
-      imported += r.imported; skipped += r.skipped;
+      if (isSpot) {
+        const { closed, open } = await spotTradesForSymbol(
+          integration.apiKey, apiSecret, symbol, sinceSpot
+        );
+        const r = await insertTrades(account.id, brokerSource, closed);
+        imported += r.imported; skipped += r.skipped;
+        await writeOpenPosition(account.id, symbol, open);
+      } else {
+        const trades = await tradesForSymbol(integration.apiKey, apiSecret, symbol, sinceFutures);
+        const r = await insertTrades(account.id, brokerSource, trades);
+        imported += r.imported; skipped += r.skipped;
+      }
       pending.shift();
     }
 
