@@ -12,6 +12,7 @@ import {
   PanelLeftClose, PanelLeftOpen, Sparkles, Activity, Shield, Target,
   Trophy, ListChecks, Newspaper, Gauge, Award, GraduationCap, Crosshair, Dices,
   CreditCard, Medal, Rocket, Landmark,
+  Receipt
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
@@ -60,6 +61,10 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/edge",         label: "edge",        icon: Crosshair,       color: "emerald", badge: "NOU" },
       { href: "/monte-carlo",  label: "monteCarlo",  icon: Dices,           color: "violet", badge: "NOU" },
       { href: "/backtesting",  label: "backtesting", icon: FlaskConical,    color: "rose" },
+      // Raportul fiscal se ajungea DOAR printr-un buton din pagina de Analiza,
+      // iar acolo disparea cand contul nu avea tranzactii. E o functie cautata
+      // o data pe an, dar cautata intentionat — trebuie sa aiba loc propriu.
+      { href: "/tax-report",   label: "taxReport",   icon: Receipt,         color: "indigo" },
     ],
   },
   {

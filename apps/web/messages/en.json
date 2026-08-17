@@ -35,7 +35,8 @@
     "logout": "Sign out",
     "new": "NEW",
     "roadmap": "Roadmap",
-    "institutional": "Pro Metrics"
+    "institutional": "Pro Metrics",
+    "taxReport": "Tax Report"
   },
   "banner": {
     "trialLabel": "PRO Trial",

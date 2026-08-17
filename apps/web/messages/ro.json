@@ -35,7 +35,8 @@
     "logout": "Deconectare",
     "new": "NOU",
     "roadmap": "Roadmap",
-    "institutional": "Metrici Pro"
+    "institutional": "Metrici Pro",
+    "taxReport": "Raport Fiscal"
   },
   "banner": {
     "trialLabel": "PRO Trial",

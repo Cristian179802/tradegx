@@ -64,12 +64,14 @@ export default async function AnalyticsPage() {
   if (closedTrades.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-zinc-100">{t("perfTitle")}</h1>
-            <p className="text-sm text-zinc-500 mt-1">{t("perfSubtitle")}</p>
-          </div>
-        </div>
+        {/* Antetul păstrează butoanele și când contul e gol.
+            Ieșirea asta timpurie le omitea, iar raportul fiscal se ajunge DOAR
+            de aici — deci pe un cont fără tranzacții intrarea dispărea complet.
+            Nu se vedea până la izolarea pe conturi: înainte pagina aduna toate
+            conturile, deci aproape nimeni nu ajungea vreodată la starea goală.
+            Iar raportul fiscal are nevoie de buton tocmai atunci: el aduna
+            oricum TOATE conturile, deci are ce arăta chiar dacă acesta e gol. */}
+        <AnalyticsHeader t={t} tTax={tTax} />
         <AnalyticsClient data={{ empty: true }} />
       </div>
     );
@@ -231,32 +233,52 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-100">{t("perfTitle")}</h1>
-          <p className="text-sm text-zinc-500 mt-1">{t("perfSubtitle")}</p>
-        </div>
-        <div className="shrink-0 flex items-center gap-2">
-          <Link
-            href="/tax-report"
-            target="_blank"
-            className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/70 hover:border-indigo-500/50 text-zinc-200 text-sm font-semibold px-4 py-2 rounded-xl transition-all"
-          >
-            <Landmark className="w-4 h-4 text-indigo-400" />
-            {tTax("navTitle")}
-          </Link>
-          <Link
-            href="/report"
-            target="_blank"
-            className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/70 hover:border-indigo-500/50 text-zinc-200 text-sm font-semibold px-4 py-2 rounded-xl transition-all"
-          >
-            <FileDown className="w-4 h-4 text-indigo-400" />
-            {t("exportPdf")}
-          </Link>
-        </div>
-      </div>
+      <AnalyticsHeader t={t} tTax={tTax} />
       <AnalyticsClient data={data} />
       <PerformanceHeatmap />
+    </div>
+  );
+}
+
+/**
+ * Antetul paginii, cu intrările către raportul fiscal și exportul PDF.
+ *
+ * Extras într-o componentă fiindcă exista în două locuri — o dată în ramura
+ * normală și o dată în cea goală — iar copia din ramura goală rămăsese fără
+ * butoane. Cu o singură definiție, cele două nu mai pot diverge.
+ *
+ * Butoanele se deschid în tab nou intenționat: ambele sunt documente de
+ * imprimat, iar traderul nu vrea să-și piardă pagina de analiză din care a
+ * pornit.
+ */
+function AnalyticsHeader({
+  t, tTax,
+}: {
+  t: (key: string) => string;
+  tTax: (key: string) => string;
+}) {
+  const linkClass =
+    "flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/70 " +
+    "hover:border-indigo-500/50 text-zinc-200 text-sm font-semibold px-4 py-2 rounded-xl transition-all";
+
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 className="text-2xl font-bold text-zinc-100">{t("perfTitle")}</h1>
+        <p className="text-sm text-zinc-500 mt-1">{t("perfSubtitle")}</p>
+      </div>
+      {/* `flex-wrap` pe rândul de sus: pe telefon butoanele coborau sub titlu și
+          ieșeau din ecran, deci nu se vedeau nici când existau. */}
+      <div className="shrink-0 flex items-center gap-2">
+        <Link href="/tax-report" target="_blank" className={linkClass}>
+          <Landmark className="w-4 h-4 text-indigo-400" />
+          {tTax("navTitle")}
+        </Link>
+        <Link href="/report" target="_blank" className={linkClass}>
+          <FileDown className="w-4 h-4 text-indigo-400" />
+          {t("exportPdf")}
+        </Link>
+      </div>
     </div>
   );
 }
