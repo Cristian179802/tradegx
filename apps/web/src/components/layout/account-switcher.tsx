@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 import {
   ChevronDown, Check, Plus, Settings2, TrendingUp, TrendingDown,
 } from "lucide-react";
@@ -234,11 +235,37 @@ function AccountPill({ account }: { account: TradingAccount }) {
 export function AccountSwitcher() {
   const t = useTranslations("accountSwitcher");
   const locale = useLocale();
+  const router = useRouter();
   const { activeAccountId, setActiveAccountId } = useAuthStore();
   const [accounts, setAccounts] = useState<TradingAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<TradingAccount | null>(null);
+
+  /**
+   * Schimbă contul privit — și pe server, nu doar în browser.
+   *
+   * Selecția stătea DOAR în magazinul client (localStorage), deci serverul nu
+   * o vedea: rutele de date citeau flagul `isActive` din baza de date, care
+   * putea indica alt cont. Aveai două „conturi active" care se contraziceau,
+   * iar datele afișate nu corespundeau contului din antet.
+   *
+   * `null` înseamnă „toate conturile" — vederea agregată, acum o alegere
+   * explicită, nu comportamentul implicit.
+   *
+   * Reîncărcăm pagina după salvare: statisticile, tranzacțiile și graficele
+   * sunt randate din server cu contul selectat, deci trebuie recerute.
+   */
+  const selectAccount = useCallback((id: string | null) => {
+    setActiveAccountId(id ?? "");
+    fetch("/api/accounts/active", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accountId: id }),
+    })
+      .then(() => router.refresh())
+      .catch(() => { /* selecția locală rămâne; se resincronizează la reîncărcare */ });
+  }, [setActiveAccountId, router]);
 
   const loadAccounts = useCallback(() => {
     fetch("/api/accounts")
@@ -308,7 +335,7 @@ export function AccountSwitcher() {
             return (
               <DropdownMenuItem
                 key={account.id}
-                onClick={() => setActiveAccountId(account.id)}
+                onClick={() => selectAccount(account.id)}
                 className={cn(
                   "flex items-center gap-3 cursor-pointer rounded-lg px-2 py-2.5",
                   "hover:bg-zinc-800 focus:bg-zinc-800 focus:text-zinc-100",

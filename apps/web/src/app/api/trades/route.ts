@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
+import { getAccountScope } from "@/lib/account-scope";
 import { tradeSchema } from "@/lib/validations";
 import { checkTradingRuleViolations } from "@/lib/trading-rules";
 
@@ -58,8 +59,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Acces interzis" }, { status: 403 });
   }
 
+  // Fără `accountId` explicit în cerere, lista urmează contul selectat — nu mai
+  // amestecă toate conturile. Un cont FTMO și unul Binance sunt două jurnale
+  // diferite; afișate împreună, nu descriu niciunul.
+  const scope = await getAccountScope(userId);
+
   const where = {
-    accountId: accountId ? accountId : { in: accountIds },
+    accountId: accountId
+      ? accountId
+      : scope.accountId
+        ? scope.accountId
+        : { in: accountIds },   // „Toate conturile" — alegere explicită a userului
     ...(status && { status: status as "OPEN" | "CLOSED" | "CANCELLED" }),
     ...(symbol && { symbol: { contains: symbol.toUpperCase() } }),
     ...(dateFrom || dateTo

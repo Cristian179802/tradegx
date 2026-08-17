@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
+// Datele se filtreaza pe contul selectat. Inainte, toate conturile erau
+// amestecate intr-o singura statistica — un FTMO de 100.000 $ si un Binance de
+// 500 $ in aceeasi rata de castig, cifra care nu descria niciun cont real.
+import { getAccountScope } from "@/lib/account-scope";
 
 export async function GET() {
   const userId = await getAuthUserId();
@@ -8,13 +12,15 @@ export async function GET() {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
+  const scope = await getAccountScope(userId);
+
   const [accounts, closedTrades] = await Promise.all([
     prisma.tradingAccount.findMany({
       where: { userId },
       select: { id: true, name: true, currency: true, initialBalance: true, balance: true },
     }),
     prisma.trade.findMany({
-      where: { account: { userId }, status: "CLOSED" },
+      where: { ...scope.where, status: "CLOSED" },
       select: {
         id: true,
         symbol: true,

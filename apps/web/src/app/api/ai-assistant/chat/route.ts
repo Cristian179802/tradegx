@@ -3,6 +3,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@/lib/auth";
 import { hasPro } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
+// Datele se filtreaza pe contul selectat. Inainte, toate conturile erau
+// amestecate intr-o singura statistica — un FTMO de 100.000 $ si un Binance de
+// 500 $ in aceeasi rata de castig, cifra care nu descria niciun cont real.
+import { getAccountScope } from "@/lib/account-scope";
 import { rateLimit } from "@/lib/rate-limit";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
@@ -41,10 +45,15 @@ export interface TraderStats {
 }
 
 async function buildTraderStats(userId: string): Promise<TraderStats> {
+  // Statisticile pe care le primește AI Coach sunt ale contului privit acum.
+  // Altfel îți vorbea despre o medie a tuturor conturilor — sfaturi care nu se
+  // potrivesc niciunui cont real.
+  const scope = await getAccountScope(userId);
+
   const [accounts, trades, user] = await Promise.all([
     prisma.tradingAccount.findMany({ where: { userId }, take: 1, orderBy: { createdAt: "asc" } }),
     prisma.trade.findMany({
-      where: { account: { userId }, status: "CLOSED" },
+      where: { ...scope.where, status: "CLOSED" },
       orderBy: { exitTime: "desc" },
       take: 500,
       include: { journalEntry: { select: { postMistakeTypes: true, preEmotionalState: true, postEmotionalState: true } } },
