@@ -15,6 +15,7 @@ import { EconomicCountdown } from "@/components/dashboard/economic-countdown";
 import { DailyReviewCard } from "@/components/dashboard/daily-review-card";
 import { OnboardingGuide } from "@/components/dashboard/onboarding-guide";
 import { AmbientState } from "@/components/dashboard/ambient-state";
+import { AutoRefresh } from "@/components/dashboard/auto-refresh";
 import { RollingNumber } from "@/components/ui/rolling-number";
 import { useIridescent } from "@/components/ui/use-iridescent";
 import { cn } from "@/lib/utils";
@@ -328,6 +329,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           aproape ești de limita ta reală de drawdown. Nu randează nimic dacă
           nu ai o regulă setată sau dacă ești sub 50% din ea. */}
       <AmbientState drawdownPct={maxDrawdown} drawdownLimitPct={maxDrawdownLimit} />
+      {/* Cere o împrospătare a conturilor conectate la deschidere și la revenirea
+          în tab. Randează null — dacă a intrat ceva nou, se vede în cifre. */}
+      <AutoRefresh />
 
       {/* Ambient orbs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">

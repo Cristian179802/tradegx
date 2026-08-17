@@ -30,9 +30,9 @@ import { runExchangeSync } from "@/lib/exchange-sync-engine";
 //   · MT4/MT5 cu EA instalat — deja live, dar invers: terminalul ÎMPINGE spre
 //     /api/webhooks/ea, nu îl întrebăm noi. Nu are ce căuta într-un cron.
 //   · MT4/MT5 prin MetaAPI — `METAAPI_TOKEN` nu e configurat, deci calea aia nu
-//     funcționează deloc momentan.
-//   · TradeLocker — logica lui de sync stă încă în corpul rutei HTTP, deci nu e
-//     apelabilă fără sesiune. Are nevoie de aceeași extragere.
+//     funcționează deloc. E oricum o alternativă redundantă la EA, care merge și
+//     e mai rapid. Am lăsat-o pe dinafară deliberat: n-aș putea verifica nimic
+//     din ce scriu pentru ea.
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,8 +46,18 @@ const MAX_ACCOUNTS = 40;
 const PER_ACCOUNT_BUDGET_MS = 12_000;
 /** Chiar fără nicio activitate, resincronizăm rar — prinde depuneri și retrageri. */
 const FORCE_AFTER_MS = 6 * 60 * 60 * 1000;
+/**
+ * Cât stă deoparte un cont care cere intervenția utilizatorului.
+ *
+ * Un token TradeLocker expirat sau o cheie revocată nu se repară de la sine. Fără
+ * răcire, cron-ul ar reîncerca la fiecare cinci minute, la infinit, consumând
+ * cereri și înecând logurile în aceeași eroare — și ocupând locurile din felia de
+ * 40 de conturi pe care le-ar merita alții.
+ */
+const COOLDOWN_MS = 60 * 60 * 1000;
 
 const fpKey = (accountId: string) => `sync:fp:${accountId}`;
+const coolKey = (accountId: string) => `sync:cooldown:${accountId}`;
 
 export async function GET(req: NextRequest) {
   // Fail-closed: fără CRON_SECRET în env, endpoint-ul refuză orice apel.
@@ -63,21 +73,65 @@ export async function GET(req: NextRequest) {
   // niciodată sincronizate — un cont nou nu trebuie să aștepte după unul care
   // s-a împrospătat acum două minute.
   const accounts = await prisma.tradingAccount.findMany({
-    where: { brokerSource: { in: ["BINANCE", "BYBIT"] } },
-    select: { id: true, userId: true, brokerSource: true, lastSyncedAt: true },
+    where: { brokerSource: { in: ["BINANCE", "BYBIT", "TRADELOCKER"] } },
+    select: {
+      id: true, userId: true, brokerSource: true, lastSyncedAt: true,
+      brokerAccountId: true, brokerAccNum: true,
+    },
     orderBy: { lastSyncedAt: { sort: "asc", nulls: "first" } },
     take: MAX_ACCOUNTS,
   });
 
-  let checked = 0, unchanged = 0, synced = 0, imported = 0, failed = 0;
+  // Conturile în răcire se citesc într-o singură interogare, nu una per cont.
+  const cooldowns = new Map<string, number>();
+  if (accounts.length > 0) {
+    const rows = await prisma.appSetting.findMany({
+      where: { key: { in: accounts.map((a) => coolKey(a.id)) } },
+    });
+    for (const r of rows) cooldowns.set(r.key, Number(r.value) || 0);
+  }
+
+  let checked = 0, unchanged = 0, synced = 0, imported = 0, failed = 0, cooling = 0;
 
   for (const account of accounts) {
     if (Date.now() - t0 > TICK_BUDGET_MS) break;
+
+    const until = cooldowns.get(coolKey(account.id)) ?? 0;
+    if (until > Date.now()) { cooling++; continue; }
+
     checked++;
 
-    const provider = account.brokerSource === "BYBIT" ? "bybit" : "binance";
+    // Dacă a fost în răcire și acum reușește, marcajul trebuie să dispară —
+    // altfel un cont reconectat ar rămâne penalizat pentru o problemă rezolvată.
+    const wasCooling = cooldowns.has(coolKey(account.id));
+    const clearCooldown = async () => {
+      if (wasCooling) {
+        await prisma.appSetting.deleteMany({ where: { key: coolKey(account.id) } });
+      }
+    };
 
     try {
+      // ── TradeLocker ──
+      // Fără detector de activitate: importul incremental e o fereastră sau două
+      // de la `lastSyncedAt`, deci deja ieftin. Identificatorii vin de pe cont,
+      // unde i-a pus conectarea.
+      if (account.brokerSource === "TRADELOCKER") {
+        if (!account.brokerAccountId || account.brokerAccNum === null) continue;
+        const { runTradeLockerSync } = await import("@/lib/tradelocker-sync-engine");
+        const res = await runTradeLockerSync({
+          userId: account.userId,
+          tradeLockerAccountId: account.brokerAccountId,
+          accNum: Number(account.brokerAccNum),
+          tradingAccountId: account.id,
+          budgetMs: 10_000,
+        });
+        imported += res.imported;
+        synced++;
+        await clearCooldown();
+        continue;
+      }
+
+      const provider = account.brokerSource === "BYBIT" ? "bybit" : "binance";
       const integration = await prisma.userIntegration.findUnique({
         where: { userId_service: { userId: account.userId, service: provider } },
       });
@@ -139,6 +193,7 @@ export async function GET(req: NextRequest) {
       }
 
       synced++;
+      await clearCooldown();
 
       // Amprenta se scrie DOAR după un import încheiat. Scrisă mai devreme, un
       // eșec la jumătate ne-ar face să sărim contul la rularea următoare,
@@ -151,17 +206,31 @@ export async function GET(req: NextRequest) {
           update: { value: fingerprint },
         });
       }
-    } catch {
+    } catch (err) {
       // Un cont picat (chei revocate, bursă indisponibilă) nu are voie să
-      // opreacă restul rulării.
+      // oprească restul rulării.
       failed++;
+
+      // Ce cere intervenția utilizatorului intră în răcire. Un token expirat nu
+      // se repară singur, iar reîncercarea la fiecare cinci minute doar consumă
+      // cereri și ocupă un loc din felie pe care altcineva l-ar folosi.
+      const status = (err as { status?: number })?.status;
+      const needsUser = status === 400 || status === 401 || status === 403;
+      if (needsUser) {
+        const until = String(Date.now() + COOLDOWN_MS);
+        await prisma.appSetting.upsert({
+          where: { key: coolKey(account.id) },
+          create: { key: coolKey(account.id), value: until },
+          update: { value: until },
+        });
+      }
     }
   }
 
   return NextResponse.json({
     ok: true,
     candidates: accounts.length,
-    checked, unchanged, synced, imported, failed,
+    checked, unchanged, synced, imported, failed, cooling,
     ms: Date.now() - t0,
   });
 }
