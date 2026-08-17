@@ -709,6 +709,13 @@ function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSu
       });
       // Secretul nu mai e necesar în memoria paginii după validare.
       setApiSecret("");
+
+      // Importul pornește singur. Verificarea cheilor nu creează nici cont, nici
+      // tranzacții — doar salvează cheia. Cine se oprea aici (butonul zice
+      // „Verifică și conectează", suna a final) rămânea cu integrarea salvată și
+      // cu nimic pe site, fără niciun semn că lipsește un pas. Butonul de import
+      // rămâne dedesubt ca reluare, dacă importul cade.
+      await runImport();
     } catch { setError(t("netErr")); }
     finally { setBusy(false); }
   }
