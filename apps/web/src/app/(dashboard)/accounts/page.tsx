@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isExchangeSourced } from "@/lib/exchange-sourced";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -44,8 +45,15 @@ export default async function AccountsPage() {
   );
 
   // Auto-sync account balances that are out of date (e.g. after CSV import)
+  //
+  // NU pentru conturile de bursă: acolo soldul vine de la bursă și e adevărul.
+  // Formula `initialBalance + P&L realizat` nu poate ajunge la el, fiindcă ratează
+  // pozițiile DESCHISE — care au `pnlMoney` null tocmai ca să nu murdărească
+  // statistica. Pe un cont cu poziții deschise, recalcularea rescria soldul real
+  // de la Binance cu unul dedus, la fiecare încărcare de pagină.
   const syncOps: Promise<unknown>[] = [];
   for (const a of raw) {
+    if (isExchangeSourced(a.brokerSource)) continue;
     const tradePnl = pnlMap.get(a.id) ?? 0;
     const correctBalance = Number(a.initialBalance) + tradePnl;
     const storedBalance = Number(a.balance);
@@ -64,7 +72,9 @@ export default async function AccountsPage() {
   // Re-fetch after sync (or compute corrected balances inline)
   const accounts = raw.map((a) => {
     const tradePnl = pnlMap.get(a.id) ?? 0;
-    const correctBalance = Number(a.initialBalance) + tradePnl;
+    const correctBalance = isExchangeSourced(a.brokerSource)
+      ? Number(a.balance)
+      : Number(a.initialBalance) + tradePnl;
     return {
       ...a,
       balance: correctBalance.toFixed(2),

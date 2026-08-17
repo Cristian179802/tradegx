@@ -37,6 +37,10 @@ interface Account {
   tradePnl?: string | number;
 }
 
+/** Conturile conectate direct la o bursă, care se resincronizează prin ruta lor. */
+const isExchangeAccount = (a: Account) =>
+  a.brokerSource === "BINANCE" || a.brokerSource === "BYBIT";
+
 const TYPE_CFG: Record<string, { label: string; color: string; border: string; bg: string; dot: string }> = {
   DEMO:      { label: "Demo",      color: "text-zinc-400",   border: "border-zinc-600/60",     bg: "bg-zinc-700/30",        dot: "bg-zinc-500" },
   CHALLENGE: { label: "Challenge", color: "text-amber-400",  border: "border-amber-500/30",    bg: "bg-amber-500/10",       dot: "bg-amber-400" },
@@ -95,9 +99,19 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
   }
 
   async function handleSync(account: Account) {
-    if (!account.metaApiId) return;
     setSyncingId(account.id);
     try {
+      // Conturile de bursă (Binance, Bybit) au propria rută. Aici se chema doar
+      // cea de MetaAPI, iar prima linie era `if (!metaApiId) return` — deci pe un
+      // cont de bursă butonul nu făcea absolut nimic, în silențiu. Mai rău, nici
+      // nu se afișa: singura cale de resincronizare era să redeschizi dialogul de
+      // adăugare cont, ceea ce nimeni nu ghicește.
+      if (isExchangeAccount(account)) {
+        await syncExchange(account);
+        return;
+      }
+      if (!account.metaApiId) return;
+
       const res = await fetch("/api/integrations/metaapi/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -115,6 +129,38 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
     } finally {
       setSyncingId(null);
     }
+  }
+
+  /**
+   * Importul de bursă e reluabil: serverul lucrează cât îi ține bugetul de timp și
+   * răspunde cu { hasMore, cursor }, iar noi îl chemăm până termină. Un istoric de
+   * doi ani nu încape într-o singură invocare serverless.
+   */
+  async function syncExchange(account: Account) {
+    const provider = account.brokerSource === "BYBIT" ? "bybit" : "binance";
+    let cursor: string | undefined;
+    let imported = 0;
+
+    for (let round = 0; round < 200; round++) {
+      const res = await fetch("/api/integrations/exchange/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider, tradingAccountId: account.id, cursor }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast({ title: t("syncErr"), description: data.error, variant: "destructive" });
+        return;
+      }
+      imported += data.imported ?? 0;
+      cursor = data.cursor;
+      if (!data.hasMore) {
+        toast({ title: t("syncOk"), description: t("syncOkDesc", { count: imported }) });
+        refresh();
+        return;
+      }
+    }
+    toast({ title: t("syncErr"), variant: "destructive" });
   }
 
   return (
@@ -257,7 +303,7 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
                     )}
                   </div>
                   <div className="flex gap-1">
-                    {hasMetaApi && (
+                    {(hasMetaApi || isExchangeAccount(account)) && (
                       <button
                         onClick={() => handleSync(account)}
                         disabled={isSyncing}

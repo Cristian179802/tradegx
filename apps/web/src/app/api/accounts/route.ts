@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isExchangeSourced } from "@/lib/exchange-sourced";
 import { auth } from "@/lib/auth";
 import { hasPro, FREE_LIMITS } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
@@ -43,10 +44,16 @@ export async function GET() {
 
   const result = accounts.map((a) => {
     const tradePnl = Number(pnlMap.get(a.id) ?? "0.00");
-    const correctBalance = Number(a.initialBalance) + tradePnl;
+    // Pe conturile de bursă soldul stocat vine de la bursă și rămâne. Formula
+    // `initialBalance + P&L realizat` ratează pozițiile deschise, deci ar înlocui
+    // cifra adevărată cu una dedusă — inclusiv la reîmprospătarea din 15 în 15
+    // secunde a paginii Conturi, care trece prin ruta asta.
+    const correctBalance = isExchangeSourced(a.brokerSource)
+      ? Number(a.balance)
+      : Number(a.initialBalance) + tradePnl;
     return {
       ...a,
-      balance: correctBalance.toFixed(2), // corrected balance = initialBalance + actual trade P&L
+      balance: correctBalance.toFixed(2),
       initialBalance: a.initialBalance.toString(),
       tradePnl: tradePnl.toFixed(2),
     };
