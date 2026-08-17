@@ -15,7 +15,9 @@ const ROOT = path.resolve(process.cwd(), "src");
 const EXCLUDE_DIRS = ["academy", "lib/academy", "app/api", "lib"];
 const EXCLUDE_FILES = [];
 // Șiruri permise (intenționat bilingve / tehnice).
-const ALLOW = ["Limbă / Language"];
+// „Română" e numele limbii în selectorul de limbă: se scrie la fel indiferent de
+// limba interfeței, exact ca „Deutsch". „București" e nume propriu de oraș, la fel.
+const ALLOW = ["Limbă / Language", "Română", "București", "Europe/București"];
 
 const DIACRITICS = /[ăâîșțĂÂÎȘȚ]/;
 // Cuvinte RO frecvente în UI care NU au diacritice (diacriticele le prind pe restul).
@@ -89,6 +91,36 @@ for (const file of walk(ROOT)) {
       if (isRomanian(m[1])) add(i + 1, m[1].trim());
     }
   });
+  // ── pasul 3: literale de obiect ───────────────────────────────────────────
+  // Punctul orb care a lăsat interfața pe jumătate românească pentru un
+  // utilizator pe engleză: pașii de onboarding, etichetele de setup și numele
+  // de grup din piață nu stăteau în JSX, ci în tablouri de obiecte
+  // (`{ title: "Adaugă contul", ... }`) randate abia mai jos prin `{s.title}`.
+  // Scanerul se uita doar la text între taguri, deci nu vedea nimic.
+  //
+  // Comentariile se scot ÎNAINTE, altfel pasul ăsta ar raporta tot codul: acest
+  // proiect e comentat în română. Poziția liniilor se păstrează.
+  const noComments = src
+    .replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, " "))
+    .replace(/\/\/[^\n]*/g, (c) => c.replace(/[^\n]/g, " "));
+  // Un fișier care își ține propriul dicționar `ro:`/`en:` traduce deja — acolo
+  // româna în literale de obiect e exact ce trebuie să fie. Sunt cazurile care
+  // randează în afara providerului next-intl (error.tsx are propriul <html>) sau
+  // conținutul Academiei.
+  const hasLocaleDict = /\bro\s*:\s*[{"]/.test(noComments) && /\ben\s*:\s*[{"]/.test(noComments);
+  // `keywords` sunt aliasuri de căutare pentru paleta de comenzi (Ctrl+K), nu text
+  // afișat: conțin intenționat și forma românească, și cea englezească, ca oricine
+  // să găsească aceeași comandă tastând în limba lui.
+  const ALLOW_KEYS = new Set(["keywords"]);
+  const OBJ_STR = /(?:^|[{,[\s])([A-Za-z_$][\w$]*)\s*:\s*"([^"\\]{3,})"/g;
+  let om;
+  OBJ_STR.lastIndex = 0;
+  while (!hasLocaleDict && (om = OBJ_STR.exec(noComments))) {
+    if (!ALLOW_KEYS.has(om[1]) && isRomanian(om[2])) {
+      add(lineOf(src, om.index), `${om[1]}: "${om[2].trim()}"`);
+    }
+  }
+
   // pasul multi-linie (pe tot fișierul). Acceptăm doar PROZĂ (fără tokenuri de cod),
   // ca să nu prindem comentarii/cod între operatori `>` `<`.
   const CODEY = /[=;()/\\`|]|\/\/|=>|\bconst\b|\breturn\b|\bnew\b|\bMap\b|\bfunction\b/;

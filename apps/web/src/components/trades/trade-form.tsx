@@ -85,7 +85,9 @@ const SETUP_TYPES = [
   { value: "REJECTION", label: "Rejection" },
   { value: "TREND_FOLLOW", label: "Trend Follow" },
   { value: "SCALP", label: "Scalp" },
-  { value: "OTHER", label: "Altul" },
+  // Singura eticheta din lista care era in romana. Restul sunt termeni tehnici
+  // identici in ambele limbi (Order Block, BOS, CHoCH…), deci raman literale.
+  { value: "OTHER", label: "setupOther", i18n: true },
 ] as const;
 
 const KILLZONES = [
@@ -603,7 +605,7 @@ export function TradeForm({ accounts, defaultAccountId, initialTrade }: TradeFor
                     <SelectContent className="bg-zinc-800 border-zinc-700">
                       {SETUP_TYPES.map((s) => (
                         <SelectItem key={s.value} value={s.value} className="text-zinc-100">
-                          {s.label}
+                          {"i18n" in s && s.i18n ? t(s.label) : s.label}
                         </SelectItem>
                       ))}
                     </SelectContent>

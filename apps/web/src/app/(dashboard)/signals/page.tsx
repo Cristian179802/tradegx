@@ -4,8 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { todayKey } from "@/lib/ai-signals";
 import { SignalsClient } from "./signals-client";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Semnale AI" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pageTitles");
+  return { title: t("signals") };
+}
 
 export default async function SignalsPage() {
   const session = await auth();

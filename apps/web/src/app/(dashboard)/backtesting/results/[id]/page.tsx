@@ -3,8 +3,12 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ResultsClient } from "./results-client";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Rezultate Backtest" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pageTitles");
+  return { title: t("backtestResult") };
+}
 
 export default async function BacktestResultsPage({
   params,

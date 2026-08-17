@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 // Datele apartin contului selectat. Paginile sunt componente de server si
 // interogheaza direct baza de date, deci migrarea rutelor API nu le atingea —
 // antetul arata „Binance Futures" iar cifrele erau tot de pe MT5.
@@ -8,7 +9,10 @@ import { getAccountScope } from "@/lib/account-scope";
 import { redirect } from "next/navigation";
 import { DashboardClient } from "./dashboard-client";
 
-export const metadata: Metadata = { title: "Panou de Control" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pageTitles");
+  return { title: t("dashboard") };
+}
 
 export default async function DashboardPage() {
   const session = await auth();

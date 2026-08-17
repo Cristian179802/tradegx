@@ -388,7 +388,12 @@
     "saveError": "Eroare la salvare",
     "noResults": "Încearcă alt termen de căutare",
     "addedBtn": "Adăugat",
-    "noResultsTitle": "Niciun rezultat"
+    "noResultsTitle": "Niciun rezultat",
+    "grpMetals": "Metale",
+    "grpEnergy": "Energie",
+    "grpIndices": "Indici",
+    "grpStocks": "Acțiuni",
+    "metaTitle": "Selector Piață"
   },
   "riskManager": {
     "title": "Risk Manager",
@@ -525,7 +530,16 @@
     "updated": "Trade actualizat",
     "saved": "Trade salvat",
     "updatedDesc": "{symbol} {direction} actualizat.",
-    "savedDesc": "{symbol} {direction} adăugat."
+    "savedDesc": "{symbol} {direction} adăugat.",
+    "instrForex": "Forex",
+    "instrCrypto": "Crypto",
+    "instrMetals": "Metale",
+    "instrIndices": "Indici",
+    "instrCommodities": "Mărfuri",
+    "instrStocks": "Acțiuni",
+    "instrCfd": "CFD",
+    "cancel": "Anulează",
+    "setupOther": "Altul"
   },
   "common": {
     "loading": "Se încarcă...",
@@ -931,7 +945,8 @@
       "disableDesc": "Necesită parola ta și un cod valid (din aplicație sau de rezervă).",
       "password": "Parolă",
       "codeOrBackup": "Cod app sau de rezervă",
-      "disableBtn": "Dezactivează 2FA"
+      "disableBtn": "Dezactivează 2FA",
+      "backupRegenerated": "Codurile de rezervă au fost regenerate."
     }
   },
   "trade": {
@@ -2975,5 +2990,32 @@
     "pw2": "Expectancy în R + profit factor",
     "pw3": "Vedere agregată pe toate conturile",
     "pw4": "Defalcare de performanță per cont"
+  },
+  "onboarding": {
+    "welcome": "Bun venit la TradeGx!",
+    "subtitle": "5 pași simpli ca să profiți la maxim de platformă.",
+    "s1t": "Adaugă primul cont de trading",
+    "s1d": "Conectează MT4/MT5 cu EA-ul gratuit sau adaugă un cont manual.",
+    "s2t": "Înregistrează / importă tranzacții",
+    "s2d": "Sincronizare automată din MT4/MT5 sau adaugă manual prima tranzacție.",
+    "s3t": "Vezi semnalele AI ale zilei",
+    "s3d": "Maxim 3 setup-uri de înaltă probabilitate, cu Entry/SL/TP și analiză.",
+    "s4t": "Setează-ți obiectivele lunare",
+    "s4d": "Țintă de profit, tranzacții și win rate — urmărite automat.",
+    "s5t": "Folosește checklist-ul pre-trade",
+    "s5d": "Verifică disciplina înainte de fiecare intrare în piață.",
+    "progress": "Ai parcurs {done} din {total} pași — continuă să-ți configurezi jurnalul.",
+    "hide": "Ascunde ghidul"
+  },
+  "pageTitles": {
+    "accounts": "Conturi de trading",
+    "backtestResult": "Rezultate backtest",
+    "calculator": "Calculator loturi",
+    "dashboard": "Panou de control",
+    "goals": "Obiective",
+    "journal": "Jurnal de trading",
+    "signals": "Semnale AI",
+    "tools": "Unelte Pro",
+    "trades": "Trade-uri"
   }
 }

@@ -1,10 +1,14 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { LotSizeCalculator } from "@/components/calculator/lot-size-calculator";
 
-export const metadata = { title: "Calculator loturi" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pageTitles");
+  return { title: t("calculator") };
+}
 
 export default async function CalculatorPage() {
   const t = await getTranslations("calc");

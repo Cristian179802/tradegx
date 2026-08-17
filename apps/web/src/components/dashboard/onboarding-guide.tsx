@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   Rocket, X, CheckCircle2, Circle, Briefcase, Target, Trophy, ListChecks, ArrowRight, GraduationCap,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface Step {
@@ -16,6 +17,7 @@ interface Step {
 }
 
 export function OnboardingGuide({ hasTrades }: { hasTrades: boolean }) {
+  const t = useTranslations("onboarding");
   const [hidden, setHidden] = React.useState(true);
 
   React.useEffect(() => {
@@ -30,12 +32,16 @@ export function OnboardingGuide({ hasTrades }: { hasTrades: boolean }) {
 
   if (hidden) return null;
 
+  // Textele erau scrise direct aici, in romana. Scanerul de i18n din build nu le
+  // vedea: el verifica text JSX intre taguri si cateva atribute, iar acestea
+  // stateau in literale de obiect, randate prin {step.title}. Un utilizator pe
+  // engleza vedea tot blocul in romana.
   const steps: Step[] = [
-    { icon: Briefcase, title: "Adaugă primul cont de trading", desc: "Conectează MT4/MT5 cu EA-ul gratuit sau adaugă un cont manual.", href: "/accounts", done: hasTrades },
-    { icon: ListChecks, title: "Înregistrează / importă tranzacții", desc: "Sincronizare automată din MT4/MT5 sau adaugă manual prima tranzacție.", href: "/trades", done: hasTrades },
-    { icon: Target, title: "Vezi semnalele AI ale zilei", desc: "Maxim 3 setup-uri de înaltă probabilitate, cu Entry/SL/TP și analiză.", href: "/signals" },
-    { icon: Trophy, title: "Setează-ți obiectivele lunare", desc: "Țintă de profit, tranzacții și win rate — urmărite automat.", href: "/goals" },
-    { icon: ListChecks, title: "Folosește checklist-ul pre-trade", desc: "Verifică disciplina înainte de fiecare intrare în piață.", href: "/checklist" },
+    { icon: Briefcase,  title: t("s1t"), desc: t("s1d"), href: "/accounts",  done: hasTrades },
+    { icon: ListChecks, title: t("s2t"), desc: t("s2d"), href: "/trades",    done: hasTrades },
+    { icon: Target,     title: t("s3t"), desc: t("s3d"), href: "/signals" },
+    { icon: Trophy,     title: t("s4t"), desc: t("s4d"), href: "/goals" },
+    { icon: ListChecks, title: t("s5t"), desc: t("s5d"), href: "/checklist" },
   ];
 
   const doneCount = steps.filter((s) => s.done).length;
@@ -54,16 +60,16 @@ export function OnboardingGuide({ hasTrades }: { hasTrades: boolean }) {
             </div>
             <div>
               <h2 className="text-base font-black text-zinc-100 flex items-center gap-2">
-                Bun venit la TradeGx! <Rocket className="w-4 h-4 text-indigo-400" />
+                {t("welcome")} <Rocket className="w-4 h-4 text-indigo-400" />
               </h2>
               <p className="text-xs text-zinc-400 mt-0.5">
                 {doneCount > 0
-                  ? `Ai parcurs ${doneCount} din ${steps.length} pași — continuă să-ți configurezi jurnalul.`
-                  : "5 pași simpli ca să profiți la maxim de platformă."}
+                  ? t("progress", { done: doneCount, total: steps.length })
+                  : t("subtitle")}
               </p>
             </div>
           </div>
-          <button onClick={dismiss} className="shrink-0 text-zinc-600 hover:text-zinc-300 transition-colors" title="Ascunde ghidul">
+          <button onClick={dismiss} className="shrink-0 text-zinc-600 hover:text-zinc-300 transition-colors" title={t("hide")}>
             <X className="w-4 h-4" />
           </button>
         </div>

@@ -53,36 +53,36 @@ const POPULAR: { symbol: string; instrumentType: string; group: string }[] = [
   { symbol: "CADCHF", instrumentType: "FOREX", group: "AUD/NZD/CAD Crosses" },
   { symbol: "CHFJPY", instrumentType: "FOREX", group: "AUD/NZD/CAD Crosses" },
   // ── Metale ──
-  { symbol: "XAUUSD", instrumentType: "METALS", group: "Metale" },
-  { symbol: "XAGUSD", instrumentType: "METALS", group: "Metale" },
-  { symbol: "XPTUSD", instrumentType: "METALS", group: "Metale" },
+  { symbol: "XAUUSD", instrumentType: "METALS", group: "Metals" },
+  { symbol: "XAGUSD", instrumentType: "METALS", group: "Metals" },
+  { symbol: "XPTUSD", instrumentType: "METALS", group: "Metals" },
   // ── Energie ──
-  { symbol: "USOIL", instrumentType: "COMMODITIES", group: "Energie" },
-  { symbol: "UKOIL", instrumentType: "COMMODITIES", group: "Energie" },
+  { symbol: "USOIL", instrumentType: "COMMODITIES", group: "Energy" },
+  { symbol: "UKOIL", instrumentType: "COMMODITIES", group: "Energy" },
   // ── Indici ──
-  { symbol: "US30",   instrumentType: "INDICES", group: "Indici" },
-  { symbol: "US500",  instrumentType: "INDICES", group: "Indici" },
-  { symbol: "NAS100", instrumentType: "INDICES", group: "Indici" },
-  { symbol: "GER40",  instrumentType: "INDICES", group: "Indici" },
-  { symbol: "UK100",  instrumentType: "INDICES", group: "Indici" },
-  { symbol: "FRA40",  instrumentType: "INDICES", group: "Indici" },
-  { symbol: "JPN225", instrumentType: "INDICES", group: "Indici" },
-  { symbol: "AUS200", instrumentType: "INDICES", group: "Indici" },
-  { symbol: "HKG50",  instrumentType: "INDICES", group: "Indici" },
-  { symbol: "ESP35",  instrumentType: "INDICES", group: "Indici" },
+  { symbol: "US30",   instrumentType: "INDICES", group: "Indices" },
+  { symbol: "US500",  instrumentType: "INDICES", group: "Indices" },
+  { symbol: "NAS100", instrumentType: "INDICES", group: "Indices" },
+  { symbol: "GER40",  instrumentType: "INDICES", group: "Indices" },
+  { symbol: "UK100",  instrumentType: "INDICES", group: "Indices" },
+  { symbol: "FRA40",  instrumentType: "INDICES", group: "Indices" },
+  { symbol: "JPN225", instrumentType: "INDICES", group: "Indices" },
+  { symbol: "AUS200", instrumentType: "INDICES", group: "Indices" },
+  { symbol: "HKG50",  instrumentType: "INDICES", group: "Indices" },
+  { symbol: "ESP35",  instrumentType: "INDICES", group: "Indices" },
   // ── Acțiuni ──
-  { symbol: "AAPL",  instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "MSFT",  instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "GOOGL", instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "AMZN",  instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "TSLA",  instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "NVDA",  instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "META",  instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "NFLX",  instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "AMD",   instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "ORCL",  instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "CRM",   instrumentType: "STOCKS", group: "Acțiuni" },
-  { symbol: "BABA",  instrumentType: "STOCKS", group: "Acțiuni" },
+  { symbol: "AAPL",  instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "MSFT",  instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "GOOGL", instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "AMZN",  instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "TSLA",  instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "NVDA",  instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "META",  instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "NFLX",  instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "AMD",   instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "ORCL",  instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "CRM",   instrumentType: "STOCKS", group: "Stocks" },
+  { symbol: "BABA",  instrumentType: "STOCKS", group: "Stocks" },
   // ── Crypto Top 50 ──
   { symbol: "BTCUSD",   instrumentType: "CRYPTO", group: "Crypto" },
   { symbol: "ETHUSD",   instrumentType: "CRYPTO", group: "Crypto" },
@@ -117,6 +117,25 @@ const POPULAR: { symbol: string; instrumentType: string; group: string }[] = [
 ];
 
 const CATEGORIES = ["Toate", "FOREX", "METALS", "INDICES", "STOCKS", "CRYPTO", "COMMODITIES"];
+
+// Numele de grup se salvează în baza de date odată cu simbolul (`groupName`) și se
+// traduce abia la afișare — patru dintre ele erau cuvinte românești arătate și
+// utilizatorilor pe engleză. Restul („Forex Majors", „Crypto") se scriu la fel în
+// ambele limbi, iar un grup necunoscut se afișează așa cum e.
+//
+// Tabelul acceptă și numele vechi, românești: listele salvate înainte de această
+// schimbare au în baza de date „Metale", nu „Metals", și trebuie să se traducă și
+// ele. Rândurile vechi rămân valide, nu e nevoie de migrare.
+const GROUP_KEYS: Record<string, string> = {
+  Metals: "grpMetals",
+  Energy: "grpEnergy",
+  Indices: "grpIndices",
+  Stocks: "grpStocks",
+  Metale: "grpMetals",
+  Energie: "grpEnergy",
+  Indici: "grpIndices",
+  "Acțiuni": "grpStocks",
+};
 
 const INSTR_COLORS: Record<string, string> = {
   FOREX:       "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
@@ -223,6 +242,8 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
     setSavingAlert(false);
   }
 
+  const groupLabel = (g: string) => (GROUP_KEYS[g] ? t(GROUP_KEYS[g]) : g);
+
   const grouped = items.reduce<Record<string, WatchlistItem[]>>((acc, item) => {
     const key = item.groupName ?? item.instrumentType;
     (acc[key] ??= []).push(item);
@@ -266,7 +287,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
               {Object.entries(grouped).map(([group, groupItems]) => (
                 <div key={group}>
                   <div className="px-5 py-2 bg-zinc-900/80">
-                    <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">{group}</p>
+                    <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">{groupLabel(group)}</p>
                   </div>
                   {groupItems.map((item) => {
                     const hasAlert = item.alertAbove != null || item.alertBelow != null;
@@ -505,7 +526,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
                     <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded border", INSTR_COLORS[p.instrumentType] ?? INSTR_COLORS.CFD)}>
                       {p.instrumentType}
                     </span>
-                    <span className="text-xs text-zinc-600">{p.group}</span>
+                    <span className="text-xs text-zinc-600">{groupLabel(p.group)}</span>
                   </div>
                   <Button
                     variant="outline"

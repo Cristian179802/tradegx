@@ -388,7 +388,12 @@
     "saveError": "Save error",
     "noResults": "Try another search term",
     "addedBtn": "Added",
-    "noResultsTitle": "No results"
+    "noResultsTitle": "No results",
+    "grpMetals": "Metals",
+    "grpEnergy": "Energy",
+    "grpIndices": "Indices",
+    "grpStocks": "Stocks",
+    "metaTitle": "Market Selector"
   },
   "riskManager": {
     "title": "Risk Manager",
@@ -525,7 +530,16 @@
     "updated": "Trade updated",
     "saved": "Trade saved",
     "updatedDesc": "{symbol} {direction} updated.",
-    "savedDesc": "{symbol} {direction} added."
+    "savedDesc": "{symbol} {direction} added.",
+    "instrForex": "Forex",
+    "instrCrypto": "Crypto",
+    "instrMetals": "Metals",
+    "instrIndices": "Indices",
+    "instrCommodities": "Commodities",
+    "instrStocks": "Stocks",
+    "instrCfd": "CFD",
+    "cancel": "Cancel",
+    "setupOther": "Other"
   },
   "common": {
     "loading": "Loading...",
@@ -931,7 +945,8 @@
       "disableDesc": "Requires your password and a valid code (app or backup).",
       "password": "Password",
       "codeOrBackup": "App or backup code",
-      "disableBtn": "Disable 2FA"
+      "disableBtn": "Disable 2FA",
+      "backupRegenerated": "Backup codes have been regenerated."
     }
   },
   "trade": {
@@ -2975,5 +2990,32 @@
     "pw2": "Expectancy in R + profit factor",
     "pw3": "Aggregated view across all accounts",
     "pw4": "Per-account performance breakdown"
+  },
+  "onboarding": {
+    "welcome": "Welcome to TradeGx!",
+    "subtitle": "5 simple steps to get the most out of the platform.",
+    "s1t": "Add your first trading account",
+    "s1d": "Connect MT4/MT5 with the free EA, or add an account manually.",
+    "s2t": "Log or import trades",
+    "s2d": "Automatic sync from MT4/MT5, or add your first trade manually.",
+    "s3t": "See today’s AI signals",
+    "s3d": "Up to 3 high-probability setups, with Entry/SL/TP and analysis.",
+    "s4t": "Set your monthly goals",
+    "s4d": "Profit target, trade count and win rate — tracked automatically.",
+    "s5t": "Use the pre-trade checklist",
+    "s5d": "Check your discipline before every entry.",
+    "progress": "You completed {done} of {total} steps — keep setting up your journal.",
+    "hide": "Hide the guide"
+  },
+  "pageTitles": {
+    "accounts": "Trading accounts",
+    "backtestResult": "Backtest results",
+    "calculator": "Lot calculator",
+    "dashboard": "Dashboard",
+    "goals": "Goals",
+    "journal": "Trading journal",
+    "signals": "AI signals",
+    "tools": "Pro tools",
+    "trades": "Trades"
   }
 }

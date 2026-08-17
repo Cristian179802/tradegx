@@ -5,7 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { MarketClient } from "./market-client";
 
-export const metadata: Metadata = { title: "Selector Piață" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("market");
+  return { title: t("metaTitle") };
+}
 
 export default async function MarketPage() {
   const t = await getTranslations("market");

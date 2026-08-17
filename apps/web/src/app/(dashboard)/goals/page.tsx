@@ -3,8 +3,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { GoalsClient } from "./goals-client";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Obiective" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pageTitles");
+  return { title: t("goals") };
+}
 
 export default async function GoalsPage() {
   const session = await auth();
