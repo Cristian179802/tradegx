@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkCronAuth } from "@/lib/cron-auth";
 import { prisma } from "@/lib/prisma";
 import { generateWeeklyReport } from "@/lib/weekly-report";
 import { sendTelegramMessage, escapeHtml } from "@/lib/telegram";
@@ -10,13 +11,8 @@ export const maxDuration = 120;
 // Cron duminică seara (Vercel) — raportul AI al săptămânii pentru fiecare
 // utilizator activ: alertă in-app + Telegram (dacă are integrarea) + push.
 export async function GET(req: NextRequest) {
-  // Fail-closed: fără CRON_SECRET setat în env, endpoint-ul refuză ORICE apel
-  // (protejează creditele AI și notificările de declanșări neautorizate).
-  const secret = process.env.CRON_SECRET;
-  const authz = req.headers.get("authorization");
-  if (!secret || authz !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  }
+  const denied = checkCronAuth(req);
+  if (denied) return denied;
 
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkCronAuth } from "@/lib/cron-auth";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/twofactor";
 import { runExchangeSync } from "@/lib/exchange-sync-engine";
@@ -60,12 +61,8 @@ const fpKey = (accountId: string) => `sync:fp:${accountId}`;
 const coolKey = (accountId: string) => `sync:cooldown:${accountId}`;
 
 export async function GET(req: NextRequest) {
-  // Fail-closed: fără CRON_SECRET în env, endpoint-ul refuză orice apel.
-  const secret = process.env.CRON_SECRET;
-  const authz = req.headers.get("authorization");
-  if (!secret || authz !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  }
+  const denied = checkCronAuth(req);
+  if (denied) return denied;
 
   const t0 = Date.now();
 

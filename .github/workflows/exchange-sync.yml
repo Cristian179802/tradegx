@@ -42,13 +42,24 @@ jobs:
               "https://www.tradegx.com/api/cron/exchange-sync"
           }
           code=$(call)
-          if [ "$code" != "200" ]; then
+          # Pe 401 nu are rost să reîncerci: secretul nu se repară singur în 15
+          # secunde. Reîncercarea e doar pentru hopuri tranzitorii (5xx, timeout).
+          if [ "$code" != "200" ] && [ "$code" != "401" ]; then
             echo "Prima încercare: $code — reîncerc peste 15s"
             sleep 15
             code=$(call)
           fi
           cat /tmp/resp.json
           echo ""
+          if [ "$code" = "401" ]; then
+            echo ""
+            echo "═══ CONFIGURARE, nu o eroare tranzitorie ═══"
+            echo "Secretul CRON_SECRET din GitHub nu corespunde celui din Vercel."
+            echo "Vezi câmpul \"reason\" din răspunsul de mai sus, apoi aliniază"
+            echo "valoarea în Vercel → Settings → Environment Variables și"
+            echo "redeployează. Reîncercarea nu ajută, deci nu am reîncercat."
+            exit 1
+          fi
           if [ "$code" != "200" ]; then
             echo "Endpoint a răspuns cu $code"
             exit 1

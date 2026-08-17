@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkCronAuth } from "@/lib/cron-auth";
 import { prisma } from "@/lib/prisma";
 // Prețul vine prin stratul de rutare: cripto de la Binance (live), restul de
 // la Yahoo. Înainte totul trecea prin Yahoo, care e măsurabil în urmă la cripto.
@@ -14,13 +15,8 @@ export const maxDuration = 60;
 // la atingere → alertă in-app + Telegram + push, apoi pragul se GOLEȘTE
 // (one-shot, fără spam). Prețuri: Yahoo v8 (reale, fără cheie API).
 export async function GET(req: NextRequest) {
-  // Fail-closed: fără CRON_SECRET setat în env, endpoint-ul refuză ORICE apel
-  // (protejează creditele AI și notificările de declanșări neautorizate).
-  const secret = process.env.CRON_SECRET;
-  const authz = req.headers.get("authorization");
-  if (!secret || authz !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  }
+  const denied = checkCronAuth(req);
+  if (denied) return denied;
 
   // Toate item-urile cu praguri active
   const items = await prisma.watchlistItem.findMany({
