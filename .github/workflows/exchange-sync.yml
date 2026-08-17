@@ -58,7 +58,14 @@ jobs:
             echo "Vezi câmpul \"reason\" din răspunsul de mai sus, apoi aliniază"
             echo "valoarea în Vercel → Settings → Environment Variables și"
             echo "redeployează. Reîncercarea nu ajută, deci nu am reîncercat."
-            exit 1
+            echo ""
+            echo "Jobul se încheie CU SUCCES intenționat, ca să nu primești un"
+            echo "email la fiecare cinci minute pentru aceeași problemă de"
+            echo "configurare. Exact zgomotul ăsta a dus la oprirea workflow-ului"
+            echo "de alerte, iar odată cu el s-au stins și alertele."
+            echo "Avertismentul apare în aplicație, în pagina Conturi, atâta timp"
+            echo "cât sincronizarea automată nu rulează — acolo unde te uiți oricum."
+            exit 0
           fi
           if [ "$code" != "200" ]; then
             echo "Endpoint a răspuns cu $code"

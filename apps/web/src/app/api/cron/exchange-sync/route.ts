@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { HEARTBEAT_KEY } from "@/lib/sync-heartbeat";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/twofactor";
@@ -223,6 +224,21 @@ export async function GET(req: NextRequest) {
       }
     }
   }
+
+  // ── Puls ──
+  // Semnul că sincronizarea automată trăiește. Absența lui e singurul semnal
+  // posibil când cron-ul nu poate nici măcar să se autentifice: atunci nu ajunge
+  // să ruleze nimic, deci nu poate raporta el însuși că e rupt.
+  //
+  // Aplicația citește vechimea asta și o arată acolo unde te uiți oricum. Până
+  // acum singurul semnal era un email „All jobs have failed" — pe care l-ai oprit,
+  // firește, și odată cu el ai stins și funcția fără să știi. Un produs care își
+  // spune singur când o parte din el nu merge nu depinde de cine citește emailuri.
+  await prisma.appSetting.upsert({
+    where: { key: HEARTBEAT_KEY },
+    create: { key: HEARTBEAT_KEY, value: String(Date.now()) },
+    update: { value: String(Date.now()) },
+  });
 
   return NextResponse.json({
     ok: true,

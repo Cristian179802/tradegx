@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import {
   Plus, Pencil, Trash2, TrendingUp, TrendingDown, BarChart3,
   RefreshCw, Wifi, WifiOff, ArrowUpRight, ArrowDownRight,
-  Activity, Shield, Zap,
+  Activity, Shield, Zap, AlertCircle,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -59,7 +59,14 @@ const CARD_GLOW: Record<string, string> = {
   LIVE:      "hover:shadow-emerald-500/20 hover:shadow-xl",
 };
 
-export function AccountsClient({ initialAccounts }: { initialAccounts: Account[] }) {
+export function AccountsClient({
+  initialAccounts,
+  syncHealth,
+}: {
+  initialAccounts: Account[];
+  /** Prezent doar când sincronizarea automată NU a rulat recent. */
+  syncHealth?: { ok: boolean; staleMinutes: number | null } | null;
+}) {
   const t = useTranslations("accounts");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -183,6 +190,28 @@ export function AccountsClient({ initialAccounts }: { initialAccounts: Account[]
           {t("addAccount")}
         </Button>
       </div>
+
+      {/* ── Sincronizarea automată nu rulează ──────────────────────────────────
+          Semnalul stă AICI, nu într-un email. Alertele de preț au fost moarte
+          șase zile fiindcă singurul avertisment era o notificare de la GitHub, la
+          fiecare zece minute, atât de zgomotoasă încât a fost oprită — și odată
+          cu ea s-a stins funcția. Un semnal pe care îl închizi nu e un semnal.
+
+          Ton informativ, nu alarmă: împrospătarea la deschidere merge în
+          continuare, deci nimic nu e pierdut, doar întârziat. */}
+      {syncHealth && (
+        <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] px-4 py-3">
+          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-200">{t("syncPausedTitle")}</p>
+            <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "var(--ink-3)" }}>
+              {syncHealth.staleMinutes === null
+                ? t("syncPausedNever")
+                : t("syncPausedStale", { min: syncHealth.staleMinutes })}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Empty state */}
       {accounts.length === 0 ? (

@@ -286,7 +286,10 @@
     "deleteConfirm": "Ești sigur că vrei să ștergi acest cont? Toate tranzacțiile asociate vor fi șterse permanent și nu pot fi recuperate.",
     "deleting": "Se șterge...",
     "deleteForever": "Șterge definitiv",
-    "balance": "Balanță"
+    "balance": "Balanță",
+    "syncPausedTitle": "Sincronizarea automată nu rulează",
+    "syncPausedNever": "Sincronizarea automată nu a rulat niciodată. Datele se împrospătează când deschizi aplicația sau apeși butonul de sincronizare de pe cont.",
+    "syncPausedStale": "Ultima rulare automată a fost acum {min} de minute. Datele se împrospătează când deschizi aplicația sau apeși butonul de sincronizare de pe cont."
   },
   "goals": {
     "title": "Obiective",

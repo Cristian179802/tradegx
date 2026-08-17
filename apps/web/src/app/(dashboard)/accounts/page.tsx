@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getSyncHealth } from "@/lib/sync-heartbeat";
 import { isExchangeSourced } from "@/lib/exchange-sourced";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -86,5 +87,16 @@ export default async function AccountsPage() {
     };
   });
 
-  return <AccountsClient initialAccounts={accounts} />;
+  // Sănătatea sincronizării automate, dar DOAR pentru cine are conturi conectate:
+  // pe un cont cu importuri CSV nu există nimic de sincronizat, deci avertismentul
+  // ar fi zgomot despre o funcție pe care nici nu o folosește.
+  const hasConnected = raw.some((a) => isExchangeSourced(a.brokerSource));
+  const syncHealth = hasConnected ? await getSyncHealth() : null;
+
+  return (
+    <AccountsClient
+      initialAccounts={accounts}
+      syncHealth={syncHealth && !syncHealth.ok ? syncHealth : null}
+    />
+  );
 }

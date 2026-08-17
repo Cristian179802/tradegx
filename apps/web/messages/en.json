@@ -286,7 +286,10 @@
     "deleteConfirm": "Are you sure you want to delete this account? All associated trades will be permanently deleted and cannot be recovered.",
     "deleting": "Deleting...",
     "deleteForever": "Delete permanently",
-    "balance": "Balance"
+    "balance": "Balance",
+    "syncPausedTitle": "Automatic sync is not running",
+    "syncPausedNever": "Automatic sync has never run. Data still refreshes when you open the app or press the sync button on an account.",
+    "syncPausedStale": "The last automatic run was {min} minutes ago. Data still refreshes when you open the app or press the sync button on an account."
   },
   "goals": {
     "title": "Goals",
