@@ -59,12 +59,12 @@
     "greetingDay": "Good afternoon",
     "greetingEvening": "Good evening",
     "subtitle": "Your trading performance, in real time.",
-    "netPnl": "Net P&L",
+    "netPnl": "Realized P&L",
     "winRate": "Win Rate",
     "profitFactor": "Profit Factor",
     "maxDrawdown": "Max Drawdown",
     "trades": "Trades",
-    "ofTrades": "of {count} trades",
+    "ofTrades": "from {count} closed positions",
     "noTrade": "no trades yet",
     "excellent": "excellent ✨",
     "positive": "positive",
@@ -95,7 +95,11 @@
     "avgLoss": "Avg loss",
     "addTradeBtn": "Add trade",
     "daysShort": "days",
-    "ambientRisk": "Risk: {pct}% of drawdown limit"
+    "ambientRisk": "Risk: {pct}% of drawdown limit",
+    "accountValue": "Account value",
+    "atMarket": "at market price",
+    "notSynced": "not synced",
+    "withOpen": "{count} open positions"
   },
   "edge": {
     "subtitle": "The statistical engine that shows you exactly where you make and lose money — by symbol, setup, killzone, day, hour and duration.",

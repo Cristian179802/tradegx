@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import {
   ArrowRight, CalendarDays, TrendingUp, TrendingDown,
   Activity, Target, BarChart2, Zap, ChevronRight, Award,
-  ArrowUpRight, ArrowDownRight, Clock, Flame,
+  ArrowUpRight, ArrowDownRight, Clock, Flame, Wallet,
 } from "lucide-react";
 import { LiveChart } from "@/components/dashboard/live-chart";
 import { MarketSessions } from "@/components/dashboard/market-sessions";
@@ -25,6 +25,11 @@ import { useTranslations, useLocale } from "next-intl";
 interface DashboardData {
   userName: string;
   totalTrades: number;
+  /** Cât ai în cont, evaluat la prețul pieței. O valoare, nu un profit. */
+  accountValue: number;
+  /** Fals = niciun cont sincronizat, deci „0,00" ar fi o minciună cu aplomb. */
+  hasAccountValue: boolean;
+  openPositions: number;
   netPnl: number;
   winRate: number | null;
   profitFactor: number | null;
@@ -296,7 +301,8 @@ export function DashboardClient({ data }: { data: DashboardData }) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const {
-    userName, totalTrades, netPnl, winRate, profitFactor, maxDrawdown, maxDrawdownLimit,
+    userName, totalTrades, accountValue, hasAccountValue, openPositions,
+    netPnl, winRate, profitFactor, maxDrawdown, maxDrawdownLimit,
     wins, losses, bestTrade, worstTrade, avgWin, avgLoss, currency,
     tradingStreak, weekTradeCount, weekWinRate,
     recentTrades, pairPerformance, sparklines,
@@ -374,7 +380,26 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       </div>
 
       {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* Valoarea contului stă PRIMA, fiindcă e cifra după care te orientezi
+            când deschizi aplicația: cât ai. Neutră la culoare intenționat —
+            verdele și roșul sunt rezervate pentru P&L, iar un sold nu e nici
+            câștig nici pierdere. */}
+        <KPICard
+          label={t("accountValue")}
+          value={hasAccountValue ? fmt(accountValue, currency) : "—"}
+          sub={
+            hasAccountValue
+              ? openPositions > 0
+                ? t("withOpen", { count: openPositions })
+                : t("atMarket")
+              : t("notSynced")
+          }
+          trend="neutral"
+          icon={Wallet}
+          accent="indigo"
+          delay={0}
+        />
         <KPICard
           label={t("netPnl")}
           value={totalTrades > 0 ? fmt(netPnl, currency) : "—"}

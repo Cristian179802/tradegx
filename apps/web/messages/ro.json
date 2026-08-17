@@ -59,12 +59,12 @@
     "greetingDay": "Bună ziua",
     "greetingEvening": "Bună seara",
     "subtitle": "Performanța ta de trading, în timp real.",
-    "netPnl": "Profit Net",
+    "netPnl": "P&L realizat",
     "winRate": "Win Rate",
     "profitFactor": "Profit Factor",
     "maxDrawdown": "Max Drawdown",
     "trades": "Tranzacții",
-    "ofTrades": "din {count} trades",
+    "ofTrades": "din {count} poziții închise",
     "noTrade": "nicio tranzacție",
     "excellent": "excelent ✨",
     "positive": "pozitiv",
@@ -95,7 +95,11 @@
     "avgLoss": "Avg pierdere",
     "addTradeBtn": "Adaugă tranzacție",
     "daysShort": "zile",
-    "ambientRisk": "Risc: {pct}% din limita de drawdown"
+    "ambientRisk": "Risc: {pct}% din limita de drawdown",
+    "accountValue": "Valoare cont",
+    "atMarket": "la prețul pieței",
+    "notSynced": "nesincronizat",
+    "withOpen": "{count} poziții deschise"
   },
   "edge": {
     "subtitle": "Motorul statistic care îți arată exact unde câștigi și unde pierzi bani — pe simbol, setup, killzone, zi, oră și durată.",

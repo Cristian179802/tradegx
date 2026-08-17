@@ -112,6 +112,29 @@ export default async function DashboardPage() {
   const profitFactor = gl > 0 ? gp / gl : null;
   const primaryCurrency = accounts[0]?.currency ?? "USD";
 
+  // ── Valoarea contului ──────────────────────────────────────────────────────
+  //
+  // Cifra pe care o cauți când deschizi aplicația bursei: CÂT AI. Lipsea complet
+  // dintre carduri, iar în locul ei stătea cel mai mare, primul și pe roșu,
+  // profitul realizat. Două mărimi diferite, iar cea afișată era singura care
+  // poate fi negativă — de unde impresia că un cont cu 900 de dolari în el e un
+  // cont pe minus.
+  //
+  // O valoare nu poate fi negativă: e cât ai, nu cât ai câștigat. Vine de la
+  // bursă și include deja pozițiile deschise evaluate la prețul pieței, exact
+  // ca „Est. Total Value" din Binance.
+  const scopedAccounts = scope.accountId
+    ? accounts.filter((a) => a.id === scope.accountId)
+    : accounts;
+  const accountValue = scopedAccounts.reduce((s, a) => s + Number(a.balance ?? 0), 0);
+  // Zero real (cont nesincronizat) vs zero calculat: fără distincția asta am
+  // arăta „0,00" cu aplomb pe un cont care pur și simplu n-a fost citit încă.
+  const hasAccountValue = scopedAccounts.some((a) => Number(a.balance ?? 0) !== 0);
+
+  const openPositions = await prisma.trade.count({
+    where: { ...scope.where, status: "OPEN" },
+  });
+
   // Best / worst / avg trades — din TOATĂ istoria (nu doar ultimele 30)
   const allPnl = allSettledTrades.map((t) => Number(t.pnlMoney ?? 0));
   const winAmounts = allPnl.filter((p) => p > 0);
@@ -211,6 +234,9 @@ export default async function DashboardPage() {
       data={{
         userName: session.user.name?.split(" ")[0] ?? "Trader",
         totalTrades,
+        accountValue,
+        hasAccountValue,
+        openPositions,
         netPnl,
         winRate,
         profitFactor,
