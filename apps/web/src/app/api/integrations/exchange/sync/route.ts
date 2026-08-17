@@ -209,7 +209,18 @@ export async function POST(req: NextRequest) {
     const sinceFutures = account.lastSyncedAt
       ? account.lastSyncedAt.getTime() - DAY_MS
       : Date.now() - BINANCE_MAX_HISTORY_MS;
-    const sinceSpot = account.lastSyncedAt
+
+    // `lastSyncedAt` e unul singur pentru cont, dar spot intră în joc abia acum.
+    // Un cont sincronizat deja pe futures are marcajul pus, deci calea
+    // incrementală ar fi cerut de la spot doar ultima zi — primul import de spot
+    // ar fi adus aproape nimic și ar fi părut că funcția nu merge. Prima dată se
+    // ia tot, iar „prima dată" se citește din date: existența unei tranzacții cu
+    // prefixul de spot. Fără coloană nouă, fără migrare.
+    const spotAlreadyImported = await prisma.trade.findFirst({
+      where: { accountId: account.id, brokerTradeId: { startsWith: "bncs_" } },
+      select: { id: true },
+    });
+    const sinceSpot = account.lastSyncedAt && spotAlreadyImported
       ? account.lastSyncedAt.getTime() - DAY_MS
       : Date.now() - BINANCE_SPOT_MAX_HISTORY_MS;
 
