@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * Cât de des cere clientul alertele, cu tabul vizibil.
+ *
+ * Peste pragul de suspendare al bazei (5 minute) nu putem urca fără să întârziem
+ * alertele vizibil, dar 2 minute e deja de zece ori mai puțin decât înainte — iar
+ * în fundal nu se mai cere deloc.
+ */
+const VISIBLE_POLL_MS = 120_000;
+
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Bell, BellRing, BellOff, CheckCheck, AlertTriangle, TrendingDown, Zap, Info, X } from "lucide-react";
@@ -164,8 +173,20 @@ export function NotificationDropdown() {
   React.useEffect(() => {
     fetchAlerts(false); // prima încărcare — fără toast (doar baseline)
 
-    // Polling: 25s cu tab-ul vizibil; 90s în fundal DACĂ notificările de
-    // browser sunt active (altfel se oprește complet, ca înainte).
+    // Polling: rar cu tabul vizibil, OPRIT complet în fundal.
+    //
+    // Era 25s vizibil și 90s în fundal, iar asta a costat baza de date. Neon
+    // suspendă computul după 5 minute fără interogări, deci un poll mai des de
+    // atât îl ține treaz permanent: un singur tab uitat deschis însemna compute
+    // 24/7. Cu șase utilizatori s-a atins plafonul lunar.
+    //
+    // În fundal nu se mai cere nimic, niciodată. Notificările de sistem vin prin
+    // Web Push, care e ÎMPINS de server — un poll din fundal „ca să apară
+    // notificarea" dubla exact ce face push-ul oricum.
+    //
+    // 2 minute cu tabul vizibil, nu 25 de secunde: alertele de preț se verifică
+    // printr-un cron la 10 minute, deci întrebând mai des decât se schimbă sursa
+    // nu aflai nimic mai devreme.
     let id: ReturnType<typeof setInterval> | null = null;
     const start = (ms: number) => {
       if (id) clearInterval(id);
@@ -175,14 +196,12 @@ export function NotificationDropdown() {
       if (id) { clearInterval(id); id = null; }
     };
 
-    start(25_000);
+    start(VISIBLE_POLL_MS);
 
     const onVisible = () => {
       if (document.visibilityState === "visible") {
         fetchAlerts(true);
-        start(25_000);
-      } else if (webNotifyEnabled()) {
-        start(90_000); // fundal: mai rar, dar viu → notificări de sistem
+        start(VISIBLE_POLL_MS);
       } else {
         stop();
       }

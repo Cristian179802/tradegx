@@ -61,7 +61,10 @@ export function RiskPanel({
   const load = React.useCallback(async () => {
     setLoading(true); setErr(false);
     try {
-      const res = await fetch(`/api/charts/quote?symbol=${symbol}`, { cache: "no-store" });
+      // `withBalance=1`: panoul de risc chiar are nevoie de sold ca să calculeze
+      // dimensiunea poziției. Graficul live NU îl cere, tocmai ca interogarea lui
+      // de 5 secunde să nu atingă deloc baza de date.
+      const res = await fetch(`/api/charts/quote?symbol=${symbol}&withBalance=1`, { cache: "no-store" });
       if (!res.ok) { setErr(true); return; }
       const data = await res.json();
       setPrice(data.price);

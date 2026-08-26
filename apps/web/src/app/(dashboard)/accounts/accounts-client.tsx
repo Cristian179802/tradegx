@@ -84,10 +84,28 @@ export function AccountsClient({
     router.refresh();
   }
 
-  // Auto-refresh every 15s to pick up new accounts synced by EA
+  // Reîmprospătare periodică, ca să apară conturile sincronizate de EA.
+  //
+  // Era la 15 secunde și se învârtea și cu tabul în fundal — adică o interogare
+  // în baza de date la fiecare 15 secunde, ore în șir, pentru o pagină la care
+  // nimeni nu se uita. Neon suspendă computul după 5 minute fără interogări, deci
+  // bucla asta singură îl ținea treaz permanent.
+  //
+  // Acum: un minut cât te uiți, nimic cât nu te uiți, și o reîmprospătare imediat
+  // la revenire — care e oricum momentul în care ai vrea date proaspete.
   React.useEffect(() => {
-    const id = setInterval(refresh, 15_000);
-    return () => clearInterval(id);
+    let id: ReturnType<typeof setInterval> | null = null;
+    const start = () => { if (!id) id = setInterval(refresh, 60_000); };
+    const stop = () => { if (id) { clearInterval(id); id = null; } };
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") { refresh(); start(); }
+      else stop();
+    };
+
+    if (document.visibilityState === "visible") start();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVisible); };
   }, []);
 
   async function handleDelete() {
