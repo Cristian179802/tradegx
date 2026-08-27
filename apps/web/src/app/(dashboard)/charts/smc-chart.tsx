@@ -89,6 +89,12 @@ export function SmcChart({
   // de la server la fiecare bifă din meniu.
   const barsRef = React.useRef<SmcCandle[]>([]);
   const indSeriesRef = React.useRef<ISeriesApi<"Line" | "Histogram">[]>([]);
+  // Legenda: ce linie e care, și cât valorează acum. Fără ea, trei medii mobile
+  // pe ecran sunt trei linii colorate fără nume — vezi că se intersectează, dar
+  // nu poți spune CARE a trecut peste care, ceea ce e tot ce contează la ele.
+  const [legend, setLegend] = React.useState<
+    { label: string; color: string; value: number; digits: number }[]
+  >([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(false);
 
@@ -155,7 +161,14 @@ export function SmcChart({
 
     // Punctele cu null se OMIT, nu se trimit ca zero — o EMA care începe de la
     // zero desenează o linie verticală uriașă până la primul preț real.
-    const line = (vals: (number | null)[], color: string, width: 1 | 2 = 1, scaleId?: string) => {
+    const entries: { label: string; color: string; value: number; digits: number }[] = [];
+
+    const line = (
+      vals: (number | null)[], color: string, width: 1 | 2 = 1, scaleId?: string,
+      /** Numele din legendă. Lipsă = linie ajutătoare (praguri RSI, benzi) care
+       *  n-are ce căuta acolo: ar tripla lista fără să adauge informație. */
+      label?: string,
+    ) => {
       const s = chart.addLineSeries({
         color, lineWidth: width, priceLineVisible: false, lastValueVisible: false,
         crosshairMarkerVisible: false,
@@ -164,23 +177,38 @@ export function SmcChart({
       s.setData(vals.map((v, i) => (v == null ? null : { time: times[i], value: v }))
         .filter(Boolean) as never);
       indSeriesRef.current.push(s);
+      if (label) {
+        // Ultima valoare NENULĂ: pe barele de la început indicatorul încă nu are
+        // destule date, iar o legendă goală pe un indicator care se vede clar pe
+        // grafic ar arăta a defect.
+        for (let i = vals.length - 1; i >= 0; i--) {
+          if (vals[i] != null) {
+            // Oscilatorii au propria scară: RSI merge 0-100, MACD și ATR sunt
+            // diferențe mici. Scrise cu zecimalele prețului, un RSI pe EURUSD ar
+            // apărea „66.25000" — corect, dar ilizibil.
+            const digits = scaleId === "osc" ? 2 : decimals;
+            entries.push({ label, color, value: vals[i] as number, digits });
+            break;
+          }
+        }
+      }
       return s;
     };
 
-    if (has("ema9"))   line(ema(closes, 9), "#38bdf8");
-    if (has("ema21"))  line(ema(closes, 21), accent);
-    if (has("ema50"))  line(ema(closes, 50), "#fbbf24");
-    if (has("ema200")) line(ema(closes, 200), "#f472b6", 2);
-    if (has("sma50"))  line(sma(closes, 50), "#a78bfa");
-    if (has("sma200")) line(sma(closes, 200), "#94a3b8", 2);
+    if (has("ema9"))   line(ema(closes, 9), "#38bdf8", 1, undefined, "EMA 9");
+    if (has("ema21"))  line(ema(closes, 21), accent, 1, undefined, "EMA 21");
+    if (has("ema50"))  line(ema(closes, 50), "#fbbf24", 1, undefined, "EMA 50");
+    if (has("ema200")) line(ema(closes, 200), "#f472b6", 2, undefined, "EMA 200");
+    if (has("sma50"))  line(sma(closes, 50), "#a78bfa", 1, undefined, "SMA 50");
+    if (has("sma200")) line(sma(closes, 200), "#94a3b8", 2, undefined, "SMA 200");
 
     if (has("bb")) {
       const b = bollinger(closes, 20, 2);
       line(b.upper, "rgba(129,140,248,0.55)");
-      line(b.mid,   "rgba(129,140,248,0.35)");
+      line(b.mid,   "rgba(129,140,248,0.35)", 1, undefined, "BB 20");
       line(b.lower, "rgba(129,140,248,0.55)");
     }
-    if (has("vwap")) line(vwap(bars as Bar[]), "#facc15", 2);
+    if (has("vwap")) line(vwap(bars as Bar[]), "#facc15", 2, undefined, "VWAP");
 
     if (has("volume")) {
       const s = chart.addHistogramSeries({
@@ -200,14 +228,14 @@ export function SmcChart({
     const osc = ["rsi", "macd", "atr"].find(has);
     if (osc) {
       if (osc === "rsi") {
-        line(rsi(closes, 14), accent, 1, "osc");
+        line(rsi(closes, 14), accent, 1, "osc", "RSI 14");
         // Pragurile 30/70 desenate ca linii plate — reperele fără de care RSI
         // nu spune nimic.
         line(closes.map(() => 70), "rgba(148,163,184,0.28)", 1, "osc");
         line(closes.map(() => 30), "rgba(148,163,184,0.28)", 1, "osc");
       } else if (osc === "macd") {
         const m = macd(closes, 12, 26, 9);
-        line(m.line, accent, 1, "osc");
+        line(m.line, accent, 1, "osc", "MACD");
         line(m.signal, "#fbbf24", 1, "osc");
         const h = chart.addHistogramSeries({
           priceScaleId: "osc", priceLineVisible: false, lastValueVisible: false,
@@ -217,10 +245,12 @@ export function SmcChart({
         })).filter(Boolean) as never);
         indSeriesRef.current.push(h);
       } else {
-        line(atr(bars as Bar[], 14), "#fbbf24", 1, "osc");
+        line(atr(bars as Bar[], 14), "#fbbf24", 1, "osc", "ATR 14");
       }
       chart.priceScale("osc").applyOptions({ scaleMargins: { top: 0.78, bottom: 0.02 } });
     }
+
+    setLegend(entries);
   }, [indicators]);
 
   React.useEffect(() => { rebuildIndicators(); }, [rebuildIndicators]);
@@ -634,6 +664,31 @@ export function SmcChart({
         style={{ display: "none", touchAction: "none" }}
         className="absolute left-0 right-0 h-3 z-20 cursor-ns-resize"
       />
+
+      {/* Legenda indicatorilor: stânga-sus, ca să nu intre în prețul viu din
+          dreapta. `pointer-events-none` fiindcă graficul de dedesubt trebuie să
+          rămână tragabil — o legendă care fură clicurile e mai enervantă decât
+          una lipsă.
+
+          Mediile mobile folosesc zecimalele prețului — scrise cu două, pe EURUSD
+          ar arăta identic ore în șir. Oscilatorii folosesc două, că au altă
+          scară. */}
+      {legend.length > 0 && (
+        <div className="absolute top-2 left-2 z-20 flex flex-col gap-0.5 pointer-events-none">
+          {legend.map((l) => (
+            <div
+              key={l.label}
+              className="flex items-center gap-1.5 rounded bg-[color:var(--s-1)]/75 px-1.5 py-0.5 backdrop-blur-sm w-fit"
+            >
+              <span className="w-2 h-[2px] rounded-full shrink-0" style={{ background: l.color }} />
+              <span className="text-[10px] font-semibold text-[color:var(--ink-3)]">{l.label}</span>
+              <span className="text-[10px] font-bold tabular-nums text-[color:var(--ink-2)]">
+                {l.value.toFixed(l.digits)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Prețul viu. Fără text tradus: doar cifra, un punct colorat pentru
           starea fluxului și, la instrumentele întârziate, minutele de decalaj —

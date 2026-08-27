@@ -7,6 +7,7 @@ import { TradingViewChart } from "./tradingview-chart";
 import { AnalyzePanel } from "./analyze-panel";
 import { RiskPanel } from "./risk-panel";
 import { SmcChart, CHART_INDICATORS, type SmcToggles, type ChartType } from "./smc-chart";
+import { usePersistedState } from "@/lib/use-persisted-state";
 import { Search, Star, LineChart, X, ChevronDown, Square, Columns2, LayoutGrid, Maximize2, Minimize2, Brain, Crosshair, Boxes } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -116,14 +117,23 @@ export default function ChartsPage() {
   const locale = useLocale();
   const tvLocale = locale === "en" ? "en" : "ro";
 
-  const [layout, setLayout] = React.useState<1 | 2 | 4>(1);
-  const [cells, setCells] = React.useState(DEFAULT_CELLS);
+  const [layout, setLayout] = usePersistedState<1 | 2 | 4>("charts:layout", 1,
+    (v) => v === 1 || v === 2 || v === 4);
+  const [cells, setCells] = usePersistedState("charts:cells", DEFAULT_CELLS,
+    (v) => Array.isArray(v) && v.length === 4 && v.every((c) => c && typeof c.symbol === "string" && typeof c.timeframe === "string"));
   const [activeCell, setActiveCell] = React.useState(0);
   const [search, setSearch] = React.useState("");
-  const [favorites, setFavorites] = React.useState<string[]>(["EURUSD", "XAUUSD", "BTCUSD", "NAS100"]);
+  const [favorites, setFavorites] = usePersistedState<string[]>("charts:favorites",
+    ["EURUSD", "XAUUSD", "BTCUSD", "NAS100"],
+    (v) => Array.isArray(v) && v.every((x) => typeof x === "string"));
   const [studies, setStudies] = React.useState<string[]>([]);
-  const [myInd, setMyInd] = React.useState<string[]>(["ema21", "volume"]);
-  const [chartType, setChartType] = React.useState<ChartType>("candles");
+  // Indicatorii bifați — cel mai des schimbat lucru de pe pagină, și cel a cărui
+  // pierdere se simte cel mai tare. Se filtrează la citire: un ID rămas de la o
+  // versiune veche ar fi ignorat oricum de grafic, dar ar rămâne bifat în meniu.
+  const [myInd, setMyInd] = usePersistedState<string[]>("charts:indicators", ["ema21", "volume"],
+    (v) => Array.isArray(v) && v.every((x) => CHART_INDICATORS.some((i) => i.id === x)));
+  const [chartType, setChartType] = usePersistedState<ChartType>("charts:type", "candles",
+    (v) => v === "candles" || v === "heikin");
   const [indOpen, setIndOpen] = React.useState(false);
   const [activeGroup, setActiveGroup] = React.useState(0);
   const [zen, setZen] = React.useState(false);
@@ -132,7 +142,8 @@ export default function ChartsPage() {
   // Graficul propriu e implicit: are pretul viu, tranzactiile si alertele tale.
   // Widgetul TradingView ramane la un click, pentru cand vrei datele lor de bursa
   // la aur si indici, unde sunt mai proaspete decat ce luam gratuit de la Yahoo.
-  const [smcMode, setSmcMode] = React.useState(true);
+  const [smcMode, setSmcMode] = usePersistedState("charts:smcMode", true,
+    (v) => typeof v === "boolean");
   const [smcToggles, setSmcToggles] = React.useState<SmcToggles>({ ob: true, fvg: true, liq: true, struct: true });
   const indRef = React.useRef<HTMLDivElement>(null);
   const tAI = useTranslations("chartAI");
