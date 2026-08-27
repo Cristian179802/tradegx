@@ -407,6 +407,19 @@ export async function runExchangeSync(opts: {
     };
   } catch (err) {
     if (err instanceof SyncError) throw err;
-    throw new SyncError(err instanceof Error ? err.message : "Eroare la bursă", 502);
+    const msg = err instanceof Error ? err.message : "Eroare la bursă";
+
+    // O cheie revocată sau fără permisiuni NU e o eroare trecătoare: nimic din
+    // ce facem noi n-o repară. Ambalată ca 502, cron-ul o trata drept hop de
+    // rețea și reîncerca la fiecare cinci minute, la nesfârșit — irosind din
+    // bugetul de cereri al Binance, care e comun cu fluxul de prețuri live al
+    // TUTUROR utilizatorilor. Marcată 401, contul intră în răcire până când
+    // utilizatorul reconectează cheile.
+    //
+    // Codurile sunt cele documentate de burse: -2008 și -2015 la Binance
+    // („Invalid Api-Key ID", „Invalid API-key, IP, or permissions"), 10003 și
+    // 10004 la Bybit, plus 401/403 la nivel de HTTP.
+    const authFailure = /401|403|-2008|-2015|10003|10004|invalid api.?key|api.?key.*permission|signature/i.test(msg);
+    throw new SyncError(msg, authFailure ? 401 : 502);
   }
 }

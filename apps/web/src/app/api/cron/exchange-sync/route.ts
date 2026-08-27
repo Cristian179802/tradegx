@@ -103,6 +103,10 @@ export async function GET(req: NextRequest) {
   }
 
   let checked = 0, unchanged = 0, synced = 0, imported = 0, failed = 0, cooling = 0;
+  // Motivele eșecurilor ajung în răspuns, deci în logul workflow-ului. De trei ori
+  // până acum am pierdut ore pentru că ceva pica în tăcere și singurul semn era un
+  // număr. Un contor spune CÂTE au picat; asta spune DE CE.
+  const failures: string[] = [];
 
   for (const account of accounts) {
     if (Date.now() - t0 > TICK_BUDGET_MS) break;
@@ -221,6 +225,8 @@ export async function GET(req: NextRequest) {
       // Un cont picat (chei revocate, bursă indisponibilă) nu are voie să
       // oprească restul rulării.
       failed++;
+      const why = err instanceof Error ? err.message : String(err);
+      failures.push(`${account.brokerSource}: ${why.slice(0, 120)}`);
 
       // Ce cere intervenția utilizatorului intră în răcire. Un token expirat nu
       // se repară singur, iar reîncercarea la fiecare cinci minute doar consumă
@@ -257,6 +263,7 @@ export async function GET(req: NextRequest) {
     ok: true,
     candidates: accounts.length,
     checked, unchanged, synced, imported, failed, cooling,
+    failures: failures.length > 0 ? failures : undefined,
     ms: Date.now() - t0,
   });
 }
