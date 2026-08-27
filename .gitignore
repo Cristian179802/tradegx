@@ -54,3 +54,7 @@ backfill.mjs
 *.bundle
 apps/web/seed-demo.mjs
 apps/web/test-trial-expiry.mjs
+apps/web/test-webpush.mjs
+
+# Fișier temporar de migrare: conține parola bazei de date.
+.env.migrate

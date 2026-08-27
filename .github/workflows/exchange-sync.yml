@@ -15,26 +15,12 @@ name: Exchange sync cron
 # deci costul nu crește cu numărul de utilizatori.
 
 on:
-  # ── PROGRAMAREA E OPRITĂ INTENȚIONAT ────────────────────────────────────────
-  #
-  # Nu din cauza GitHub, ci a bazei de date. Neon suspendă computul după 5 minute
-  # fără interogări, iar planul gratuit dă 100 CU-ore pe lună. Un cron la 5 minute
-  # ține baza trează 100% din timp: 0,25 CU × 720 ore = 180 CU-ore, adică de 1,8
-  # ori toată alocația lunară — doar el, fără niciun utilizator.
-  #
-  # Pe 26 august alocația s-a epuizat și Neon a anunțat că interogările pot începe
-  # să eșueze. Pornit acum, cron-ul ar fi accelerat exact asta.
-  #
-  # Sincronizarea NU e moartă între timp: se face la deschiderea aplicației și la
-  # revenirea în tab, prin sesiunea utilizatorului (vezi /api/accounts/refresh),
-  # plus butonul din pagina Conturi.
-  #
-  # CA SĂ O PORNEȘTI: treci Neon pe un plan plătit (computul nu mai are plafon de
-  # ore), apoi decomentează cele două linii de mai jos. Pe planul gratuit, un cron
-  # la 5 minute e incompatibil cu alocația — nu e o chestiune de reglaj fin.
-  #
-  # schedule:
-  #   - cron: "*/5 * * * *"
+  # Baza de date e pe Supabase, care taxează pe instanță, nu pe orele cât e trează.
+  # Pe Neon, acest cron ar fi costat 180 CU-ore pe lună — de 1,8 ori toată alocația
+  # gratuită — fiindcă ținea computul treaz non-stop. Aici nu costă nimic în plus,
+  # iar suspendarea se face abia după o SĂPTĂMÂNĂ de inactivitate, nu după 5 minute.
+  schedule:
+    - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
 # O singură rulare odată. Fără asta, o rulare întârziată s-ar suprapune cu

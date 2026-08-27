@@ -42,8 +42,21 @@ export const maxDuration = 60;
 
 /** Cât lucrează o rulare. Sub maxDuration, cu marjă pentru răspuns. */
 const TICK_BUDGET_MS = 45_000;
-/** Câte conturi verificăm per rulare. Mărginit ca să nu depindă de câți useri sunt. */
-const MAX_ACCOUNTS = 40;
+/**
+ * Câte conturi verificăm per rulare.
+ *
+ * Ăsta e plafonul REAL al promisiunii „sincronizare la 5 minute": cu mai multe
+ * conturi decât atât, coada se rotește și fiecare cont ajunge la rând o dată la
+ * `ceil(N/MAX) × 5` minute.
+ *
+ * 100, nu mai mult, iar limita nu e baza de date — e Binance. Verificarea de
+ * activitate costă ~25 de puncte, iar bursa dă 6000 pe minut PER IP, pe același
+ * IP cu fluxul de prețuri live al tuturor utilizatorilor. 100 de verificări
+ * întinse pe o rulare stau confortabil sub prag; dublul ar începe să concureze
+ * cu prețurile, iar un 418 de la Binance ar lăsa tot site-ul fără cotații ca să
+ * sincronizăm mai repede câteva conturi.
+ */
+const MAX_ACCOUNTS = 100;
 /** Cât primește un singur cont, ca unul lent să nu mănânce toată rularea. */
 const PER_ACCOUNT_BUDGET_MS = 12_000;
 /** Chiar fără nicio activitate, resincronizăm rar — prinde depuneri și retrageri. */

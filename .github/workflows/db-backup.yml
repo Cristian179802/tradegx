@@ -1,0 +1,68 @@
+name: Backup baza de date
+
+# Supabase Free NU are backupuri automate. Aplicația ține jurnalele de trading ale
+# unor clienți plătitori, deci o copie proprie nu e opțională.
+#
+# Rulează duminica la 03:00 UTC și poate fi pornit oricând manual.
+#
+# Necesită secretul SUPABASE_DB_URL în GitHub (Settings → Secrets → Actions), cu
+# șirul SESSION POOLER (portul 5432, gazda `...pooler.supabase.com`).
+# NU cel direct: conexiunea directă a Supabase e doar pe IPv6, iar runnerele
+# GitHub n-au IPv6 — ar eșua cu un „connection refused" care nu spune de ce.
+# Și NU cel de tranzacții (6543): `pg_dump` are nevoie de o sesiune adevărată.
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"
+  workflow_dispatch: {}
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # `pg_dump` rulează într-un container cu ACEEAȘI versiune majoră ca serverul
+      # (Postgres 17). Versiunea din runner variază în timp, iar un pg_dump mai
+      # vechi decât serverul refuză să pornească — un backup care se strică singur
+      # peste șase luni, exact când ai nevoie de el, e mai rău decât niciunul.
+      - name: Dump
+        run: |
+          set -euo pipefail
+          stamp=$(date -u +%Y%m%d-%H%M)
+          docker run --rm -i \
+            -e PGCONN="${{ secrets.SUPABASE_DB_URL }}" \
+            -v "$PWD:/out" postgres:17 \
+            bash -c 'pg_dump "$PGCONN" --format=custom --no-owner --no-privileges \
+              --schema=public --file=/out/backup.dump'
+          mv backup.dump "tradegx-$stamp.dump"
+          echo "NUME=tradegx-$stamp.dump" >> "$GITHUB_ENV"
+          ls -lh tradegx-*.dump
+
+      # Un fișier care există dar e gol trece neobservat până în ziua în care vrei
+      # să-l restaurezi. Verificăm că se poate CITI și că are tabelele așteptate.
+      - name: Verifică arhiva
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/out" postgres:17 \
+            pg_restore --list "/out/$NUME" > toc.txt
+          tabele=$(grep -c "TABLE DATA" toc.txt || true)
+          echo "tabele cu date în arhivă: $tabele"
+          if [ "$tabele" -lt 20 ]; then
+            echo "Arhiva are doar $tabele tabele — sub pragul așteptat. Backup NEVALID."
+            exit 1
+          fi
+          echo "✓ arhivă validă"
+
+      - name: Încarcă
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NUME }}
+          path: ${{ env.NUME }}
+          # Maximul permis de GitHub. Backupul cel mai vechi pe care îl ai la
+          # îndemână acoperă trei luni în urmă.
+          retention-days: 90
+          if-no-files-found: error
