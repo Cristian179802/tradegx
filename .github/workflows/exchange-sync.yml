@@ -15,12 +15,19 @@ name: Exchange sync cron
 # deci costul nu crește cu numărul de utilizatori.
 
 on:
-  # Baza de date e pe Supabase, care taxează pe instanță, nu pe orele cât e trează.
-  # Pe Neon, acest cron ar fi costat 180 CU-ore pe lună — de 1,8 ori toată alocația
-  # gratuită — fiindcă ținea computul treaz non-stop. Aici nu costă nimic în plus,
-  # iar suspendarea se face abia după o SĂPTĂMÂNĂ de inactivitate, nu după 5 minute.
-  schedule:
-    - cron: "*/5 * * * *"
+  # ── PROGRAMAREA S-A MUTAT ÎN BAZA DE DATE ───────────────────────────────────
+  #
+  # Sincronizările sunt acum declanșate de `pg_cron` din Supabase, prin `pg_net`.
+  # Motivul e măsurat, nu teoretic: acest workflow cerea rulări la 5 minute, iar
+  # GitHub livra la 47 de minute până la 16 ore. O alertă de preț care ajunge
+  # după 16 ore e mai rea decât una lipsă — pare că funcția merge.
+  #
+  # pg_cron respectă intervalul la secundă, rulează în baza pe care o avem oricum,
+  # și nu costă nimic în plus. Joburile se văd cu:
+  #   select * from cron.job;
+  #   select * from cron.job_run_details order by start_time desc;
+  #
+  # Declanșarea manuală rămâne, ca plasă de siguranță dacă baza e indisponibilă.
   workflow_dispatch: {}
 
 # O singură rulare odată. Fără asta, o rulare întârziată s-ar suprapune cu
