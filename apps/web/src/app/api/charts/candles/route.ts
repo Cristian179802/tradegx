@@ -38,9 +38,20 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Date insuficiente pentru acest simbol.", code: "NO_DATA" }, { status: 422 });
   }
 
-  // limităm la ultimele 400 pentru performanță (v = volum, pt. harta 3D)
+  // Limităm la ultimele 400 pentru performanță (v = volum, pt. harta 3D).
+  //
+  // Timpul se convertește în SECUNDE. `fetchHistoricalCandles` întoarce
+  // milisecunde (convenția JavaScript), dar lightweight-charts citește numerele ca
+  // secunde Unix. Trimise ca atare, o lumânare de azi ajungea în anul 58624 — de
+  // acolo veneau cifrele de pe axa de timp, care erau ANI, nu ore.
+  //
+  // Stricau și altceva, mai greu de observat: /api/charts/trades întoarce timpul
+  // corect, în secunde, deci marcajele tranzacțiilor tale cădeau la 58 de mii de
+  // ani distanță de lumânări și nu se vedeau niciodată. Conversia se face aici,
+  // într-un singur loc, ca toate straturile graficului să vorbească aceeași unitate.
   const trimmed = candles.slice(-400).map((c) => ({
-    time: c.time, open: c.open, high: c.high, low: c.low, close: c.close, v: c.volume ?? 0,
+    time: Math.floor(c.time / 1000),
+    open: c.open, high: c.high, low: c.low, close: c.close, v: c.volume ?? 0,
   }));
 
   return NextResponse.json({ ok: true, symbol, candles: trimmed });
