@@ -3055,6 +3055,9 @@
     "edge": "Edge Finder",
     "monteCarlo": "Monte Carlo",
     "lesson": "Lecție",
-    "quiz": "Quiz"
+    "quiz": "Quiz",
+    "aiCoach": "AI Coach",
+    "community": "Comunitate",
+    "riskManager": "Risk Manager"
   }
 }

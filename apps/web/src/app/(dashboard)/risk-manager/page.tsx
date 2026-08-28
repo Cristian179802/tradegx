@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getAccountScope } from "@/lib/account-scope";
 import { redirect } from "next/navigation";
 import { RiskManagerClient } from "./risk-manager-client";
 
-export const metadata: Metadata = { title: "Risk Manager — TradeGx" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pageTitles");
+  return { title: t("riskManager") };
+}
 
 export default async function RiskManagerPage() {
   const session = await auth();

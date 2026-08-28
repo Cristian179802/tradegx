@@ -3,8 +3,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { CommunityClient } from "./community-client";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Comunitate — TradeGx" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pageTitles");
+  return { title: t("community") };
+}
 
 export default async function CommunityPage() {
   const session = await auth();

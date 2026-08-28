@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 // Datele apartin contului selectat. Paginile sunt componente de server si
 // interogheaza direct baza de date, deci migrarea rutelor API nu le atingea —
 // antetul arata „Binance Futures" iar cifrele erau tot de pe MT5.
@@ -9,7 +10,10 @@ import { getAccountScope } from "@/lib/account-scope";
 import { AIChatClient } from "./chat-client";
 import type { TraderStatsType } from "@/app/api/ai-assistant/chat/route";
 
-export const metadata: Metadata = { title: "AI Coach — TradeGx" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pageTitles");
+  return { title: t("aiCoach") };
+}
 
 async function getTraderStats(userId: string): Promise<TraderStatsType> {
   const scope = await getAccountScope(userId);
