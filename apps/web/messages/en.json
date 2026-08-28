@@ -2959,7 +2959,13 @@
     "struct": "BOS / CHoCH",
     "auto": "Auto-detected from price action",
     "loading": "Detecting structure…",
-    "noData": "Not enough data for this symbol."
+    "noData": "Not enough data for this symbol.",
+    "toolCursor": "Cursor",
+    "toolTrend": "Trend line",
+    "toolHLine": "Horizontal line",
+    "toolRect": "Rectangle",
+    "delSelected": "Delete selection (Delete)",
+    "delAll": "Delete all drawings"
   },
   "institutional": {
     "metaTitle": "Institutional metrics — TradeGx",

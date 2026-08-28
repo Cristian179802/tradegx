@@ -121,6 +121,22 @@ for (const file of walk(ROOT)) {
     }
   }
 
+  // ── pasul 4: tabele de tuple ─────────────────────────────────────────────
+  // Al doilea punct orb, descoperit tot pe viu: bara de instrumente a graficului
+  // își ținea etichetele în tuple — `["trend", "Linie trend", "M2 14 L14 2"]` —
+  // randate prin `title={label}`. Nu e text JSX, nu e atribut literal, nu e
+  // pereche cheie-valoare, deci niciunul din pașii de dinainte nu-l vedea.
+  //
+  // Căutăm șiruri românești în tuple, sărind peste primul element: acolo stau de
+  // regulă identificatorii („trend", „hline"), care sunt cod, nu text. Căile SVG
+  // și clasele CSS nu conțin diacritice, deci nu produc alarme false.
+  const TUPLE_STR = /\[\s*"[^"\n]*"\s*,\s*"([^"\n]{3,})"/g;
+  let tm;
+  TUPLE_STR.lastIndex = 0;
+  while (!hasLocaleDict && (tm = TUPLE_STR.exec(noComments))) {
+    if (isRomanian(tm[1])) add(lineOf(src, tm.index), `tuplu: "${tm[1].trim()}"`);
+  }
+
   // pasul multi-linie (pe tot fișierul). Acceptăm doar PROZĂ (fără tokenuri de cod),
   // ca să nu prindem comentarii/cod între operatori `>` `<`.
   const CODEY = /[=;()/\\`|]|\/\/|=>|\bconst\b|\breturn\b|\bnew\b|\bMap\b|\bfunction\b/;

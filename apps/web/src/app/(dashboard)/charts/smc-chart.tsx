@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { createChart, CrosshairMode, type IChartApi, type IPriceLine, type ISeriesApi, type UTCTimestamp } from "lightweight-charts";
+import { priceDigits, priceFormatFor } from "@/lib/price-format";
+import {
+  loadDrawings, saveDrawings, hitTest, newId,
+  type Drawing, type DrawingTool, type Point,
+} from "@/lib/chart-drawings";
 import { detectSMC, type SmcResult, type SmcCandle } from "@tradegx/core";
 import { Loader2 } from "lucide-react";
 import { useLivePrice } from "@/lib/use-live-price";
@@ -53,6 +59,10 @@ export const CHART_INDICATORS = [
  * declarăm până nu există, ca meniul să nu ofere opțiuni moarte. */
 export type ChartType = "candles" | "heikin";
 
+/** Culoarea desenelor manuale. Una singură, deliberat: un selector de culori ar
+ *  fi al patrulea meniu pe o bară deja plină, pentru un câștig estetic. */
+const DRAW_COLOR = "#38bdf8";
+
 export function SmcChart({
   symbol, timeframe, toggles, onResult, errorLabel, loadingLabel,
   indicators = [], chartType = "candles",
@@ -92,6 +102,23 @@ export function SmcChart({
   // Legenda: ce linie e care, și cât valorează acum. Fără ea, trei medii mobile
   // pe ecran sunt trei linii colorate fără nume — vezi că se intersectează, dar
   // nu poți spune CARE a trecut peste care, ceea ce e tot ce contează la ele.
+  // ── Desene manuale ──
+  // Ancorate în (timp, preț), nu în pixeli: un desen legat de pixeli ar aluneca
+  // la prima derulare. `drawRef` ține copia pe care o citește bucla de desenare,
+  // ca aceasta să nu depindă de închideri vechi.
+  const tDraw = useTranslations("chartSmc");
+  const [tool, setTool] = React.useState<DrawingTool>("none");
+  const [drawings, setDrawings] = React.useState<Drawing[]>([]);
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const drawRef = React.useRef<{ items: Drawing[]; selected: string | null; pending: Point | null; hover: { x: number; y: number } | null }>(
+    { items: [], selected: null, pending: null, hover: null }
+  );
+  const pendingRef = React.useRef<Point | null>(null);
+  // Bucla de desenare rulează în afara ciclului React, deci citește din refs, nu
+  // din stare — altfel ar folosi valorile de la ultima randare.
+  const toolRef = React.useRef<DrawingTool>("none");
+  const decimalsRef = React.useRef(2);
+
   const [legend, setLegend] = React.useState<
     { label: string; color: string; value: number; digits: number }[]
   >([]);
@@ -255,6 +282,27 @@ export function SmcChart({
 
   React.useEffect(() => { rebuildIndicators(); }, [rebuildIndicators]);
 
+  // Desenele se încarcă la schimbarea instrumentului sau a intervalului: o linie
+  // trasată pe EURUSD H1 n-are ce căuta pe XAUUSD D1.
+  React.useEffect(() => {
+    const items = loadDrawings(symbol, timeframe);
+    setDrawings(items);
+    setSelectedId(null);
+    pendingRef.current = null;
+  }, [symbol, timeframe]);
+
+  React.useEffect(() => { toolRef.current = tool; }, [tool]);
+
+  // Salvarea e separată de încărcare, altfel primul randare ar scrie lista goală
+  // peste desenele existente înainte ca ele să apuce să fie citite.
+  const loadedForRef = React.useRef<string>("");
+  React.useEffect(() => {
+    const key = `${symbol}|${timeframe}`;
+    if (loadedForRef.current !== key) { loadedForRef.current = key; return; }
+    saveDrawings(symbol, timeframe, drawings);
+  }, [drawings, symbol, timeframe]);
+
+
   // ── Desenarea overlay-ului SMC pe canvas, sincron cu chartul ──
   const draw = React.useCallback(() => {
     const chart = chartRef.current, series = seriesRef.current, canvas = canvasRef.current, wrap = wrapRef.current;
@@ -281,6 +329,16 @@ export function SmcChart({
       return v == null ? null : (v as unknown as number);
     };
     const rightEdge = W - 2;
+    // Inversele: din pixeli înapoi în (timp, preț). Necesare ca să știm unde ai
+    // dat clic, în unitățile în care se ancorează desenele.
+    const xToTime = (x: number): number | null => {
+      const v = ts.coordinateToTime(x);
+      return v == null ? null : (v as unknown as number);
+    };
+    const yToPrice = (y: number): number | null => {
+      const v = series.coordinateToPrice(y);
+      return v == null ? null : (v as unknown as number);
+    };
     const t = togglesRef.current;
 
     // Zone (OB + FVG): dreptunghiuri care se extind spre dreapta
@@ -347,9 +405,101 @@ export function SmcChart({
       ctx.fillText(label, Math.min(rightEdge - tw, x + 3), y - 3);
     }
 
+    // ── Desenele manuale, deasupra straturilor automate ──
+    // Se desenează ultimele: sunt ale tale, deci nu le acoperă nimic.
+    const dstate = drawRef.current;
+    const toXY = (pt: Point) => {
+      const px = xOf(pt.t), py = yOf(pt.price);
+      return px == null || py == null ? null : { x: px, y: py };
+    };
+
+    const strokeDrawing = (d: Drawing, isSel: boolean, isPreview = false) => {
+      const a = toXY(d.p1);
+      if (!a) return;
+      ctx.save();
+      ctx.strokeStyle = d.color;
+      ctx.lineWidth = isSel ? 2.5 : 1.5;
+      if (isPreview) ctx.setLineDash([4, 3]);
+
+      if (d.type === "hline") {
+        // Linia orizontală traversează tot ecranul: dacă ar fi doar cât ai tras-o,
+        // ar înceta să mai fie un nivel și ar deveni un segment.
+        ctx.beginPath(); ctx.moveTo(0, a.y); ctx.lineTo(rightEdge, a.y); ctx.stroke();
+        ctx.fillStyle = d.color;
+        ctx.font = "bold 9px ui-monospace,monospace";
+        ctx.fillText(d.p1.price.toFixed(decimalsRef.current), 4, a.y - 4);
+      } else {
+        const b = d.p2 ? toXY(d.p2) : null;
+        if (!b) { ctx.restore(); return; }
+        if (d.type === "trend") {
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        } else {
+          const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y);
+          const w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y);
+          ctx.fillStyle = d.color + "1f";
+          ctx.fillRect(x, y, w, h);
+          ctx.strokeRect(x, y, w, h);
+        }
+        if (isSel) {
+          // Capetele se marchează doar când e selectat — altfel un grafic cu zece
+          // desene ar fi presărat cu douăzeci de pătrate.
+          ctx.fillStyle = d.color;
+          for (const pt of [a, b]) ctx.fillRect(pt.x - 3, pt.y - 3, 6, 6);
+        }
+      }
+      ctx.restore();
+    };
+
+    for (const d of dstate.items) strokeDrawing(d, d.id === dstate.selected);
+
+    // Previzualizarea: ce ai fi desenat dacă dădeai clic acum. Punctată, ca să se
+    // distingă de un desen comis.
+    if (dstate.pending && dstate.hover) {
+      const t2 = xToTime(dstate.hover.x), p2 = yToPrice(dstate.hover.y);
+      if (t2 != null && p2 != null) {
+        strokeDrawing(
+          { id: "preview", type: toolRef.current === "none" ? "trend" : toolRef.current,
+            p1: dstate.pending, p2: { t: t2, price: p2 }, color: DRAW_COLOR },
+          false, true
+        );
+      }
+    }
+
     // Mânerele alertelor urmăresc scala împreună cu tot restul.
     syncHandles();
   }, [syncHandles]);
+
+  // Efectele de mai jos cheamă `draw`, deci stau DUPĂ definiția lui — altfel
+  // TypeScript semnalează folosire înainte de declarare, iar la execuție ar fi
+  // undefined la prima randare.
+  React.useEffect(() => {
+    drawRef.current.items = drawings;
+    drawRef.current.selected = selectedId;
+    draw();
+  }, [drawings, selectedId, draw]);
+
+  // Tastatura: Delete șterge selecția, Escape anulează desenul în curs sau
+  // părăsește unealta. Fără Escape, o unealtă activă din greșeală blochează
+  // derularea graficului și pare că s-a stricat.
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA")) return;
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (selectedId) {
+          e.preventDefault();
+          setDrawings((prev) => prev.filter((d) => d.id !== selectedId));
+          setSelectedId(null);
+        }
+      } else if (e.key === "Escape") {
+        if (pendingRef.current) { pendingRef.current = null; drawRef.current.pending = null; draw(); }
+        else { setTool("none"); setSelectedId(null); }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedId, draw]);
+
 
   // ── Init chart o singură dată ──
   React.useEffect(() => {
@@ -379,6 +529,11 @@ export function SmcChart({
     const series = chart.addCandlestickSeries({
       upColor: gain, downColor: loss, borderVisible: false,
       wickUpColor: gain, wickDownColor: loss,
+      // Fără asta, lightweight-charts folosește implicitul lui: două zecimale.
+      // Pe EURUSD însemna „1.17" în loc de „1.16495" — adică pipsii, unitatea în
+      // care se măsoară de fapt tranzacția, lipseau de pe ecran. Se rafinează mai
+      // jos, când avem prețul real; aici pornim de la ce știm din simbol.
+      priceFormat: priceFormatFor(symbol),
     });
     chartRef.current = chart;
     seriesRef.current = series;
@@ -409,6 +564,13 @@ export function SmcChart({
           : candles;
         seriesRef.current?.setData(shown as never);
         lastBarRef.current = shown[shown.length - 1] ?? null;
+
+        // Cripto se formatează după preț, nu după simbol: „PEPEUSDT" nu spune
+        // dacă moneda costă 0,0000042 sau 95.000. Acum avem prețul, deci putem.
+        const lastClose = shown[shown.length - 1]?.close;
+        if (lastClose != null) {
+          seriesRef.current?.applyOptions({ priceFormat: priceFormatFor(symbol, lastClose) });
+        }
         barsRef.current = candles;
         rebuildIndicators();
         chartRef.current?.timeScale().fitContent();
@@ -641,12 +803,161 @@ export function SmcChart({
   // Cifre semnificative după virgulă: 5 la valute (unde mișcarea e în puncte a
   // patra zecimală), 2 la aur, indici și cripto. Un BTC afișat cu 5 zecimale ar
   // fi ilizibil, un EUR/USD cu 2 ar părea nemișcat.
-  const decimals = livePrice != null && livePrice < 20 ? 5 : 2;
+  // Aceeași regulă ca la grafic, dintr-un singur loc. Înainte era „sub 20 →
+  // 5 zecimale", care dădea 5 zecimale pe USDJPY (are nevoie de 3) și 2 pe orice
+  // cripto ieftină (are nevoie de 6-8).
+  const decimals = priceDigits(symbol, livePrice);
+  decimalsRef.current = decimals;
+
+  // ── Interacțiunea cu desenele ──
+  //
+  // Canvasul primește clicuri DOAR când e ceva de făcut: o unealtă activă, sau un
+  // desen existent care ar putea fi selectat. În rest rămâne transparent la
+  // evenimente, ca graficul de dedesubt să se deruleze și să se scaleze normal.
+  const canvasPoint = React.useCallback((e: React.PointerEvent) => {
+    const chart = chartRef.current, series = seriesRef.current, wrap = wrapRef.current;
+    if (!chart || !series || !wrap) return null;
+    const r = wrap.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const tv = chart.timeScale().coordinateToTime(x);
+    const pv = series.coordinateToPrice(y);
+    if (tv == null || pv == null) return null;
+    return { x, y, t: tv as unknown as number, price: pv as unknown as number };
+  }, []);
+
+  const onCanvasDown = React.useCallback((e: React.PointerEvent) => {
+    const pt = canvasPoint(e);
+    if (!pt) return;
+    const active = toolRef.current;
+
+    // Fără unealtă: clicul selectează sau deselectează.
+    if (active === "none") {
+      const hit = hitTest(drawRef.current.items, pt.x, pt.y, (q) => {
+        const chart = chartRef.current, series = seriesRef.current;
+        if (!chart || !series) return null;
+        const cx = chart.timeScale().timeToCoordinate(q.t as never);
+        const cy = series.priceToCoordinate(q.price);
+        return cx == null || cy == null ? null : { x: cx as unknown as number, y: cy as unknown as number };
+      });
+      setSelectedId(hit ? hit.id : null);
+      return;
+    }
+
+    e.preventDefault();
+
+    // Linia orizontală are un singur punct: se comite din primul clic.
+    if (active === "hline") {
+      setDrawings((prev) => [...prev, {
+        id: newId(), type: "hline", p1: { t: pt.t, price: pt.price }, color: DRAW_COLOR,
+      }]);
+      setTool("none");
+      return;
+    }
+
+    // Trend și dreptunghi: primul clic pune ancora, al doilea o închide.
+    if (!pendingRef.current) {
+      pendingRef.current = { t: pt.t, price: pt.price };
+      drawRef.current.pending = pendingRef.current;
+      return;
+    }
+    const p1 = pendingRef.current;
+    pendingRef.current = null;
+    drawRef.current.pending = null;
+    // Un „desen" de doi pixeli e aproape sigur un clic dublu accidental, nu o
+    // intenție. L-am lăsa pe grafic fără să-l poți vedea sau selecta.
+    if (Math.abs(pt.t - p1.t) < 1 && Math.abs(pt.price - p1.price) < 1e-9) { draw(); return; }
+    setDrawings((prev) => [...prev, {
+      id: newId(), type: active === "rect" ? "rect" : "trend",
+      p1, p2: { t: pt.t, price: pt.price }, color: DRAW_COLOR,
+    }]);
+    setTool("none");
+  }, [canvasPoint, draw]);
+
+  const onCanvasMove = React.useCallback((e: React.PointerEvent) => {
+    if (!pendingRef.current) return;
+    const r = wrapRef.current?.getBoundingClientRect();
+    if (!r) return;
+    drawRef.current.hover = { x: e.clientX - r.left, y: e.clientY - r.top };
+    draw();
+  }, [draw]);
+
+  const drawingActive = tool !== "none" || drawings.length > 0;
 
   return (
     <div className="relative h-full w-full">
       <div ref={wrapRef} className="absolute inset-0" />
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
+      {/* Canvasul lasă evenimentele să treacă spre grafic CÂND nu e nimic de făcut.
+          Altfel graficul n-ar mai putea fi derulat sau scalat — cea mai enervantă
+          formă de „instrument de desen": una care confiscă tot. */}
+      <canvas
+        ref={canvasRef}
+        onPointerDown={drawingActive ? onCanvasDown : undefined}
+        onPointerMove={tool !== "none" ? onCanvasMove : undefined}
+        className={cn(
+          "absolute inset-0",
+          drawingActive ? "" : "pointer-events-none",
+          tool !== "none" ? "cursor-crosshair" : "",
+        )}
+        style={drawingActive && tool === "none" ? { pointerEvents: "auto" } : undefined}
+      />
+
+      {/* Bara de desen: verticală, pe stânga, sub legendă. Iconițele sunt trase cu
+          SVG inline în loc de o bibliotecă nouă — trei forme geometrice nu justifică
+          o dependență. */}
+      <div className="absolute left-2 z-30 flex flex-col gap-1" style={{ top: legend.length > 0 ? 8 + legend.length * 18 + 8 : 8 }}>
+        {([
+          ["none",  "toolCursor", "M4 2 L4 14 L7 11 L9 15 L11 14 L9 10 L13 10 Z"],
+          ["trend", "toolTrend",  "M2 14 L14 2"],
+          ["hline", "toolHLine",  "M2 8 L14 8"],
+          ["rect",  "toolRect",   "M3 4 H13 V12 H3 Z"],
+        ] as const).map(([id, labelKey, d]) => (
+          <button
+            key={id}
+            type="button"
+            title={tDraw(labelKey)}
+            onClick={() => {
+              setTool(id as DrawingTool);
+              pendingRef.current = null;
+              drawRef.current.pending = null;
+              if (id !== "none") setSelectedId(null);
+            }}
+            className={cn(
+              "w-7 h-7 grid place-items-center rounded-lg border backdrop-blur-sm transition-colors",
+              tool === id
+                ? "border-[color:var(--accent)] bg-[color:var(--accent)]/15 text-[color:var(--accent)]"
+                : "border-[color:var(--line-1)] bg-[color:var(--s-1)]/80 text-[color:var(--ink-3)] hover:text-[color:var(--ink-1)]"
+            )}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill={id === "none" ? "currentColor" : "none"}
+                 stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d={d} />
+            </svg>
+          </button>
+        ))}
+
+        {/* Ștergerea apare doar când ai ce șterge. Un buton de coș permanent, pe un
+            grafic gol, e o promisiune de distrugere fără obiect. */}
+        {(selectedId || drawings.length > 0) && (
+          <button
+            type="button"
+            title={selectedId ? tDraw("delSelected") : tDraw("delAll")}
+            onClick={() => {
+              if (selectedId) {
+                setDrawings((prev) => prev.filter((d) => d.id !== selectedId));
+                setSelectedId(null);
+              } else {
+                setDrawings([]);
+              }
+            }}
+            className="w-7 h-7 grid place-items-center rounded-lg border border-rose-500/30 bg-[color:var(--s-1)]/80 text-rose-400 hover:bg-rose-500/10 backdrop-blur-sm transition-colors"
+          >
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 strokeWidth="1.6" strokeLinecap="round">
+              <path d="M3 4 H13 M6.5 4 V2.5 H9.5 V4 M4.5 4 L5 13.5 H11 L11.5 4" />
+            </svg>
+          </button>
+        )}
+      </div>
 
       {/* Mânerele alertelor: benzi de 12px exact peste linii. Invizibile, dar
           apucabile — cu mouse-ul sau cu degetul. `touchAction: none` doar aici,

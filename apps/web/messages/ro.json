@@ -2959,7 +2959,13 @@
     "struct": "BOS / CHoCH",
     "auto": "Detectat automat din acțiunea prețului",
     "loading": "Detectez structura…",
-    "noData": "Date insuficiente pentru acest simbol."
+    "noData": "Date insuficiente pentru acest simbol.",
+    "toolCursor": "Cursor",
+    "toolTrend": "Linie de trend",
+    "toolHLine": "Linie orizontală",
+    "toolRect": "Dreptunghi",
+    "delSelected": "Șterge selecția (Delete)",
+    "delAll": "Șterge toate desenele"
   },
   "institutional": {
     "metaTitle": "Metrici instituționale — TradeGx",
