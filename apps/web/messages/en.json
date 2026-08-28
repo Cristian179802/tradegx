@@ -3044,6 +3044,17 @@
     "journal": "Trading journal",
     "signals": "AI signals",
     "tools": "Pro tools",
-    "trades": "Trades"
+    "trades": "Trades",
+    "academy": "Academy",
+    "achievements": "Achievements",
+    "backtestNew": "New backtest",
+    "billing": "Billing",
+    "calendar": "Economic calendar",
+    "charts": "Live charts",
+    "checklist": "Pre-Trade Checklist",
+    "edge": "Edge Finder",
+    "monteCarlo": "Monte Carlo",
+    "lesson": "Lesson",
+    "quiz": "Quiz"
   }
 }

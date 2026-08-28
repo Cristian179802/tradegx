@@ -3044,6 +3044,17 @@
     "journal": "Jurnal de trading",
     "signals": "Semnale AI",
     "tools": "Unelte Pro",
-    "trades": "Trade-uri"
+    "trades": "Trade-uri",
+    "academy": "Academie",
+    "achievements": "Realizări",
+    "backtestNew": "Backtest nou",
+    "billing": "Abonament",
+    "calendar": "Calendar economic",
+    "charts": "Grafice Live",
+    "checklist": "Checklist Pre-Trade",
+    "edge": "Edge Finder",
+    "monteCarlo": "Monte Carlo",
+    "lesson": "Lecție",
+    "quiz": "Quiz"
   }
 }
