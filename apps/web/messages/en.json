@@ -36,7 +36,12 @@
     "new": "NEW",
     "roadmap": "Roadmap",
     "institutional": "Pro Metrics",
-    "taxReport": "Tax Report"
+    "taxReport": "Tax Report",
+    "search": "Search",
+    "subJournal": "Journal",
+    "subAnalysis": "Analysis",
+    "subRisk": "Risk & goals",
+    "mainNav": "Main navigation"
   },
   "banner": {
     "trialLabel": "PRO Trial",

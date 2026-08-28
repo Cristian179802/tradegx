@@ -1743,3 +1743,10 @@ tr.cyber-row:hover {
   border-color: var(--line-1);
   box-shadow: var(--el-2), inset 0 1px 0 var(--line-top);
 }
+
+/* Panoul șinei de comandă: alunecă dinspre șină, nu apare din neant. Mișcarea
+   spune DE UNDE vine, deci ochiul nu trebuie să caute ce s-a schimbat. */
+@keyframes tg-rail-in {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}

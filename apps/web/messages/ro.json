@@ -36,7 +36,12 @@
     "new": "NOU",
     "roadmap": "Roadmap",
     "institutional": "Metrici Pro",
-    "taxReport": "Raport Fiscal"
+    "taxReport": "Raport Fiscal",
+    "search": "Caută",
+    "subJournal": "Jurnal",
+    "subAnalysis": "Analiză",
+    "subRisk": "Risc & obiective",
+    "mainNav": "Navigare principală"
   },
   "banner": {
     "trialLabel": "PRO Trial",
