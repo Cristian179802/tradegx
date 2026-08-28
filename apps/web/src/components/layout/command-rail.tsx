@@ -200,6 +200,10 @@ export function CommandRail() {
   /** Deschis cu clic = rămâne; deschis cu mouse-ul = se închide la ieșire. */
   const [pinned, setPinned] = React.useState(false);
   const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Referințe către glife, ca săgețile să poată muta focusul între ele.
+  const glyphRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+  // Handler-ul de tastatură e montat o dată, deci nu poate citi starea direct.
+  const openRef = React.useRef<string | null>(null);
 
   // Domeniul paginii curente. Potrivirea e pe prefix, ca `/trades/123` să
   // marcheze tot „Trading".
@@ -214,12 +218,21 @@ export function CommandRail() {
     return best;
   }, [pathname]);
 
+  React.useEffect(() => { openRef.current = open; }, [open]);
+
   // Navigarea închide panoul: altfel ar rămâne deschis peste pagina nouă.
   React.useEffect(() => { setOpen(null); setPinned(false); }, [pathname]);
 
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { setOpen(null); setPinned(false); }
+      if (e.key !== "Escape") return;
+      setOpen(null);
+      setPinned(false);
+      // Focusul se ÎNTOARCE la glifa de unde a plecat. Fără asta, Escape îl
+      // aruncă la începutul paginii, iar cine navighează cu tastatura trebuie să
+      // refacă tot drumul până unde era — pedeapsă pentru că a închis un meniu.
+      const i = DOMAINS.findIndex((d) => d.id === openRef.current);
+      if (i >= 0) glyphRefs.current[i]?.focus();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -236,6 +249,28 @@ export function CommandRail() {
     if (pinned) return;
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => setOpen(null), 180);
+  };
+
+  /**
+   * Săgețile mută focusul între glife, ca într-o bară de instrumente reală.
+   *
+   * Fără asta, un utilizator care navighează cu tastatura trebuie să apese Tab de
+   * șase ori ca să treacă de navigație, la FIECARE pagină. Iar cine folosește
+   * tastatura o face de obicei pentru că nu are altă opțiune, nu din preferință.
+   *
+   * Se face pe săgeți, nu pe Tab: convenția pentru un grup de comenzi înrudite e
+   * un singur opritor de Tab pentru tot grupul, iar înăuntru te miști cu săgeți.
+   */
+  const onGlyphKey = (e: React.KeyboardEvent, index: number) => {
+    const last = DOMAINS.length - 1;
+    let next: number | null = null;
+    if (e.key === "ArrowDown") next = index === last ? 0 : index + 1;
+    else if (e.key === "ArrowUp") next = index === 0 ? last : index - 1;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = last;
+    if (next === null) return;
+    e.preventDefault();
+    glyphRefs.current[next]?.focus();
   };
 
   const openDomain = DOMAINS.find((d) => d.id === open) ?? null;
@@ -289,7 +324,7 @@ export function CommandRail() {
         </button>
 
         <div className="flex flex-col gap-2">
-          {DOMAINS.map((d) => {
+          {DOMAINS.map((d, i) => {
             const Icon = d.icon;
             const isOpen = open === d.id;
             const isHere = activeDomain === d.id;
@@ -297,7 +332,16 @@ export function CommandRail() {
               <button
                 key={d.id}
                 type="button"
+                ref={(el) => { glyphRefs.current[i] = el; }}
                 title={t(d.label)}
+                aria-label={t(d.label)}
+                aria-haspopup="true"
+                aria-expanded={isOpen}
+                aria-current={isHere ? "page" : undefined}
+                // Un singur opritor de Tab pentru tot grupul; înăuntru, săgeți.
+                tabIndex={isHere || (activeDomain === null && i === 0) ? 0 : -1}
+                onKeyDown={(e) => onGlyphKey(e, i)}
+                onFocus={() => hoverOpen(d.id)}
                 onMouseEnter={() => hoverOpen(d.id)}
                 onClick={() => {
                   if (isOpen && pinned) { setOpen(null); setPinned(false); }
@@ -305,6 +349,10 @@ export function CommandRail() {
                 }}
                 className={cn(
                   "relative grid place-items-center w-11 h-11 rounded-xl transition-all duration-200",
+                  // Inelul de focus e OBLIGATORIU vizibil: pe un buton fără text,
+                  // cine navighează cu tastatura n-are alt indiciu unde se află.
+                  "outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)] focus-visible:ring-offset-2",
+                  "focus-visible:ring-offset-[color:var(--s-0)]",
                   "border",
                   isOpen || isHere
                     ? "border-[color:var(--accent-line)] bg-[color:var(--accent-soft)] text-[color:var(--ink-1)]"
@@ -345,6 +393,7 @@ export function CommandRail() {
         <div
           onMouseEnter={() => { if (closeTimer.current) clearTimeout(closeTimer.current); }}
           onMouseLeave={hoverClose}
+          aria-label={t(openDomain.label)}
           className="hidden md:block fixed inset-y-0 left-[68px] z-40 w-auto min-w-[260px] max-w-[720px]
                      border-r border-[color:var(--line-1)] bg-[color:var(--s-1)]/97 backdrop-blur-2xl
                      shadow-[24px_0_60px_-30px_rgba(0,0,0,0.9)]"
