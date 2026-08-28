@@ -41,7 +41,11 @@
     "subJournal": "Journal",
     "subAnalysis": "Analysis",
     "subRisk": "Risk & goals",
-    "mainNav": "Main navigation"
+    "mainNav": "Main navigation",
+    "pulseBalance": "Balance",
+    "pulseToday": "Today",
+    "pulseOpen": "{count} open",
+    "pulseAlerts": "{count} unread alerts"
   },
   "banner": {
     "trialLabel": "PRO Trial",

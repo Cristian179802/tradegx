@@ -41,7 +41,11 @@
     "subJournal": "Jurnal",
     "subAnalysis": "Analiză",
     "subRisk": "Risc & obiective",
-    "mainNav": "Navigare principală"
+    "mainNav": "Navigare principală",
+    "pulseBalance": "Sold",
+    "pulseToday": "Azi",
+    "pulseOpen": "{count} în piață",
+    "pulseAlerts": "{count} alerte necitite"
   },
   "banner": {
     "trialLabel": "PRO Trial",

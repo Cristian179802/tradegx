@@ -13,6 +13,7 @@ import {
   Settings, CreditCard, Search, Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavPulse, compactMoney } from "@/lib/use-nav-pulse";
 
 // ── Șina de comandă ──────────────────────────────────────────────────────────
 //
@@ -165,6 +166,7 @@ export function CommandRail() {
   const { data: session } = useSession();
   const isPro = session?.user?.plan === "PRO" || session?.user?.isTrialing;
 
+  const pulse = useNavPulse();
   const [open, setOpen] = React.useState<string | null>(null);
   /** Deschis cu clic = rămâne; deschis cu mouse-ul = se închide la ieșire. */
   const [pinned, setPinned] = React.useState(false);
@@ -273,7 +275,7 @@ export function CommandRail() {
                   else { setOpen(d.id); setPinned(true); }
                 }}
                 className={cn(
-                  "grid place-items-center w-11 h-11 rounded-xl transition-all duration-200",
+                  "relative grid place-items-center w-11 h-11 rounded-xl transition-all duration-200",
                   "border",
                   isOpen || isHere
                     ? "border-[color:var(--accent-line)] bg-[color:var(--accent-soft)] text-[color:var(--ink-1)]"
@@ -281,6 +283,26 @@ export function CommandRail() {
                 )}
               >
                 <Icon className="w-[19px] h-[19px]" />
+
+                {/* Datele vii pe glifă. Doar CE SE SCHIMBĂ și cere o decizie —
+                    alertele care așteaptă, pozițiile care sunt încă în piață.
+                    Restul stă în panou, unde e loc de context. */}
+                {d.id === "ai" && !!pulse?.alerts && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 grid place-items-center
+                                   rounded-full text-[9px] font-black tabular-nums
+                                   bg-[color:var(--accent)] text-white
+                                   shadow-[0_0_8px_rgba(109,117,246,0.6)]">
+                    {pulse.alerts > 9 ? "9+" : pulse.alerts}
+                  </span>
+                )}
+                {d.id === "trading" && !!pulse?.openPositions && (
+                  // Punct, nu cifră: numărul de poziții deschise nu-ți cere nimic,
+                  // doar te anunță că ai ceva în piață. Un număr ar striga.
+                  <span
+                    className="absolute top-1 right-1 w-[5px] h-[5px] rounded-full bg-[color:var(--accent)]"
+                    style={{ boxShadow: "0 0 6px rgba(109,117,246,0.9)" }}
+                  />
+                )}
               </button>
             );
           })}
@@ -303,6 +325,57 @@ export function CommandRail() {
             <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[color:var(--ink-4)]">
               {t(openDomain.label)}
             </p>
+
+            {/* Contextul viu al domeniului. În panou e loc de cifră ȘI de ce
+                înseamnă ea — pe glifă încăpea doar semnalul.
+
+                Verdele și roșul apar DOAR aici, pe P&L, fiindcă doar acolo au
+                înțeles semantic. Soldul rămâne neutru: e cât ai, nu cât ai
+                câștigat. */}
+            {openDomain.id === "trading" && pulse && (
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                <span className="flex items-baseline gap-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-[color:var(--ink-4)]">
+                    {t("pulseBalance")}
+                  </span>
+                  <span className="text-[13px] font-bold tabular-nums text-[color:var(--ink-1)]">
+                    {/* Soldul nu poartă semn: „+900" ar sugera un câștig, când
+                        de fapt e cât ai în cont. Semnul aparține P&L-ului. */}
+                    {compactMoney(pulse.balance, { plus: false })}
+                  </span>
+                </span>
+
+                {pulse.tradesToday > 0 && (
+                  <span className="flex items-baseline gap-1.5">
+                    <span className="text-[10px] uppercase tracking-wider text-[color:var(--ink-4)]">
+                      {t("pulseToday")}
+                    </span>
+                    <span
+                      className="text-[13px] font-bold tabular-nums"
+                      style={{ color: pulse.pnlToday >= 0 ? "var(--gain)" : "var(--loss)" }}
+                    >
+                      {compactMoney(pulse.pnlToday)}
+                    </span>
+                  </span>
+                )}
+
+                {pulse.openPositions > 0 && (
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-[5px] h-[5px] rounded-full bg-[color:var(--accent)]"
+                          style={{ boxShadow: "0 0 6px rgba(109,117,246,0.9)" }} />
+                    <span className="text-[11px] font-semibold text-[color:var(--ink-2)]">
+                      {t("pulseOpen", { count: pulse.openPositions })}
+                    </span>
+                  </span>
+                )}
+              </div>
+            )}
+
+            {openDomain.id === "ai" && !!pulse?.alerts && (
+              <p className="mt-3 text-[11px] font-semibold text-[color:var(--accent)]">
+                {t("pulseAlerts", { count: pulse.alerts })}
+              </p>
+            )}
           </div>
 
           <div className="flex gap-1 px-3 pb-6">
