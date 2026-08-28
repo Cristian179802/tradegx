@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 /**
  * Cere o împrospătare a conturilor conectate când deschizi aplicația sau revii în
@@ -25,6 +26,13 @@ import { useRouter } from "next/navigation";
  */
 export function AutoRefresh() {
   const router = useRouter();
+  const { data: session } = useSession();
+  // Contul demo e read-only, iar middleware-ul refuză CENTRAL orice mutație pe
+  // API. Cererea pleca oricum și primea 403 — o eroare roșie în consolă la
+  // fiecare încărcare a dashboard-ului, pe exact contul pe care intră oricine
+  // vrea să vadă produsul. Regula centrală e corectă; clientul trebuia să n-o
+  // provoace.
+  const isDemo = session?.user?.role === "DEMO";
   const lastRun = React.useRef(0);
   const running = React.useRef(false);
 
@@ -33,6 +41,11 @@ export function AutoRefresh() {
 
     async function run() {
       if (running.current) return;
+      if (isDemo) return;
+      // Aceeași regulă ca la pulsul din șină, pe care o uitasem aici: cu tabul
+      // în fundal nu cerem nimic. Baza suspendă computul după cinci minute fără
+      // interogări, iar un tab deschis undeva în spate n-are de ce s-o țină trează.
+      if (document.visibilityState !== "visible") return;
       if (Date.now() - lastRun.current < 60_000) return;
       running.current = true;
       lastRun.current = Date.now();
@@ -60,7 +73,7 @@ export function AutoRefresh() {
       cancelled = true;
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [router]);
+  }, [router, isDemo]);
 
   return null;
 }
