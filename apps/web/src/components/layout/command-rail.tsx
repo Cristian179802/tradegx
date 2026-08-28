@@ -160,6 +160,35 @@ const ROUTE_DOMAIN = new Map<string, string>(
   DOMAINS.flatMap((d) => d.columns.flatMap((c) => c.items.map((i) => [i.href, d.id] as const)))
 );
 
+/**
+ * Ce pagină e deschisă, după rută: iconița, eticheta ei și domeniul din care face
+ * parte.
+ *
+ * Exportat pentru bara de sus, ca cele două să nu se contrazică niciodată. Înainte
+ * bara își ținea propria hartă de rute, cu emoji — deci o pagină nouă adăugată în
+ * meniu apărea în șină și lipsea din titlu, iar nimeni nu observa până nu se uita
+ * cineva la ecran.
+ */
+export function navMetaForRoute(pathname: string): {
+  labelKey: string;
+  domainKey: string;
+  icon: React.ComponentType<{ className?: string }>;
+} | null {
+  let best: { labelKey: string; domainKey: string; icon: NavItem["icon"] } | null = null;
+  let bestLen = 0;
+  for (const d of DOMAINS) {
+    for (const col of d.columns) {
+      for (const it of col.items) {
+        if ((pathname === it.href || pathname.startsWith(it.href + "/")) && it.href.length > bestLen) {
+          best = { labelKey: it.label, domainKey: d.label, icon: it.icon };
+          bestLen = it.href.length;
+        }
+      }
+    }
+  }
+  return best;
+}
+
 export function CommandRail() {
   const t = useTranslations("nav");
   const pathname = usePathname();
