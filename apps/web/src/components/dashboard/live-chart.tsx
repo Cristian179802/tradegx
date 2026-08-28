@@ -164,13 +164,19 @@ export function LiveChart() {
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* ── Header ───────────────────────────────────────── */}
-      <div className="shrink-0 flex items-center justify-between mb-2 gap-3">
-        <div>
+      {/* Pe telefon rândul se rupe pe două linii în loc să iasă din ecran.
+          Măsurat la 375px: titlul plus intervalele plus selectorul de simbol
+          cereau 406px, deci butonul de simbol ieșea cu 31px afară — nu tăiat de
+          nimic, pur și simplu în afara ecranului, de unde nu se putea apăsa. */}
+      <div className="shrink-0 flex flex-wrap items-center justify-between mb-2 gap-x-3 gap-y-2">
+        <div className="min-w-0">
           <h2 className="text-sm font-semibold text-zinc-200">{t("title")}</h2>
           <p className="text-xs text-zinc-600 mt-0.5">{t("realtimeData")}</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Intervalele pot depăși pe ecrane foarte înguste: le lăsăm să se
+            deruleze pe orizontală în interiorul lor, nu să împingă pagina. */}
+        <div className="flex items-center gap-2 min-w-0 max-w-full overflow-x-auto">
           {/* Interval tabs */}
           <div className="flex items-center gap-0.5 bg-zinc-800 rounded-lg p-0.5">
             {INTERVALS.map(({ label, value }) => (
