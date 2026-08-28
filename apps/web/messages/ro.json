@@ -108,7 +108,12 @@
     "accountValue": "Balanța",
     "atMarket": "la prețul pieței",
     "notSynced": "nesincronizat",
-    "withOpen": "{count} poziții deschise"
+    "withOpen": "{count} poziții deschise",
+    "todayPnl": "Azi",
+    "openNow": "În piață",
+    "noTradesToday": "Nicio tranzacție azi",
+    "tradesCount": "{count} tranzacții",
+    "overallMetrics": "Metrici de ansamblu"
   },
   "edge": {
     "subtitle": "Motorul statistic care îți arată exact unde câștigi și unde pierzi bani — pe simbol, setup, killzone, zi, oră și durată.",

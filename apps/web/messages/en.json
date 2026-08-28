@@ -108,7 +108,12 @@
     "accountValue": "Balance",
     "atMarket": "at market price",
     "notSynced": "not synced",
-    "withOpen": "{count} open positions"
+    "withOpen": "{count} open positions",
+    "todayPnl": "Today",
+    "openNow": "Open",
+    "noTradesToday": "No trades today",
+    "tradesCount": "{count} trades",
+    "overallMetrics": "Overall metrics"
   },
   "edge": {
     "subtitle": "The statistical engine that shows you exactly where you make and lose money — by symbol, setup, killzone, day, hour and duration.",

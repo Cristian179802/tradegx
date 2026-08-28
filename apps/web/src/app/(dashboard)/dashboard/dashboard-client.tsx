@@ -31,6 +31,9 @@ interface DashboardData {
   /** Fals = niciun cont sincronizat, deci „0,00" ar fi o minciună cu aplomb. */
   hasAccountValue: boolean;
   openPositions: number;
+  /** Rezultatul de azi, calculat pe server ca să nu adăugăm o buclă de client. */
+  pnlToday: number;
+  tradesToday: number;
   netPnl: number;
   winRate: number | null;
   profitFactor: number | null;
@@ -117,6 +120,117 @@ function Sparkline({
       {filled && <path d={areaPath} fill={`url(#${gradId})`} />}
       <path d={path} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+// ─── Panoul de stare ──────────────────────────────────────────────────────────
+//
+// Trei cifre, in ordinea in care conteaza cand deschizi aplicatia, cu greutati
+// vizuale diferite — pentru ca importanta lor CHIAR e diferita.
+//
+// Culoarea: soldul e neutru, fiindca e cat ai, nu cat ai castigat. Verdele si
+// rosul apar doar pe P&L, unde inseamna ceva. Regula asta e a intregii aplicatii,
+// nu o preferinta locala.
+
+function StatePanel({
+  accountValue, hasAccountValue, pnlToday, tradesToday, openPositions,
+  currency, spark, greetingText, dateText, timeText, labels,
+}: {
+  accountValue: number; hasAccountValue: boolean;
+  pnlToday: number; tradesToday: number; openPositions: number;
+  currency: string; spark: number[];
+  greetingText: string; dateText: string; timeText: string;
+  labels: {
+    balance: string; today: string; open: string;
+    notSynced: string; noTradesToday: string; trades: string;
+  };
+}) {
+  const up = pnlToday >= 0;
+
+  return (
+    <div className="tg-panel tg-boot tg-boot-edge relative overflow-hidden rounded-2xl border">
+      {/* Aceeasi linie de accent ca sub bara de sus si pe marginea sinei: trei
+          locuri, acelasi semnal, deci ecranul pare o singura piesa. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, var(--accent-line) 30%, transparent 75%)" }}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4 px-5 py-4">
+        {/* Salutul: mic si o singura data. Era un titlu de 24px care nu purta
+            nicio informatie — cel mai mare text de pe ecran spunea cel mai putin. */}
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold text-[color:var(--ink-3)] truncate">{greetingText}</p>
+          <p className="text-[10px] text-[color:var(--ink-4)] capitalize mt-0.5 truncate">
+            {dateText} · <span className="font-mono tabular-nums">{timeText}</span>
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
+          {/* Cat am. Cea mai mare cifra de pe ecran, fiindca e prima intrebare. */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--ink-4)] mb-1">
+              {labels.balance}
+            </p>
+            {hasAccountValue ? (
+              <p className="text-[26px] leading-none font-black tabular-nums text-[color:var(--ink-1)]">
+                {accountValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                <span className="ml-1.5 text-[12px] font-bold text-[color:var(--ink-4)]">{currency}</span>
+              </p>
+            ) : (
+              <p className="text-[15px] font-bold text-[color:var(--ink-4)]">{labels.notSynced}</p>
+            )}
+          </div>
+
+          {/* Cat am facut azi. A doua ca marime — e o miscare, nu o pozitie. */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--ink-4)] mb-1">
+              {labels.today}
+            </p>
+            {tradesToday > 0 ? (
+              <div className="flex items-baseline gap-2">
+                <p
+                  className="text-[19px] leading-none font-black tabular-nums"
+                  style={{ color: up ? "var(--gain)" : "var(--loss)" }}
+                >
+                  {fmtShort(pnlToday)}
+                </p>
+                <span className="text-[10px] font-medium text-[color:var(--ink-4)]">{labels.trades}</span>
+              </div>
+            ) : (
+              <p className="text-[13px] font-semibold text-[color:var(--ink-4)]">{labels.noTradesToday}</p>
+            )}
+          </div>
+
+          {/* Ce e inca in piata. Cel mai mic — te anunta, nu-ti cere o decizie. */}
+          {openPositions > 0 && (
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--ink-4)] mb-1">
+                {labels.open}
+              </p>
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="w-[6px] h-[6px] rounded-full bg-[color:var(--accent)]"
+                  style={{ boxShadow: "0 0 8px rgba(109,117,246,0.9)" }}
+                />
+                <p className="text-[15px] leading-none font-bold tabular-nums text-[color:var(--ink-2)]">
+                  {openPositions}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Forma ultimelor zile. Fara axe si fara cifre: nu e de citit, e de
+              simtit — spune daca urci sau cobori, dintr-o privire laterala. */}
+          {spark.length > 1 && (
+            <div className="hidden sm:block opacity-70">
+              <Sparkline data={spark} color={up ? "var(--gain)" : "var(--loss)"} width={96} height={30} filled />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -302,7 +416,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const {
-    userName, totalTrades, accountValue, hasAccountValue, openPositions,
+    userName, totalTrades, accountValue, hasAccountValue, openPositions, pnlToday, tradesToday,
     netPnl, winRate, profitFactor, maxDrawdown, maxDrawdownLimit,
     wins, losses, bestTrade, worstTrade, avgWin, avgLoss, currency,
     tradingStreak, weekTradeCount, weekWinRate,
@@ -340,36 +454,40 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         <div className="orb orb-indigo absolute w-[400px] h-[400px] bottom-0 left-1/3 opacity-20" style={{ animationDelay: '4s' }} />
       </div>
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between animate-fade-in-up">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="live-dot-indigo" />
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.12em]">
-              Live
-            </span>
-          </div>
-          <h1 className="text-2xl font-black text-zinc-100 tracking-tight tg-title">
-            {greeting(userName, {
-              morning: t("greetingMorning"),
-              day: t("greetingDay"),
-              evening: t("greetingEvening"),
-            })}{" "}
-            <span className="inline-block animate-[wave_2s_ease-in-out_infinite]">👋</span>
-          </h1>
-          <p className="text-sm text-zinc-500 mt-0.5">{t("subtitle")}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 tg-panel border rounded-xl px-3 py-2">
-            <CalendarDays className="w-3.5 h-3.5 text-zinc-500" />
-            <span className="capitalize text-zinc-400 font-medium">{todayLocalized(locale)}</span>
-          </div>
-          <div className="flex items-center gap-2 tg-panel border rounded-xl px-3 py-2">
-            <span className="live-dot" />
-            <span className="font-mono text-xs text-zinc-300 num tracking-wider">{currentTime}</span>
-          </div>
-        </div>
-      </div>
+      {/* ── Starea de acum ───────────────────────────────────────────────────
+          Un dashboard cu Sase cutii egale nu spune nimic: daca totul are aceeasi
+          greutate vizuala, ochiul nu stie unde sa se uite intai si le citeste pe
+          toate, adica pe niciuna.
+
+          Panoul asta raspunde la singura intrebare cu care deschizi aplicatia —
+          „cum stau acum" — in trei cifre, in ordinea in care conteaza: cat am,
+          cat am facut azi, ce e inca in piata. Restul metricilor raman, dar la
+          rang secundar, unde le cauti cand vrei sa analizezi, nu cand vrei sa
+          te orientezi. */}
+      <StatePanel
+        accountValue={accountValue}
+        hasAccountValue={hasAccountValue}
+        pnlToday={pnlToday}
+        tradesToday={tradesToday}
+        openPositions={openPositions}
+        currency={currency}
+        spark={sparklines.pnl}
+        greetingText={greeting(userName, {
+          morning: t("greetingMorning"),
+          day: t("greetingDay"),
+          evening: t("greetingEvening"),
+        })}
+        dateText={todayLocalized(locale)}
+        timeText={currentTime}
+        labels={{
+          balance: t("accountValue"),
+          today: t("todayPnl"),
+          open: t("openNow"),
+          notSynced: t("notSynced"),
+          noTradesToday: t("noTradesToday"),
+          trades: t("tradesCount", { count: tradesToday }),
+        }}
+      />
 
       {/* ── Ghid de pornire (începători) ───────────────────────────────────── */}
       <OnboardingGuide hasTrades={totalTrades > 0} />
@@ -383,27 +501,15 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         <EconomicCountdown />
       </div>
 
-      {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {/* Valoarea contului stă PRIMA, fiindcă e cifra după care te orientezi
-            când deschizi aplicația: cât ai. Neutră la culoare intenționat —
-            verdele și roșul sunt rezervate pentru P&L, iar un sold nu e nici
-            câștig nici pierdere. */}
-        <KPICard
-          label={t("accountValue")}
-          value={hasAccountValue ? fmt(accountValue, currency) : "—"}
-          sub={
-            hasAccountValue
-              ? openPositions > 0
-                ? t("withOpen", { count: openPositions })
-                : t("atMarket")
-              : t("notSynced")
-          }
-          trend="neutral"
-          icon={Wallet}
-          accent="indigo"
-          delay={0}
-        />
+      {/* ── Metricile de fond ────────────────────────────────────────────────
+          Nu mai concureaza cu starea de acum: sunt sub ea, mai mici, si au un
+          titlu care spune ce sunt. Le cauti cand vrei sa ANALIZEZI, nu cand vrei
+          sa te orientezi — iar cele doua momente n-au aceeasi urgenta. */}
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--ink-4)] mb-2">
+          {t("overallMetrics")}
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <KPICard
           label={t("netPnl")}
           value={totalTrades > 0 ? fmt(netPnl, currency) : "—"}
@@ -461,6 +567,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           accent="violet"
           delay={240}
         />
+        </div>
       </div>
 
       {/* ── Rând secundar: streak + săptămâna curentă ──────────────────────────

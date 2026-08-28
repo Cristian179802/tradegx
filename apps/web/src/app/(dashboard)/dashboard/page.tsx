@@ -135,6 +135,19 @@ export default async function DashboardPage() {
     where: { ...scope.where, status: "OPEN" },
   });
 
+  // Rezultatul de AZI. Se citește pe server, într-un agregat, nu cu încă o buclă
+  // de client: pagina asta se randează oricum pe server, iar o cerere periodică
+  // în plus ar ține baza de date trează degeaba.
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  const todayAgg = await prisma.trade.aggregate({
+    where: { ...scope.where, status: "CLOSED", exitTime: { gte: dayStart } },
+    _sum: { pnlMoney: true },
+    _count: { _all: true },
+  });
+  const pnlToday = Number(todayAgg._sum.pnlMoney ?? 0);
+  const tradesToday = todayAgg._count._all;
+
   // Best / worst / avg trades — din TOATĂ istoria (nu doar ultimele 30)
   const allPnl = allSettledTrades.map((t) => Number(t.pnlMoney ?? 0));
   const winAmounts = allPnl.filter((p) => p > 0);
@@ -237,6 +250,8 @@ export default async function DashboardPage() {
         accountValue,
         hasAccountValue,
         openPositions,
+        pnlToday,
+        tradesToday,
         netPnl,
         winRate,
         profitFactor,
