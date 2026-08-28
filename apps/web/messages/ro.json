@@ -2311,7 +2311,7 @@
     "s5p1": "Orice întrebare, sugestie sau problemă: <contact>pagina de contact</contact> — răspundem de regulă în aceeași zi."
   },
   "roadmap": {
-    "metaTitle": "Roadmap public — TradeGx",
+    "metaTitle": "Roadmap public",
     "metaDesc": "Ce am livrat, ce construim acum și ce urmează. TradeGx se dezvoltă în public.",
     "title": "Roadmap public",
     "updated": "16 august 2026",
@@ -2381,7 +2381,7 @@
     "pl17": "cTrader și DXtrade — sincronizare live a contului. Depinde de accesul API al furnizorilor: cTrader cere aprobare Spotware și un server persistent, DXtrade se acordă individual de fiecare broker"
   },
   "contactPage": {
-    "metaTitle": "Contact — TradeGx",
+    "metaTitle": "Contact",
     "metaDesc": "Contactează echipa TradeGx: suport, feedback, raportare probleme de securitate.",
     "title": "Contact",
     "intro": "TradeGx este un produs nou, dezvoltat activ — fiecare mesaj ajunge direct la fondator. Răspundem de regulă în aceeași zi.",
@@ -2397,7 +2397,7 @@
     "idP": "Platforma TradeGx este operată din România. Detaliile complete despre prelucrarea datelor se află în <privacy>Politica de Confidențialitate</privacy>, iar condițiile de utilizare în <terms>Termeni și Condiții</terms>."
   },
   "terms": {
-    "metaTitle": "Termeni și Condiții — TradeGx",
+    "metaTitle": "Termeni și Condiții",
     "metaDesc": "Termenii și condițiile de utilizare a platformei TradeGx.",
     "title": "Termeni și Condiții",
     "updated": "3 iulie 2026",
@@ -2431,7 +2431,7 @@
     "s10p1": "Pentru orice întrebare legată de acești termeni: <mail>palcristi1@gmail.com</mail> sau pagina de <contact>contact</contact>."
   },
   "privacy_page": {
-    "metaTitle": "Politica de Confidențialitate — TradeGx",
+    "metaTitle": "Politica de Confidențialitate",
     "metaDesc": "Cum colectează, folosește și protejează TradeGx datele tale (GDPR).",
     "title": "Politica de Confidențialitate",
     "updated": "3 iulie 2026",
@@ -2672,7 +2672,7 @@
     "legendNegative": "Negativă (opus)"
   },
   "reportPage": {
-    "metaTitle": "Raport de Performanță — TradeGx",
+    "metaTitle": "Raport de Performanță",
     "instrForex": "Forex",
     "instrCrypto": "Crypto",
     "instrMetals": "Metale",
@@ -2855,7 +2855,7 @@
     "cancelNote": "Anulezi oricând · Datele tale rămân intacte pe orice plan"
   },
   "sharePage": {
-    "metaTitle": "Trade partajat — TradeGx",
+    "metaTitle": "Trade partajat",
     "invalidTitle": "Link invalid sau expirat",
     "invalidDesc": "Acest link de partajare nu este valid.",
     "goToApp": "Mergi la TradeGx",
@@ -2871,7 +2871,7 @@
     "setupOther": "Altul"
   },
   "taxReport": {
-    "metaTitle": "Raport Fiscal — TradeGx",
+    "metaTitle": "Raport Fiscal",
     "metaDesc": "Sumar fiscal automat pe an pentru traderi.",
     "navTitle": "Raport Fiscal",
     "title": "Raport Fiscal {year}",
@@ -2982,7 +2982,7 @@
     "delAll": "Șterge toate desenele"
   },
   "institutional": {
-    "metaTitle": "Metrici instituționale — TradeGx",
+    "metaTitle": "Metrici instituționale",
     "title": "Metrici Instituționale",
     "subtitle": "Aceleași cifre pe care le cer prop firm-urile și fondurile — pe tot portofoliul tău.",
     "portfolio": "Portofoliu · toate conturile",

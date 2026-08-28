@@ -2311,7 +2311,7 @@
     "s5p1": "Any question, suggestion or issue: <contact>the contact page</contact> — we usually reply the same day."
   },
   "roadmap": {
-    "metaTitle": "Public roadmap — TradeGx",
+    "metaTitle": "Public roadmap",
     "metaDesc": "What we've shipped, what we're building now and what's next. TradeGx develops in public.",
     "title": "Public roadmap",
     "updated": "August 16, 2026",
@@ -2381,7 +2381,7 @@
     "pl17": "cTrader and DXtrade — live account sync. Gated by provider API access: cTrader needs Spotware approval and a persistent server, DXtrade is granted individually by each broker"
   },
   "contactPage": {
-    "metaTitle": "Contact — TradeGx",
+    "metaTitle": "Contact",
     "metaDesc": "Contact the TradeGx team: support, feedback, security issue reporting.",
     "title": "Contact",
     "intro": "TradeGx is a new, actively developed product — every message reaches the founder directly. We usually reply the same day.",
@@ -2397,7 +2397,7 @@
     "idP": "The TradeGx platform is operated from Romania. Full details about data processing are in the <privacy>Privacy Policy</privacy>, and the terms of use in the <terms>Terms & Conditions</terms>."
   },
   "terms": {
-    "metaTitle": "Terms & Conditions — TradeGx",
+    "metaTitle": "Terms & Conditions",
     "metaDesc": "The terms and conditions for using the TradeGx platform.",
     "title": "Terms & Conditions",
     "updated": "July 3, 2026",
@@ -2431,7 +2431,7 @@
     "s10p1": "For any question about these terms: <mail>palcristi1@gmail.com</mail> or the <contact>contact</contact> page."
   },
   "privacy_page": {
-    "metaTitle": "Privacy Policy — TradeGx",
+    "metaTitle": "Privacy Policy",
     "metaDesc": "How TradeGx collects, uses and protects your data (GDPR).",
     "title": "Privacy Policy",
     "updated": "July 3, 2026",
@@ -2672,7 +2672,7 @@
     "legendNegative": "Negative (opposite)"
   },
   "reportPage": {
-    "metaTitle": "Performance Report — TradeGx",
+    "metaTitle": "Performance Report",
     "instrForex": "Forex",
     "instrCrypto": "Crypto",
     "instrMetals": "Metals",
@@ -2855,7 +2855,7 @@
     "cancelNote": "Cancel anytime · Your data stays intact on any plan"
   },
   "sharePage": {
-    "metaTitle": "Shared trade — TradeGx",
+    "metaTitle": "Shared trade",
     "invalidTitle": "Invalid or expired link",
     "invalidDesc": "This share link is not valid.",
     "goToApp": "Go to TradeGx",
@@ -2871,7 +2871,7 @@
     "setupOther": "Other"
   },
   "taxReport": {
-    "metaTitle": "Tax Report — TradeGx",
+    "metaTitle": "Tax Report",
     "metaDesc": "Automatic annual tax summary for traders.",
     "navTitle": "Tax Report",
     "title": "Tax Report {year}",
@@ -2982,7 +2982,7 @@
     "delAll": "Delete all drawings"
   },
   "institutional": {
-    "metaTitle": "Institutional metrics — TradeGx",
+    "metaTitle": "Institutional metrics",
     "title": "Institutional Metrics",
     "subtitle": "The exact numbers prop firms and funds ask for — across your whole portfolio.",
     "portfolio": "Portfolio · all accounts",
