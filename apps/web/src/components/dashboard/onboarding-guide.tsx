@@ -69,7 +69,7 @@ export function OnboardingGuide({ hasTrades }: { hasTrades: boolean }) {
               </p>
             </div>
           </div>
-          <button onClick={dismiss} className="shrink-0 text-zinc-600 hover:text-zinc-300 transition-colors" title={t("hide")}>
+          <button onClick={dismiss} className="tg-tap shrink-0 text-zinc-600 hover:text-zinc-300 transition-colors" title={t("hide")}>
             <X className="w-4 h-4" />
           </button>
         </div>

@@ -184,7 +184,7 @@ export function LiveChart() {
                 key={value}
                 onClick={() => setInterval(value)}
                 className={cn(
-                  "text-[10px] font-semibold px-2 py-1 rounded-md transition-all",
+                  "tg-tap text-[10px] font-semibold px-2 py-1 rounded-md transition-all",
                   interval === value
                     ? "bg-indigo-600 text-white shadow"
                     : "text-zinc-500 hover:text-zinc-300"

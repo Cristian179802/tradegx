@@ -2293,7 +2293,8 @@
     "lastUpdated": "Ultima actualizare: {date}",
     "ftTerms": "Termeni",
     "ftPrivacy": "Confidențialitate",
-    "ftContact": "Contact"
+    "ftContact": "Contact",
+    "backToApp": "Înapoi în aplicație"
   },
   "about": {
     "metaTitle": "Despre TradeGx — cine suntem și de ce construim asta",

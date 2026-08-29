@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft } from "lucide-react";
+import { BackLink } from "@/components/legal/back-link";
 
 // ── Wrapper comun pentru paginile legale/publice (terms, privacy, contact) ──
 
@@ -28,12 +28,9 @@ export async function LegalPage({
               Trade<span className="gradient-text-indigo">Gx</span>
             </span>
           </Link>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-medium"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" /> {t("backToSite")}
-          </Link>
+          {/* Întoarcerea duce de unde ai venit: în aplicație dacă ești
+              conectat, pe site dacă nu. Vezi BackLink pentru de ce. */}
+          <BackLink toSite={t("backToSite")} toApp={t("backToApp")} />
         </div>
       </header>
 

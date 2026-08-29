@@ -2293,7 +2293,8 @@
     "lastUpdated": "Last updated: {date}",
     "ftTerms": "Terms",
     "ftPrivacy": "Privacy",
-    "ftContact": "Contact"
+    "ftContact": "Contact",
+    "backToApp": "Back to app"
   },
   "about": {
     "metaTitle": "About TradeGx — who we are and why we build this",

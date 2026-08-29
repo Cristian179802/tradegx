@@ -65,7 +65,7 @@ export function Topbar() {
             singura cale spre navigație. */}
         <button
           onClick={toggleMobileSidebar}
-          className="md:hidden grid place-items-center w-8 h-8 -ml-1 rounded-lg
+          className="tg-tap md:hidden grid place-items-center w-8 h-8 -ml-1 rounded-lg
                      text-[color:var(--ink-3)] hover:text-[color:var(--ink-1)]
                      hover:bg-[color:var(--s-2)] transition-colors"
           aria-label={tCommon("openMenu")}

@@ -1188,7 +1188,7 @@ tr.cyber-row:hover {
   --ink-1: #f2f4f8;  /* titluri */
   --ink-2: #c3c9d6;  /* corp */
   --ink-3: #8b93a5;  /* secundar */
-  --ink-4: #5d6577;  /* etichete / meta */
+  --ink-4: #7d8597;  /* etichete / meta — vezi nota de contrast de mai jos */
 
   /* ── Accent unic de brand ────────────────────────────────────────────── */
   --accent:      #6d75f6;
@@ -1726,8 +1726,23 @@ tr.cyber-row:hover {
       (--s-*) sunt reci. Amestecul făcea interfața să pară murdară. Rampa
       --ink-* e rece, deci totul se așază pe aceeași temperatură.
 
-   Sunt ridicări blânde, nu dramatice: --ink-4 (#5d6577) e doar puțin peste
-   zinc-600, cât să treacă pragul de citit.
+   CONTRAST, măsurat în browser pe paginile reale:
+
+     --ink-1  18.2 : 1   ✓
+     --ink-2  12.0 : 1   ✓
+     --ink-3   6.5 : 1   ✓
+     --ink-4   3.2 : 1   ✗  ← pica pragul WCAG AA de 4.5:1
+
+   --ink-4 era #5d6577 și cădea sub prag pe TOATE suprafețele: 3.43 pe --s-0,
+   3.18 pe --s-2. Doar pe dashboard erau 43 de texte sub limită — eticheta
+   „Balanța", ora, „Nicio tranzacție azi", numele domeniilor din bara de sus.
+
+   Ridicat la #7d8597: 5.38 pe fundalul paginii, 5.02 pe --s-2, 4.71 pe --s-3,
+   care e cea mai deschisă suprafață pe care stă text. Trece cu marjă peste tot.
+
+   Ierarhia supraviețuiește: --ink-3 rămâne la 6.5, deci saltul dintre „secundar"
+   și „meta" e în continuare vizibil. Nu se poate avea și text foarte stins, și
+   text lizibil — iar dintre cele două, lizibilitatea nu e negociabilă.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .text-zinc-700 { color: var(--ink-4); }
@@ -1749,4 +1764,34 @@ tr.cyber-row:hover {
 @keyframes tg-rail-in {
   from { opacity: 0; transform: translateX(-10px); }
   to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ══ Ținte de atins ══════════════════════════════════════════════════════════
+   Măsurat pe dashboard la 375px: 57 de butoane și linkuri sub 44×44, pragul de
+   la care un deget nimerește constant. Cel mai mic avea 16×16 — butonul de
+   închidere al ghidului de pornire.
+
+   Elementele NU se măresc: densitatea de pe desktop e o calitate, nu un defect,
+   iar un buton de 44px într-o bară de instrumente ar strica-o. În schimb primesc
+   o zonă de atins invizibilă, centrată, care se extinde până la 44×44.
+
+   Doar pe pointer: coarse — adică pe atins. Cu mouse-ul, precizia e a
+   cursorului, iar o zonă invizibilă mai mare decât butonul ar face ca un clic
+   de lângă el să pară că apasă butonul.
+
+   Nu se aplică global pe button::after: multe componente își folosesc deja
+   pseudo-elementul pentru decorații (șina de navigație, printre altele), iar o
+   regulă globală le-ar suprascrie. De aceea e ::before și e o clasă explicită. */
+@media (pointer: coarse) {
+  .tg-tap { position: relative; }
+  .tg-tap::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    /* Nu desenează nimic; există doar ca suprafață de atins. */
+  }
 }
