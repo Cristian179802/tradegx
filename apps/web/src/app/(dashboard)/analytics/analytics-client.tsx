@@ -93,7 +93,7 @@ function StatCard({
   return (
     <div className={cn("rounded-xl border bg-zinc-900/80 p-3 transition-all duration-200 group card-3d", bgMap[accentColor])}>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">{label}</p>
+        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider leading-[15px] min-h-[30px] sm:min-h-0">{label}</p>
         <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center", iconMap[accentColor])}>
           <Icon className="h-3 w-3" />
         </div>
