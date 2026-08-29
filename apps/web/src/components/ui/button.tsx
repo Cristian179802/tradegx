@@ -16,7 +16,11 @@ import { cn } from "@/lib/utils";
 // vechi; 12px e limbajul actual.
 
 const buttonVariants = cva(
-  "tg-btn inline-flex items-center justify-center whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none disabled:pointer-events-none disabled:opacity-45",
+  // `tg-tap` da fiecarui buton o zona de atins de minim 44×44 pe ecrane
+  // tactile, fara sa-i schimbe aspectul. Aici, in componenta comuna, in loc de
+  // cateva zeci de locuri: variantele „sm" (36px) si „icon" (32px) sunt sub
+  // pragul la care un deget nimereste constant.
+  "tg-tap tg-btn inline-flex items-center justify-center whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none disabled:pointer-events-none disabled:opacity-45",
   {
     variants: {
       variant: {

@@ -43,7 +43,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
           key={l}
           onClick={() => switchTo(l)}
           className={cn(
-            "font-bold rounded-md transition-colors uppercase",
+            "tg-tap font-bold rounded-md transition-colors uppercase",
             compact ? "px-2 py-1 text-[10px]" : "px-2.5 py-1.5 text-xs",
             locale === l
               ? "bg-indigo-500/20 text-indigo-300"
