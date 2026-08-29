@@ -45,7 +45,12 @@
     "pulseBalance": "Balance",
     "pulseToday": "Today",
     "pulseOpen": "{count} open",
-    "pulseAlerts": "{count} unread alerts"
+    "pulseAlerts": "{count} unread alerts",
+    "planFree": "Free plan",
+    "planPro": "PRO plan",
+    "planTrial": "PRO trial",
+    "upgrade": "Upgrade to PRO",
+    "account": "My account"
   },
   "banner": {
     "trialLabel": "PRO Trial",

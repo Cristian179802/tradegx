@@ -3,14 +3,14 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import {
   LayoutDashboard, Target, BookOpen, NotebookPen, ListChecks, Trophy,
   Calculator, Shield, Award, TrendingUp, BarChart3, Landmark, Crosshair,
   Dices, FlaskConical, Receipt, Brain, BellRing, GraduationCap, Medal,
   LineChart, Globe, Gauge, CalendarDays, Newspaper, Users, Rocket,
-  Settings, CreditCard, Search, Lock,
+  Settings, CreditCard, Search, Lock, LogOut, User, Sparkles, ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavPulse, compactMoney } from "@/lib/use-nav-pulse";
@@ -38,6 +38,16 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
   proOnly?: boolean;
+  /**
+   * Pagina trăiește ÎN AFARA shell-ului aplicației (`src/app/x`, nu
+   * `src/app/(dashboard)/x`), deci navigarea către ea în același tab te scoate
+   * din aplicație: fără șină, fără bară, fără cale de întoarcere în afară de
+   * butonul „înapoi" al browserului — care te duce pe pagina publică de start,
+   * unde scrie „Autentificare". Pare că te-a deconectat, deși sesiunea e intactă.
+   *
+   * Se deschid în tab nou. Aplicația rămâne exact unde ai lăsat-o.
+   */
+  external?: boolean;
 }
 
 interface NavColumn {
@@ -89,7 +99,7 @@ const DOMAINS: Domain[] = [
           { href: "/calculator",   label: "calculator",  icon: Calculator },
           { href: "/goals",        label: "goals",       icon: Trophy },
           { href: "/prop-firm",    label: "propFirm",    icon: Award },
-          { href: "/tax-report",   label: "taxReport",   icon: Receipt },
+          { href: "/tax-report",   label: "taxReport",   icon: Receipt, external: true },
         ],
       },
     ],
@@ -138,7 +148,7 @@ const DOMAINS: Domain[] = [
     columns: [{
       items: [
         { href: "/community", label: "community", icon: Users, proOnly: true },
-        { href: "/roadmap",   label: "roadmap",   icon: Rocket },
+        { href: "/roadmap",   label: "roadmap",   icon: Rocket, external: true },
       ],
     }],
   },
@@ -191,9 +201,13 @@ export function navMetaForRoute(pathname: string): {
 
 export function CommandRail() {
   const t = useTranslations("nav");
+  const tc = useTranslations("common");
   const pathname = usePathname();
   const { data: session } = useSession();
   const isPro = session?.user?.plan === "PRO" || session?.user?.isTrialing;
+  const isTrial = !!session?.user?.isTrialing;
+  const initials = (session?.user?.name ?? "T")
+    .split(" ").map((w) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
 
   const pulse = useNavPulse();
   const [open, setOpen] = React.useState<string | null>(null);
@@ -204,6 +218,7 @@ export function CommandRail() {
   const glyphRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   // Handler-ul de tastatură e montat o dată, deci nu poate citi starea direct.
   const openRef = React.useRef<string | null>(null);
+  const [accountOpen, setAccountOpen] = React.useState(false);
 
   // Domeniul paginii curente. Potrivirea e pe prefix, ca `/trades/123` să
   // marcheze tot „Trading".
@@ -221,13 +236,14 @@ export function CommandRail() {
   React.useEffect(() => { openRef.current = open; }, [open]);
 
   // Navigarea închide panoul: altfel ar rămâne deschis peste pagina nouă.
-  React.useEffect(() => { setOpen(null); setPinned(false); }, [pathname]);
+  React.useEffect(() => { setOpen(null); setPinned(false); setAccountOpen(false); }, [pathname]);
 
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       setOpen(null);
       setPinned(false);
+      setAccountOpen(false);
       // Focusul se ÎNTOARCE la glifa de unde a plecat. Fără asta, Escape îl
       // aruncă la începutul paginii, iar cine navighează cu tastatura trebuie să
       // refacă tot drumul până unde era — pedeapsă pentru că a închis un meniu.
@@ -384,7 +400,131 @@ export function CommandRail() {
             );
           })}
         </div>
+
+        {/* ── Contul, jos ──
+            Trecerea la șină pierduse blocul de profil din vechiul meniu: cu el au
+            dispărut deconectarea și drumul spre abonament. O aplicație din care
+            nu te poți deconecta fără să știi ruta pe de rost nu e terminată.
+
+            Stă jos, separat de domenii, fiindcă nu e o destinație între altele —
+            e despre tine, nu despre produs. */}
+        <div className="mt-auto mb-3">
+          <button
+            type="button"
+            aria-haspopup="true"
+            aria-expanded={accountOpen}
+            aria-label={t("account")}
+            title={t("account")}
+            onClick={() => { setAccountOpen((v) => !v); setOpen(null); setPinned(false); }}
+            className={cn(
+              "relative grid place-items-center w-11 h-11 rounded-xl border transition-all duration-200",
+              "outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]",
+              "focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--s-0)]",
+              accountOpen
+                ? "border-[color:var(--accent-line)] bg-[color:var(--accent-soft)]"
+                : "border-transparent hover:bg-[color:var(--s-2)]"
+            )}
+          >
+            <span className="grid place-items-center w-8 h-8 rounded-lg text-[11px] font-black text-white
+                             bg-gradient-to-br from-[color:var(--accent)] to-violet-700">
+              {initials}
+            </span>
+            {/* Punctul apare doar când planul cere o decizie: fără el, un semnal
+                permanent devine invizibil în două zile. */}
+            {!isPro && (
+              <span
+                className="absolute top-1 right-1 w-[6px] h-[6px] rounded-full bg-amber-400"
+                style={{ boxShadow: "0 0 6px rgba(251,191,36,0.9)" }}
+              />
+            )}
+          </button>
+        </div>
       </nav>
+
+      {/* ── Panoul contului ──
+          Ancorat jos, lângă butonul lui, ca legătura dintre declanșator și
+          conținut să fie evidentă fără animație explicativă. */}
+      {accountOpen && (
+        <div
+          onMouseLeave={() => setAccountOpen(false)}
+          aria-label={t("account")}
+          className="hidden md:block fixed bottom-3 left-[68px] z-40 w-[236px]
+                     rounded-2xl border border-[color:var(--line-1)]
+                     bg-[color:var(--s-1)]/97 backdrop-blur-2xl
+                     shadow-[16px_16px_50px_-24px_rgba(0,0,0,0.9)] overflow-hidden"
+          style={{ animation: "tg-rail-in 200ms cubic-bezier(0.22,0.61,0.36,1) both" }}
+        >
+          <div className="px-4 pt-3.5 pb-3 border-b border-[color:var(--line-1)]">
+            <p className="text-[13px] font-bold text-[color:var(--ink-1)] truncate">
+              {session?.user?.name ?? t("account")}
+            </p>
+            <p className="text-[11px] text-[color:var(--ink-4)] truncate mt-0.5">
+              {session?.user?.email}
+            </p>
+          </div>
+
+          {/* Planul. Lipsea complet din vechiul meniu: aflai ce plan ai doar
+              intrând la Abonament. Aici e o linie, iar dacă nu ești pe PRO
+              devine o invitație — nu un banner care țipă, ci butonul evident
+              din singurul loc unde te uiți oricum după contul tău. */}
+          <div className="px-4 py-3 border-b border-[color:var(--line-1)]">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className={cn("w-3 h-3", isPro ? "text-[color:var(--accent)]" : "text-amber-400")} />
+              <span className={cn(
+                "text-[11px] font-bold",
+                isPro ? "text-[color:var(--accent)]" : "text-amber-300"
+              )}>
+                {isTrial ? t("planTrial") : isPro ? t("planPro") : t("planFree")}
+              </span>
+            </div>
+            {!isPro && (
+              <Link
+                href="/billing"
+                className="mt-2 flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5
+                           text-[12px] font-bold text-white
+                           bg-gradient-to-r from-[color:var(--accent)] to-violet-600
+                           hover:brightness-110 transition-all"
+              >
+                {t("upgrade")}
+              </Link>
+            )}
+          </div>
+
+          <div className="p-1.5">
+            {[
+              { href: "/settings", icon: User, label: tc("profileSettings") },
+              { href: "/accounts", icon: TrendingUp, label: tc("tradingAccounts") },
+              { href: "/billing", icon: CreditCard, label: t("billing") },
+            ].map((it) => (
+              <Link
+                key={it.href}
+                href={it.href}
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-[7px]
+                           text-[color:var(--ink-3)] hover:text-[color:var(--ink-1)]
+                           hover:bg-[color:var(--s-2)] transition-colors"
+              >
+                <it.icon className="w-[15px] h-[15px] shrink-0 text-[color:var(--ink-4)]" />
+                <span className="text-[13px] font-medium truncate">{it.label}</span>
+              </Link>
+            ))}
+
+            <div className="my-1.5 h-px bg-[color:var(--line-1)]" />
+
+            {/* Deconectarea e singurul lucru roșu din toată navigația. Nu ca
+                avertisment — ci pentru că e singura acțiune de aici care te scoate
+                din aplicație, iar ochiul trebuie s-o găsească fără să citească. */}
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-[7px]
+                         text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
+            >
+              <LogOut className="w-[15px] h-[15px] shrink-0" />
+              <span className="text-[13px] font-medium">{t("logout")}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Panoul domeniului ──
           Alunecă din șină, nu apare din neant: mișcarea spune de unde vine, deci
@@ -473,6 +613,9 @@ export function CommandRail() {
                       <Link
                         key={item.href}
                         href={locked ? "/billing" : item.href}
+                        {...(item.external && !locked
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
                         className={cn(
                           "tg-nav group flex items-center gap-2.5 rounded-lg px-2.5 py-[7px]",
                           active
@@ -486,6 +629,11 @@ export function CommandRail() {
                         )} />
                         <span className="text-[13px] font-medium truncate">{t(item.label)}</span>
                         {locked && <Lock className="w-3 h-3 shrink-0 text-[color:var(--ink-4)]" />}
+                        {/* Săgeata spune că pleacă în altă filă ÎNAINTE de clic.
+                            O surpriză după clic e o surpriză, oricât de mică. */}
+                        {item.external && !locked && (
+                          <ArrowUpRight className="w-3 h-3 shrink-0 text-[color:var(--ink-4)]" />
+                        )}
                         {item.badge && !locked && (
                           <span className="ml-auto shrink-0 rounded px-1 py-px text-[9px] font-black tracking-wide
                                            border border-[color:var(--accent-line)] bg-[color:var(--accent-soft)]

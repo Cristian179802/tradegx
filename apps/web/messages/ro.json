@@ -45,7 +45,12 @@
     "pulseBalance": "Sold",
     "pulseToday": "Azi",
     "pulseOpen": "{count} în piață",
-    "pulseAlerts": "{count} alerte necitite"
+    "pulseAlerts": "{count} alerte necitite",
+    "planFree": "Plan gratuit",
+    "planPro": "Plan PRO",
+    "planTrial": "Probă PRO",
+    "upgrade": "Treci pe PRO",
+    "account": "Contul meu"
   },
   "banner": {
     "trialLabel": "PRO Trial",
