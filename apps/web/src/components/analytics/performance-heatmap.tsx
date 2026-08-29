@@ -4,7 +4,6 @@ import * as React from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Clock, TrendingUp, TrendingDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PnlField3D } from "@/components/analytics/pnl-field-3d";
 
 interface RawTrade { time: string; pnl: number; }
 type Metric = "pnl" | "winrate" | "count";
@@ -20,7 +19,6 @@ export function PerformanceHeatmap() {
   const [currency, setCurrency] = React.useState("USD");
   const [loading, setLoading] = React.useState(true);
   const [metric, setMetric] = React.useState<Metric>("pnl");
-  const [view, setView] = React.useState<"2d" | "3d">("2d");
   const [hover, setHover] = React.useState<{ d: number; h: number } | null>(null);
 
   React.useEffect(() => {
@@ -96,7 +94,30 @@ export function PerformanceHeatmap() {
 
   const money = (n: number) =>
     new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
+  // Plusul se punea hardcodat înaintea sumei, deci o fereastră cu pierdere
+  // ieșea „+-0 USD" — un plus lipit de un minus. Semnul îl decide valoarea.
+  const signedMoney = (n: number) => `${n > 0 ? "+" : ""}${money(n)}`;
   const hh = (h: number) => `${String(h).padStart(2, "0")}:00`;
+
+  // Totalul fiecărei zile, pentru coloana din dreapta grilei.
+  const dayTotals = React.useMemo(
+    () =>
+      grid.map((row) =>
+        row.reduce(
+          (acc, c) => ({ pnl: acc.pnl + c.pnl, count: acc.count + c.count }),
+          { pnl: 0, count: 0 }
+        )
+      ),
+    [grid]
+  );
+
+  // Capătul scalei de culoare, mereu în P&L — legenda descrie culoarea, iar
+  // culoarea e normalizată pe `maxAbs` doar când metrica selectată e P&L.
+  const legendMax = React.useMemo(() => {
+    let m = 0;
+    for (const row of grid) for (const c of row) if (c.count > 0) m = Math.max(m, Math.abs(c.pnl));
+    return m;
+  }, [grid]);
 
   const hovered = hover ? grid[hover.d][hover.h] : null;
 
@@ -116,29 +137,8 @@ export function PerformanceHeatmap() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Mod de reprezentare. 2D e mai bun la scanat (toate celulele
-              vizibile, fără ocluziune); 3D e mai bun la comparat mărimi
-              (înălțimea se compară imediat, intensitatea culorii nu). Aceleași
-              date, aceleași insight-uri — doar reprezentarea diferă. */}
           <div className="flex items-center gap-0.5 bg-zinc-800 rounded-lg p-0.5">
-            {(["2d", "3d"] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className={cn(
-                  "text-[11px] font-bold px-2.5 py-1 rounded-md transition-all uppercase",
-                  view === v ? "bg-indigo-600 text-white" : "text-zinc-500 hover:text-zinc-300"
-                )}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-
-          {/* Metrica are sens doar pe heatmap: în 3D înălțimea e mereu |P&L|. */}
-          {view === "2d" && (
-            <div className="flex items-center gap-0.5 bg-zinc-800 rounded-lg p-0.5">
-              {([["pnl", "P&L"], ["winrate", "Win %"], ["count", t("metricVolume")]] as [Metric, string][]).map(([m, label]) => (
+            {([["pnl", "P&L"], ["winrate", "Win %"], ["count", t("metricVolume")]] as [Metric, string][]).map(([m, label]) => (
                 <button
                   key={m}
                   onClick={() => setMetric(m)}
@@ -150,8 +150,7 @@ export function PerformanceHeatmap() {
                   {label}
                 </button>
               ))}
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -162,17 +161,6 @@ export function PerformanceHeatmap() {
           {t("empty")}
         </p>
       ) : (
-        <>
-        {view === "3d" ? (
-          <PnlField3D
-            cells={grid.flatMap((row, d) =>
-              row.map((c, h) => ({ day: d, hour: h, pnl: c.pnl, count: c.count, wins: c.wins }))
-                 .filter((c) => c.count > 0)
-            )}
-            dayLabels={DAYS_SHORT}
-            money={money}
-          />
-        ) : (
         <>
           {/* Tooltip activ */}
           <div className="h-6 mb-1 text-center">
@@ -194,7 +182,7 @@ export function PerformanceHeatmap() {
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full">
               {/* Header ore */}
-              <div className="flex pl-10">
+              <div className="flex pl-10 pr-14">
                 {Array.from({ length: 24 }, (_, h) => (
                   <div key={h} className="flex-1 text-center" style={{ minWidth: 13 }}>
                     {h % 3 === 0 && <span className="text-[8px] text-zinc-600">{h}</span>}
@@ -207,10 +195,15 @@ export function PerformanceHeatmap() {
                   <div className="w-10 text-[10px] font-semibold text-zinc-500 shrink-0">{dayLabel}</div>
                   {Array.from({ length: 24 }, (_, h) => {
                     const c = grid[d][h];
-                    const isBest = best.best.d === d && best.best.h === h && c.count > 0;
+                    const isBest = best.best.d === d && best.best.h === h && c.count > 0 && c.pnl > 0;
                     return (
                       <div
                         key={h}
+                        // `title` face celula inspectabilă și fără JavaScript de-al
+                        // nostru: tooltip nativ pe desktop, text citit de cititoarele
+                        // de ecran. Grila e 168 de div-uri fără nicio semantică; asta
+                        // e cel mai ieftin mod de a le da una.
+                        title={c.count > 0 ? `${DAYS[d]} ${hh(h)} · ${signedMoney(c.pnl)} · ${c.count}` : undefined}
                         className="flex-1 aspect-square m-[1px] rounded-[2px] cursor-pointer transition-transform hover:scale-125 hover:z-10 relative"
                         style={{
                           minWidth: 11,
@@ -219,36 +212,71 @@ export function PerformanceHeatmap() {
                         }}
                         onMouseEnter={() => setHover({ d, h })}
                         onMouseLeave={() => setHover(null)}
+                        // Pe telefon nu există `mouseenter`: fără asta, detaliile
+                        // unei celule erau de neajuns pe jumătate din trafic.
+                        // Atingerea comută, ca a doua atingere să poată închide.
+                        onClick={() =>
+                          setHover((prev) => (prev && prev.d === d && prev.h === h ? null : { d, h }))
+                        }
                       />
                     );
                   })}
+                  {/* Totalul zilei. Grila arată tiparul, coloana asta arată
+                      verdictul — altfel trebuie să însumezi 24 de pătrățele din ochi. */}
+                  <div className="w-14 pl-1.5 shrink-0 text-right text-[10px] font-semibold num">
+                    {dayTotals[d].count > 0 ? (
+                      <span className={dayTotals[d].pnl >= 0 ? "text-emerald-400/90" : "text-rose-400/90"}>
+                        {signedMoney(dayTotals[d].pnl)}
+                      </span>
+                    ) : (
+                      <span className="text-zinc-700">—</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-        </>
-        )}
 
+          {/* Legendă. Fără ea, intensitatea culorii nu înseamnă nimic: nu se
+              poate ști dacă verdele închis e o sută sau zece mii. */}
+          <div className="flex items-center justify-end gap-2 mt-3 pr-1">
+            <span className="text-[9px] text-zinc-600 num">{signedMoney(-legendMax)}</span>
+            <div
+              className="h-2 w-28 rounded-full"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(244,63,94,0.93), rgba(244,63,94,0.12), rgba(63,63,70,0.35), rgba(16,185,129,0.12), rgba(16,185,129,0.93))",
+              }}
+            />
+            <span className="text-[9px] text-zinc-600 num">{signedMoney(legendMax)}</span>
+          </div>
           {/* Insight-uri — comune ambelor moduri: cea mai bună fereastră și cea
               de evitat sunt aceleași indiferent de reprezentare. */}
           {best.best.d >= 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+              {/* Numai daca EXISTĂ o fereastră pe profit. Pe un cont în pierdere,
+                  cea mai bună oră e tot o oră pe minus — a o eticheta „cea mai
+                  bună fereastră" și a-i lipi un plus în față e o minciună
+                  liniștitoare, exact genul pe care un jurnal de tranzacționare
+                  n-are voie să-l spună. */}
+              {best.best.pnl > 0 && (
               <div className="rounded-xl bg-emerald-500/8 border border-emerald-500/20 px-3 py-2.5 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">{t("bestWindow")}</p>
                   <p className="text-xs text-zinc-200 font-semibold">
-                    {DAYS[best.best.d]} {hh(best.best.h)} · <span className="text-emerald-400">+{money(best.best.pnl)}</span>
+                    {DAYS[best.best.d]} {hh(best.best.h)} · <span className="text-emerald-400">{signedMoney(best.best.pnl)}</span>
                   </p>
                 </div>
               </div>
+              )}
               {best.worst.d >= 0 && best.worst.pnl < 0 && (
                 <div className="rounded-xl bg-rose-500/8 border border-rose-500/20 px-3 py-2.5 flex items-center gap-2">
                   <TrendingDown className="w-4 h-4 text-rose-400 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-rose-400/80">{t("avoid")}</p>
                     <p className="text-xs text-zinc-200 font-semibold">
-                      {DAYS[best.worst.d]} {hh(best.worst.h)} · <span className="text-rose-400">{money(best.worst.pnl)}</span>
+                      {DAYS[best.worst.d]} {hh(best.worst.h)} · <span className="text-rose-400">{signedMoney(best.worst.pnl)}</span>
                     </p>
                   </div>
                 </div>

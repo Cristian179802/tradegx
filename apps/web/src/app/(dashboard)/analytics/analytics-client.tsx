@@ -15,7 +15,8 @@ import {
   ReferenceLine,
   Cell,
 } from "recharts";
-import { TrendingUp, TrendingDown, Trophy, AlertTriangle, Target, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, Trophy, AlertTriangle, Target, BarChart3,
+         Sigma, RotateCcw, Repeat, Receipt, Timer } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 
 interface Summary {
@@ -29,6 +30,14 @@ interface Summary {
   worstTrade: number;
   avgRR: number;
   maxDrawdown: number;
+  expectancy: number;
+  recoveryFactor: number | null;
+  maxWinStreak: number;
+  maxLossStreak: number;
+  totalCosts: number;
+  costRatio: number | null;
+  avgDurationWin: number;
+  avgDurationLoss: number;
 }
 
 interface AnalyticsData {
@@ -102,6 +111,25 @@ function StatCard({
   );
 }
 
+/**
+ * Minute → durata citibila: 45m, 2h 15m, 3z 4h.
+ *
+ * Unitatile vin din traduceri fiindca "z" de la zile nu e "d" de la days.
+ * Taiem la doua unitati: "2z 4h 13m" e o precizie pe care nimeni n-o foloseste
+ * cand se uita la cat tine in medie o pozitie.
+ */
+function humanDuration(min: number, u: { m: string; h: string; d: string }): string {
+  if (min < 60) return `${min}${u.m}`;
+  if (min < 1440) {
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return m > 0 ? `${h}${u.h} ${m}${u.m}` : `${h}${u.h}`;
+  }
+  const d = Math.floor(min / 1440);
+  const h = Math.floor((min % 1440) / 60);
+  return h > 0 ? `${d}${u.d} ${h}${u.h}` : `${d}${u.d}`;
+}
+
 const darkTooltipStyle = {
   contentStyle: {
     background: "rgba(9,9,11,0.95)",
@@ -133,6 +161,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
   if (!summary) return null;
 
   const fmt = (v: number) => formatCurrency(v, currency);
+  const durUnits = { m: t("unitMin"), h: t("unitHour"), d: t("unitDay") };
 
   return (
     <div className="space-y-6">
@@ -171,6 +200,67 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           sub={t("subWorst", { v: fmt(summary.worstTrade) })}
           icon={AlertTriangle}
         />
+      </div>
+
+      {/* ── Calitatea sistemului ──────────────────────────────────────────────
+          Randul de sus spune CAT ai castigat. Astea spun DACA metoda tine.
+          Sunt separate printr-un titlu fiindca se citesc altfel: pe primele te
+          uiti zilnic, pe astea cand decizi daca merita sa continui — iar un
+          rand de zece casete identice le-ar face pe toate sa para la fel de
+          urgente. */}
+      <div>
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-600 mb-2.5">
+          {t("systemQuality")}
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {/* Asteptarea. Singura cifra care raspunde la "merita sa continui?":
+              cat aduce, in medie, fiecare tranzactie. */}
+          <StatCard
+            label={t("kExpectancy")}
+            value={fmt(summary.expectancy)}
+            sub={t("subPerTrade")}
+            positive={summary.expectancy >= 0}
+            icon={Sigma}
+          />
+          <StatCard
+            label={t("kRecovery")}
+            value={summary.recoveryFactor !== null ? String(summary.recoveryFactor) : "—"}
+            sub={summary.recoveryFactor !== null ? t("subRecovery") : t("subRecoveryNone")}
+            positive={summary.recoveryFactor !== null ? summary.recoveryFactor >= 1 : undefined}
+            icon={RotateCcw}
+          />
+          {/* Seria de pierderi ramane neutra ca si culoare: fara sa stim cat
+              risti pe tranzactie, cinci la rand nu e nici bine, nici rau. */}
+          <StatCard
+            label={t("kLossStreak")}
+            value={String(summary.maxLossStreak)}
+            sub={t("subWinStreak", { n: summary.maxWinStreak })}
+            icon={Repeat}
+          />
+          <StatCard
+            label={t("kCosts")}
+            value={fmt(summary.totalCosts)}
+            sub={summary.costRatio !== null ? t("subCostRatio", { p: summary.costRatio }) : t("subNoCosts")}
+            icon={Receipt}
+          />
+          {/* Durata separata pe castiguri si pierderi. Daca pierderile sunt
+              tinute mai mult, ai efectul de dispozitie — media pe toate
+              tranzactiile l-ar ascunde exact. */}
+          <StatCard
+            label={t("kDuration")}
+            value={
+              summary.avgDurationWin === 0 && summary.avgDurationLoss === 0
+                ? "—"
+                : `${humanDuration(summary.avgDurationWin, durUnits)} / ${humanDuration(summary.avgDurationLoss, durUnits)}`
+            }
+            sub={
+              summary.avgDurationWin === 0 && summary.avgDurationLoss === 0
+                ? t("subNoDuration")
+                : t("subWinLoss")
+            }
+            icon={Timer}
+          />
+        </div>
       </div>
 
       {/* Equity curve */}

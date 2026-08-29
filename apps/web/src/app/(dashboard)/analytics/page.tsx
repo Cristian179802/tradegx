@@ -200,13 +200,83 @@ export default async function AnalyticsPage() {
       : 0;
   let peak = initialBalance;
   let maxDrawdown = 0;
+  let maxDrawdownMoney = 0;
   let bal = initialBalance;
   for (const t of closedTrades) {
     bal += Number(t.pnlMoney ?? 0);
     if (bal > peak) peak = bal;
+    const ddMoney = peak - bal;
+    if (ddMoney > maxDrawdownMoney) maxDrawdownMoney = ddMoney;
     const dd = peak > 0 ? ((peak - bal) / peak) * 100 : 0;
     if (dd > maxDrawdown) maxDrawdown = dd;
   }
+
+  // ── Metrici avansate ───────────────────────────────────────────────────────
+  //
+  // Cele cinci de sus spun CAT ai castigat. Astea spun DACA sistemul tine — si
+  // sunt cifrele pe care le cere oricine evalueaza serios o strategie. O firma
+  // de prop trading se uita la ele inaintea profitului brut.
+
+  // Asteptarea: cat aduce, in medie, o tranzactie. Singura cifra care raspunde
+  // la "merita sa continui?". Un win rate de 70% cu pierderi de trei ori cat
+  // castigurile e tot un sistem care pierde bani — rata de castig singura minte.
+  const winRateFrac = closedTrades.length > 0 ? wins.length / closedTrades.length : 0;
+  const lossRateFrac = closedTrades.length > 0 ? losses.length / closedTrades.length : 0;
+  const expectancy = winRateFrac * avgWin - lossRateFrac * avgLoss;
+
+  // Factorul de recuperare: de cate ori acopera profitul net cea mai adanca
+  // groapa prin care a trecut contul. Sub 1 inseamna ca inca nu ti-ai revenit
+  // din cea mai urata perioada. Fara profit sau fara groapa nu inseamna nimic,
+  // deci ramane gol in loc sa afiseze un zero care ar parea o evaluare.
+  const recoveryFactor =
+    maxDrawdownMoney > 0 && totalPnl > 0 ? totalPnl / maxDrawdownMoney : null;
+
+  // Serii consecutive. Conteaza pentru dimensionarea riscului, nu pentru orgoliu:
+  // daca istoric ai avut opt pierderi la rand si risti 5% pe tranzactie,
+  // urmatoarea serie de opt iti ia o treime din cont.
+  let maxLossStreak = 0;
+  let maxWinStreak = 0;
+  let curLoss = 0;
+  let curWin = 0;
+  for (const p of pnlValues) {
+    if (p > 0) {
+      curWin += 1;
+      curLoss = 0;
+    } else if (p < 0) {
+      curLoss += 1;
+      curWin = 0;
+    } else {
+      curWin = 0;
+      curLoss = 0;
+    }
+    if (curWin > maxWinStreak) maxWinStreak = curWin;
+    if (curLoss > maxLossStreak) maxLossStreak = curLoss;
+  }
+
+  // Costurile: comision plus swap, platite pe fiecare tranzactie indiferent cum
+  // a iesit. Raportate la profitul brut, fiindca suma singura nu spune nimic —
+  // 400 in costuri e neglijabil la 20.000 profit si fatal la 1.000.
+  const totalCosts = closedTrades.reduce(
+    (sum, t) => sum + Math.abs(Number(t.commission ?? 0)) + Math.abs(Number(t.swap ?? 0)),
+    0
+  );
+  const costRatio = grossProfit > 0 ? (totalCosts / grossProfit) * 100 : null;
+
+  // Durata medie, separata pe castiguri si pierderi. Daca pierderile sunt tinute
+  // mult mai mult decat castigurile, ai efectul de dispozitie: iei profitul
+  // devreme de teama sa nu-l pierzi, si tii pierderea sperand ca se intoarce.
+  // Media pe toate tranzactiile ascunde exact asta; doar separarea o arata.
+  const avgOf = (xs: number[]) => (xs.length > 0 ? xs.reduce((s, x) => s + x, 0) / xs.length : 0);
+  const durationWin = avgOf(
+    closedTrades
+      .filter((t) => Number(t.pnlMoney ?? 0) > 0 && t.durationMinutes != null)
+      .map((t) => Number(t.durationMinutes))
+  );
+  const durationLoss = avgOf(
+    closedTrades
+      .filter((t) => Number(t.pnlMoney ?? 0) < 0 && t.durationMinutes != null)
+      .map((t) => Number(t.durationMinutes))
+  );
 
   const data = {
     empty: false,
@@ -222,6 +292,14 @@ export default async function AnalyticsPage() {
       worstTrade: parseFloat(worstTrade.toFixed(2)),
       avgRR: parseFloat(avgRR.toFixed(2)),
       maxDrawdown: parseFloat(maxDrawdown.toFixed(2)),
+      expectancy: parseFloat(expectancy.toFixed(2)),
+      recoveryFactor: recoveryFactor !== null ? parseFloat(recoveryFactor.toFixed(2)) : null,
+      maxWinStreak,
+      maxLossStreak,
+      totalCosts: parseFloat(totalCosts.toFixed(2)),
+      costRatio: costRatio !== null ? parseFloat(costRatio.toFixed(1)) : null,
+      avgDurationWin: Math.round(durationWin),
+      avgDurationLoss: Math.round(durationLoss),
     },
     equityCurve,
     monthlyPnl,
