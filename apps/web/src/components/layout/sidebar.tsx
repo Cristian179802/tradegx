@@ -272,7 +272,12 @@ export function Sidebar() {
                   href={locked ? "/pricing" : item.href}
                   onClick={() => setMobileSidebarOpen(false)}
                   className={cn(
-                    "tg-nav flex items-center gap-3 mx-2 px-2.5 py-2 rounded-xl text-sm group",
+                    // `min-h-11` = 44px, pragul de la care un deget nimereste constant.
+                  // Erau 38px, masurat. Aici se poate mari direct, fara zona
+                  // invizibila: de cand navigatia pe desktop e sina de comanda,
+                  // sertarul asta se vede DOAR pe telefon — deci nu exista o
+                  // densitate de desktop pe care sa o stricam.
+                  "tg-nav flex items-center gap-3 mx-2 px-2.5 py-2 min-h-11 rounded-xl text-sm group",
                     isActive
                       ? "tg-nav-on text-white font-semibold border border-indigo-500/30"
                       : "text-[#8b93a5] hover:text-[#f2f4f8] border border-transparent hover:border-zinc-700/40",
