@@ -42,7 +42,7 @@ export function DailyReviewCard() {
           <button
             onClick={load}
             disabled={loading}
-            className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/8 hover:bg-indigo-500/15 border border-indigo-500/20 rounded-lg px-2.5 py-1 transition-all"
+            className="tg-tap ml-auto flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/8 hover:bg-indigo-500/15 border border-indigo-500/20 rounded-lg px-2.5 py-1 transition-all"
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
             {loading ? t("analyzing") : t("generate")}

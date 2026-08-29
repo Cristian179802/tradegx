@@ -199,7 +199,7 @@ export function LiveChart() {
           <div ref={dropRef} className="relative">
             <button
               onClick={() => setOpen((v) => !v)}
-              className="flex items-center gap-1.5 bg-zinc-800 border border-zinc-700 hover:border-zinc-600 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-200 transition-colors"
+              className="tg-tap flex items-center gap-1.5 bg-zinc-800 border border-zinc-700 hover:border-zinc-600 rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-200 transition-colors"
             >
               {currentLabel}
               <ChevronDown className={cn("h-3 w-3 text-zinc-500 transition-transform", open && "rotate-180")} />

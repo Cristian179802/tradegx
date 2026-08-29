@@ -617,7 +617,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               <span className="text-sm font-bold text-zinc-200">{t("liveChart")}</span>
               <span className="live-dot" />
             </div>
-            <Link href="/charts" className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors font-semibold">
+            <Link href="/charts" className="tg-tap text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors font-semibold">
               Ecran complet <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -657,7 +657,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           </div>
 
           <Link href="/analytics"
-            className="mt-4 flex items-center justify-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 bg-indigo-500/8 hover:bg-indigo-500/15 border border-indigo-500/20 rounded-xl py-2.5 transition-all">
+            className="tg-tap mt-4 flex items-center justify-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 bg-indigo-500/8 hover:bg-indigo-500/15 border border-indigo-500/20 rounded-xl py-2.5 transition-all">
             {t("fullAnalysis")} <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -678,7 +678,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               </div>
               <h2 className="text-sm font-bold text-zinc-200">{t("topPairs")}</h2>
             </div>
-            <Link href="/analytics" className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+            <Link href="/analytics" className="tg-tap text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
               Toate <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
@@ -723,7 +723,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               </div>
               <h2 className="text-sm font-bold text-zinc-200">{t("recentTrades")}</h2>
             </div>
-            <Link href="/trades" className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+            <Link href="/trades" className="tg-tap text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
               Toate <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
@@ -747,7 +747,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
                 const pos = (trade.pnlMoney ?? 0) >= 0;
                 return (
                   <Link key={trade.id} href={`/trades/${trade.id}`}
-                    className="flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-zinc-800/60 transition-all group">
+                    className="tg-tap flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-zinc-800/60 transition-all group">
                     <span className={cn(
                       "text-[10px] font-bold w-9 text-center py-1 rounded-lg",
                       trade.direction === "BUY"
@@ -785,10 +785,10 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             <span className="text-xs">📅</span>
           </div>
           <h3 className="text-sm font-bold text-zinc-200">{t("calendarToday")}</h3>
-          <a href="/calendar" className="ml-auto text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors">{t("seeAll")}</a>
+          <a href="/calendar" className="tg-tap ml-auto text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors">{t("seeAll")}</a>
         </div>
         <p className="text-xs text-zinc-500">
-          {t("calendarCheckPre")} <a href="/calendar" className="text-amber-400 hover:text-amber-300 transition-colors font-medium">{t("calendarCheckLink")}</a> {t("calendarCheckPost")}
+          {t("calendarCheckPre")} <a href="/calendar" className="tg-tap text-amber-400 hover:text-amber-300 transition-colors font-medium">{t("calendarCheckLink")}</a> {t("calendarCheckPost")}
         </p>
       </div>
     </div>

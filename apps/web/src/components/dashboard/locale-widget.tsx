@@ -104,7 +104,7 @@ export function LocaleWidget() {
         onClick={() => setOpen((v) => !v)}
         aria-label={t("title")}
         className={cn(
-          "flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all select-none backdrop-blur-md",
+          "tg-tap flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all select-none backdrop-blur-md",
           open ? "border-indigo-500/40" : "hover:border-zinc-600"
         )}
         style={{

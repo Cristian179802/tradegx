@@ -322,47 +322,56 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           <div className="p-4 border-b border-zinc-800">
             <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />{t("chartSetup")}</h2>
           </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-zinc-800">
-                {[t("colSetup"), t("colTrades"), t("colWinRate"), t("colPnlTotal"), t("colAvgPnl")].map((h) => (
-                  <th key={h} className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {setupPerformance.map((s) => (
-                <tr key={s.setup} className="border-b border-zinc-800/50 hover:bg-indigo-500/5 transition-colors">
-                  <td className="px-4 py-3 text-zinc-200 text-xs font-medium">
-                    {s.setup === "OTHER" ? t("setupOther") : (SETUP_LABELS[s.setup] ?? s.setup)}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-400 num text-xs">{s.total}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={cn(
-                        "text-xs num font-medium",
-                        s.winRate >= 50 ? "text-emerald-400" : "text-rose-400"
-                      )}
-                    >
-                      {s.winRate}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={cn("text-xs num", s.pnl >= 0 ? "text-emerald-400" : "text-rose-400")}>
-                      {s.pnl >= 0 ? "+" : ""}{formatCurrency(s.pnl, currency)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={cn("text-xs num", s.avgPnl >= 0 ? "text-emerald-400" : "text-rose-400")}>
-                      {s.avgPnl >= 0 ? "+" : ""}{formatCurrency(s.avgPnl, currency)}
-                    </span>
-                  </td>
+          {/* Pe telefon tabelul are 394px intr-un card de 328. Cardul e
+              `overflow-hidden` pentru colturile rotunjite, deci ultima coloana
+              — P&L, adica exact cea pentru care te uiti la tabel — era taiata SI
+              inaccesibila: nu exista derulare la care sa ajungi.
+
+              Stratul asta se deruleaza pe orizontala. Cardul isi pastreaza
+              colturile, tabelul isi pastreaza toate coloanele. */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-800">
+                  {[t("colSetup"), t("colTrades"), t("colWinRate"), t("colPnlTotal"), t("colAvgPnl")].map((h) => (
+                    <th key={h} className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {setupPerformance.map((s) => (
+                  <tr key={s.setup} className="border-b border-zinc-800/50 hover:bg-indigo-500/5 transition-colors">
+                    <td className="px-4 py-3 text-zinc-200 text-xs font-medium">
+                      {s.setup === "OTHER" ? t("setupOther") : (SETUP_LABELS[s.setup] ?? s.setup)}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-400 num text-xs">{s.total}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={cn(
+                          "text-xs num font-medium",
+                          s.winRate >= 50 ? "text-emerald-400" : "text-rose-400"
+                        )}
+                      >
+                        {s.winRate}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={cn("text-xs num", s.pnl >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                        {s.pnl >= 0 ? "+" : ""}{formatCurrency(s.pnl, currency)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={cn("text-xs num", s.avgPnl >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                        {s.avgPnl >= 0 ? "+" : ""}{formatCurrency(s.avgPnl, currency)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

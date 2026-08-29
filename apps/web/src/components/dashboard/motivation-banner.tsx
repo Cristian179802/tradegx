@@ -54,7 +54,7 @@ export function MotivationBanner() {
       </div>
       <button
         onClick={dismiss}
-        className="shrink-0 text-zinc-600 hover:text-zinc-300 transition-colors"
+        className="tg-tap shrink-0 text-zinc-600 hover:text-zinc-300 transition-colors"
         title={t("hideForToday")}
       >
         <X className="w-4 h-4" />
