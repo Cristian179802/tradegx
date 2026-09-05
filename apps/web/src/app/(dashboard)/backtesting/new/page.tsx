@@ -11,6 +11,7 @@ import {
   ArrowLeft, ArrowRight, Play, Check, ChevronDown, Plus, X, ChevronUp,
 } from "lucide-react";
 import type { CustomCondition, IndicatorRef, IndicatorRefType, ConditionOperator } from "@/lib/backtest-engine";
+import { tApiError } from "@/lib/api-error-dict";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -854,7 +855,7 @@ export default function NewStrategyPage() {
         toast({ title: data.status === "COMPLETED" ? t("btComplete") : t("btCreated"), description: data.status === "COMPLETED" ? t("resultsReady") : t("checkStatus") });
         router.push(`/backtesting/results/${data.backtestId}`);
       } else {
-        toast({ title: t("btErr"), description: data.error, variant: "destructive" });
+        toast({ title: t("btErr"), description: tApiError(data.error), variant: "destructive" });
       }
     } catch {
       toast({ title: t("netErr"), variant: "destructive" });

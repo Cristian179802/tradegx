@@ -18,6 +18,7 @@ import {
   ChevronRight, AlertTriangle, Share2, Check, PlayCircle,
 } from "lucide-react";
 import { TradeReplay } from "@/components/trades/trade-replay";
+import { tApiError } from "@/lib/api-error-dict";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -166,7 +167,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
       toast({ title: t("toastAnalyzed") });
     } else {
       const err = await res.json().catch(() => ({}));
-      toast({ title: t("toastAiErr"), description: err.error ?? t("toastRetry"), variant: "destructive" });
+      toast({ title: t("toastAiErr"), description: tApiError(err.error) ?? t("toastRetry"), variant: "destructive" });
     }
     setAnalyzing(false);
   }

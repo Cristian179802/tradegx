@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, FileText, CheckCircle, AlertCircle, Info, X } from "lucide-react";
+import { tApiError } from "@/lib/api-error-dict";
 
 interface Account {
   id: string;
@@ -114,7 +115,7 @@ export function ImportDialog({ open, onClose, onSuccess, accounts, defaultAccoun
       const data = await res.json();
 
       if (!res.ok) {
-        toast({ title: t("errImportTitle"), description: data.error, variant: "destructive" });
+        toast({ title: t("errImportTitle"), description: tApiError(data.error), variant: "destructive" });
         return;
       }
 

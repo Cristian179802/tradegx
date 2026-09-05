@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { resetPasswordSchema, type ResetPasswordInput } from "@/lib/validations";
+import { tApiError } from "@/lib/api-error-dict";
 
 function ResetPasswordContent() {
   const t = useTranslations("auth");
@@ -46,7 +47,7 @@ function ResetPasswordContent() {
 
     const json = await res.json();
     if (!json.success) {
-      setError(json.error ?? t("errRetry"));
+      setError(tApiError(json.error) ?? t("errRetry"));
       return;
     }
 

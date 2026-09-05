@@ -148,6 +148,63 @@ for (const file of walk(ROOT)) {
   }
 }
 
+// ── pasul 5: erorile trimise de API ──────────────────────────────────────────
+//
+// Al treilea punct orb, si cel mai vechi. Rutele API raspund cu
+// `{ error: "Cont negasit" }`, iar clientul afiseaza textul ca atare. Mesajele
+// astea nu trec niciodata prin `useTranslations`, deci pasii de mai sus — care se
+// uita la componente — nu le-au vazut. Asa au ramas TOATE in romana: un
+// utilizator pe engleza primea romana exact pe drumurile care conteaza,
+// inregistrare si plata inclusiv.
+//
+// Traducerea se face la afisare, din `lib/api-error-dict.ts`. Un dictionar copiat
+// de mana s-ar invechi la primul mesaj nou, asa ca de aici incolo build-ul pica
+// daca cineva adauga un mesaj romanesc fara traducere.
+{
+  const dictSrc = fs.readFileSync(path.join(ROOT, "lib", "api-error-dict.ts"), "utf8");
+  const chei = new Set();
+  for (const m of dictSrc.matchAll(/^\s*"((?:[^"\\]|\\.)*)"\s*:/gm)) chei.add(m[1]);
+
+  // Ne uitam doar unde se PRODUC raspunsurile: rutele si ajutoarele de server.
+  const serverFiles = [];
+  const walkServer = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const f = path.join(dir, e.name);
+      if (e.isDirectory()) walkServer(f);
+      else if (e.name.endsWith(".ts")) serverFiles.push(f);
+    }
+  };
+  walkServer(path.join(ROOT, "app", "api"));
+  walkServer(path.join(ROOT, "lib"));
+
+  const netraduse = [];
+  for (const f of serverFiles) {
+    if (f.replace(/\\/g, "/").endsWith("lib/api-error-dict.ts")) continue;
+    const src = fs.readFileSync(f, "utf8");
+    for (const m of src.matchAll(/\berror:\s*"([^"\n]{4,})"/g)) {
+      const txt = m[1];
+      // Doar romana: multe mesaje sunt deja in engleza ("Invalid JSON") si n-au
+      // ce cauta in dictionar.
+      const rom = /[ăâîșțĂÂÎȘȚ]/.test(txt) ||
+        /\b(Eroare|Neautorizat|Negăsit|negasit|lipsă|lipsa|invalidă|obligatorii|Cerere|Cont|Prea multe|Nu am|Nu s-au|Ești|Date)\b/.test(txt);
+      if (rom && !chei.has(txt)) {
+        netraduse.push({ file: f, line: (src.slice(0, m.index).match(/\n/g) || []).length + 1, text: txt });
+      }
+    }
+  }
+
+  if (netraduse.length > 0) {
+    console.error(`✗ i18n: ${netraduse.length} mesaj(e) de eroare din API fără traducere în lib/api-error-dict.ts:\n`);
+    for (const n of netraduse) {
+      const rel = path.relative(process.cwd(), n.file).replace(/\\/g, "/");
+      console.error(`  ${rel}:${n.line}  →  "${n.text}"`);
+    }
+    console.error("\n  Adaugă-le în API_ERROR_EN, cu traducerea în engleză.");
+    process.exit(1);
+  }
+}
+
 if (findings.length === 0) {
   console.log("✓ i18n: niciun text românesc hardcodat în UI (exceptând Academia).");
   process.exit(0);

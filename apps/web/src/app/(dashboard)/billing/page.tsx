@@ -18,6 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useTranslations, useLocale } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PRICE_MONTHLY, PRICE_ANNUAL, PRICE_ANNUAL_PER_MONTH } from "@/lib/pricing";
+import { tApiError } from "@/lib/api-error-dict";
 
 // ── Abonament & Facturare ───────────────────────────────────────────────────
 // Pagina care explică omului EXACT ce cumpără: planul curent, comparația
@@ -100,7 +101,7 @@ export default function BillingPage() {
         window.location.href = json.url;
         return;
       }
-      toast({ title: tc("error"), description: json.error ?? tc("retry"), variant: "destructive" });
+      toast({ title: tc("error"), description: tApiError(json.error) ?? tc("retry"), variant: "destructive" });
     } finally {
       setWorking(null);
     }
@@ -115,7 +116,7 @@ export default function BillingPage() {
         window.location.href = json.url;
         return;
       }
-      toast({ title: tc("error"), description: json.error ?? tc("retry"), variant: "destructive" });
+      toast({ title: tc("error"), description: tApiError(json.error) ?? tc("retry"), variant: "destructive" });
     } finally {
       setWorking(null);
     }

@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations";
+import { tApiError } from "@/lib/api-error-dict";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("auth");
@@ -40,7 +41,7 @@ export default function ForgotPasswordPage() {
 
     const json = await res.json();
     if (!json.success) {
-      setError(json.error ?? t("errRetry"));
+      setError(tApiError(json.error) ?? t("errRetry"));
       return;
     }
     setSent(true);

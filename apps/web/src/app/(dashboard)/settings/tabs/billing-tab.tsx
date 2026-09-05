@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import { tApiError } from "@/lib/api-error-dict";
 
 interface BillingTabProps {
   plan: string;
@@ -59,7 +60,7 @@ export function BillingTab({
       } else if (data.code === "STRIPE_NOT_CONFIGURED") {
         toast({ title: t("paymentsSoonTitle"), description: t("paymentsSoonDesc"), variant: "destructive" });
       } else {
-        toast({ title: t("errTitle"), description: data.error, variant: "destructive" });
+        toast({ title: t("errTitle"), description: tApiError(data.error), variant: "destructive" });
       }
     } catch {
       toast({ title: t("netErrTitle"), description: t("netErrDesc"), variant: "destructive" });
@@ -75,7 +76,7 @@ export function BillingTab({
       const res = await fetch("/api/stripe/portal", { method: "POST" });
       const data = await res.json();
       if (res.ok && data.url) window.location.href = data.url;
-      else toast({ title: t("errTitle"), description: data.error, variant: "destructive" });
+      else toast({ title: t("errTitle"), description: tApiError(data.error), variant: "destructive" });
     } finally {
       setLoadingPortal(false);
     }

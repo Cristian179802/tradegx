@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { tApiError } from "@/lib/api-error-dict";
 
 // ── Secțiune conectare Telegram ───────────────────────────────────────────────
 function TelegramSection() {
@@ -43,7 +44,7 @@ function TelegramSection() {
         body: JSON.stringify({ chatId: chatId.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || t("errFallback"));
+      if (!res.ok) throw new Error(tApiError(data.error) || t("errFallback"));
       setConnected(true);
       setMaskedChatId(data.maskedChatId);
       setChatId("");

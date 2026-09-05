@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { useBinanceLive } from "@/hooks/use-binance-live";
+import { tApiError } from "@/lib/api-error-dict";
 
 interface WatchlistItem {
   id: string;
@@ -180,7 +181,7 @@ export function MarketClient({ initial }: { initial: WatchlistItem[] }) {
       toast({ title: t("added", { symbol }) });
     } else {
       const err = await res.json();
-      toast({ title: t("error"), description: err.error, variant: "destructive" });
+      toast({ title: t("error"), description: tApiError(err.error), variant: "destructive" });
     }
     setAdding(null);
   }

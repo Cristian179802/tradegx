@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { tApiError } from "@/lib/api-error-dict";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -181,7 +182,7 @@ function MetaApiPanel() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(tApiError(data.error));
       setSyncResults((p) => ({ ...p, [metaApiAccountId]: data.message }));
       toast({ title: t("syncDone"), description: data.message });
     } catch (err: any) {
@@ -589,8 +590,8 @@ export function ApiKeysTab() {
     const data = await res.json();
 
     if (!res.ok) {
-      toast({ title: t("saveErr"), description: data.error, variant: "destructive" });
-      throw new Error(data.error);
+      toast({ title: t("saveErr"), description: tApiError(data.error), variant: "destructive" });
+      throw new Error(tApiError(data.error));
     }
 
     setIntegrations((prev) => {

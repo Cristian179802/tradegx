@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
   if (!process.env.TELEGRAM_BOT_TOKEN) {
     return NextResponse.json(
-      { error: "Botul Telegram nu este configurat pe server (TELEGRAM_BOT_TOKEN lipsește)." },
+      { error: "Notificările Telegram nu sunt configurate pe server. Contactează suportul." },
       { status: 503 }
     );
   }

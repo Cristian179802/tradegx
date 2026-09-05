@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, RefreshCw, Clock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { tApiError } from "@/lib/api-error-dict";
 
 type Impact = "High" | "Medium" | "Low" | "Holiday";
 type Week = "last" | "this" | "next";
@@ -131,7 +132,7 @@ export default function CalendarPage() {
     try {
       const res = await fetch(`/api/calendar?week=${week}`, { cache: "no-store" });
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (data.error) throw new Error(tApiError(data.error));
       setEvents(data.events ?? []);
       setStats({ high: data.high, medium: data.medium, low: data.low, source: data.source });
     } catch (e: any) {

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Brain, X, TrendingUp, TrendingDown, MoveHorizontal, Target, Sparkles, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tApiError } from "@/lib/api-error-dict";
 
 interface KeyLevel { price: string; type: "support" | "resistance" | "liquidity" }
 interface Analysis {
@@ -57,8 +58,8 @@ export function AnalyzePanel({
       const data = await res.json().catch(() => ({}));
       if (requestedFor.current !== key) return; // s-a schimbat simbolul între timp
       if (res.status === 402) { setError({ code: "PRO", msg: "" }); return; }
-      if (res.status === 429) { setError({ code: "RATE", msg: data.error ?? "" }); return; }
-      if (!res.ok || !data.ok) { setError({ code: "ERR", msg: data.error ?? "" }); return; }
+      if (res.status === 429) { setError({ code: "RATE", msg: tApiError(data.error) ?? "" }); return; }
+      if (!res.ok || !data.ok) { setError({ code: "ERR", msg: tApiError(data.error) ?? "" }); return; }
       setResult(data as Result);
     } catch {
       setError({ code: "ERR", msg: "" });

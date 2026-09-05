@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { tApiError } from "@/lib/api-error-dict";
 
 // ── Testează instant ────────────────────────────────────────────────────────
 // Rulează un backtest REAL (date Yahoo) în 3 click-uri, fără configurare:
@@ -187,7 +188,7 @@ export function QuickTest({ strategies }: { strategies: ExistingStrategy[] }) {
       if (result.error) {
         toast({
           title: t("failedTitle"),
-          description: String(result.error),
+          description: (tApiError(result.error) ?? ""),
           variant: "destructive",
         });
         router.refresh();

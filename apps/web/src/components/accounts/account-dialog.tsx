@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import { tApiError } from "@/lib/api-error-dict";
 import {
   Loader2, ChevronLeft, CheckCircle2, AlertCircle,
   Upload, FileText, X, User2, ChevronRight,
@@ -222,7 +223,7 @@ function StepEA({ onBack, onDone }: { onBack: () => void; onDone: () => void }) 
         setTestMsg(t("webhookOk", { detail: s === "created" ? t("wCreated") : s === "updated" ? t("wUpdated") : t("wStatus", { status: data.status }) }));
       } else {
         setTestState("error");
-        const detail = data.error ?? data.body?.error ?? JSON.stringify(data.body ?? data);
+        const detail = tApiError(data.error) ?? data.body?.error ?? JSON.stringify(data.body ?? data);
         setTestMsg(`❌ ${data.status ?? res.status}: ${detail}`);
       }
     } catch (e) {
@@ -407,7 +408,7 @@ function StepMetaApi({ onBack, onSuccess, onClose }: { onBack: () => void; onSuc
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? t("connectErr")); return; }
+      if (!res.ok) { setError(tApiError(data.error) ?? t("connectErr")); return; }
       toast({ title: t("connectedTitle"), description: data.message ?? t("syncingDesc") });
       onSuccess(); onClose();
     } catch {
@@ -537,7 +538,7 @@ function StepTradeLocker({ onBack, onSuccess, onClose }: { onBack: () => void; o
         body: JSON.stringify({ email: email.trim(), password, server: server.trim(), env }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? t("connectErr")); return; }
+      if (!res.ok) { setError(tApiError(data.error) ?? t("connectErr")); return; }
       setAccounts(data.accounts as TlAccountRow[]);
     } catch { setError(t("netErr")); }
     finally { setBusy(false); }
@@ -563,7 +564,7 @@ function StepTradeLocker({ onBack, onSuccess, onClose }: { onBack: () => void; o
           }),
         });
         const data = await res.json();
-        if (!res.ok) { setError(data.error ?? t("importErr")); return; }
+        if (!res.ok) { setError(tApiError(data.error) ?? t("importErr")); return; }
 
         totalImported += data.imported ?? 0;
         acctId = data.tradingAccountId ?? acctId;
@@ -701,7 +702,7 @@ function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSu
         body: JSON.stringify({ provider, apiKey: apiKey.trim(), apiSecret: apiSecret.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? t("connectErr")); return; }
+      if (!res.ok) { setError(tApiError(data.error) ?? t("connectErr")); return; }
       setConnected({
         equity: data.equity ?? 0,
         currency: data.currency ?? "USDT",
@@ -738,7 +739,7 @@ function StepExchange({ onBack, onSuccess, onClose }: { onBack: () => void; onSu
           body: JSON.stringify({ provider, cursor, tradingAccountId: acctId }),
         });
         const data = await res.json();
-        if (!res.ok) { setError(data.error ?? t("importErr")); return; }
+        if (!res.ok) { setError(tApiError(data.error) ?? t("importErr")); return; }
 
         totalImported += data.imported ?? 0;
         acctId = data.tradingAccountId ?? acctId;
@@ -884,7 +885,7 @@ function StepCSV({ onBack, onSuccess, onClose }: { onBack: () => void; onSuccess
       fd.append("platform", platform);
       const res = await fetch("/api/accounts/import", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? t("importErr")); return; }
+      if (!res.ok) { setError(tApiError(data.error) ?? t("importErr")); return; }
       setDone(true);
       toast({ title: t("importedToast", { n: data.imported }) });
       setTimeout(() => { onSuccess(); onClose(); }, 1500);
@@ -1034,7 +1035,7 @@ function StepForm({ prefill, isEdit, locked, onBack, onClose, onSuccess }: {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      toast({ title: t("errTitle"), description: err.error ?? t("errGeneric"), variant: "destructive" });
+      toast({ title: t("errTitle"), description: tApiError(err.error) ?? t("errGeneric"), variant: "destructive" });
       return;
     }
     toast({ title: isEdit ? t("accUpdated") : t("accCreated"), description: data.name });

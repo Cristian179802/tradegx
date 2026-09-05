@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { tApiError } from "@/lib/api-error-dict";
 import {
   Plus, Pencil, Trash2, TrendingUp, TrendingDown, BarChart3,
   RefreshCw, Wifi, WifiOff, ArrowUpRight, ArrowDownRight,
@@ -147,7 +148,7 @@ export function AccountsClient({
         toast({ title: t("syncOk"), description: t("syncOkDesc", { count: data.imported ?? 0 }) });
         refresh();
       } else {
-        toast({ title: t("syncErr"), description: data.error, variant: "destructive" });
+        toast({ title: t("syncErr"), description: tApiError(data.error), variant: "destructive" });
       }
     } catch {
       toast({ title: t("netErr"), variant: "destructive" });
@@ -174,7 +175,7 @@ export function AccountsClient({
       });
       const data = await res.json();
       if (!res.ok) {
-        toast({ title: t("syncErr"), description: data.error, variant: "destructive" });
+        toast({ title: t("syncErr"), description: tApiError(data.error), variant: "destructive" });
         return;
       }
       imported += data.imported ?? 0;

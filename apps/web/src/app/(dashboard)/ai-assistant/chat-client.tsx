@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TraderStatsType } from "@/app/api/ai-assistant/chat/route";
+import { tApiError } from "@/lib/api-error-dict";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -472,7 +473,7 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: t("errUnknown") }));
         setMessages(prev => prev.map(m => m.id === aiId
-          ? { ...m, content: `⚠️ ${err.error}`, streaming: false }
+          ? { ...m, content: `⚠️ ${tApiError(err.error) ?? ""}`, streaming: false }
           : m));
         return;
       }

@@ -9,6 +9,7 @@ import { AccountDialog } from "@/components/accounts/account-dialog";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Plus, Pencil, ExternalLink, Link2, CheckCircle2, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
+import { tApiError } from "@/lib/api-error-dict";
 
 interface Account {
   id: string;
@@ -59,7 +60,7 @@ function MetaApiConnect() {
         body: JSON.stringify({ login, password, server, platform, name: name || undefined }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? t("connectErrFallback"));
+      if (!res.ok) throw new Error(tApiError(data.error) ?? t("connectErrFallback"));
       setConnected({ tradingAccountId: data.tradingAccountId, metaApiAccountId: data.metaApiAccountId, imported: data.imported ?? 0 });
       toast({ title: t("connectedTitle"), description: data.message ?? t("tradesImported", { n: data.imported ?? 0 }) });
     } catch (err: any) {
@@ -85,7 +86,7 @@ function MetaApiConnect() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? t("syncErrFallback"));
+      if (!res.ok) throw new Error(tApiError(data.error) ?? t("syncErrFallback"));
       toast({ title: t("syncDoneTitle"), description: data.message ?? t("tradesImported", { n: data.imported ?? 0 }) });
     } catch (err: any) {
       toast({ title: t("syncErrTitle"), description: err.message, variant: "destructive" });

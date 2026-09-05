@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import { tApiError } from "@/lib/api-error-dict";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,7 +101,7 @@ function CreateTeamModal({
       toast({ title: t("createdToast", { name: team.name }) });
     } else {
       const err = await res.json().catch(() => ({}));
-      toast({ title: err.error ?? t("createErr"), variant: "destructive" });
+      toast({ title: tApiError(err.error) ?? t("createErr"), variant: "destructive" });
     }
     setSubmitting(false);
   }
@@ -359,7 +360,7 @@ export function CommunityClient({
       toast({ title: t("joinedToast") });
     } else {
       const err = await res.json().catch(() => ({}));
-      toast({ title: err.error ?? t("joinErr"), variant: "destructive" });
+      toast({ title: tApiError(err.error) ?? t("joinErr"), variant: "destructive" });
     }
     setJoiningId(null);
   }
@@ -391,7 +392,7 @@ export function CommunityClient({
       toast({ title: t("joinedCodeToast", { name: data.name }) });
     } else {
       const err = await res.json().catch(() => ({}));
-      toast({ title: err.error ?? t("codeInvalid"), variant: "destructive" });
+      toast({ title: tApiError(err.error) ?? t("codeInvalid"), variant: "destructive" });
     }
     setJoinByCodeLoading(false);
   }

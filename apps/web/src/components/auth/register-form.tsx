@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { registerSchema, type RegisterInput } from "@/lib/validations";
 import { cn } from "@/lib/utils";
+import { tApiError } from "@/lib/api-error-dict";
 
 function PasswordStrength({ password }: { password: string }) {
   const t = useTranslations("auth");
@@ -113,7 +114,7 @@ export function RegisterForm() {
     const json = await res.json();
 
     if (!json.success) {
-      setError(json.error ?? t("registerError"));
+      setError(tApiError(json.error) ?? t("registerError"));
       return;
     }
 

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import { tApiError } from "@/lib/api-error-dict";
 
 interface Screenshot {
   id: string;
@@ -78,7 +79,7 @@ export function ScreenshotGallery({
         toast({ title: t("added") });
       } else {
         const err = await res.json();
-        toast({ title: t("errUpload"), description: err.error, variant: "destructive" });
+        toast({ title: t("errUpload"), description: tApiError(err.error), variant: "destructive" });
       }
     } finally {
       setUploading(false);
