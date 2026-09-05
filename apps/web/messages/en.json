@@ -3004,7 +3004,8 @@
     "toolHLine": "Horizontal line",
     "toolRect": "Rectangle",
     "delSelected": "Delete selection (Delete)",
-    "delAll": "Delete all drawings"
+    "delAll": "Delete all drawings",
+    "outsideRange": "{n} trades outside this range — zoom out to see them"
   },
   "institutional": {
     "metaTitle": "Institutional metrics",

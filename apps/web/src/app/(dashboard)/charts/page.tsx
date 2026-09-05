@@ -525,6 +525,7 @@ export default function ChartsPage() {
               chartType={chartType}
               errorLabel={tSmc("noData")}
               loadingLabel={tSmc("loading")}
+              outsideRangeLabel={(n) => tSmc("outsideRange", { n })}
             />
           </div>
         ) : (

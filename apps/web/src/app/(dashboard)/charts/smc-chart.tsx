@@ -64,7 +64,7 @@ export type ChartType = "candles" | "heikin";
 const DRAW_COLOR = "#38bdf8";
 
 export function SmcChart({
-  symbol, timeframe, toggles, onResult, errorLabel, loadingLabel,
+  symbol, timeframe, toggles, onResult, errorLabel, loadingLabel, outsideRangeLabel,
   indicators = [], chartType = "candles",
 }: {
   symbol: string;
@@ -73,6 +73,8 @@ export function SmcChart({
   onResult?: (r: SmcResult | null) => void;
   errorLabel: string;
   loadingLabel: string;
+  /** Eticheta pentru tranzacțiile din afara intervalului afișat. */
+  outsideRangeLabel?: (n: number) => string;
   indicators?: string[];
   chartType?: ChartType;
 }) {
@@ -98,6 +100,7 @@ export function SmcChart({
   // Lumânările brute, ca să putem recalcula indicatorii fără să cerem din nou
   // de la server la fiecare bifă din meniu.
   const barsRef = React.useRef<SmcCandle[]>([]);
+  const [outsideRange, setOutsideRange] = React.useState(0);
   const indSeriesRef = React.useRef<ISeriesApi<"Line" | "Histogram">[]>([]);
   // Legenda: ce linie e care, și cât valorează acum. Fără ea, trei medii mobile
   // pe ecran sunt trei linii colorate fără nume — vezi că se intersectează, dar
@@ -652,9 +655,39 @@ export function SmcChart({
           return items;
         });
 
+        // Marcajele din AFARA intervalului încărcat nu dispar: biblioteca le
+        // fixează la marginea cea mai apropiată. Pe contul demo, toate cele 33
+        // de tranzacții EURUSD sunt din 2025-12 … 2026-07, iar graficul H1 arăta
+        // ultimele 400 de ore — deci toate se prăbușeau una peste alta pe stânga,
+        // într-un teanc ilizibil care acoperea exact acțiunea prețului pentru
+        // care deschizi graficul.
+        //
+        // Un marcaj are sens doar dacă lumânarea lui e pe ecran. Restul le
+        // numărăm și o spunem, ca lipsa lor să nu pară o defecțiune: pe un
+        // interval mai mare (1D, 1W) tranzacțiile vechi reintră în fereastră.
+        const bars = barsRef.current;
+        const primaBara = bars.length > 0 ? (bars[0].time as number) : null;
+        const ultimaBara = bars.length > 0 ? (bars[bars.length - 1].time as number) : null;
+        const inInterval =
+          primaBara === null || ultimaBara === null
+            ? markers
+            : markers.filter((m) => (m.time as number) >= primaBara && (m.time as number) <= ultimaBara);
+
+        // Numărăm TRANZACȚII, nu marcaje: o tranzacție produce două marcaje
+        // (intrare și ieșire), iar „66 de tranzacții în afara intervalului"
+        // pentru 33 de tranzacții ar fi tot un fel de minciună.
+        const tranzactiiInInterval = new Set<number>();
+        for (const tr of trades) {
+          const e = tr.entryTime as number;
+          if (primaBara === null || ultimaBara === null || (e >= primaBara && e <= ultimaBara)) {
+            tranzactiiInInterval.add(e);
+          }
+        }
+        setOutsideRange(trades.length - tranzactiiInInterval.size);
+
         // lightweight-charts cere marcajele ordonate crescător după timp.
-        markers.sort((a, b) => (a.time as number) - (b.time as number));
-        seriesRef.current.setMarkers(markers as never);
+        inInterval.sort((a, b) => (a.time as number) - (b.time as number));
+        seriesRef.current.setMarkers(inInterval as never);
 
         // Curățăm liniile de la simbolul precedent înainte să punem altele.
         for (const l of tradeLinesRef.current) {
@@ -1020,6 +1053,14 @@ export function SmcChart({
           {freshness === "delayed" && (
             <span className="text-[9px] font-semibold text-zinc-500">10 min</span>
           )}
+        </div>
+      )}
+      {outsideRange > 0 && !loading && outsideRangeLabel && (
+        <div className="absolute bottom-2 left-2 z-20 rounded-lg border border-[color:var(--line-1)]
+                        bg-[color:var(--s-1)]/90 px-2.5 py-1 backdrop-blur-sm pointer-events-none">
+          <span className="text-[10px] font-semibold text-[color:var(--ink-4)]">
+            {outsideRangeLabel(outsideRange)}
+          </span>
         </div>
       )}
       {loading && (

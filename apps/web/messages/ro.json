@@ -3004,7 +3004,8 @@
     "toolHLine": "Linie orizontală",
     "toolRect": "Dreptunghi",
     "delSelected": "Șterge selecția (Delete)",
-    "delAll": "Șterge toate desenele"
+    "delAll": "Șterge toate desenele",
+    "outsideRange": "{n} tranzacții în afara intervalului — mărește perioada ca să le vezi"
   },
   "institutional": {
     "metaTitle": "Metrici instituționale",
