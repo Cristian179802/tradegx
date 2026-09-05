@@ -57,12 +57,14 @@ export async function POST() {
   if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   if (!(await hasPro(userId))) return NextResponse.json(PRO_REQUIRED, { status: 402 });
 
-  const signals = await getOrCreateTodaySignals();
+  const { signals, outcome } = await getOrCreateTodaySignals();
 
   return NextResponse.json({
     date: todayKey(),
     signals: signals.map(serialize),
     generated: true,
     available: !!process.env.ANTHROPIC_API_KEY,
+    // Clientul are nevoie de motiv ca sa nu prezinte un esec drept concluzie.
+    outcome,
   });
 }

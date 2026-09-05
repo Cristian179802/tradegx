@@ -121,11 +121,36 @@ function pickEnum(val: string | undefined, allowed: string[], fallback: string):
   return allowed.includes(up) ? up : fallback;
 }
 
-export async function generateDailySignals(date: string): Promise<number> {
-  if (!process.env.ANTHROPIC_API_KEY) return 0;
+/**
+ * De ce nu există semnale.
+ *
+ * Opt căi diferite întorceau tăcut zero, iar pagina le traducea pe toate în
+ * „AI-ul nu a identificat condiții de piață suficient de clare" — o CONCLUZIE
+ * despre piață. Una singură dintre ele o justifică: `none`, când modelul a
+ * răspuns și n-a propus niciun setup. Restul sunt defecțiuni, și trebuie să
+ * arate ca defecțiuni.
+ */
+export type SignalOutcome =
+  | "ok"             // au fost generate semnale
+  | "none"           // modelul a răspuns, dar n-a propus niciun setup — singura stare care e o concluzie
+  | "no-key"         // lipsește cheia de pe server
+  | "no-market-data" // n-am putut aduce prețurile
+  | "ai-error"       // apelul a eșuat: credit, rețea, limită de rată
+  | "bad-response";  // a răspuns, dar răspunsul n-a putut fi folosit
+
+export type SignalRun = { count: number; outcome: SignalOutcome };
+
+export async function generateDailySignals(date: string): Promise<SignalRun> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error("[signals] ANTHROPIC_API_KEY lipsește din mediu");
+    return { count: 0, outcome: "no-key" };
+  }
 
   const snapshot = await fetchMarketSnapshot();
-  if (snapshot.length === 0) return 0;
+  if (snapshot.length === 0) {
+    console.error("[signals] fetchMarketSnapshot a întors zero instrumente");
+    return { count: 0, outcome: "no-market-data" };
+  }
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -157,26 +182,41 @@ Valori permise:
 
   const user = `Date de piață live (${date}):\n${marketTable}\n\nGenerează maxim 3 HPS pentru ziua de azi. Returnează DOAR JSON.`;
 
-  const resp = await anthropic.messages.create({
-    model: "claude-opus-4-5",
-    max_tokens: 3000,
-    system,
-    messages: [{ role: "user", content: user }],
-  });
+  // Apelul propriu-zis: esecul lui (credit epuizat, retea, limita de rata) e
+  // altceva decat un raspuns pe care nu-l putem folosi, si altceva decat un
+  // raspuns gol. Inainte, toate trei ieseau la fel — cu zero, in tacere.
+  let resp;
+  try {
+    resp = await anthropic.messages.create({
+      model: "claude-opus-4-5",
+      max_tokens: 3000,
+      system,
+      messages: [{ role: "user", content: user }],
+    });
+  } catch (err) {
+    console.error("[signals] apelul catre model a esuat:", err);
+    return { count: 0, outcome: "ai-error" };
+  }
 
   const text = resp.content.filter((c) => c.type === "text").map((c) => (c as { text: string }).text).join("");
   const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return 0;
+  if (!jsonMatch) {
+    console.error("[signals] raspunsul nu contine JSON:", text.slice(0, 300));
+    return { count: 0, outcome: "bad-response" };
+  }
 
   let parsed: { signals?: RawSignal[] };
   try {
     parsed = JSON.parse(jsonMatch[0]);
-  } catch {
-    return 0;
+  } catch (err) {
+    console.error("[signals] JSON invalid in raspuns:", err);
+    return { count: 0, outcome: "bad-response" };
   }
 
   const raw = (parsed.signals ?? []).slice(0, 3);
-  if (raw.length === 0) return 0;
+  // SINGURA stare care e o concluzie despre piata: modelul a raspuns cu o lista
+  // goala, adica s-a uitat si n-a gasit nimic care sa merite.
+  if (raw.length === 0) return { count: 0, outcome: "none" };
 
   // Validare + sanitizare înainte de inserare
   const priceBySym = new Map(snapshot.map((s) => [s.symbol, s.price]));
@@ -193,7 +233,13 @@ Valori permise:
     return true;
   });
 
-  if (valid.length === 0) return 0;
+  // Modelul a propus setup-uri, dar TOATE au picat validarea (niveluri
+  // incoerente sau pret la peste 5% de cel real). Asta e un raspuns prost, nu o
+  // observatie despre piata.
+  if (valid.length === 0) {
+    console.error(`[signals] toate cele ${raw.length} setup-uri propuse au picat validarea`);
+    return { count: 0, outcome: "bad-response" };
+  }
 
   await prisma.aiSignal.createMany({
     data: valid.map((s) => {
@@ -229,7 +275,7 @@ Valori permise:
     /* eșec silențios — nu blocăm generarea */
   }
 
-  return valid.length;
+  return { count: valid.length, outcome: "ok" };
 }
 
 // Formatează și difuzează semnalele zilei pe Telegram
@@ -262,18 +308,20 @@ export async function getOrCreateTodaySignals() {
     where: { date },
     orderBy: { confidence: "desc" },
   });
-  if (existing.length > 0) return existing;
+  if (existing.length > 0) return { signals: existing, outcome: "ok" as SignalOutcome };
 
   // Evită generarea dublă în aceeași instanță
   if (generating.has(date)) {
     // Altcineva generează — așteaptă scurt și recitește
     await new Promise((r) => setTimeout(r, 1500));
-    return prisma.aiSignal.findMany({ where: { date }, orderBy: { confidence: "desc" } });
+    const s = await prisma.aiSignal.findMany({ where: { date }, orderBy: { confidence: "desc" } });
+    return { signals: s, outcome: (s.length > 0 ? "ok" : "none") as SignalOutcome };
   }
 
+  let outcome: SignalOutcome = "ai-error";
   generating.add(date);
   try {
-    await generateDailySignals(date);
+    ({ outcome } = await generateDailySignals(date));
     // Push către device-urile native — semnale HPS noi disponibile
     const fresh = await prisma.aiSignal.findMany({ where: { date }, orderBy: { confidence: "desc" } });
     if (fresh.length > 0) {
@@ -284,11 +332,15 @@ export async function getOrCreateTodaySignals() {
         data: { route: "/(tabs)/signals" },
       });
     }
-  } catch {
-    /* eșec silențios — pagina va arăta stare goală */
+  } catch (err) {
+    // Era `catch {}` gol, fără niciun log: exact motivul pentru care funcția asta
+    // n-a produs nimic luni de zile fără ca nimeni să poată spune de ce.
+    console.error("[signals] generarea a aruncat:", err);
+    outcome = "ai-error";
   } finally {
     generating.delete(date);
   }
 
-  return prisma.aiSignal.findMany({ where: { date }, orderBy: { confidence: "desc" } });
+  const signals = await prisma.aiSignal.findMany({ where: { date }, orderBy: { confidence: "desc" } });
+  return { signals, outcome };
 }

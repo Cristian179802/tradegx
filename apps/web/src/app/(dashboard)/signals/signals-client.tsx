@@ -193,6 +193,8 @@ export function SignalsClient({
   const locale = useLocale();
   const [signals, setSignals] = React.useState<Signal[]>(initialSignals);
   const [generating, setGenerating] = React.useState(false);
+  // De ce nu sunt semnale. `null` = inca nu stim (n-a rulat generarea).
+  const [outcome, setOutcome] = React.useState<string | null>(null);
   const triggered = React.useRef(false);
 
   const generate = React.useCallback(async () => {
@@ -201,8 +203,9 @@ export function SignalsClient({
     setGenerating(true);
     try {
       // Client API partajat (același cod pe web și mobile)
-      const data = await api.signals.generate() as { signals?: Signal[] };
+      const data = await api.signals.generate() as { signals?: Signal[]; outcome?: string };
       setSignals(data.signals ?? []);
+      setOutcome(data.outcome ?? null);
     } catch {
       /* păstrează semnalele existente */
     } finally {
@@ -292,16 +295,22 @@ export function SignalsClient({
               piață, unui trader care plătește tocmai pentru judecata aia.
               Zero semnale fiindcă n-a analizat nimeni nu e același lucru cu zero
               semnale fiindcă nu era nimic de găsit. */}
+          {/* Mesajul analitic — „AI-ul nu a identificat condiții suficient de
+              clare" — e o CONCLUZIE, și se afișează DOAR când modelul chiar a
+              răspuns cu o listă goală (`outcome === "none"`). Opt căi diferite
+              întorceau tăcut zero, iar pagina le traducea pe toate în aceeași
+              propoziție: o defecțiune de server prezentată ca judecată despre
+              piață, unui trader care plătește tocmai pentru judecata aia. */}
           <div>
             <p className="text-sm font-semibold text-zinc-300">
-              {available ? t("emptyTitle") : t("unavailableTitle")}
+              {outcome === "none" ? t("emptyTitle") : t("unavailableTitle")}
             </p>
             <p className="text-xs text-zinc-500 mt-1 max-w-md">
-              {available ? t("emptyBody") : t("unavailableBody")}
+              {outcome === "none" ? t("emptyBody") : t("unavailableBody")}
             </p>
           </div>
           {/* Reîncercarea are sens doar dacă generarea chiar poate rula. */}
-          {available && (
+          {available && outcome !== "none" && (
             <button
               onClick={() => { triggered.current = false; generate(); }}
               className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5"
