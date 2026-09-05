@@ -91,7 +91,10 @@ export default auth((req: NextRequest & { auth: { user?: { id?: string; role?: s
     req.method !== "HEAD"
   ) {
     return NextResponse.json(
-      { error: "Cont demo — doar vizualizare. / Demo account is read-only.", demo: true },
+      // Era bilingv cu bară — un compromis de pe vremea când erorile de API
+      // n-aveau cum să fie traduse. Acum le traduce dicționarul la afișare,
+      // deci fiecare vede o singură propoziție, în limba lui.
+      { error: "Cont demo — doar vizualizare.", demo: true },
       { status: 403 }
     );
   }

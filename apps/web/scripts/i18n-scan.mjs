@@ -177,6 +177,11 @@ for (const file of walk(ROOT)) {
   };
   walkServer(path.join(ROOT, "app", "api"));
   walkServer(path.join(ROOT, "lib"));
+  // `middleware.ts` nu e in niciunul din cele doua directoare, dar raspunde cu
+  // `error:` ca orice ruta — si tocmai de aia mesajul lui pentru contul demo a
+  // stat ani intregi bilingv, cu bara, in loc sa fie tradus.
+  const mw = path.join(ROOT, "middleware.ts");
+  if (fs.existsSync(mw)) serverFiles.push(mw);
 
   const netraduse = [];
   for (const f of serverFiles) {

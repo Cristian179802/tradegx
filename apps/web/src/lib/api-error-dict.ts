@@ -18,6 +18,7 @@
 
 export const API_ERROR_EN: Record<string, string> = {
   // Autentificare și cont
+  "Cont demo — doar vizualizare.": "Demo account — view only.",
   "Neautorizat": "Not authorized",
   "Negăsit": "Not found",
   "Negăsit sau neautorizat": "Not found or not authorized",
