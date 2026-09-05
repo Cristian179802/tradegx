@@ -1335,7 +1335,9 @@
     "analyzingSub": "Identifying the best setups of the day. Takes ~10-20 seconds.",
     "emptyTitle": "No high-probability setup today",
     "emptyBody": "The AI did not identify clear enough market conditions. Quality over quantity — sometimes the best trade is to wait.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "unavailableTitle": "Signals couldn't be generated",
+    "unavailableBody": "Automatic generation isn't running right now. This isn't a read on the market — check back later."
   },
   "tools": {
     "csTitle": "Currency Strength",

@@ -42,5 +42,14 @@ export default async function SignalsPage() {
     createdAt: s.createdAt.toISOString(),
   }));
 
-  return <SignalsClient initialSignals={serialized} date={todayKey()} />;
+  // Pagina e componenta de server, deci poate citi direct mediul. Clientul are
+  // nevoie de asta ca sa nu prezinte o lipsa de configurare drept concluzie
+  // despre piata.
+  return (
+    <SignalsClient
+      initialSignals={serialized}
+      date={todayKey()}
+      available={!!process.env.ANTHROPIC_API_KEY}
+    />
+  );
 }

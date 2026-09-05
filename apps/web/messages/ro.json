@@ -1335,7 +1335,9 @@
     "analyzingSub": "Identifică cele mai bune setup-uri ale zilei. Durează ~10-20 secunde.",
     "emptyTitle": "Niciun setup de înaltă probabilitate astăzi",
     "emptyBody": "AI-ul nu a identificat condiții de piață suficient de clare. Calitate peste cantitate — uneori cea mai bună tranzacție e să aștepți.",
-    "tryAgain": "Încearcă din nou"
+    "tryAgain": "Încearcă din nou",
+    "unavailableTitle": "Semnalele nu au putut fi generate",
+    "unavailableBody": "Generarea automată nu rulează momentan. Nu e o concluzie despre piață — revino mai târziu."
   },
   "tools": {
     "csTitle": "Forța Valutelor",

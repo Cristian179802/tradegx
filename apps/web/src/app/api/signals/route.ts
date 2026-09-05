@@ -46,6 +46,8 @@ export async function GET() {
     date: todayKey(),
     signals: signals.map(serialize),
     needsGeneration: signals.length === 0,
+    // Distinge „AI-ul a analizat și n-a găsit nimic" de „AI-ul n-a rulat".
+    available: !!process.env.ANTHROPIC_API_KEY,
   });
 }
 
@@ -61,5 +63,6 @@ export async function POST() {
     date: todayKey(),
     signals: signals.map(serialize),
     generated: true,
+    available: !!process.env.ANTHROPIC_API_KEY,
   });
 }

@@ -179,7 +179,16 @@ function SignalCard({ s }: { s: Signal }) {
   );
 }
 
-export function SignalsClient({ initialSignals, date }: { initialSignals: Signal[]; date: string }) {
+export function SignalsClient({
+  initialSignals,
+  date,
+  available,
+}: {
+  initialSignals: Signal[];
+  date: string;
+  /** Generarea automata poate rula? Fals cand cheia AI lipseste de pe server. */
+  available: boolean;
+}) {
   const t = useTranslations("signals");
   const locale = useLocale();
   const [signals, setSignals] = React.useState<Signal[]>(initialSignals);
@@ -201,10 +210,12 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
     }
   }, []);
 
-  // Generează automat dacă nu există semnale pentru azi
+  // Generează automat dacă nu există semnale pentru azi — dar numai dacă are cu
+  // ce. Fără cheie, cererea pleca oricum la fiecare încărcare de pagină, se
+  // întorcea cu zero, și lăsa în urmă mesajul de mai jos.
   React.useEffect(() => {
-    if (initialSignals.length === 0) generate();
-  }, [initialSignals.length, generate]);
+    if (available && initialSignals.length === 0) generate();
+  }, [available, initialSignals.length, generate]);
 
   const dateLabel = new Date(date).toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" });
 
@@ -274,18 +285,30 @@ export function SignalsClient({ initialSignals, date }: { initialSignals: Signal
           <div className="w-14 h-14 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center">
             <Activity className="w-6 h-6 text-zinc-500" />
           </div>
+          {/* „Niciun setup de înaltă probabilitate astăzi — AI-ul nu a identificat
+              condiții de piață suficient de clare" e o CONCLUZIE. Se afișa și
+              atunci când AI-ul nu rulase deloc, fiindcă lipsea cheia de pe
+              server: o problemă de configurare prezentată drept judecată despre
+              piață, unui trader care plătește tocmai pentru judecata aia.
+              Zero semnale fiindcă n-a analizat nimeni nu e același lucru cu zero
+              semnale fiindcă nu era nimic de găsit. */}
           <div>
-            <p className="text-sm font-semibold text-zinc-300">{t("emptyTitle")}</p>
+            <p className="text-sm font-semibold text-zinc-300">
+              {available ? t("emptyTitle") : t("unavailableTitle")}
+            </p>
             <p className="text-xs text-zinc-500 mt-1 max-w-md">
-              {t("emptyBody")}
+              {available ? t("emptyBody") : t("unavailableBody")}
             </p>
           </div>
-          <button
-            onClick={() => { triggered.current = false; generate(); }}
-            className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5"
-          >
-            <RefreshCw className="w-3.5 h-3.5" /> {t("tryAgain")}
-          </button>
+          {/* Reîncercarea are sens doar dacă generarea chiar poate rula. */}
+          {available && (
+            <button
+              onClick={() => { triggered.current = false; generate(); }}
+              className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> {t("tryAgain")}
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
