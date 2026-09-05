@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 
 export const dynamic = "force-dynamic";
 
@@ -116,7 +117,7 @@ export async function GET(req: NextRequest) {
       medium: events.filter(e => e.impact === "Medium").length,
       low: events.filter(e => e.impact === "Low").length,
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message, events: [] }, { status: 500 });
+  } catch (err) {
+    return apiError("calendarFailed", { log: ["Calendar", err], extra: { events: [] } });
   }
 }

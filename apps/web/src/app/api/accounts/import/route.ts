@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { autoDetectAndParse, parseByPlatform, detectInstrumentType } from "@/lib/parsers/index";
+import { apiError } from "@/lib/api-error";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -144,11 +145,9 @@ export async function POST(req: NextRequest) {
         to: lastTrade.exitTime.toISOString(),
       },
     });
-  } catch (err: any) {
-    console.error("[IMPORT]", err);
-    return NextResponse.json(
-      { error: err.message ?? "Eroare la import" },
-      { status: 500 }
-    );
+  } catch (err) {
+    // Excepția putea fi orice — o eroare Prisma cu numele coloanelor, un parser
+    // care crapă pe un rând stricat. Niciuna nu e o instrucțiune utilă.
+    return apiError("importFailed", { log: ["IMPORT", err] });
   }
 }

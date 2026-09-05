@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { hasPro, PRO_REQUIRED } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { getDeals, pairDeals } from "@/lib/metaapi";
+import { apiError } from "@/lib/api-error";
 
 const PROVISIONING_BASE = "https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai";
 const CLIENT_BASE = "https://mt-client-api-v1.agiliumtrade.agiliumtrade.ai";
@@ -262,11 +263,7 @@ export async function POST(req: NextRequest) {
         ? `Cont conectat! ${imported} tranzacții importate din ultimele 90 de zile.`
         : "Cont conectat! Tranzacțiile vor apărea după ce MetaAPI se sincronizează (1-2 min).",
     });
-  } catch (err: any) {
-    console.error("[METAAPI/PROVISION]", err);
-    return NextResponse.json(
-      { error: err.message ?? "Eroare la conectarea contului MT4/MT5." },
-      { status: 502 }
-    );
+  } catch (err) {
+    return apiError("brokerConnectFailed", { status: 502, log: ["METAAPI/PROVISION", err] });
   }
 }

@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { getAccountScope } from "@/lib/account-scope";
 import { rateLimit } from "@/lib/rate-limit";
 import { fetchHistoricalCandles } from "@/lib/yahoo-finance";
+import { apiError } from "@/lib/api-error";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -167,9 +168,9 @@ ${langLine} Educațional, nu sfat financiar — nu include disclaimere în text.
       hasPersonal: personal.length > 0,
     });
   } catch (err) {
-    return NextResponse.json(
-      { error: "Analiza AI a eșuat. Încearcă din nou.", code: "AI_ERROR", detail: String(err).slice(0, 220) },
-      { status: 502 }
-    );
+    // `detail` trimitea excepția brută clientului, iar aici nu exista niciun
+    // `console.error` — deci singurul loc unde ajungea diagnosticul era ecranul
+    // clientului. Acum e invers: el vede o propoziție, noi vedem eroarea.
+    return apiError("aiFailed", { status: 502, log: ["Charts Analyze", err] });
   }
 }

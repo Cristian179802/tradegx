@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 // 500 $ in aceeasi rata de castig, cifra care nu descria niciun cont real.
 import { getAccountScope } from "@/lib/account-scope";
 import { rateLimit } from "@/lib/rate-limit";
+import { apiError, apiErrorText } from "@/lib/api-error";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -207,12 +208,12 @@ export async function POST(req: NextRequest) {
     return new Response("Bad request", { status: 400 });
   }
 
-  // Early check — fail fast with clear error if key missing
+  // Cheia lipsă e o problemă de configurare a NOASTRĂ, nu a clientului. Textul
+  // vechi îi spunea să editeze .env.local și să repornească serverul — pe un
+  // site pe care nu-l administrează.
   if (!process.env.ANTHROPIC_API_KEY) {
-    return new Response(
-      JSON.stringify({ error: "ANTHROPIC_API_KEY lipsește din .env.local. Adaugă cheia și repornește serverul." }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    console.error("[AI Chat] ANTHROPIC_API_KEY lipsește din mediul de producție");
+    return apiError("aiUnavailable", { status: 503 });
   }
 
   try {
@@ -236,10 +237,12 @@ export async function POST(req: NextRequest) {
             }
           }
         } catch (streamErr) {
-          // Stream error — write error message into the response body so client can display it
-          const msg = streamErr instanceof Error ? streamErr.message : "Eroare necunoscută API";
+          // Fluxul a pornit deja, deci eroarea trebuie scrisă ÎN corp — dar textul
+          // brut al SDK-ului nu are ce căuta acolo. Când creditul Anthropic se
+          // termină, mesajul lor îi cere cititorului să-și încarce contul; clientul
+          // nostru citea asta în chat și credea că e vina lui.
           console.error("[AI Stream]", streamErr);
-          controller.enqueue(encoder.encode(`\n\n⚠️ Eroare: ${msg}`));
+          controller.enqueue(encoder.encode(`\n\n⚠️ ${await apiErrorText("aiUnavailable")}`));
         } finally {
           controller.close();
         }
@@ -250,12 +253,7 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache, no-store" },
     });
   } catch (err) {
-    console.error("[AI Chat]", err);
-    const msg = err instanceof Error ? err.message : "Eroare necunoscută";
-    return new Response(
-      JSON.stringify({ error: `Eroare server: ${msg}` }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return apiError("aiFailed", { status: 502, log: ["AI Chat", err] });
   }
 }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { apiError } from "@/lib/api-error";
 
 const schema = z.object({
   period: z.enum(["monthly", "annual"]).optional(),
@@ -113,8 +114,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ url: checkoutSession.url });
-  } catch (err: any) {
-    console.error("[Stripe Checkout]", err);
-    return NextResponse.json({ error: err.message ?? "Eroare Stripe" }, { status: 500 });
+  } catch (err) {
+    // Erorile Stripe pot conține identificatori de preț și detalii de cont.
+    return apiError("checkoutFailed", { log: ["Stripe Checkout", err] });
   }
 }

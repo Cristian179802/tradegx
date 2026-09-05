@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { rateLimit } from "@/lib/rate-limit";
 import { hasPro, PRO_REQUIRED } from "@/lib/plan";
+import { apiError } from "@/lib/api-error";
 
 export const maxDuration = 60;
 
@@ -27,7 +28,8 @@ export async function POST(
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: "AI coach neconfiguarat — lipsește ANTHROPIC_API_KEY" }, { status: 503 });
+    console.error("[Trade Analyze] ANTHROPIC_API_KEY lipsește din mediul de producție");
+    return apiError("aiUnavailable", { status: 503 });
   }
 
   const { id } = await params;
