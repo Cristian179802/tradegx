@@ -5,6 +5,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { rateLimit } from "@/lib/rate-limit";
 import { hasPro, PRO_REQUIRED } from "@/lib/plan";
 import { apiError } from "@/lib/api-error";
+import { consumaBugetLunar } from "@/lib/ai-budget";
 
 export const maxDuration = 60;
 
@@ -24,6 +25,18 @@ export async function POST(
     return NextResponse.json(
       { error: "Ai atins limita de analize AI. Încearcă din nou mai târziu." },
       { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+    );
+  }
+
+  const buget = await consumaBugetLunar("tradeAnalyze", session.user.id);
+  if (!buget.ok) {
+    return NextResponse.json(
+      {
+        error: "Ai folosit toate analizele AI incluse în abonament luna asta.",
+        code: "MONTHLY_BUDGET",
+        seReinnoieste: buget.seReinnoieste,
+      },
+      { status: 429 }
     );
   }
 

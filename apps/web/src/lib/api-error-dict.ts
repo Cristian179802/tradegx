@@ -130,6 +130,14 @@ export const API_ERROR_EN: Record<string, string> = {
   "API key TwelveData invalid. Verifică cheia din twelvedata.com/account.":
     "Invalid TwelveData API key. Check your key at twelvedata.com/account.",
 
+  // AI — bugetul lunar inclus in abonament
+  "Ai folosit toate mesajele AI incluse în abonament luna asta.":
+    "You've used all the AI messages included in your plan this month.",
+  "Ai folosit toate analizele pe grafic incluse în abonament luna asta.":
+    "You've used all the chart analyses included in your plan this month.",
+  "Ai folosit toate analizele AI incluse în abonament luna asta.":
+    "You've used all the AI analyses included in your plan this month.",
+
   // AI
   "Ai atins limita de analize AI. Încearcă din nou mai târziu.":
     "You've reached the AI analysis limit. Try again later.",

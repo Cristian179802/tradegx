@@ -10,6 +10,7 @@ import { getAccountScope } from "@/lib/account-scope";
 import { rateLimit } from "@/lib/rate-limit";
 import { fetchHistoricalCandles } from "@/lib/yahoo-finance";
 import { apiError } from "@/lib/api-error";
+import { consumaBugetLunar } from "@/lib/ai-budget";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -54,6 +55,18 @@ export async function POST(req: Request) {
   const rl = await rateLimit(`chart-analyze:${userId}`, { limit: 15, windowSecs: 3600 });
   if (!rl.success) {
     return NextResponse.json({ error: "Prea multe analize. Reîncearcă peste puțin timp.", code: "RATE_LIMIT" }, { status: 429 });
+  }
+
+  const buget = await consumaBugetLunar("chartAnalyze", userId);
+  if (!buget.ok) {
+    return NextResponse.json(
+      {
+        error: "Ai folosit toate analizele pe grafic incluse în abonament luna asta.",
+        code: "MONTHLY_BUDGET",
+        seReinnoieste: buget.seReinnoieste,
+      },
+      { status: 429 }
+    );
   }
 
   let body: { symbol?: string; timeframe?: string; locale?: string };

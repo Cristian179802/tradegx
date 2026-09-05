@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { getAccountScope } from "@/lib/account-scope";
 import { rateLimit } from "@/lib/rate-limit";
 import { apiError, apiErrorText } from "@/lib/api-error";
+import { consumaBugetLunar } from "@/lib/ai-budget";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -198,6 +199,20 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Ai atins limita de 30 mesaje/oră. Revino mai târziu." }), {
       status: 429, headers: { "Content-Type": "application/json" },
     });
+  }
+
+  // Bugetul lunii. DUPĂ limita pe oră: aceea e o barieră de rafală, iar cine e
+  // oprit de ea n-are de ce să piardă din cota lunii.
+  const buget = await consumaBugetLunar("chat", session.user.id);
+  if (!buget.ok) {
+    return new Response(
+      JSON.stringify({
+        error: "Ai folosit toate mesajele AI incluse în abonament luna asta.",
+        code: "MONTHLY_BUDGET",
+        seReinnoieste: buget.seReinnoieste,
+      }),
+      { status: 429, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   let messages: { role: string; content: string }[];
