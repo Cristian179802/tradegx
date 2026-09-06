@@ -2305,7 +2305,16 @@
     "pf24": "Notificări browser + Telegram pentru alerte și semnale",
     "saveBadge": "Economisești {pct}%",
     "navDashboard": "Panou de control",
-    "navBilling": "Abonament"
+    "navBilling": "Abonament",
+    "premiumTag": "Pentru cei intensivi",
+    "premiumName": "Premium",
+    "premiumDesc": "Când Pro nu-ți mai ajunge la AI",
+    "premiumBtn": "Treci la Premium",
+    "pmf1": "Tot ce include Pro",
+    "pmf2": "400 întrebări AI Coach pe lună",
+    "pmf3": "60 analize AI pe grafic pe lună",
+    "pmf4": "120 analize AI pe tranzacție pe lună",
+    "pmf5": "Prioritate la suport"
   },
   "legalCommon": {
     "backToSite": "Înapoi la site",

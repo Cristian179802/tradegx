@@ -2305,7 +2305,16 @@
     "pf24": "Browser + Telegram notifications for alerts and signals",
     "saveBadge": "Save {pct}%",
     "navDashboard": "Dashboard",
-    "navBilling": "Billing"
+    "navBilling": "Billing",
+    "premiumTag": "For heavy users",
+    "premiumName": "Premium",
+    "premiumDesc": "When Pro's AI limits aren't enough",
+    "premiumBtn": "Go Premium",
+    "pmf1": "Everything in Pro",
+    "pmf2": "400 AI Coach questions a month",
+    "pmf3": "60 AI chart analyses a month",
+    "pmf4": "120 AI trade analyses a month",
+    "pmf5": "Priority support"
   },
   "legalCommon": {
     "backToSite": "Back to site",

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { PREMIUM_PRICE_MONTHLY, PREMIUM_PRICE_ANNUAL, PREMIUM_PRICE_ANNUAL_PER_MONTH } from "@/lib/pricing";
 
 // label/free/pro = chei → pricing.* (traduse la randare; valorile bool raman)
 const FEATURES = [
@@ -64,7 +65,9 @@ export default function PricingPage() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  async function handleGetPro() {
+  // Treapta se trimite ca nume, nu ca ID de preț: ID-ul se rezolvă pe server,
+  // altfel clientul ar putea cere Premium plătind prețul de Pro.
+  async function handleGetPro(tier: "pro" | "premium" = "pro") {
     if (!session) {
       router.push("/register");
       return;
@@ -74,7 +77,7 @@ export default function PricingPage() {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ period: annual ? "annual" : "monthly" }),
+        body: JSON.stringify({ period: annual ? "annual" : "monthly", tier }),
       });
       const data = await res.json();
       if (res.ok && data.url) {
@@ -89,6 +92,13 @@ export default function PricingPage() {
       setLoadingCheckout(false);
     }
   }
+
+  // Premium urmează aceeași regulă: echivalentul lunar se calculează din total.
+  const premiumDisplayPrice = annual
+    ? (PREMIUM_PRICE_ANNUAL_PER_MONTH % 1 === 0
+        ? String(PREMIUM_PRICE_ANNUAL_PER_MONTH)
+        : PREMIUM_PRICE_ANNUAL_PER_MONTH.toFixed(2).replace(".", ","))
+    : String(PREMIUM_PRICE_MONTHLY);
 
   // Sursa de adevăr sunt cele două prețuri din Stripe: €10/lună și €100/an.
   // Echivalentul lunar al planului anual se CALCULEAZĂ din total, ca să nu apară
@@ -172,7 +182,7 @@ export default function PricingPage() {
         </div>
 
         {/* Plan cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 max-w-5xl mx-auto">
           {/* Free */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
             <div className="mb-6">
@@ -249,7 +259,7 @@ export default function PricingPage() {
               )}
             </div>
             <Button
-              onClick={handleGetPro}
+              onClick={() => handleGetPro("pro")}
               disabled={loadingCheckout}
               className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/25 mb-6"
             >
@@ -290,6 +300,64 @@ export default function PricingPage() {
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                 {t("prf8")}
+              </li>
+            </ul>
+          </div>
+
+          {/* PREMIUM — aceleași funcții ca PRO, dar cu cote AI de ~3,5 ori mai
+              mari. Nu vinde funcții noi, vinde VOLUM: cine folosește coach-ul
+              zilnic atinge plafonul Pro, iar treapta asta e răspunsul, în loc
+              să-l lăsăm blocat până luna viitoare. */}
+          <div className="relative bg-zinc-900/50 border border-amber-500/25 rounded-2xl p-8">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+              <Badge className="bg-amber-500/15 text-amber-300 border border-amber-500/30 px-4 py-1">
+                {t("premiumTag")}
+              </Badge>
+            </div>
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-zinc-100 mb-1">{t("premiumName")}</h3>
+              <p className="text-zinc-400 text-sm">{t("premiumDesc")}</p>
+            </div>
+            <div className="mb-6">
+              <span className="text-4xl font-black text-white num">€{premiumDisplayPrice}</span>
+              <span className="text-zinc-500 text-sm ml-2">{t("perMonth")}</span>
+              {annual && (
+                <p className="text-xs text-zinc-500 mt-1">
+                  {t("billedAnnual", { x: PREMIUM_PRICE_ANNUAL })}
+                </p>
+              )}
+            </div>
+            <Button
+              onClick={() => handleGetPro("premium")}
+              disabled={loadingCheckout}
+              variant="outline"
+              className="w-full border-amber-500/40 text-amber-200 hover:bg-amber-500/10 hover:text-amber-100 font-semibold mb-6"
+            >
+              {loadingCheckout
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <>{t("premiumBtn")}<ArrowRight className="ml-2 w-4 h-4" /></>
+              }
+            </Button>
+            <ul className="space-y-3 text-sm text-zinc-300">
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                {t("pmf1")}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                {t("pmf2")}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                {t("pmf3")}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                {t("pmf4")}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                {t("pmf5")}
               </li>
             </ul>
           </div>
