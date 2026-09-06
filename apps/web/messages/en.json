@@ -1635,7 +1635,9 @@
     "poweredBy": "Powered by Claude Opus",
     "you": "YOU",
     "errUnknown": "Unknown error",
-    "connFailed": "⚠️ The connection failed. Check your Anthropic API key."
+    "connFailed": "⚠️ The connection failed. Check your Anthropic API key.",
+    "quotaRenews": "Renews on {data}",
+    "quotaUpgrade": "See plans"
   },
   "accountDialog": {
     "copyEaCode": "Copy EA code",

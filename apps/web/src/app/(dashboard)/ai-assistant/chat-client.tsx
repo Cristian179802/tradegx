@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { TraderStatsType } from "@/app/api/ai-assistant/chat/route";
 import { tApiError } from "@/lib/api-error-dict";
+import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -432,9 +433,15 @@ function StatsSidebar({ stats, mode, onModeChange }: {
 
 export function AIChatClient({ stats }: { stats: TraderStatsType }) {
   const t = useTranslations("aiChat");
+  const locale = useLocale();
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [input, setInput] = React.useState("");
   const [isStreaming, setIsStreaming] = React.useState(false);
+  // Cota lunară epuizată: null cât timp mai are. Nu se resetează singură — se
+  // stinge doar când o cerere trece din nou, adică după reînnoire sau upgrade.
+  const [cotaEpuizata, setCotaEpuizata] = React.useState<
+    { text: string; reinnoire: number | null; upgrade: string | null } | null
+  >(null);
   const [mode, setMode] = React.useState<CoachMode>("general");
   const [showQuickPrompts, setShowQuickPrompts] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
@@ -458,6 +465,7 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
 
     setMessages(prev => [...prev, userMsg, aiMsg]);
     setIsStreaming(true);
+    setCotaEpuizata(null);
 
     abortRef.current = new AbortController();
 
@@ -472,6 +480,21 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: t("errUnknown") }));
+
+        // Cota epuizată nu e o eroare de conversație, e o stare a contului.
+        // Într-o bulă de chat ar fi un zid: nu spune când se reînnoiește și nu
+        // duce nicăieri — exact utilizatorul pentru care există treapta de sus
+        // ajungea într-o fundătură. Primește panoul de dedesubt.
+        if (err.code === "MONTHLY_BUDGET" || err.code === "FREE_QUOTA") {
+          setCotaEpuizata({
+            text: tApiError(err.error) ?? "",
+            reinnoire: typeof err.seReinnoieste === "number" ? err.seReinnoieste : null,
+            upgrade: typeof err.upgradeUrl === "string" ? err.upgradeUrl : null,
+          });
+          setMessages(prev => prev.filter(m => m.id !== aiId));
+          return;
+        }
+
         setMessages(prev => prev.map(m => m.id === aiId
           ? { ...m, content: `⚠️ ${tApiError(err.error) ?? ""}`, streaming: false }
           : m));
@@ -606,6 +629,38 @@ export function AIChatClient({ stats }: { stats: TraderStatsType }) {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* Cota lunară epuizată. Stă deasupra zonei de scriere, nu în conversație:
+            e o stare a contului, nu un răspuns al asistentului. */}
+        {cotaEpuizata && (
+          <div className="px-4 pt-3 shrink-0">
+            <div className="rounded-xl border border-amber-500/25 bg-amber-500/[0.06] px-4 py-3
+                            flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-amber-200">{cotaEpuizata.text}</p>
+                {cotaEpuizata.reinnoire && (
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    {t("quotaRenews", {
+                      data: new Date(cotaEpuizata.reinnoire).toLocaleDateString(locale, {
+                        day: "numeric", month: "long",
+                      }),
+                    })}
+                  </p>
+                )}
+              </div>
+              {cotaEpuizata.upgrade && (
+                <Link
+                  href={cotaEpuizata.upgrade}
+                  className="tg-tap shrink-0 text-xs font-bold px-3 py-2 rounded-lg
+                             bg-amber-500/15 border border-amber-500/30 text-amber-200
+                             hover:bg-amber-500/25 transition-colors"
+                >
+                  {t("quotaUpgrade")}
+                </Link>
+              )}
             </div>
           </div>
         )}

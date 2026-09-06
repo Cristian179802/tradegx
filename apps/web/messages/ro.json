@@ -1635,7 +1635,9 @@
     "poweredBy": "Powered by Claude Opus",
     "you": "TU",
     "errUnknown": "Eroare necunoscută",
-    "connFailed": "⚠️ Conexiunea a eșuat. Verifică cheia API Anthropic."
+    "connFailed": "⚠️ Conexiunea a eșuat. Verifică cheia API Anthropic.",
+    "quotaRenews": "Se reînnoiește pe {data}",
+    "quotaUpgrade": "Vezi planurile"
   },
   "accountDialog": {
     "copyEaCode": "Copiază codul EA",

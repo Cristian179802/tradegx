@@ -217,6 +217,8 @@ export async function POST(req: NextRequest) {
               error: "Ai folosit toate mesajele AI incluse în abonament luna asta.",
               code: "MONTHLY_BUDGET",
               seReinnoieste: buget.seReinnoieste,
+              // Premium n-are treaptă deasupra: nu-i arătăm un upgrade inexistent.
+              ...(plan === "PREMIUM" ? {} : { upgradeUrl: "/pricing" }),
             }
       ),
       { status: peFree ? 402 : 429, headers: { "Content-Type": "application/json" } }
