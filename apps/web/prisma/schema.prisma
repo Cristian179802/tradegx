@@ -184,6 +184,7 @@ enum ScreenshotType {
 enum SubscriptionPlan {
   FREE
   PRO
+  PREMIUM
 }
 
 enum SubStatus {

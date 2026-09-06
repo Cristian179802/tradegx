@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { rateLimit } from "@/lib/rate-limit";
-import { hasPro, PRO_REQUIRED } from "@/lib/plan";
+import { getEffectivePlan, FREE_QUOTA_EPUIZATA } from "@/lib/plan";
 import { apiError } from "@/lib/api-error";
 import { consumaBugetLunar } from "@/lib/ai-budget";
 
@@ -15,9 +15,7 @@ export async function POST(
 ) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  if (!(await hasPro(session.user.id))) {
-    return NextResponse.json(PRO_REQUIRED, { status: 402 });
-  }
+  const { plan } = await getEffectivePlan(session.user.id);
 
   // 10 AI analyses per user per hour
   const rl = await rateLimit(`ai-analyze:${session.user.id}`, { limit: 10, windowSecs: 60 * 60 });
@@ -28,15 +26,18 @@ export async function POST(
     );
   }
 
-  const buget = await consumaBugetLunar("tradeAnalyze", session.user.id);
+  const buget = await consumaBugetLunar("tradeAnalyze", session.user.id, plan);
   if (!buget.ok) {
+    const peFree = plan === "FREE";
     return NextResponse.json(
-      {
-        error: "Ai folosit toate analizele AI incluse în abonament luna asta.",
-        code: "MONTHLY_BUDGET",
-        seReinnoieste: buget.seReinnoieste,
-      },
-      { status: 429 }
+      peFree
+        ? FREE_QUOTA_EPUIZATA
+        : {
+            error: "Ai folosit toate analizele AI incluse în abonament luna asta.",
+            code: "MONTHLY_BUDGET",
+            seReinnoieste: buget.seReinnoieste,
+          },
+      { status: peFree ? 402 : 429 }
     );
   }
 

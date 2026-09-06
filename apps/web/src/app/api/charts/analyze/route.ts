@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getAuthUserId } from "@/lib/auth-bridge";
-import { hasPro, PRO_REQUIRED } from "@/lib/plan";
+import { getEffectivePlan, PRO_REQUIRED } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 // Datele se filtreaza pe contul selectat. Inainte, toate conturile erau
 // amestecate intr-o singura statistica — un FTMO de 100.000 $ si un Binance de
@@ -49,7 +49,7 @@ function atr(candles: { high: number; low: number; close: number }[], period = 1
 export async function POST(req: Request) {
   const userId = await getAuthUserId();
   if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  if (!(await hasPro(userId))) return NextResponse.json(PRO_REQUIRED, { status: 402 });
+  const { plan } = await getEffectivePlan(userId);
 
   // Costă tokeni AI → limită sănătoasă per utilizator
   const rl = await rateLimit(`chart-analyze:${userId}`, { limit: 15, windowSecs: 3600 });
@@ -57,7 +57,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Prea multe analize. Reîncearcă peste puțin timp.", code: "RATE_LIMIT" }, { status: 429 });
   }
 
-  const buget = await consumaBugetLunar("chartAnalyze", userId);
+  const buget = await consumaBugetLunar("chartAnalyze", userId, plan);
+  // Cotă zero = funcția e închisă pe treapta asta (FREE). Utilizatorul primește
+  // invitația de upgrade, nu un „ai consumat tot" despre ceva ce n-a avut.
+  if (buget.cota === 0) return NextResponse.json(PRO_REQUIRED, { status: 402 });
   if (!buget.ok) {
     return NextResponse.json(
       {

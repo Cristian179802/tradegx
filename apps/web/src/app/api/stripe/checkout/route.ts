@@ -6,6 +6,8 @@ import { apiError } from "@/lib/api-error";
 
 const schema = z.object({
   period: z.enum(["monthly", "annual"]).optional(),
+  /** Treapta cumpărată. Lipsa ei înseamnă PRO — comportamentul de dinainte. */
+  tier: z.enum(["pro", "premium"]).optional().default("pro"),
   priceId: z.string().optional(),
   successUrl: z.string().url().optional(),
   cancelUrl: z.string().url().optional(),
@@ -31,15 +33,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Date invalide" }, { status: 400 });
   }
 
-  const { period, successUrl, cancelUrl } = result.data;
+  const { period, tier, successUrl, cancelUrl } = result.data;
   let { priceId } = result.data;
 
-  // Resolve priceId from period server-side — no NEXT_PUBLIC_ vars needed
+  // ID-ul prețului se rezolvă pe SERVER, din treaptă + perioadă. Clientul trimite
+  // ce vrea să cumpere, nu ID-ul — altfel ar putea cere Premium la prețul de Pro.
   if (period && !priceId) {
+    const e = process.env;
     priceId =
-      period === "monthly"
-        ? process.env.STRIPE_PRO_MONTHLY_PRICE_ID
-        : process.env.STRIPE_PRO_ANNUAL_PRICE_ID;
+      tier === "premium"
+        ? period === "monthly"
+          ? e.STRIPE_PREMIUM_MONTHLY_PRICE_ID
+          : e.STRIPE_PREMIUM_ANNUAL_PRICE_ID
+        : period === "monthly"
+          ? e.STRIPE_PRO_MONTHLY_PRICE_ID
+          : e.STRIPE_PRO_ANNUAL_PRICE_ID;
   }
 
   if (!priceId) {

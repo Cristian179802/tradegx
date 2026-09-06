@@ -22,6 +22,14 @@ export const PRICE_MONTHLY = 10;
 /** Prețul anual, o singură plată. */
 export const PRICE_ANNUAL = 100;
 
+// ── Treapta PREMIUM ──────────────────────────────────────────────────────────
+// Aceleași funcții ca PRO, dar cu cote AI de aproape patru ori mai mari. Prețul
+// nu e ales estetic: cotele Premium costă cel mult $14,43 în credit AI, deci
+// €25 lasă marjă chiar și pe abonatul care consumă tot.
+export const PREMIUM_PRICE_MONTHLY = 25;
+export const PREMIUM_PRICE_ANNUAL = 250;
+export const PREMIUM_PRICE_ANNUAL_PER_MONTH = PREMIUM_PRICE_ANNUAL / 12;
+
 /** Echivalentul lunar al planului anual. Calculat, nu scris de mână. */
 export const PRICE_ANNUAL_PER_MONTH = PRICE_ANNUAL / 12; // 8,333…
 

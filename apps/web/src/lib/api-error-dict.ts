@@ -64,6 +64,8 @@ export const API_ERROR_EN: Record<string, string> = {
   "Eroare internă. Încearcă din nou.": "Internal error. Please try again.",
 
   // Plan și plată
+  "Ai folosit tot AI-ul inclus în planul gratuit. Treci la PRO pentru mai mult.":
+    "You've used all the AI included in the free plan. Upgrade to PRO for more.",
   "Funcție disponibilă doar în planul PRO": "This feature is only available on the PRO plan",
   "Planul FREE include un singur cont de trading. Treci la PRO pentru conturi nelimitate.":
     "The FREE plan includes a single trading account. Upgrade to PRO for unlimited accounts.",

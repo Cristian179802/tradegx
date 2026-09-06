@@ -57,26 +57,38 @@ export function periodOf(sub: any): { start: Date | null; end: Date | null } {
   return { start: toDate(rawStart), end: toDate(rawEnd) };
 }
 
-/** PRO doar dacă prețul e unul dintre cele două configurate. */
+/**
+ * Ce treaptă înseamnă prețul plătit.
+ *
+ * PREMIUM se verifică ÎNAINTEA lui PRO: dacă cineva ar configura din greșeală
+ * același ID în ambele variabile, e mai bine să primească mai mult decât a
+ * plătit decât mai puțin — o reclamație de „am plătit și n-am primit" costă mai
+ * mult decât diferența.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function planOf(sub: any): { isPro: boolean; priceId?: string } {
+function planOf(sub: any): { plan: "FREE" | "PRO" | "PREMIUM"; priceId?: string } {
   const priceId = sub?.items?.data?.[0]?.price?.id as string | undefined;
-  const isPro =
-    !!priceId &&
-    (priceId === process.env.STRIPE_PRO_MONTHLY_PRICE_ID ||
-      priceId === process.env.STRIPE_PRO_ANNUAL_PRICE_ID);
-  return { isPro, priceId };
+  if (!priceId) return { plan: "FREE" };
+
+  const e = process.env;
+  if (priceId === e.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === e.STRIPE_PREMIUM_ANNUAL_PRICE_ID) {
+    return { plan: "PREMIUM", priceId };
+  }
+  if (priceId === e.STRIPE_PRO_MONTHLY_PRICE_ID || priceId === e.STRIPE_PRO_ANNUAL_PRICE_ID) {
+    return { plan: "PRO", priceId };
+  }
+  return { plan: "FREE", priceId };
 }
 
 /** Scrie în baza noastră starea unui abonament Stripe. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function upsertSubscription(userId: string, sub: any) {
-  const { isPro, priceId } = planOf(sub);
+  const { plan, priceId } = planOf(sub);
   const { start, end } = periodOf(sub);
 
   const data = {
     stripeSubId: sub.id as string,
-    plan: (isPro ? "PRO" : "FREE") as never,
+    plan: plan as never,
     status: (STATUS_MAP[sub.status] ?? "ACTIVE") as never,
     currentPeriodStart: start,
     currentPeriodEnd: end,
@@ -91,10 +103,11 @@ export async function upsertSubscription(userId: string, sub: any) {
 
   // Dacă prețul nu se potrivește cu niciunul configurat, userul rămâne pe FREE
   // deși a plătit. Semnalăm zgomotos: e o greșeală de configurare, nu de client.
-  if (!isPro) {
+  if (plan === "FREE") {
     console.warn(
-      `[stripe] priceId "${priceId}" nu corespunde nici cu STRIPE_PRO_MONTHLY_PRICE_ID ` +
-      `nici cu STRIPE_PRO_ANNUAL_PRICE_ID — user ${userId} rămâne pe FREE.`
+      `[stripe] priceId "${priceId}" nu corespunde niciunui pret configurat ` +
+      `(PRO_MONTHLY / PRO_ANNUAL / PREMIUM_MONTHLY / PREMIUM_ANNUAL) — ` +
+      `user ${userId} ramane pe FREE desi a platit.`
     );
   }
 }
@@ -142,9 +155,9 @@ export async function reconcileSubscription(userId: string): Promise<boolean> {
     const sub = mostRelevant(list.data);
     if (!sub) return false;
 
-    const { isPro } = planOf(sub);
+    const { plan } = planOf(sub);
     const wanted = {
-      plan: isPro ? "PRO" : "FREE",
+      plan,
       status: STATUS_MAP[sub.status] ?? "ACTIVE",
       subId: sub.id,
     };
