@@ -1,7 +1,7 @@
 ﻿import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@/lib/auth";
-import { getEffectivePlan, FREE_QUOTA_EPUIZATA } from "@/lib/plan";
+import { getEffectivePlan, PRO_REQUIRED } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 // Datele se filtreaza pe contul selectat. Inainte, toate conturile erau
 // amestecate intr-o singura statistica — un FTMO de 100.000 $ si un Binance de
@@ -191,9 +191,9 @@ ${s.last5Trades}
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return new Response("Unauthorized", { status: 401 });
-  // Poarta nu mai e „ai PRO?", ci „mai ai cotă?". FREE primește 10 întrebări pe
-  // lună — te costă 21 de cenți de om și e cel mai ieftin marketing care există:
-  // îl lași să guste, apoi vede singur plafonul.
+  // Poarta e „mai ai cotă?", nu „ai PRO?". Pe FREE cota e zero, deci rezultatul
+  // e același ca înainte — dar acum diferența dintre „nu ai treapta" și „ai
+  // consumat tot" e explicită, iar Premium poate avea altă cotă decât Pro.
   const { plan } = await getEffectivePlan(session.user.id);
 
   if (!(await checkRateLimit(session.user.id))) {
@@ -205,23 +205,25 @@ export async function POST(req: NextRequest) {
   // Bugetul lunii. DUPĂ limita pe oră: aceea e o barieră de rafală, iar cine e
   // oprit de ea n-are de ce să piardă din cota lunii.
   const buget = await consumaBugetLunar("chat", session.user.id, plan);
+
+  // Cotă zero = funcția e închisă pe treapta asta. E o invitație de upgrade
+  // (402), nu un „ai consumat tot" (429) despre ceva ce n-a avut niciodată.
+  if (buget.cota === 0) {
+    return new Response(JSON.stringify(PRO_REQUIRED), {
+      status: 402, headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (!buget.ok) {
-    // Pe FREE, cota epuizată e o ocazie de upgrade, nu o eroare: 402 cu link,
-    // nu 429 cu „revino luna viitoare". Cine plătește deja primește al doilea.
-    const peFree = plan === "FREE";
     return new Response(
-      JSON.stringify(
-        peFree
-          ? FREE_QUOTA_EPUIZATA
-          : {
-              error: "Ai folosit toate mesajele AI incluse în abonament luna asta.",
-              code: "MONTHLY_BUDGET",
-              seReinnoieste: buget.seReinnoieste,
-              // Premium n-are treaptă deasupra: nu-i arătăm un upgrade inexistent.
-              ...(plan === "PREMIUM" ? {} : { upgradeUrl: "/pricing" }),
-            }
-      ),
-      { status: peFree ? 402 : 429, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({
+        error: "Ai folosit toate mesajele AI incluse în abonament luna asta.",
+        code: "MONTHLY_BUDGET",
+        seReinnoieste: buget.seReinnoieste,
+        // Premium n-are treaptă deasupra: nu-i arătăm un upgrade inexistent.
+        ...(plan === "PREMIUM" ? {} : { upgradeUrl: "/pricing" }),
+      }),
+      { status: 429, headers: { "Content-Type": "application/json" } }
     );
   }
 

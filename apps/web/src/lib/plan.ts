@@ -30,10 +30,15 @@ export const FREE_LIMITS = {
 // Fiecare treaptă e dimensionată ca, ȘI DACĂ abonatul consumă TOT, să rămână
 // profitabilă. Ținta e ca AI-ul să nu treacă de jumătate din încasare:
 //
-//   FREE     cel mult $0,57 — nu e pierdere, e cost de achiziție. Îl lași să
-//            guste, apoi vede singur plafonul. Cel mai ieftin marketing care există.
+//   FREE     ZERO. AI-ul e închis pe treapta gratuită, deliberat.
 //   PRO      cel mult $4,71 din €10 (≈$10,80)  = 44%
 //   PREMIUM  cel mult $14,43 din €25 (≈$27,00) = 53%
+//
+// DE CE FREE N-ARE DELOC. Cotele mici păreau un cost de achiziție ieftin — 57 de
+// cenți de om. Dar înscrierile gratuite sunt NELIMITATE: o mie de conturi
+// înseamnă $570 în credit, din venit zero, și nimic nu împiedică a doua mie.
+// Un cost de achiziție are sens când e plafonat de ceva; ăsta nu era.
+// AI-ul rămâne argumentul de conversie, nu mostra.
 //
 // ATENȚIE la conversie: Anthropic facturează în USD, clientul plătește în EUR.
 // Marja de mai sus presupune EUR/USD ≈ 1,08. Dacă euro slăbește, marja scade cu el.
@@ -45,7 +50,7 @@ export const FREE_LIMITS = {
 // utilizatorul primește invitația de upgrade, nu un „ai consumat tot" despre
 // ceva ce n-a avut niciodată.
 export const AI_QUOTA = {
-  FREE: { chat: 10, chartAnalyze: 0, tradeAnalyze: 5 },
+  FREE: { chat: 0, chartAnalyze: 0, tradeAnalyze: 0 },
   PRO: { chat: 120, chartAnalyze: 20, tradeAnalyze: 40 },
   PREMIUM: { chat: 400, chartAnalyze: 60, tradeAnalyze: 120 },
 } as const satisfies Record<Tier, Record<string, number>>;
@@ -113,12 +118,5 @@ export function cotaAI(plan: Tier, functie: FunctieAI): number {
 export const PRO_REQUIRED = {
   error: "Funcție disponibilă doar în planul PRO",
   code: "PRO_REQUIRED",
-  upgradeUrl: "/pricing",
-} as const;
-
-/** Idem, când cota gratuită s-a epuizat — mesaj de upgrade, nu de eroare. */
-export const FREE_QUOTA_EPUIZATA = {
-  error: "Ai folosit tot AI-ul inclus în planul gratuit. Treci la PRO pentru mai mult.",
-  code: "FREE_QUOTA",
   upgradeUrl: "/pricing",
 } as const;
