@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { reportClientError } from "@/lib/report-client-error";
 
 export default function DashboardError({
   error,
@@ -15,7 +16,10 @@ export default function DashboardError({
 }) {
   const t = useTranslations("errorPages");
   useEffect(() => {
+    // Bariera prinde ce se strică la RANDARE — partea pe care ascultătorul
+    // global de erori n-o vede, fiindcă React o înghite ca s-o poată afișa aici.
     console.error("[Dashboard Error]", error);
+    reportClientError(error);
   }, [error]);
 
   return (

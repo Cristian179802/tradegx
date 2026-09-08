@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { reportClientError } from "@/lib/report-client-error";
 
 // Această pagină randează propriul <html> → rulează în afara NextIntlClientProvider.
 // Traducem printr-un dicționar inline citind cookie-ul `locale` (fallback ro).
@@ -26,7 +27,10 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
+    // Bariera prinde ce se strică la RANDARE — partea pe care ascultătorul
+    // global de erori n-o vede, fiindcă React o înghite ca s-o poată afișa aici.
     console.error(error);
+    reportClientError(error);
   }, [error]);
 
   const locale = typeof document !== "undefined" && /(?:^|;\s*)locale=en\b/.test(document.cookie) ? "en" : "ro";

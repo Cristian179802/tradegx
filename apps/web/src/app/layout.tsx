@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Providers } from "@/components/providers";
 import "./globals.css";
+import { ClientErrorReporter } from "@/components/client-error-reporter";
 
 const SEO = {
   ro: {
@@ -114,7 +115,13 @@ export default async function RootLayout({
     >
       <body className="min-h-screen bg-background antialiased font-sans">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers>{children}</Providers>
+          <Providers>
+            {/* Ascultă erorile de browser pe TOATE paginile, inclusiv cele
+                publice: pe landing sau în formularul de înregistrare, o eroare
+                costă un client care încă n-a devenit client. */}
+            <ClientErrorReporter />
+            {children}
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>
