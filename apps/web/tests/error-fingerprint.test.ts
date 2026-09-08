@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { errorFingerprint, normalizeMessage } from "@/lib/error-fingerprint";
+import { errorFingerprint, normalizeMessage, summarizeError } from "@/lib/error-fingerprint";
 
 // ── Gruparea erorilor ────────────────────────────────────────────────────────
 //
@@ -86,5 +86,63 @@ describe("errorFingerprint", () => {
   it("e stabilă între apeluri", () => {
     const err = new Error("Cont negăsit");
     expect(errorFingerprint(E, err)).toBe(errorFingerprint(E, err));
+  });
+});
+
+describe("summarizeError — ce ajunge pe telefon", () => {
+  // Cazul real, captat pe productie. Erorile Prisma reproduc INTREAGA interogare
+  // si abia la final spun ce a fost gresit: taiate de la inceput, alerta ajungea
+  // un dump rupt la jumatatea unui cuvant, fara diagnostic. Vazut pe Telegramul
+  // real, nu presupus.
+  const PRISMA_REAL = `
+Invalid \`prisma.communityPost.findMany()\` invocation:
+
+{
+  orderBy: {
+    createdAt: "desc"
+  },
+  take: 20,
+  include: {
+    user: {
+      select: {
+        id: true
+      }
+    }
+  }
+}
+
+Argument \`skip\` is missing.`;
+
+  it("păstrează diagnosticul, nu corpul interogării", () => {
+    const r = summarizeError(PRISMA_REAL);
+    expect(r).toContain("Argument `skip` is missing.");
+    expect(r).toContain("Invalid `prisma.communityPost.findMany()` invocation:");
+  });
+
+  it("aruncă structura interogării", () => {
+    const r = summarizeError(PRISMA_REAL);
+    expect(r).not.toContain("orderBy");
+    expect(r).not.toContain("createdAt");
+  });
+
+  it("e mult mai scurt decât originalul", () => {
+    // Pe mesajul real de productie: 428 → 83 de caractere.
+    expect(summarizeError(PRISMA_REAL).length).toBeLessThan(PRISMA_REAL.length / 2);
+  });
+
+  it("lasă neatins un mesaj de o singură linie", () => {
+    expect(summarizeError("Cont negăsit")).toBe("Cont negăsit");
+  });
+
+  it("nu dublează când prima linie e și ultima", () => {
+    expect(summarizeError("Ceva\n\n{\n}\n")).toBe("Ceva");
+  });
+
+  it("respectă lungimea maximă", () => {
+    expect(summarizeError("a".repeat(500) + "\nfinal", 100).length).toBeLessThanOrEqual(100);
+  });
+
+  it("nu crapă pe un mesaj gol", () => {
+    expect(() => summarizeError("")).not.toThrow();
   });
 });

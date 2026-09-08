@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { errorFingerprint } from "@/lib/error-fingerprint";
+import { errorFingerprint, summarizeError } from "@/lib/error-fingerprint";
 import { sendTelegramMessage, escapeHtml } from "@/lib/telegram";
 
 // ── Monitorizarea erorilor ───────────────────────────────────────────────────
@@ -110,7 +110,7 @@ export async function captureError(
     await alerteazaAdmin(
       `🚨 <b>Eroare nouă — TradeGx</b>\n\n` +
         `<b>${escapeHtml(label)}</b>\n` +
-        `<code>${escapeHtml(message.slice(0, 300))}</code>\n\n` +
+        `<code>${escapeHtml(summarizeError(message))}</code>\n\n` +
         (ctx.route ? `Rută: <code>${escapeHtml(ctx.route)}</code>\n` : "") +
         `<i>Prima apariție. Următoarele se numără, nu se mai anunță.</i>`
     );

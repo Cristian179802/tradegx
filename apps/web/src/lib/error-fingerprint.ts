@@ -1,4 +1,7 @@
-// ── Amprenta unui grup de erori ──────────────────────────────────────────────
+// ── Ajutoare pure pe textul erorilor ─────────────────────────────────────────
+//
+// Amprenta (gruparea) și rezumatul (alerta). Amândouă sunt transformări pure de
+// text, deci stau împreună și se pot testa fără Prisma și fără `server-only`.
 //
 // Stă SEPARAT de `error-monitor.ts` din două motive:
 //
@@ -68,4 +71,32 @@ export function errorFingerprint(label: string, err: unknown): string {
   const mesaj = normalizeMessage(err instanceof Error ? err.message : String(err));
   const intrare = `${label}|${tip}|${mesaj}`;
   return fnv1a64(intrare, 14695981039346656037n) + fnv1a64(intrare, 1469598103934665603n);
+}
+
+/**
+ * Rezumatul unei erori, pentru alerta de pe telefon.
+ *
+ * DE CE NU PUR ȘI SIMPLU PRIMELE 300 DE CARACTERE. Erorile Prisma încep prin a
+ * reproduce ÎNTREAGA interogare și abia la final spun ce a fost greșit. Tăiate de
+ * la început, alerta ajungea un dump de query rupt la jumătatea unui cuvânt, iar
+ * diagnosticul — singurul lucru care contează — rămânea afară. Verificat pe
+ * Telegramul real, nu presupus.
+ *
+ * Așa că luăm prima linie (CE a eșuat) și ultima linie utilă (DE CE), sărind
+ * peste corpul interogării dintre ele. Stiva completă rămâne oricum în panou.
+ */
+export function summarizeError(raw: string, maxLen = 300): string {
+  const linii = raw
+    .split("\n")
+    .map((l) => l.trim())
+    // Liniile care sunt doar structură de obiect nu spun nimic.
+    .filter((l) => l.length > 0 && !/^[{}\[\],]+$/.test(l));
+
+  if (linii.length === 0) return raw.slice(0, maxLen);
+
+  const prima = linii[0];
+  const ultima = linii[linii.length - 1];
+
+  const rezumat = prima === ultima ? prima : `${prima} … ${ultima}`;
+  return rezumat.length > maxLen ? rezumat.slice(0, maxLen - 1) + "…" : rezumat;
 }
