@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { AlertTriangle, Check, ChevronDown, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, Monitor, Server, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface EroareAfisata {
@@ -15,6 +15,19 @@ export interface EroareAfisata {
   firstSeen: string;
   lastSeen: string;
   resolvedAt: string | null;
+}
+
+/**
+ * Desparte eticheta in sursa si rest: "client:/trades" → browser + "/trades".
+ *
+ * Cele doua lumi se repara diferit -- o eroare de browser inseamna cod trimis
+ * catre om, una de server inseamna cod care ruleaza la noi -- deci merita
+ * deosebite dintr-o privire, nu citind cu atentie inceputul textului.
+ */
+function despartEticheta(label: string): { browser: boolean; rest: string } {
+  if (label.startsWith("client:")) return { browser: true, rest: label.slice(7) };
+  if (label.startsWith("server:")) return { browser: false, rest: label.slice(7) };
+  return { browser: false, rest: label };
 }
 
 export function ErrorsClient({ erori }: { erori: EroareAfisata[] }) {
@@ -104,9 +117,24 @@ export function ErrorsClient({ erori }: { erori: EroareAfisata[] }) {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-[color:var(--ink-3)]">
-                        {e.label}
-                      </span>
+                      {(() => {
+                        const { browser, rest } = despartEticheta(e.label);
+                        const Icoana = browser ? Monitor : Server;
+                        return (
+                          <span className="inline-flex items-center gap-1.5">
+                            <span
+                              className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[color:var(--s-2)] text-[color:var(--ink-3)]"
+                              title={browser ? t("sourceBrowserHint") : t("sourceServerHint")}
+                            >
+                              <Icoana className="w-3 h-3" />
+                              {browser ? t("sourceBrowser") : t("sourceServer")}
+                            </span>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-[color:var(--ink-3)]">
+                              {rest}
+                            </span>
+                          </span>
+                        );
+                      })()}
                       {/* Numărul de apariții e cel mai bun indiciu de prioritate:
                           o eroare lovită de 400 de ori nu e la fel cu una lovită
                           o dată, chiar dacă textul arată la fel de rău. */}

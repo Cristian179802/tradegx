@@ -3107,6 +3107,10 @@
     "seenRange": "First seen {first} · last seen {last}",
     "toggleStack": "Show technical details",
     "resolve": "Mark resolved",
-    "reopen": "Reopen"
+    "reopen": "Reopen",
+    "sourceBrowser": "browser",
+    "sourceServer": "server",
+    "sourceBrowserHint": "Error that happened in a user's browser",
+    "sourceServerHint": "Error that happened on the server"
   }
 }

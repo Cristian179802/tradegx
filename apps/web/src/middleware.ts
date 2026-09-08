@@ -34,6 +34,11 @@ const publicPrefixes = [
   "/api/cron",           // Vercel cron jobs — protected by CRON_SECRET bearer token
   "/share",          // public share pages — protected by per-trade HMAC token
   "/api/share",      // share token validation endpoint
+  // Erorile din browser: trebuie sa mearga si pentru vizitatori NELOGATI —
+  // o eroare pe landing sau in formularul de inregistrare e exact cea care
+  // costa un client. Ruta nu citeste si nu scrie nimic al utilizatorului;
+  // e limitata la 20/ora per IP si raspunde mereu 204.
+  "/api/client-errors",
   "/_next",
   "/favicon",
   "/images",

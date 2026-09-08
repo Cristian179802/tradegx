@@ -124,3 +124,15 @@ describe("barierele de eroare sunt la locul lor", () => {
     }
   });
 });
+
+describe("poarta chiar e deschisa", () => {
+  const MW = fs.readFileSync("src/middleware.ts", "utf8");
+
+  it("middleware o lasă să treacă fără autentificare", () => {
+    // Defectul asta e invizibil local: in dezvoltare esti mereu logat, deci ruta
+    // pare sa mearga. Pe productie, middleware-ul o redirecta la /login cu 307 si
+    // NICIO eroare de vizitator nelogat nu ajungea nicaieri -- adica exact
+    // erorile de pe landing si din inregistrare, cele care costa clienti.
+    expect(MW).toContain('"/api/client-errors"');
+  });
+});
