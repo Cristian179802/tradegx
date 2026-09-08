@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { intParam } from "@/lib/parse-params";
 
 const createSchema = z.object({
   title: z.string().min(3).max(200),
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const page = Math.max(1, Number(searchParams.get("page") ?? 1));
+  const page = intParam(searchParams.get("page"), 1, { min: 1 });
   const limit = 20;
 
   const [total, posts] = await Promise.all([

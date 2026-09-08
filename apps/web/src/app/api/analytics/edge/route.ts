@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getAccountScope } from "@/lib/account-scope";
 import { computeEdges, type EdgeTrade } from "@/lib/edge-finder";
 import { hasPro, PRO_REQUIRED } from "@/lib/plan";
+import { intParam } from "@/lib/parse-params";
 
 // GET /api/analytics/edge?days=90&accountId=...
 export async function GET(req: NextRequest) {
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(PRO_REQUIRED, { status: 402 });
   }
 
-  const days = Math.min(Number(req.nextUrl.searchParams.get("days") ?? 365), 3650);
+  const days = intParam(req.nextUrl.searchParams.get("days"), 365, { min: 1, max: 3650 });
   const accountId = req.nextUrl.searchParams.get("accountId");
 
   const scope = await getAccountScope(session.user.id);
