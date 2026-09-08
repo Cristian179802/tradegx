@@ -35,8 +35,15 @@ export async function POST(request: Request) {
       const token = await generatePasswordResetToken(email);
       try {
         await sendPasswordResetEmail(email, token);
-      } catch {
-        // silent
+      } catch (err) {
+        // Era `catch {}` gol. Cel mai rău loc posibil pentru tăcere: utilizatorul
+        // primește „dacă adresa există, vei primi un email" — formulare corectă,
+        // care nu divulgă dacă adresa e înregistrată — deci un om blocat în afara
+        // contului ar fi așteptat la infinit un email care nu pleacă, iar noi
+        // n-am fi aflat niciodată. Răspunsul către client rămâne neschimbat;
+        // doar noi aflăm.
+        const { captureError } = await import("@/lib/error-monitor");
+        await captureError("Email: resetare parolă", err);
       }
     }
 

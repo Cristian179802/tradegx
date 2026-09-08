@@ -51,8 +51,9 @@ export async function POST(request: Request) {
     const token = await generateVerificationToken(email);
     await sendVerificationEmail(email, token);
   } catch (err) {
-    // Aici logăm, dar tot nu divulgăm nimic apelantului.
-    console.error("[RESEND-VERIFICATION] Trimitere eșuată:", err instanceof Error ? err.message : err);
+    // Logăm și alertăm, dar tot nu divulgăm nimic apelantului.
+    const { captureError } = await import("@/lib/error-monitor");
+    await captureError("Email: retrimitere verificare", err);
     return NextResponse.json(
       { success: false, error: "Serviciul de email nu este disponibil momentan." },
       { status: 503 }

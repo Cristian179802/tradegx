@@ -97,7 +97,10 @@ export async function POST(request: Request) {
       emailSent = true;
     } catch (err) {
       emailError = err instanceof Error ? err.message : String(err);
-      console.error("[REGISTER] Trimiterea emailului de verificare a eșuat:", emailError);
+      // Dacă Resend cade, FIECARE înregistrare nouă rămâne neverificată. Merită
+      // o alertă, nu o linie într-un log pe care nimeni nu-l deschide.
+      const { captureError } = await import("@/lib/error-monitor");
+      await captureError("Email: verificare cont", err);
     }
 
     return NextResponse.json(
