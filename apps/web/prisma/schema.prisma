@@ -302,21 +302,21 @@ model User {
   notificationPrefs Json?
 
   // Relations
-  accounts        Account[]
-  sessions        Session[]
-  tradingAccounts TradingAccount[]
-  subscription    Subscription?
-  alerts          Alert[]
-  watchlistItems  WatchlistItem[]
-  strategies      Strategy[]
+  accounts           Account[]
+  sessions           Session[]
+  tradingAccounts    TradingAccount[]
+  subscription       Subscription?
+  alerts             Alert[]
+  watchlistItems     WatchlistItem[]
+  strategies         Strategy[]
   posts              CommunityPost[]
   comments           CommunityComment[]
   communityReactions CommunityReaction[]
   teamMemberships    TeamMember[]
-  journalEntries  JournalEntry[]
-  integrations    UserIntegration[]
-  pushTokens      PushToken[]
-  pushSubscriptions PushSubscription[]
+  journalEntries     JournalEntry[]
+  integrations       UserIntegration[]
+  pushTokens         PushToken[]
+  pushSubscriptions  PushSubscription[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -351,7 +351,7 @@ model PushToken {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
-  platform  String?  // "ios" | "android"
+  platform  String? // "ios" | "android"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -384,9 +384,9 @@ model TradingAccount {
   minTradingDays  Int? // numărul minim de zile de tranzacționare cerut
 
   // Broker sync
-  metaApiId    String?
-  brokerSource BrokerSource?
-  lastSyncedAt DateTime?
+  metaApiId       String?
+  brokerSource    BrokerSource?
+  lastSyncedAt    DateTime?
   // Identificatori neutri pentru brokerii care nu trec prin MetaAPI
   // (TradeLocker cere id-ul contului ȘI accNum ca antet la fiecare cerere).
   brokerAccountId String?
@@ -413,9 +413,9 @@ model Trade {
   instrumentType InstrumentType
   direction      TradeDirection
 
-  entryPrice Decimal  @db.Decimal(15, 5)
+  entryPrice Decimal   @db.Decimal(15, 5)
   entryTime  DateTime
-  exitPrice  Decimal? @db.Decimal(15, 5)
+  exitPrice  Decimal?  @db.Decimal(15, 5)
   exitTime   DateTime?
 
   lotSize Decimal @db.Decimal(10, 2)
@@ -438,7 +438,7 @@ model Trade {
   timeframe   Timeframe?
   sessionType SessionType?
 
-  status        TradeStatus  @default(OPEN)
+  status        TradeStatus   @default(OPEN)
   brokerSource  BrokerSource?
   brokerTradeId String?
 
@@ -573,18 +573,18 @@ model EconomicEvent {
 // ============================================================
 
 model CommunityPost {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   teamId    String?
-  team      Team?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  team      Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
   title     String?
-  content   String  @db.Text
+  content   String   @db.Text
   symbol    String?
   imageUrls String[]
   tags      String[]
-  upvotes   Int     @default(0)
-  isPinned  Boolean @default(false)
+  upvotes   Int      @default(0)
+  isPinned  Boolean  @default(false)
 
   comments  CommunityComment[]
   reactions CommunityReaction[]
@@ -702,25 +702,25 @@ model Backtest {
   status     BacktestStatus @default(PENDING)
 
   // Results
-  totalTrades     Int?
-  winRate         Decimal? @db.Decimal(5, 2)
-  profitFactor    Decimal? @db.Decimal(8, 2)
-  maxDrawdown     Decimal? @db.Decimal(8, 4)
-  maxDrawdownPct  Decimal? @db.Decimal(8, 4)
-  sharpeRatio     Decimal? @db.Decimal(6, 2)
-  sortinoRatio    Decimal? @db.Decimal(6, 2)
-  netPnl          Decimal? @db.Decimal(15, 2)
-  expectancy      Decimal? @db.Decimal(8, 2)
-  avgRR           Decimal? @db.Decimal(6, 2)
-  totalBars       Int?
-  initialBalance  Decimal? @db.Decimal(15, 2)
-  finalBalance    Decimal? @db.Decimal(15, 2)
-  riskPerTrade    Decimal? @db.Decimal(5, 2)
-  commission      Decimal  @default(0) @db.Decimal(8, 4)
-  spread          Decimal  @default(0.00020) @db.Decimal(10, 5)
-  equityCurve     Json?
-  monthlyPnl      Json?
-  errorMessage    String?  @db.Text
+  totalTrades    Int?
+  winRate        Decimal? @db.Decimal(5, 2)
+  profitFactor   Decimal? @db.Decimal(8, 2)
+  maxDrawdown    Decimal? @db.Decimal(8, 4)
+  maxDrawdownPct Decimal? @db.Decimal(8, 4)
+  sharpeRatio    Decimal? @db.Decimal(6, 2)
+  sortinoRatio   Decimal? @db.Decimal(6, 2)
+  netPnl         Decimal? @db.Decimal(15, 2)
+  expectancy     Decimal? @db.Decimal(8, 2)
+  avgRR          Decimal? @db.Decimal(6, 2)
+  totalBars      Int?
+  initialBalance Decimal? @db.Decimal(15, 2)
+  finalBalance   Decimal? @db.Decimal(15, 2)
+  riskPerTrade   Decimal? @db.Decimal(5, 2)
+  commission     Decimal  @default(0) @db.Decimal(8, 4)
+  spread         Decimal  @default(0.00020) @db.Decimal(10, 5)
+  equityCurve    Json?
+  monthlyPnl     Json?
+  errorMessage   String?  @db.Text
 
   trades BacktestTrade[]
 
@@ -731,22 +731,22 @@ model Backtest {
 }
 
 model BacktestTrade {
-  id         String         @id @default(cuid())
-  backtestId String
-  backtest   Backtest       @relation(fields: [backtestId], references: [id], onDelete: Cascade)
-  symbol     String
-  direction  TradeDirection
-  entryPrice      Decimal   @db.Decimal(15, 5)
-  exitPrice       Decimal   @db.Decimal(15, 5)
+  id              String         @id @default(cuid())
+  backtestId      String
+  backtest        Backtest       @relation(fields: [backtestId], references: [id], onDelete: Cascade)
+  symbol          String
+  direction       TradeDirection
+  entryPrice      Decimal        @db.Decimal(15, 5)
+  exitPrice       Decimal        @db.Decimal(15, 5)
   entryTime       DateTime
   exitTime        DateTime
-  lotSize         Decimal   @db.Decimal(10, 2)
-  stopLoss        Decimal?  @db.Decimal(15, 5)
-  takeProfit      Decimal?  @db.Decimal(15, 5)
-  pnl             Decimal   @db.Decimal(15, 2)
-  commission      Decimal   @default(0) @db.Decimal(8, 4)
-  riskRewardRatio Decimal?  @db.Decimal(6, 2)
-  exitReason      String?   // "TP" | "SL" | "EOD" | "SIGNAL"
+  lotSize         Decimal        @db.Decimal(10, 2)
+  stopLoss        Decimal?       @db.Decimal(15, 5)
+  takeProfit      Decimal?       @db.Decimal(15, 5)
+  pnl             Decimal        @db.Decimal(15, 2)
+  commission      Decimal        @default(0) @db.Decimal(8, 4)
+  riskRewardRatio Decimal?       @db.Decimal(6, 2)
+  exitReason      String? // "TP" | "SL" | "EOD" | "SIGNAL"
 
   createdAt DateTime @default(now())
 
@@ -761,9 +761,9 @@ model UserIntegration {
   id       String  @id @default(cuid())
   userId   String
   user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  service  String  // "metaapi" | "cloudinary" | "twelvedata"
+  service  String // "metaapi" | "cloudinary" | "twelvedata"
   apiKey   String? @db.Text
-  config   Json?   // Extra config (cloudName, accountId, etc.)
+  config   Json? // Extra config (cloudName, accountId, etc.)
   isActive Boolean @default(false)
 
   createdAt DateTime @default(now())
@@ -820,9 +820,9 @@ model AiSignal {
   riskReward  Decimal  @db.Decimal(5, 2)
   confidence  Int // 0-100
 
-  setupType    SetupType?
-  bias         String? // "Bullish" | "Bearish"
-  session      SessionType?
+  setupType SetupType?
+  bias      String? // "Bullish" | "Bearish"
+  session   SessionType?
 
   rationale    String  @db.Text // analiza completă: de ce
   confirmation String  @db.Text // confirmarea de așteptat înainte de intrare
@@ -842,4 +842,42 @@ model RateLimit {
   resetAt DateTime
 
   @@index([resetAt])
+}
+
+// ============================================================
+// MONITORIZAREA ERORILOR
+// ============================================================
+
+/// O eroare de server, grupată după amprentă.
+///
+/// De ce există: până acum, când ceva se strica pentru un client, nu afla nimeni.
+/// Toate defectele găsite până la 8 sep 2026 — semnalele moarte de la prima zi,
+/// marcajele îngrămădite pe grafic, erorile tehnice arătate clienților — au fost
+/// găsite citind cod, nu pentru că a anunțat ceva.
+///
+/// Rândurile se GRUPEAZĂ, nu se acumulează: o rută stricată care e apelată de o
+/// mie de ori produce un rând cu `count = 1000`, nu o mie de rânduri. Altfel
+/// primul incident ar îneca tabela și ar ascunde al doilea.
+model ErrorLog {
+  id          String    @id @default(cuid())
+  /// Hash din etichetă + tipul erorii + mesajul normalizat. Unic: identitatea grupului.
+  fingerprint String    @unique
+  /// Eticheta locului care a prins eroarea, ex. "Stripe Checkout", "AI Chat".
+  label       String
+  message     String    @db.Text
+  stack       String?   @db.Text
+  /// Ruta pe care s-a întâmplat, când o știm.
+  route       String?
+  /// Cine a lovit-o ultima dată. Nullable: multe erori se întâmplă fără sesiune.
+  userId      String?
+  count       Int       @default(1)
+  firstSeen   DateTime  @default(now())
+  lastSeen    DateTime  @default(now())
+  /// Marcat manual din panou, ca lista să nu crească la infinit.
+  resolvedAt  DateTime?
+  /// Alerta se trimite O SINGURĂ DATĂ per amprentă nouă. O rută stricată nu are
+  /// voie să trimită o mie de mesaje pe Telegram.
+  notified    Boolean   @default(false)
+
+  @@index([resolvedAt, lastSeen])
 }

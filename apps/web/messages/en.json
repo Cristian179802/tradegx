@@ -3096,5 +3096,17 @@
     "aiCoach": "AI Coach",
     "community": "Community",
     "riskManager": "Risk Manager"
+  },
+  "errorMonitor": {
+    "title": "Error monitor",
+    "subtitle": "What broke, grouped by cause",
+    "allClear": "No open errors",
+    "openCount": "{n} open",
+    "emptyTitle": "No errors recorded",
+    "emptyBody": "Server errors show up here, grouped by cause. An empty list means nothing broke — not that nothing is being measured.",
+    "seenRange": "First seen {first} · last seen {last}",
+    "toggleStack": "Show technical details",
+    "resolve": "Mark resolved",
+    "reopen": "Reopen"
   }
 }

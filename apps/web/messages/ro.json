@@ -3096,5 +3096,17 @@
     "aiCoach": "AI Coach",
     "community": "Comunitate",
     "riskManager": "Risk Manager"
+  },
+  "errorMonitor": {
+    "title": "Monitor erori",
+    "subtitle": "Ce s-a stricat, grupat după cauză",
+    "allClear": "Nicio eroare deschisă",
+    "openCount": "{n} deschise",
+    "emptyTitle": "Nicio eroare înregistrată",
+    "emptyBody": "Aici apar erorile de server, grupate după cauză. O listă goală înseamnă că nu s-a stricat nimic — nu că nu se măsoară.",
+    "seenRange": "Prima dată {first} · ultima dată {last}",
+    "toggleStack": "Arată detaliile tehnice",
+    "resolve": "Marchează rezolvată",
+    "reopen": "Redeschide"
   }
 }

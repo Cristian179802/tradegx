@@ -99,7 +99,12 @@ export async function apiError(
     extra?: Record<string, unknown>;
   }
 ) {
-  if (opts?.log) console.error(`[${opts.log[0]}]`, opts.log[1]);
+  // Detaliul tehnic merge in monitor, nu doar in consola: o eroare care apare
+  // doar in logurile Vercel e o eroare pe care nimeni n-o citeste.
+  if (opts?.log) {
+    const { captureError } = await import("@/lib/error-monitor");
+    await captureError(opts.log[0], opts.log[1]);
+  }
   return NextResponse.json(
     { error: await apiErrorText(key), code: key, ...(opts?.extra ?? {}) },
     { status: opts?.status ?? 500 }
