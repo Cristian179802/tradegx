@@ -33,3 +33,20 @@ export function intParam(
   if (max !== undefined && v > max) v = max;
   return v;
 }
+
+/**
+ * O dată dintr-un parametru de URL, sau `null` dacă nu e validă.
+ *
+ * `new Date("abc")` nu aruncă — întoarce un obiect Date cu timpul NaN, care arată
+ * ca o dată până în clipa în care ajunge la Prisma. Atunci aruncă, iar clientul
+ * primește 500 în loc de 400.
+ *
+ * Confirmat pe producție: `/api/trades?dateFrom=abc` returna 500 și a declanșat
+ * o alertă pe Telegram — exact cum trebuia, dar pentru un bug care n-avea de ce
+ * să existe.
+ */
+export function dateParam(raw: string | null | undefined): Date | null {
+  if (!raw) return null;
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? null : d;
+}

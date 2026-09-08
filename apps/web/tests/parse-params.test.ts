@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { intParam } from "@/lib/parse-params";
+import { intParam, dateParam } from "@/lib/parse-params";
 
 // ── Numere din parametrii de URL ─────────────────────────────────────────────
 //
@@ -82,5 +82,33 @@ describe("niciun parametru de URL nu mai ajunge nevalidat în Prisma", () => {
     }
 
     expect(vinovate, "folosește intParam din @/lib/parse-params").toEqual([]);
+  });
+});
+
+describe("dateParam", () => {
+  it("acceptă o dată validă", () => {
+    expect(dateParam("2026-09-08")?.toISOString().slice(0, 10)).toBe("2026-09-08");
+  });
+
+  it("întoarce null pentru text care nu e dată", () => {
+    // `new Date("abc")` NU arunca — intorcea un Date cu timpul NaN, care arata a
+    // data pana ajungea la Prisma. Confirmat pe productie: 500 pe ?dateFrom=abc.
+    expect(dateParam("abc")).toBeNull();
+    expect(dateParam("???")).toBeNull();
+  });
+
+  it("întoarce null când lipsește", () => {
+    expect(dateParam(null)).toBeNull();
+    expect(dateParam(undefined)).toBeNull();
+    expect(dateParam("")).toBeNull();
+  });
+
+  it("NU întoarce niciodată o dată invalidă", () => {
+    // Invariantul: orice iese de aici si nu e null trebuie sa fie o data reala,
+    // altfel Prisma arunca la serializare.
+    for (const intrare of ["abc", "", null, undefined, "2026-13-45", "nu-i data"]) {
+      const d = dateParam(intrare as string | null);
+      if (d !== null) expect(Number.isNaN(d.getTime())).toBe(false);
+    }
   });
 });

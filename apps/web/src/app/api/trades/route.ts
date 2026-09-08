@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getAccountScope } from "@/lib/account-scope";
 import { tradeSchema } from "@/lib/validations";
 import { checkTradingRuleViolations } from "@/lib/trading-rules";
-import { intParam } from "@/lib/parse-params";
+import { intParam, dateParam } from "@/lib/parse-params";
 
 function calcPnlPercent(pnlMoney: number, balance: number): number {
   if (balance === 0) return 0;
@@ -44,8 +44,9 @@ export async function GET(req: NextRequest) {
   const accountId = searchParams.get("accountId");
   const status = searchParams.get("status");
   const symbol = searchParams.get("symbol");
-  const dateFrom = searchParams.get("dateFrom");
-  const dateTo = searchParams.get("dateTo");
+  // Validate AICI, nu la folosire: o dată invalidă se ignoră, nu produce 500.
+  const dateFrom = dateParam(searchParams.get("dateFrom"));
+  const dateTo = dateParam(searchParams.get("dateTo"));
   const page = intParam(searchParams.get("page"), 1, { min: 1 });
   const limit = intParam(searchParams.get("limit"), 20, { min: 1, max: 100 });
 
@@ -76,8 +77,8 @@ export async function GET(req: NextRequest) {
     ...(dateFrom || dateTo
       ? {
           entryTime: {
-            ...(dateFrom && { gte: new Date(dateFrom) }),
-            ...(dateTo && { lte: new Date(dateTo) }),
+            ...(dateFrom && { gte: dateFrom }),
+            ...(dateTo && { lte: dateTo }),
           },
         }
       : {}),
