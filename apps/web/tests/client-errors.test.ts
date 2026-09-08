@@ -91,3 +91,36 @@ describe("raportarea din browser nu poate face rău", () => {
     expect(RUTA).not.toMatch(/NextResponse\.json\(\s*\{\s*(ok|success|id)/);
   });
 });
+
+describe("barierele de eroare sunt la locul lor", () => {
+  const ERROR = fs.readFileSync("src/app/error.tsx", "utf8");
+  const GLOBAL = fs.readFileSync("src/app/global-error.tsx", "utf8");
+  const DASH = fs.readFileSync("src/app/(dashboard)/error.tsx", "utf8");
+
+  it("error.tsx NU randează html/body", () => {
+    // Traieste inauntrul layout-ului radacina, care are deja html si body.
+    // Propriul wrapper producea <body><html><body> — HTML invalid.
+    expect(ERROR).not.toMatch(/<html|<body/);
+    expect(DASH).not.toMatch(/<html|<body/);
+  });
+
+  it("global-error.tsx randează html/body", () => {
+    // El INLOCUIESTE layout-ul radacina, deci trebuie sa le aiba pe amandoua.
+    expect(GLOBAL).toMatch(/<html/);
+    expect(GLOBAL).toMatch(/<body/);
+  });
+
+  it("global-error.tsx nu depinde de nimic care s-ar putea să nu se fi încărcat", () => {
+    // Daca am ajuns acolo, presupunerea sanatoasa e ca nimic n-a mers cum trebuie.
+    // Fara clase de Tailwind, fara iconite din biblioteci, fara providere.
+    expect(GLOBAL).not.toMatch(/className=/);
+    expect(GLOBAL).not.toMatch(/from "lucide-react"/);
+    expect(GLOBAL).not.toMatch(/next-intl/);
+  });
+
+  it("toate cele trei bariere raportează", () => {
+    for (const [nume, sursa] of [["error", ERROR], ["global-error", GLOBAL], ["dashboard/error", DASH]] as const) {
+      expect(sursa, `${nume} nu raporteaza`).toContain("reportClientError");
+    }
+  });
+});

@@ -4,8 +4,9 @@ import { useEffect } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { reportClientError } from "@/lib/report-client-error";
 
-// Această pagină randează propriul <html> → rulează în afara NextIntlClientProvider.
-// Traducem printr-un dicționar inline citind cookie-ul `locale` (fallback ro).
+// Bariera asta poate prinde o eroare venită CHIAR din providere, deci nu se poate
+// baza pe NextIntlClientProvider. Traducem printr-un dicționar inline, citind
+// cookie-ul `locale` (implicit ro).
 const T = {
   ro: {
     title: "A apărut o eroare",
@@ -19,7 +20,7 @@ const T = {
   },
 };
 
-export default function GlobalError({
+export default function EroarePagina({
   error,
   reset,
 }: {
@@ -37,25 +38,23 @@ export default function GlobalError({
   const t = T[locale as "ro" | "en"];
 
   return (
-    <html>
-      <body className="bg-zinc-950 min-h-screen flex items-center justify-center p-6">
-        <div className="text-center max-w-md">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 mb-6">
-            <AlertTriangle className="h-8 w-8 text-rose-400" />
-          </div>
-          <h1 className="text-xl font-bold text-zinc-100 mb-2">{t.title}</h1>
-          <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
-            {t.desc}
-          </p>
-          <button
-            onClick={reset}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-500/20"
-          >
-            <RefreshCw className="h-4 w-4" />
-            {t.tryAgain}
-          </button>
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="text-center max-w-md">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 mb-6">
+          <AlertTriangle className="h-8 w-8 text-rose-400" />
         </div>
-      </body>
-    </html>
+        <h1 className="text-xl font-bold text-zinc-100 mb-2">{t.title}</h1>
+        <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
+          {t.desc}
+        </p>
+        <button
+          onClick={reset}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-500/20"
+        >
+          <RefreshCw className="h-4 w-4" />
+          {t.tryAgain}
+        </button>
+      </div>
+    </div>
   );
 }
