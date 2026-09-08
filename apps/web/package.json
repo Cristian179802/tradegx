@@ -5,14 +5,16 @@
   "scripts": {
     "dev": "next dev",
     "i18n:check": "node scripts/i18n-scan.mjs",
-    "build": "node scripts/i18n-scan.mjs && next build",
+    "build": "node scripts/i18n-scan.mjs && vitest run && next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "db:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts"
+    "db:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
@@ -85,6 +87,8 @@
     "@types/web-push": "^3.6.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
   }
 }
