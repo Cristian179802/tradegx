@@ -42,8 +42,8 @@ const T1 = {
   toRecover: { ro: "Ai nevoie de", en: "You'd need" },
   ruin: { ro: "Șansa să pierzi jumătate din cont", en: "Chance of losing half the account" },
   ruinSub: {
-    ro: "din 2.000 de scenarii simulate, cu 55% win rate și R:R 1:2, peste 200 de tranzacții",
-    en: "out of 2,000 simulated scenarios, at 55% win rate and 1:2 R:R, over 200 trades",
+    ro: "din 2.000 de scenarii simulate, cu {wr}% win rate și R:R 1:{rr}, peste 200 de tranzacții",
+    en: "out of 2,000 simulated scenarios, at {wr}% win rate and 1:{rr} R:R, over 200 trades",
   },
   pips: { ro: "pips", en: "pips" },
   lots: { ro: "loturi", en: "lots" },
@@ -89,17 +89,22 @@ export function RiskLab({
   // Simularea e scumpă: o rulăm pe o valoare „întârziată", ca tragerea de
   // cursor să rămână fluidă și rezultatul să ajungă o clipă mai târziu.
   const riskDeferred = React.useDeferredValue(riskPct);
+  // Sistemul presupus de simulare. Implicit: 45% win rate cu R:R 1:1.5, adică
+  // 0.125R expectanță — un sistem bun și REALIST pentru retail. Un sistem
+  // excepțional (55% / 1:2, 0.65R) supraviețuiește și la 8% risc, deci ar preda
+  // exact pe dos lecția din secțiunea asta.
+  const sistem = { wr: preset?.winRate ?? 45, rr: preset?.rr ?? 1.5 };
   const ruin = React.useMemo(
     () =>
       riskOfRuin({
-        winRatePct: preset?.winRate ?? 55,
+        winRatePct: sistem.wr,
         riskPct: riskDeferred,
-        rr: preset?.rr ?? 2,
+        rr: sistem.rr,
         drawdownPct: 50,
         trades: 200,
         simulations: 2000,
       }),
-    [riskDeferred, preset?.winRate, preset?.rr]
+    [riskDeferred, sistem.wr, sistem.rr]
   );
 
   const reset = () => {
@@ -193,7 +198,7 @@ export function RiskLab({
               value={ruin.toFixed(ruin < 10 ? 1 : 0)}
               unit="%"
               tone={ruin < 5 ? "gain" : ruin < 25 ? "ink" : "loss"}
-              sub={T1.ruinSub[lang]}
+              sub={fill(T1.ruinSub[lang], { wr: sistem.wr, rr: sistem.rr })}
             />
             <div className="mt-3">
               <Bar pct={ruin} tone={ruin < 5 ? "gain" : "loss"} />

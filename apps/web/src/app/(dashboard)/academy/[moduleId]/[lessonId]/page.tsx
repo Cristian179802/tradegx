@@ -26,6 +26,7 @@ import {
   WarningBlock,
 } from "@/components/academy/blocks";
 import { Lab } from "@/components/academy/labs";
+import { LessonTutor } from "@/components/academy/tutor";
 import { useAcademyLang, useAcademyProgress } from "@/components/academy/use-academy";
 
 // ── Pagina de lecție ─────────────────────────────────────────────────────────
@@ -212,6 +213,10 @@ export default function LessonPage() {
               );
             })}
           </div>
+
+          {/* Tutorele vine ÎNAINTE de butonul de finalizare: dacă n-ai înțeles
+              ceva, întrebi acum, nu după ce ai bifat lecția ca terminată. */}
+          <LessonTutor moduleId={mod.id} lessonId={lesson.id} lang={lang} />
 
           {/* Finalizare */}
           <div className="mt-12 flex items-center gap-3">

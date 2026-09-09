@@ -145,6 +145,9 @@ export const API_ERROR_EN: Record<string, string> = {
     "You've reached the AI analysis limit. Try again later.",
   "Ai atins limita de 30 mesaje/oră. Revino mai târziu.":
     "You've reached the limit of 30 messages per hour. Come back later.",
+  "Ai atins limita de 20 de întrebări pe oră. Revino mai târziu.":
+    "You've reached the limit of 20 questions per hour. Come back later.",
+  "Lecția nu există": "That lesson doesn't exist",
   "Prea multe analize. Reîncearcă peste puțin timp.": "Too many analyses. Try again shortly.",
 
   // Comunitate

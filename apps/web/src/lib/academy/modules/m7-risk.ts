@@ -77,7 +77,7 @@ export const M7_BUNDLE: ModuleBundle = {
           },
           {
             heading: { ro: "Formula de sizing", en: "The sizing formula" },
-            lab: { kind: "risk-lab", preset: { balance: 10000, riskPct: 1, winRate: 55, rr: 2 } },
+            lab: { kind: "risk-lab", preset: { balance: 10000, riskPct: 1, winRate: 45, rr: 1.5 } },
             body: {
               ro: "Mărimea lotului NU se alege din instinct. Se calculează, în această ordine: întâi decizi unde e stop loss-ul (loc TEHNIC), abia apoi afli lotul:\n\n**lot = (cont × risc%) / (SL în pips × valoarea pipului per lot)**\n\nCei trei pași, de fiecare dată:\n\n- **Pasul 1** — calculează riscul în bani: cont × risc% (ex. 10.000 $ × 1% = 100 $).\n- **Pasul 2** — măsoară distanța până la SL, în pips, dictată de grafic.\n- **Pasul 3** — împarte riscul în bani la (SL × valoarea pipului per 1 lot).\n\nReține valorile standard: la EURUSD, 1 pip pentru 1 lot standard ≈ **10 $**. La XAUUSD (contract de 100 uncii), 1 pip = 0.10 $ pe preț, adică tot ≈ **10 $** per lot.",
               en: "Lot size is NOT chosen by instinct. It's calculated, in this order: first you decide where the stop loss goes (a TECHNICAL spot), and only then do you derive the lot:\n\n**lot = (account × risk%) / (SL in pips × pip value per lot)**\n\nThe three steps, every single time:\n\n- **Step 1** — compute your risk in money: account × risk% (e.g. $10,000 × 1% = $100).\n- **Step 2** — measure the distance to your SL, in pips, dictated by the chart.\n- **Step 3** — divide the money risk by (SL × pip value per 1 lot).\n\nRemember the standard values: on EURUSD, 1 pip for 1 standard lot ≈ **$10**. On XAUUSD (100 oz contract), 1 pip = $0.10 of price, which is also ≈ **$10** per lot.",
