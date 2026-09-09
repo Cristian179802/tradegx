@@ -322,8 +322,12 @@ function Stat({ value, of, label, icon }: { value: number; of?: number; label: s
         {value}
         {of != null && <span className="text-[14px] font-bold text-[color:var(--ink-4)]"> / {of}</span>}
       </p>
-      <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[color:var(--ink-4)] flex items-center gap-1 truncate">
-        {icon}
+      {/* NU `truncate`: la 375px, trei coloane dau ~100px fiecare, iar „LECȚII
+          TERMINATE" se tăia la „LECȚII TERMIN". O etichetă trunchiată e mai rea
+          decât una pe două rânduri — lasă cifra fără nume. Nici `flex`, pentru
+          că textul nu se rupe firesc înăuntru: iconița stă inline. */}
+      <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.12em] leading-tight text-[color:var(--ink-4)]">
+        {icon && <span className="inline-block align-[-2px] mr-1">{icon}</span>}
         {label}
       </p>
     </div>

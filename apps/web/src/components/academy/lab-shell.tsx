@@ -154,7 +154,12 @@ export function Readout({
     tone === "gain" ? "var(--gain)" : tone === "loss" ? "var(--loss)" : tone === "accent" ? "var(--accent)" : "var(--ink-1)";
   return (
     <div className="min-w-0">
-      <p className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-[color:var(--ink-4)] mb-1 truncate">{label}</p>
+      {/* NU `truncate`: „Contul după 10 pierderi la rând" depășea cu 8px pe
+          telefon și se citea „Contul după 10 pierderi la r…", adică o cifră
+          rămasă fără nume. Un rând în plus costă mai puțin. */}
+      <p className="text-[9.5px] font-bold uppercase tracking-[0.14em] leading-tight text-[color:var(--ink-4)] mb-1">
+        {label}
+      </p>
       <p
         className={cn("font-display font-black leading-none tabular-nums", big ? "text-[30px] md:text-[36px]" : "text-[20px]")}
         style={{ color }}
