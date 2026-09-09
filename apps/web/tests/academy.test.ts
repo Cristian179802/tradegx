@@ -339,3 +339,59 @@ describe("datele exercițiilor", () => {
     }
   });
 });
+
+describe("tutorele AI e închis pe treapta gratuită", () => {
+  const RUTA = fs.readFileSync("src/app/api/academy/tutor/route.ts", "utf8");
+  const CHAT = fs.readFileSync("src/app/api/ai-assistant/chat/route.ts", "utf8");
+  const COMP = fs.readFileSync("src/components/academy/tutor.tsx", "utf8");
+
+  it("trece prin bugetul lunar, ca și chat-ul", () => {
+    // Regula produsului: treapta gratuită nu consumă AI, fiindcă fiecare
+    // răspuns costă bani reali. Poarta NU e o verificare scrisă de mână — e
+    // `AI_QUOTA.FREE.chat === 0`, pe care `consumaBugetLunar` o refuză singur.
+    // O rută AI nouă care ocolește funcția asta ar deschide o gaură în model.
+    //
+    // Căutăm APELUL, nu numele: prima versiune a testului folosea `toContain`,
+    // iar verificarea negativă a arătat că trecea și cu apelul șters — numele
+    // rămânea în linia de `import` ȘI în comentariul de deasupra. Un test care
+    // se mulțumește cu o mențiune nu apără nimic.
+    expect(RUTA).toMatch(/await consumaBugetLunar\(\s*"chat"/);
+    expect(CHAT).toMatch(/await consumaBugetLunar\(\s*"chat"/);
+  });
+
+  it("refuză cota zero cu 402, nu cu 429", () => {
+    // Diferența contează pentru client: 402 = „n-ai treapta asta" (invitație de
+    // upgrade), 429 = „ai consumat tot" (despre ceva ce a avut). Confundate,
+    // cineva pe FREE ar citi că a epuizat o cotă pe care n-a avut-o niciodată.
+    expect(RUTA).toMatch(/buget\.cota === 0[\s\S]{0,200}status: 402/);
+  });
+
+  it("nu atinge contorul lunar când funcția e închisă", () => {
+    // `consumaBugetLunar` iese devreme la cotă zero — altfel cine face upgrade
+    // ar începe cu contorul deja umplut de refuzuri.
+    const BUGET = fs.readFileSync("src/lib/ai-budget.ts", "utf8");
+    expect(BUGET).toMatch(/if \(cota === 0\)[\s\S]{0,160}return/);
+  });
+
+  it("construiește contextul pe SERVER, nu îl primește de la client", () => {
+    // Dacă textul lecției ar veni din corpul cererii, oricine l-ar putea
+    // înlocui cu un text propriu și ar folosi cheia noastră ca pe un chat
+    // general. Clientul trimite doar identificatori.
+    expect(RUTA).toContain("getLesson");
+    expect(COMP).toMatch(/moduleId,\s*lessonId,\s*question/);
+    expect(COMP).not.toMatch(/body: JSON\.stringify\([\s\S]{0,200}sections/);
+  });
+
+  it("promptul refuză sfaturile de tranzacționare personalizate", () => {
+    // Un tutore de curs care răspunde „da, cumpără acum" e o problemă de
+    // reglementare pentru un SaaS de trading, nu doar o depășire de rol.
+    expect(RUTA).toMatch(/NU da niciodată sfaturi de tranzacționare personalizate/);
+  });
+
+  it("interfața nu arată un câmp care va fi refuzat", () => {
+    // Contul demo raportează plan PRO, dar middleware-ul îi refuză central
+    // orice POST (login-ul demo e public — altfel oricine ar arde credit prin
+    // el). Fără poarta asta, omul scria o întrebare degeaba.
+    expect(COMP).toMatch(/role === "DEMO"/);
+  });
+});

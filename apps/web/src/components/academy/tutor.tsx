@@ -37,6 +37,12 @@ const UI = {
     en: "Ask anything about the open lesson and get an explanation on the spot, with worked numbers. Lessons, diagrams, labs and quizzes stay completely free.",
   },
   proCta: { ro: "Vezi planurile", en: "See the plans" },
+  demoTitle: { ro: "Tutorele merge pe contul tău", en: "The tutor runs on your own account" },
+  demoBody: {
+    ro: "Contul demo e comun tuturor vizitatorilor, deci nu poate pune întrebări AI. Restul Academiei o poți parcurge de aici în întregime — lecții, diagrame, laboratoare pe date reale și quiz-uri.",
+    en: "The demo account is shared by every visitor, so it can't ask AI questions. You can go through the rest of the Academy from here in full — lessons, diagrams, labs on real data and quizzes.",
+  },
+  demoCta: { ro: "Creează cont gratuit", en: "Create a free account" },
   quotaLeft: { ro: "întrebări rămase luna asta", en: "questions left this month" },
   again: { ro: "Mai întreabă", en: "Ask again" },
   suggestions: {
@@ -149,6 +155,26 @@ export function LessonTutor({
       }
       setState({ s: "error", message: eroareDeAfișat(null, lang) });
     }
+  }
+
+  // ── Poarta pentru contul demo ──
+  if (session?.user?.role === "DEMO") {
+    return (
+      <aside className="mt-10 rounded-2xl border border-[color:var(--line-2)] bg-[color:var(--s-2)] p-5 md:p-6">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 shrink-0 rounded-lg grid place-items-center border border-[color:var(--line-2)] bg-[color:var(--s-3)]">
+            <Sparkles className="w-4 h-4 text-[color:var(--ink-3)]" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-[14px] font-bold text-[color:var(--ink-1)]">{UI.demoTitle[lang]}</h3>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-[color:var(--ink-2)]">{UI.demoBody[lang]}</p>
+            <Link href="/register" className="tg-btn tg-btn-primary mt-4 inline-flex rounded-xl px-4 py-2 text-[12px] font-bold">
+              {UI.demoCta[lang]} →
+            </Link>
+          </div>
+        </div>
+      </aside>
+    );
   }
 
   // ── Poarta PRO ──
