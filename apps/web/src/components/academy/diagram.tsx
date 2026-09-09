@@ -2,12 +2,13 @@ import type { DiagramDef, Lang } from "@/lib/academy/types";
 
 // ── Motor de diagrame pentru Academie ───────────────────────────────────────
 // Randează definiții pure de date (OHLC 0..100) în SVG responsive, pe tema
-// site-ului: emerald = bullish, rose = bearish, indigo = accente.
+// site-ului. Verde/roșu = semantic (bullish/bearish), la fel ca P&L-ul.
+// Grid, text și cadru vin din tokens — diagrama e o suprafață ca oricare alta.
 
-const BULL = "#10b981";
-const BEAR = "#f43f5e";
-const GRID = "#27272a";
-const TEXT = "#a1a1aa";
+const BULL = "#34d399"; // --gain
+const BEAR = "#fb5c72"; // --loss
+const GRID = "rgba(255,255,255,0.07)";
+const TEXT = "#8b93a5"; // --ink-3
 
 const H = 280; // înălțime plot
 const PAD_X = 14;
@@ -25,8 +26,8 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
   const y = (v: number) => PAD_TOP + ((100 - v) / 100) * plotH;
 
   return (
-    <figure className="my-4">
-      <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3 overflow-x-auto">
+    <figure className="my-5">
+      <div className="relative rounded-xl border border-[color:var(--line-1)] bg-[color:var(--s-0)] p-3 overflow-x-auto shadow-[inset_0_1px_0_var(--line-top)]">
         <svg
           viewBox={`0 0 ${width} ${H}`}
           className="w-full h-auto min-w-[320px]"
@@ -43,7 +44,7 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
               y1={y(g)}
               y2={y(g)}
               stroke={GRID}
-              strokeWidth={0.6}
+              strokeWidth={0.8}
               strokeDasharray="2 6"
             />
           ))}
@@ -54,7 +55,7 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
             const zx2 = z.x2 != null ? x(z.x2) + STEP / 2 : width;
             const top = y(Math.max(z.y1, z.y2));
             const bot = y(Math.min(z.y1, z.y2));
-            const c = z.color ?? "#6366f1";
+            const c = z.color ?? "#6d75f6";
             return (
               <g key={`z${i}`}>
                 <rect
@@ -63,14 +64,14 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
                   width={zx2 - zx1}
                   height={bot - top}
                   fill={c}
-                  opacity={0.14}
+                  opacity={0.13}
                   stroke={c}
                   strokeOpacity={0.45}
                   strokeWidth={0.8}
                   rx={2}
                 />
                 {z.label && (
-                  <text x={zx1 + 5} y={top + 13} fontSize={10.5} fill={c} fontWeight={600}>
+                  <text x={zx1 + 5} y={top + 13} fontSize={10.5} fill={c} fontWeight={700}>
                     {z.label}
                   </text>
                 )}
@@ -80,7 +81,7 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
 
           {/* Niveluri orizontale (S/R, limite) */}
           {def.levels?.map((lv, i) => {
-            const c = lv.color ?? "#71717a";
+            const c = lv.color ?? TEXT;
             return (
               <g key={`l${i}`}>
                 <line
@@ -99,7 +100,7 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
                     fontSize={10.5}
                     fill={c}
                     textAnchor="end"
-                    fontWeight={600}
+                    fontWeight={700}
                   >
                     {lv.label}
                   </text>
@@ -116,7 +117,7 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
               y1={y(t.y1)}
               x2={x(t.x2)}
               y2={y(t.y2)}
-              stroke={t.color ?? "#818cf8"}
+              stroke={t.color ?? "#6d75f6"}
               strokeWidth={1.6}
               strokeDasharray={t.dashed ? "6 4" : undefined}
               strokeLinecap="round"
@@ -136,14 +137,7 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
             const lo = Math.min(cd.l, cd.o, cd.c);
             return (
               <g key={`c${i}`}>
-                <line
-                  x1={x(i)}
-                  x2={x(i)}
-                  y1={y(hi)}
-                  y2={y(lo)}
-                  stroke={color}
-                  strokeWidth={1.6}
-                />
+                <line x1={x(i)} x2={x(i)} y1={y(hi)} y2={y(lo)} stroke={color} strokeWidth={1.6} />
                 <rect
                   x={x(i) - BODY_W / 2}
                   y={top}
@@ -190,7 +184,7 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
                     fontSize={10.5}
                     fill={c}
                     textAnchor="middle"
-                    fontWeight={600}
+                    fontWeight={700}
                   >
                     {a.label}
                   </text>
@@ -208,7 +202,7 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
               fontSize={11}
               fill={lb.color ?? TEXT}
               textAnchor="middle"
-              fontWeight={600}
+              fontWeight={700}
             >
               {lb.text}
             </text>
@@ -216,7 +210,7 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
         </svg>
       </div>
       {def.caption && (
-        <figcaption className="mt-2 text-center text-xs text-zinc-500">
+        <figcaption className="mt-2.5 text-center text-[12px] leading-relaxed text-[color:var(--ink-4)]">
           {def.caption[lang]}
         </figcaption>
       )}

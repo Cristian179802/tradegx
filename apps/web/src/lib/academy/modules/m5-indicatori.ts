@@ -45,6 +45,16 @@ export const M5_BUNDLE: ModuleBundle = {
           },
           {
             heading: { ro: "Cum îl folosești concret", en: "How to use it in practice" },
+            lab: {
+              kind: "chart-lab",
+              symbol: "XAUUSD",
+              tf: "240",
+              overlays: ["ema50", "ema200", "rsi"],
+              focus: {
+                ro: "Găsește o zonă unde RSI a stat peste 70 mai multe lumânări la rând, iar prețul a continuat să urce. Acolo, „supracumpărat” n-a însemnat „vinde” — a însemnat „trend puternic”. Stinge RSI-ul și uită-te doar la EMA-uri: povestea e aceeași?",
+                en: "Find a stretch where RSI stayed above 70 for several candles while price kept rising. There, 'overbought' didn't mean 'sell' — it meant 'strong trend'. Now switch RSI off and look at the EMAs alone: is it the same story?",
+              },
+            },
             body: {
               ro: "- **Setarea standard** — RSI(14). Rezistă tentației de a-l „optimiza” la 7 sau 21 după fiecare săptămână slabă: schimbi zgomotul, nu avantajul.\n- **Divergență + structură** — cea mai bună utilizare: divergență bearish PE un double top, sau divergență bullish PE un retest de suport major. Indicatorul confirmă ideea dată de preț.\n- **Regim înainte de semnal** — întreabă-te întâi: sunt în trend sau în range? Abia apoi decide ce înseamnă valoarea RSI.\n\nNu mă crede pe cuvânt: pagina de **Backtesting din TradeGx** are RSI printre cei 15+ indicatori disponibili. Testează singur regula „vinde la RSI 70” pe EURUSD sau BTC pe doi ani de date — apoi testează „cumpără pullback în uptrend când RSI iese din 40”. Diferența dintre cele două statistici e toată lecția asta, demonstrată cu cifrele tale.",
               en: "- **Standard setting** — RSI(14). Resist the urge to 'optimize' it to 7 or 21 after every weak week: you're changing the noise, not the edge.\n- **Divergence + structure** — the best use: a bearish divergence ON a double top, or a bullish divergence ON a major support retest. The indicator confirms the idea price gave you.\n- **Regime before signal** — first ask: am I in a trend or a range? Only then decide what the RSI value means.\n\nDon't take my word for it: the **TradeGx Backtesting** page includes RSI among its 15+ available indicators. Test the 'sell at RSI 70' rule yourself on two years of EURUSD or BTC data — then test 'buy the pullback in an uptrend when RSI climbs out of 40'. The difference between those two statistics is this entire lesson, proven with your own numbers.",

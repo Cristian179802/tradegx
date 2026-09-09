@@ -3,226 +3,231 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  Award,
-  CheckCircle2,
-  ChevronLeft,
-  GraduationCap,
-  RotateCcw,
-  XCircle,
-} from "lucide-react";
+import { Award, BookOpen, CheckCircle2, ChevronLeft, GraduationCap, RotateCcw, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getModule } from "@/lib/academy";
-import type { Lang } from "@/lib/academy/types";
+import { ACADEMY, getModule } from "@/lib/academy";
 import { PASS_THRESHOLD, QUIZZES } from "@/lib/academy/quiz";
-import { useAcademyLang } from "@/components/academy/use-academy";
+import { renderInline } from "@/components/academy/lesson-body";
+import { useAcademyLang, useAcademyProgress } from "@/components/academy/use-academy";
 
-const SCORE_KEY = "tradegx-academy-quiz";
-
-function saveBestScore(moduleId: string, pct: number) {
-  try {
-    const raw = localStorage.getItem(SCORE_KEY);
-    const scores = raw ? (JSON.parse(raw) as Record<string, number>) : {};
-    if ((scores[moduleId] ?? 0) < pct) {
-      scores[moduleId] = pct;
-      localStorage.setItem(SCORE_KEY, JSON.stringify(scores));
-    }
-  } catch {}
-}
+// ── Quiz-ul final al unui modul ──────────────────────────────────────────────
+//
+// O întrebare pe ecran, răspuns → explicație → următoarea. La final, scorul se
+// salvează (cel mai bun rămâne), iar întrebările GREȘITE se țin minte: de acolo
+// pornește repetiția — data viitoare le vezi întâi pe ele.
 
 const UI = {
   back: { ro: "Înapoi la modul", en: "Back to module" },
-  quiz: { ro: "Quiz final", en: "Final quiz" },
+  kicker: { ro: "Quiz final", en: "Final quiz" },
   question: { ro: "Întrebarea", en: "Question" },
   of: { ro: "din", en: "of" },
   next: { ro: "Următoarea întrebare", en: "Next question" },
   seeResult: { ro: "Vezi rezultatul", en: "See result" },
-  passed: { ro: "Modul absolvit!", en: "Module passed!" },
-  failed: { ro: "Încă puțin — mai încearcă", en: "Almost there — try again" },
+  passed: { ro: "Modul absolvit", en: "Module passed" },
+  failed: { ro: "Încă puțin", en: "Almost there" },
   passedSub: {
-    ro: "Ai demonstrat că stăpânești materialul. Continuă cu modulul următor.",
-    en: "You have proven you know the material. Continue with the next module.",
+    ro: "Ai demonstrat că stăpânești materialul. Modulul următor te așteaptă.",
+    en: "You've shown you know the material. The next module is waiting.",
   },
   failedSub: {
-    ro: "Pragul de promovare este 80%. Recitește lecțiile marcate greșit și revino.",
-    en: "The passing threshold is 80%. Reread the lessons you missed and come back.",
+    ro: "Pragul e 80%. Recitește lecțiile de mai jos — sunt cele din care ai greșit — și revino.",
+    en: "The bar is 80%. Reread the lessons below — they're the ones you missed — and come back.",
   },
   retry: { ro: "Reia quiz-ul", en: "Retake quiz" },
+  nextModule: { ro: "Modulul următor", en: "Next module" },
   backToAcademy: { ro: "Înapoi la Academie", en: "Back to Academy" },
-  correct: { ro: "Corect!", en: "Correct!" },
+  correct: { ro: "Corect", en: "Correct" },
   wrong: { ro: "Greșit", en: "Wrong" },
   score: { ro: "Scorul tău", en: "Your score" },
+  best: { ro: "cel mai bun", en: "best" },
+  review: { ro: "De recitit", en: "To reread" },
+  unavailable: { ro: "Quiz indisponibil.", en: "Quiz unavailable." },
 } as const;
 
 export default function QuizPage() {
   const params = useParams<{ moduleId: string }>();
-  const [lang, setLang] = useAcademyLang();
+  const lang = useAcademyLang();
+  const { quizScores, saveQuizScore, missed } = useAcademyProgress();
 
   const mod = getModule(params.moduleId);
-  const questions = QUIZZES[params.moduleId] ?? [];
+  const bank = QUIZZES[params.moduleId] ?? [];
 
-  const [idx, setIdx] = React.useState(0);
+  // Ordinea: întâi cele greșite anterior (repetiție), apoi restul. Ordinea se
+  // fixează o dată per încercare, ca să nu se amestece în timp ce răspunzi.
+  const order = React.useMemo(() => {
+    const idx = bank.map((_, i) => i);
+    const weight = (i: number) => missed[`${params.moduleId}#${i}`] ?? 0;
+    return idx.sort((a, b) => weight(b) - weight(a) || a - b);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.moduleId, bank.length]);
+
+  const [pos, setPos] = React.useState(0);
   const [picked, setPicked] = React.useState<number | null>(null);
-  const [correctCount, setCorrectCount] = React.useState(0);
+  const [answers, setAnswers] = React.useState<{ qi: number; ok: boolean }[]>([]);
   const [finished, setFinished] = React.useState(false);
 
-  if (!mod || questions.length === 0) {
+  if (!mod || bank.length === 0) {
     return (
       <div className="max-w-2xl py-16 text-center">
-        <p className="text-sm text-zinc-500">Quiz indisponibil.</p>
-        <Link
-          href="/academy"
-          className="inline-flex items-center gap-1.5 mt-4 text-xs font-bold text-indigo-400 hover:text-indigo-300"
-        >
+        <p className="text-[13px] text-[color:var(--ink-4)]">{UI.unavailable[lang]}</p>
+        <Link href="/academy" className="inline-flex items-center gap-1.5 mt-4 text-[12px] font-bold text-[color:var(--accent)] hover:underline">
           <ChevronLeft className="w-3.5 h-3.5" /> {UI.backToAcademy[lang]}
         </Link>
       </div>
     );
   }
 
-  const question = questions[idx];
-  const isLast = idx === questions.length - 1;
-  const pct = Math.round((correctCount / questions.length) * 100);
-  const passed = pct >= PASS_THRESHOLD;
+  const qi = order[pos]!;
+  const question = bank[qi]!;
+  const isLast = pos === order.length - 1;
+  const correctCount = answers.filter((a) => a.ok).length;
 
   const pick = (i: number) => {
     if (picked !== null) return;
     setPicked(i);
-    if (i === question.correct) setCorrectCount((c) => c + 1);
+    setAnswers((a) => [...a, { qi, ok: i === question.correct }]);
   };
 
   const advance = () => {
     if (isLast) {
+      const pct = Math.round((correctCount / bank.length) * 100);
+      saveQuizScore(mod.id, pct, answers.filter((a) => !a.ok).map((a) => a.qi));
       setFinished(true);
-      // scorul final se calculează cu ultimul răspuns deja inclus
-      const finalPct = Math.round((correctCount / questions.length) * 100);
-      saveBestScore(mod.id, finalPct);
     } else {
-      setIdx((i) => i + 1);
+      setPos((p) => p + 1);
       setPicked(null);
     }
   };
 
   const restart = () => {
-    setIdx(0);
+    setPos(0);
     setPicked(null);
-    setCorrectCount(0);
+    setAnswers([]);
     setFinished(false);
   };
 
-  // ── Ecran final ──
+  // ── Ecranul final ──
   if (finished) {
+    const pct = Math.round((correctCount / bank.length) * 100);
+    const passed = pct >= PASS_THRESHOLD;
+    const best = Math.max(pct, quizScores[mod.id] ?? 0);
+    const modIdx = ACADEMY.findIndex((b) => b.module.id === mod.id);
+    const nextMod = ACADEMY[modIdx + 1]?.module ?? null;
+    const wrongQs = answers.filter((a) => !a.ok).map((a) => bank[a.qi]!);
+
     return (
-      <div className="max-w-2xl space-y-6 pb-10">
-        <div
-          className={cn(
-            "rounded-2xl border p-10 text-center",
-            passed
-              ? "border-emerald-500/40 bg-emerald-500/[0.06]"
-              : "border-amber-500/40 bg-amber-500/[0.06]"
-          )}
+      <div className="max-w-2xl space-y-5 pb-10">
+        <section
+          className="tg-panel tg-boot tg-boot-edge relative rounded-2xl border p-8 md:p-10 text-center overflow-hidden"
+          style={passed ? { borderColor: "rgba(52,211,153,0.3)" } : undefined}
         >
-          {passed ? (
-            <Award className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-          ) : (
-            <RotateCcw className="w-12 h-12 text-amber-400 mx-auto mb-4" />
-          )}
-          <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1">
-            {UI.score[lang]}
-          </p>
-          <p
-            className={cn(
-              "text-5xl font-black mb-3",
-              passed ? "text-emerald-400" : "text-amber-400"
-            )}
+          <div
+            className="w-16 h-16 mx-auto mb-4 rounded-2xl grid place-items-center border"
+            style={
+              passed
+                ? { background: "rgba(52,211,153,0.10)", borderColor: "rgba(52,211,153,0.35)" }
+                : { background: "var(--s-3)", borderColor: "var(--line-2)" }
+            }
           >
-            {pct}%
+            {passed ? (
+              <Award className="w-8 h-8" style={{ color: "var(--gain)" }} />
+            ) : (
+              <RotateCcw className="w-7 h-7 text-[color:var(--ink-3)]" />
+            )}
+          </div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--ink-4)] mb-1">{UI.score[lang]}</p>
+          <p className="font-display text-[56px] leading-none font-black tabular-nums text-[color:var(--ink-1)]">
+            {pct}<span className="text-[24px] text-[color:var(--ink-4)]">%</span>
           </p>
-          <p className="text-lg font-black text-zinc-100 mb-1">
+          <p className="mt-1 text-[11px] text-[color:var(--ink-4)] tabular-nums">
+            {correctCount}/{bank.length} · {UI.best[lang]} {best}%
+          </p>
+          <h2 className="font-display text-[22px] font-black mt-5 text-[color:var(--ink-1)]">
             {passed ? UI.passed[lang] : UI.failed[lang]}
-          </p>
-          <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+          </h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--ink-3)] max-w-md mx-auto">
             {passed ? UI.passedSub[lang] : UI.failedSub[lang]}
           </p>
 
-          <div className="flex items-center justify-center gap-3 mt-6">
-            {!passed && (
-              <button
-                onClick={restart}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition-colors"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> {UI.retry[lang]}
-              </button>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            <button onClick={restart} className="tg-btn tg-btn-secondary rounded-xl px-4 py-2.5 text-[12.5px] font-bold inline-flex items-center gap-1.5">
+              <RotateCcw className="w-3.5 h-3.5" /> {UI.retry[lang]}
+            </button>
+            {passed && nextMod ? (
+              <Link href={`/academy/${nextMod.id}/${nextMod.lessons[0]!.id}`} className="tg-btn tg-btn-primary rounded-xl px-4 py-2.5 text-[12.5px] font-bold inline-flex items-center gap-1.5">
+                {UI.nextModule[lang]}: {nextMod.title[lang]}
+              </Link>
+            ) : (
+              <Link href="/academy" className="tg-btn tg-btn-primary rounded-xl px-4 py-2.5 text-[12.5px] font-bold inline-flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5" /> {UI.backToAcademy[lang]}
+              </Link>
             )}
-            <Link
-              href="/academy"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-bold text-zinc-300 hover:border-zinc-600 transition-colors"
-            >
-              <GraduationCap className="w-3.5 h-3.5" /> {UI.backToAcademy[lang]}
-            </Link>
           </div>
-        </div>
+        </section>
+
+        {wrongQs.length > 0 && (
+          <section className="tg-surface rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <BookOpen className="w-3.5 h-3.5 text-[color:var(--ink-4)]" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--ink-4)]">{UI.review[lang]}</p>
+            </div>
+            <ul className="space-y-3">
+              {wrongQs.map((q, i) => (
+                <li key={i} className="text-[13px] leading-relaxed">
+                  <p className="font-semibold text-[color:var(--ink-1)]">{q.q[lang]}</p>
+                  <p className="mt-0.5 text-[color:var(--ink-3)]">{renderInline(q.explain[lang], lang)}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     );
   }
 
-  // ── Întrebare curentă ──
+  // ── Întrebarea curentă ──
   return (
     <div className="max-w-2xl space-y-5 pb-10">
-      {/* Breadcrumb + limbă */}
-      <div className="flex items-center justify-between gap-3">
-        <Link
-          href="/academy"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-300 transition-colors"
-        >
-          <ChevronLeft className="w-3.5 h-3.5" />
-          <GraduationCap className="w-3.5 h-3.5" />
-          {mod.title[lang]} · {UI.quiz[lang]}
-        </Link>
-        <div className="flex rounded-lg border border-zinc-800 bg-zinc-900/80 p-0.5 shrink-0">
-          {(["ro", "en"] as Lang[]).map((l) => (
-            <button
-              key={l}
-              onClick={() => setLang(l)}
-              className={cn(
-                "px-2.5 py-1 text-[10px] font-bold rounded-md transition-colors uppercase",
-                lang === l ? "bg-indigo-500/20 text-indigo-300" : "text-zinc-500 hover:text-zinc-300"
-              )}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Link href={`/academy#${mod.id}`} className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[color:var(--ink-4)] hover:text-[color:var(--ink-2)] transition-colors">
+        <ChevronLeft className="w-3.5 h-3.5" /> {UI.back[lang]}
+      </Link>
 
-      {/* Progres */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[11px] font-bold text-zinc-500">
-            {UI.question[lang]} {idx + 1} {UI.of[lang]} {questions.length}
-          </span>
-          <span className="text-[11px] text-zinc-600">
-            {correctCount} ✓
-          </span>
+      <header>
+        <p className="tg-label mb-2" style={{ color: "#fbbf24" }}>{UI.kicker[lang]} · {mod.title[lang]}</p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-[12px] font-bold text-[color:var(--ink-3)] tabular-nums">
+            {UI.question[lang]} {pos + 1} {UI.of[lang]} {order.length}
+          </p>
+          <p className="text-[11px] text-[color:var(--ink-4)] tabular-nums">
+            <span style={{ color: "var(--gain)" }}>{correctCount}</span> / {answers.length}
+          </p>
         </div>
-        <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-indigo-400 transition-all duration-300"
-            style={{ width: `${((idx + (picked !== null ? 1 : 0)) / questions.length) * 100}%` }}
-          />
+        {/* progres pe întrebări */}
+        <div className="mt-2 flex gap-1">
+          {order.map((_, i) => {
+            const a = answers[i];
+            return (
+              <span
+                key={i}
+                className="h-1 flex-1 rounded-full transition-colors"
+                style={{
+                  background: a ? (a.ok ? "var(--gain)" : "var(--loss)") : i === pos ? "var(--accent)" : "var(--s-4)",
+                }}
+              />
+            );
+          })}
         </div>
-      </div>
+      </header>
 
-      {/* Întrebare */}
-      <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-6">
-        <h1 className="text-base font-bold text-zinc-100 leading-snug mb-5">
+      <section className="tg-panel tg-boot relative rounded-2xl border p-5 md:p-7">
+        <h2 className="font-display text-[18px] md:text-[21px] font-bold tracking-[-0.01em] leading-snug text-[color:var(--ink-1)] mb-5 text-balance">
           {question.q[lang]}
-        </h1>
+        </h2>
 
         <div className="space-y-2.5">
           {question.options.map((opt, i) => {
             const isCorrect = i === question.correct;
-            const isPicked = i === picked;
+            const isPicked = picked === i;
             const revealed = picked !== null;
             return (
               <button
@@ -230,69 +235,50 @@ export default function QuizPage() {
                 onClick={() => pick(i)}
                 disabled={revealed}
                 className={cn(
-                  "w-full flex items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-all",
-                  !revealed &&
-                    "border-zinc-700/60 bg-zinc-950/40 text-zinc-300 hover:border-indigo-500/50 hover:bg-indigo-500/[0.06]",
-                  revealed && isCorrect &&
-                    "border-emerald-500/50 bg-emerald-500/10 text-emerald-200",
-                  revealed && isPicked && !isCorrect &&
-                    "border-rose-500/50 bg-rose-500/10 text-rose-200",
-                  revealed && !isPicked && !isCorrect &&
-                    "border-zinc-800/60 bg-zinc-950/30 text-zinc-600"
+                  "w-full text-left rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed transition-all flex items-start gap-3",
+                  !revealed && "tg-surface hover:border-[color:var(--accent-line)] hover:bg-[color:var(--s-3)] text-[color:var(--ink-2)]",
+                  revealed && isCorrect && "border-[rgba(52,211,153,0.4)] bg-[rgba(52,211,153,0.08)] text-[color:var(--ink-1)]",
+                  revealed && isPicked && !isCorrect && "border-[rgba(251,92,114,0.4)] bg-[rgba(251,92,114,0.07)] text-[color:var(--ink-1)]",
+                  revealed && !isPicked && !isCorrect && "border-[color:var(--line-1)] bg-[color:var(--s-1)] text-[color:var(--ink-4)]"
                 )}
               >
                 <span
-                  className={cn(
-                    "w-6 h-6 rounded-lg border flex items-center justify-center text-[11px] font-black shrink-0",
+                  className="mt-[2px] w-5 h-5 shrink-0 rounded-md grid place-items-center text-[10px] font-black font-mono border"
+                  style={
                     revealed && isCorrect
-                      ? "border-emerald-500/50 text-emerald-300"
+                      ? { background: "rgba(52,211,153,0.15)", borderColor: "rgba(52,211,153,0.4)", color: "var(--gain)" }
                       : revealed && isPicked
-                        ? "border-rose-500/50 text-rose-300"
-                        : "border-zinc-700 text-zinc-500"
-                  )}
+                        ? { background: "rgba(251,92,114,0.15)", borderColor: "rgba(251,92,114,0.4)", color: "var(--loss)" }
+                        : { background: "var(--s-4)", borderColor: "var(--line-2)", color: "var(--ink-4)" }
+                  }
                 >
-                  {String.fromCharCode(65 + i)}
+                  {revealed && isCorrect ? <CheckCircle2 className="w-3.5 h-3.5" /> : revealed && isPicked ? <XCircle className="w-3.5 h-3.5" /> : "ABCD"[i]}
                 </span>
-                <span className="flex-1 font-medium">{opt[lang]}</span>
-                {revealed && isCorrect && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-                {revealed && isPicked && !isCorrect && <XCircle className="w-4 h-4 text-rose-400 shrink-0" />}
+                <span>{opt[lang]}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Explicație */}
         {picked !== null && (
           <div
-            className={cn(
-              "mt-4 rounded-xl border p-4",
+            className="mt-5 rounded-xl border p-4"
+            style={
               picked === question.correct
-                ? "border-emerald-500/25 bg-emerald-500/[0.06]"
-                : "border-rose-500/25 bg-rose-500/[0.06]"
-            )}
+                ? { borderColor: "rgba(52,211,153,0.25)", background: "rgba(52,211,153,0.05)" }
+                : { borderColor: "rgba(251,92,114,0.25)", background: "rgba(251,92,114,0.05)" }
+            }
           >
-            <p
-              className={cn(
-                "text-xs font-bold mb-1",
-                picked === question.correct ? "text-emerald-300" : "text-rose-300"
-              )}
-            >
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] mb-1" style={{ color: picked === question.correct ? "var(--gain)" : "var(--loss)" }}>
               {picked === question.correct ? UI.correct[lang] : UI.wrong[lang]}
             </p>
-            <p className="text-xs leading-relaxed text-zinc-400">{question.explain[lang]}</p>
+            <p className="text-[13px] leading-relaxed text-[color:var(--ink-2)]">{renderInline(question.explain[lang], lang)}</p>
+            <button onClick={advance} className="tg-btn tg-btn-primary mt-4 rounded-xl px-4 py-2.5 text-[12.5px] font-bold w-full md:w-auto">
+              {isLast ? UI.seeResult[lang] : UI.next[lang]} →
+            </button>
           </div>
         )}
-      </div>
-
-      {/* Următoarea */}
-      {picked !== null && (
-        <button
-          onClick={advance}
-          className="w-full rounded-xl border border-indigo-500/40 bg-indigo-500/10 py-3 text-sm font-bold text-indigo-300 hover:bg-indigo-500/20 transition-colors"
-        >
-          {isLast ? UI.seeResult[lang] : UI.next[lang]} →
-        </button>
-      )}
+      </section>
     </div>
   );
 }

@@ -317,6 +317,7 @@ model User {
   integrations       UserIntegration[]
   pushTokens         PushToken[]
   pushSubscriptions  PushSubscription[]
+  academyProgress    AcademyProgress?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -880,4 +881,28 @@ model ErrorLog {
   notified    Boolean   @default(false)
 
   @@index([resolvedAt, lastSeen])
+}
+
+// ── Progresul în Academie ────────────────────────────────────────────────────
+// Un rând per utilizator. Înainte trăia doar în localStorage: se pierdea la
+// schimbarea dispozitivului și nu exista pentru aplicația mobilă. Forma
+// câmpurilor JSON e definită și validată în lib/academy/progress-merge.ts.
+model AcademyProgress {
+  id      String @id @default(cuid())
+  userId  String @unique
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// chei "moduleId/lessonId" terminate
+  lessons String[] @default([])
+  /// { moduleId: celMaiBunScorProcent }
+  quizzes Json     @default("{}")
+  /// { drillId: { attempts, correct, bestStreak } }
+  drills  Json     @default("{}")
+  /// { "moduleId#index": deCateOriGresit } — pentru repetiție spațiată
+  missed  Json     @default("{}")
+  /// rezultatul testului de plasare, dacă a fost dat
+  placement Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

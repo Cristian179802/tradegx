@@ -8,15 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CountUp } from "@/components/ui/count-up";
 import { ACADEMY, TOTAL_LESSONS, lessonKey } from "@/lib/academy";
 import { PASS_THRESHOLD, QUIZZES } from "@/lib/academy/quiz";
-import {
-  useAcademyProgress,
-  useQuizScores,
-} from "@/components/academy/use-academy";
+import { useAcademyProgress } from "@/components/academy/use-academy";
 import type { Achievement, GamificationData } from "@/lib/gamification";
 
 // ── Realizări & Streak ──────────────────────────────────────────────────────
 // Server: 12 realizări din tranzacții/alerte/backteste (date reale).
-// Client: 2 realizări din Academie (progresul e stocat local, per dispozitiv).
+// Client: 2 realizări din Academie (progresul se sincronizează cu baza, deci
+// urcă și pe alt dispozitiv — vezi lib/academy/progress-merge.ts).
 
 function AchievementCard({ a }: { a: Achievement }) {
   const pct = Math.min(100, Math.round((a.progress / a.target) * 100));
@@ -68,8 +66,7 @@ export default function AchievementsPage() {
   const t = useTranslations("achievements");
   const [data, setData] = React.useState<GamificationData | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const { done } = useAcademyProgress();
-  const quizScores = useQuizScores();
+  const { done, quizScores } = useAcademyProgress();
 
   React.useEffect(() => {
     fetch("/api/gamification", { cache: "no-store" })

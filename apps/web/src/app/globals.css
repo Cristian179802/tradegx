@@ -1795,3 +1795,74 @@ tr.cyber-row:hover {
     /* Nu desenează nimic; există doar ca suprafață de atins. */
   }
 }
+
+/* ── Cursor de laborator (Academie) ─────────────────────────────────────────
+   `input[type=range]` implicit arată ca dintr-o altă aplicație: gri de sistem,
+   bulină lucioasă, alt aspect în fiecare browser. Aici e o piesă de interfață
+   pe care elevul o trage de zeci de ori, deci trebuie să se simtă a noastră.
+
+   Șina se colorează până la valoarea curentă prin `--tg-range-pct`, pus din
+   componentă — un gradient hard-stop, nu două elemente suprapuse. Culoarea vine
+   din `--tg-range-color`, ca aceeași piesă să poată fi verde (câștig) sau roșie
+   (risc) fără o clasă nouă. */
+.tg-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;                 /* suprafață de atins, nu grosimea șinei */
+  background: transparent;
+  cursor: pointer;
+}
+.tg-range:focus-visible {
+  outline: 2px solid var(--tg-range-color, var(--accent));
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Șina — Chrome/Safari/Edge */
+.tg-range::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--tg-range-color, var(--accent)) 0%,
+    var(--tg-range-color, var(--accent)) var(--tg-range-pct, 50%),
+    var(--s-4) var(--tg-range-pct, 50%),
+    var(--s-4) 100%
+  );
+}
+/* Bulina — Chrome/Safari/Edge. `margin-top` o centrează pe șină: fără ea,
+   bulina stă cu marginea de sus pe șină, adică vizibil prea jos. */
+.tg-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: var(--ink-1);
+  border: 3px solid var(--tg-range-color, var(--accent));
+  box-shadow: var(--el-1);
+  transition: transform 120ms ease;
+}
+.tg-range:active::-webkit-slider-thumb { transform: scale(1.15); }
+
+/* Firefox — proprietăți separate, nu le poate împărți cu WebKit */
+.tg-range::-moz-range-track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--s-4);
+}
+.tg-range::-moz-range-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--tg-range-color, var(--accent));
+}
+.tg-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink-1);
+  border: 3px solid var(--tg-range-color, var(--accent));
+  box-shadow: var(--el-1);
+}

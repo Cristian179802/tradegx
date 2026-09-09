@@ -9,10 +9,14 @@ import fs from "fs";
 import path from "path";
 
 const ROOT = path.resolve(process.cwd(), "src");
-// Zone excluse: Academia (conținut de curs RO intenționat) și tot ce e server-side
-// (api/, lib/) — acolo textele RO sunt output pt Telegram/email către publicul RO,
-// nu UI. Scanăm DOAR .tsx (JSX = interfața vizibilă).
-const EXCLUDE_DIRS = ["academy", "lib/academy", "app/api", "lib"];
+// Zone excluse: tot ce e server-side (api/, lib/) — acolo textele RO sunt output
+// pt Telegram/email către publicul RO, nu UI. Scanăm DOAR .tsx (JSX = interfața
+// vizibilă), deci conținutul Academiei (fișiere .ts de date) nu ajunge aici.
+//
+// Paginile și componentele Academiei NU sunt excluse, deliberat: conținutul ei e
+// bilingv prin `I18nText` + `lang`, iar poarta asta e cea care ține proza să nu
+// ajungă direct în JSX, unde engleza ar rămâne în urmă fără să afle nimeni.
+const EXCLUDE_DIRS = ["lib/academy", "app/api", "lib"];
 const EXCLUDE_FILES = [];
 // Șiruri permise (intenționat bilingve / tehnice).
 // „Română" e numele limbii în selectorul de limbă: se scrie la fel indiferent de
@@ -211,7 +215,7 @@ for (const file of walk(ROOT)) {
 }
 
 if (findings.length === 0) {
-  console.log("✓ i18n: niciun text românesc hardcodat în UI (exceptând Academia).");
+  console.log("✓ i18n: niciun text românesc hardcodat în UI.");
   process.exit(0);
 }
 

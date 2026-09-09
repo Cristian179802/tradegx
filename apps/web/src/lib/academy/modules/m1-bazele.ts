@@ -77,7 +77,7 @@ export const M1_BUNDLE: ModuleBundle = {
           {
             heading: { ro: "Trendul: primul lucru pe care îl cauți", en: "The trend: the first thing you look for" },
             body: {
-              ro: "Prețul se mișcă în 3 moduri: **uptrend** (crește), **downtrend** (scade) sau **range** (lateral). Un uptrend sănătos face maxime din ce în ce mai sus (**HH — Higher High**) și minime din ce în ce mai sus (**HL — Higher Low**). Un downtrend face LH și LL.\n\nRegula de aur a începătorului: **tranzacționează în direcția trendului**. Statistic, continuarea trendului e mai probabilă decât inversarea lui — „the trend is your friend\".",
+              ro: "Prețul se mișcă în 3 moduri: **uptrend** (crește), **downtrend** (scade) sau **range** (lateral). Un uptrend sănătos face maxime din ce în ce mai sus (**HH — Higher High**) și minime din ce în ce mai sus (**HL — Higher Low**). Un downtrend face LH și LL.\n\nRegula de aur a începătorului: **tranzacționează în direcția trendului**. Statistic, continuarea trendului e mai probabilă decât inversarea lui — „the trend is your friend”.",
               en: "Price moves in 3 ways: **uptrend** (rising), **downtrend** (falling) or **range** (sideways). A healthy uptrend makes progressively higher highs (**HH**) and higher lows (**HL**). A downtrend makes LH and LL.\n\nThe beginner's golden rule: **trade in the direction of the trend**. Statistically, trend continuation is more likely than reversal — 'the trend is your friend'.",
             },
             diagram: "m1-trend",
@@ -158,6 +158,7 @@ export const M1_BUNDLE: ModuleBundle = {
           },
           {
             heading: { ro: "Stop Loss și Take Profit", en: "Stop Loss and Take Profit" },
+            lab: { kind: "sl-drill" },
             body: {
               ro: "**Stop Loss (SL)** = ordinul care îți închide automat poziția la o pierdere predefinită. **Take Profit (TP)** = ordinul care îți încasează automat profitul la ținta stabilită.\n\nSL-ul nu e opțional. E diferența dintre o pierdere mică, planificată, și o catastrofă. Se plasează într-un loc TEHNIC (dincolo de zona care îți invalidează ideea), nu la o distanță aleasă emoțional.",
               en: "**Stop Loss (SL)** = the order that automatically closes your position at a predefined loss. **Take Profit (TP)** = the order that automatically banks your profit at your target.\n\nThe SL is not optional. It's the difference between a small, planned loss and a catastrophe. Place it at a TECHNICAL spot (beyond the zone that invalidates your idea), not at an emotionally chosen distance.",

@@ -180,6 +180,7 @@ export const M3_BUNDLE: ModuleBundle = {
           },
           {
             heading: { ro: "Antrenamentul ochiului", en: "Training your eye" },
+            lab: { kind: "pattern-drill", patterns: [] },
             body: {
               ro: "Modelele se învață prin expunere, nu prin memorare. Planul de antrenament:\n\n- **Backtesting**: derulează istoricul lumânare cu lumânare în TradeGx și notează fiecare model găsit LA UN NIVEL, plus ce a urmat. 100 de exemple îți calibrează ochiul mai bine decât orice carte.\n- **Jurnal cu etichete**: fiecare trade primește numele modelului și contextul (la suport / la rezistență / fără nivel). Statistica pe etichete îți arată adevărul.\n- **Review săptămânal**: 15 minute în care te uiți DOAR la trade-urile pierzătoare și întrebi: era modelul la un nivel real, sau l-am vrut eu acolo?",
               en: "Patterns are learned through exposure, not memorization. The training plan:\n\n- **Backtesting**: scroll history candle by candle in TradeGx and log every pattern found AT A LEVEL, plus what followed. 100 examples calibrate your eye better than any book.\n- **Tagged journal**: every trade gets the pattern's name and its context (at support / at resistance / no level). The per-tag statistics show you the truth.\n- **Weekly review**: 15 minutes looking ONLY at losing trades, asking: was the pattern at a real level, or did I want it to be there?",
