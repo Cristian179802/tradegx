@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, Eye, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { detectSMC, type SmcCandle, type SmcResult } from "@tradegx/core";
 import { atr, bollinger, ema, macd, rsi, sma, type Bar } from "@/lib/indicators";
 import { priceDigits } from "@/lib/price-format";
@@ -97,9 +97,10 @@ export function ChartLab({
         const data = (await res.json()) as { candles?: Candle[] };
         if (cancelled) return;
         if (!data.candles || data.candles.length < 30) throw new Error("prea puține");
-        // Ultimele 120: destule ca să existe context, puține ca lumânările să
-        // rămână distincte pe un telefon.
-        setCandles(data.candles.slice(-120));
+        // Păstrăm TOT ce vine (ruta dă până la 400): indicatorii lungi au nevoie
+        // de istoric ca să producă prima valoare. Tăierea la 120 se face abia
+        // la desenare — vezi VIZIBILE.
+        setCandles(data.candles);
       } catch {
         if (!cancelled) setFailed(true);
       }
@@ -187,7 +188,10 @@ export function ChartLab({
       <ChartCanvas candles={candles} symbol={symbol} on={on} lang={lang} />
 
       <p className="mt-2.5 text-center text-[10px] text-[color:var(--ink-4)] tabular-nums">
-        {candles.length} {T.candles[lang]} · {T.live[lang]} · {new Date(candles[candles.length - 1]!.time * 1000).toLocaleDateString(lang === "ro" ? "ro-RO" : "en-US")}
+        {Math.min(candles.length, VIZIBILE)} {T.candles[lang]} · {T.live[lang]} ·{" "}
+        {new Date(candles[candles.length - 1]!.time * 1000).toLocaleDateString(
+          lang === "ro" ? "ro-RO" : "en-US"
+        )}
       </p>
     </LabShell>
   );
@@ -196,12 +200,19 @@ export function ChartLab({
 // ── Desenul ──────────────────────────────────────────────────────────────────
 
 const W = 640;
+/**
+ * Câte lumânări se DESENEAZĂ. Restul rămân în urmă, ca istoric de calcul: o
+ * EMA 200 desenată pe 120 de lumânări n-ar avea nicio valoare de arătat.
+ * 120 e alegerea: destule pentru context, puține ca lumânările să rămână
+ * distincte pe un telefon.
+ */
+const VIZIBILE = 120;
 const PRICE_H = 220;
 const SUB_H = 70;
 const PAD_R = 52; // loc pentru axa de preț
 
 function ChartCanvas({
-  candles,
+  candles: toate,
   symbol,
   on,
   lang,
@@ -211,29 +222,38 @@ function ChartCanvas({
   on: Set<Overlay>;
   lang: Lang;
 }) {
+  // Indicatorii se calculează pe TOT istoricul, apoi tăiem aceeași felie din
+  // fiecare serie. Dacă am calcula pe felie, EMA 200 ar fi mereu goală.
+  const decalaj = Math.max(0, toate.length - VIZIBILE);
+  const candles = React.useMemo(() => toate.slice(decalaj), [toate, decalaj]);
   const n = candles.length;
-  const closes = React.useMemo(() => candles.map((c) => c.close), [candles]);
-  const bars = React.useMemo<Bar[]>(() => candles.map((c) => ({ ...c })), [candles]);
-  const digits = priceDigits(symbol, closes[n - 1]);
 
-  const ind = React.useMemo(
-    () => ({
-      ema20: ema(closes, 20),
-      ema50: ema(closes, 50),
-      ema200: ema(closes, 200),
-      sma200: sma(closes, 200),
-      bb: bollinger(closes, 20, 2),
-      rsi: rsi(closes, 14),
-      macd: macd(closes),
-      atr: atr(bars, 14),
-    }),
-    [closes, bars]
-  );
+  const digits = priceDigits(symbol, candles[n - 1]?.close);
 
+  const ind = React.useMemo(() => {
+    const closes = toate.map((c) => c.close);
+    const bars: Bar[] = toate.map((c) => ({ ...c }));
+    const felie = <T,>(xs: T[]) => xs.slice(decalaj);
+    const bb = bollinger(closes, 20, 2);
+    const m = macd(closes);
+    return {
+      ema20: felie(ema(closes, 20)),
+      ema50: felie(ema(closes, 50)),
+      ema200: felie(ema(closes, 200)),
+      sma200: felie(sma(closes, 200)),
+      bb: { mid: felie(bb.mid), upper: felie(bb.upper), lower: felie(bb.lower) },
+      rsi: felie(rsi(closes, 14)),
+      macd: { line: felie(m.line), signal: felie(m.signal), hist: felie(m.hist) },
+      atr: felie(atr(bars, 14)),
+    };
+  }, [toate, decalaj]);
+
+  // SMC se detectează tot pe istoricul întreg — o zonă formată înainte de
+  // fereastră e adesea exact cea în care prețul se întoarce acum.
   const smc = React.useMemo<SmcResult | null>(() => {
     if (!on.has("smc")) return null;
-    return detectSMC(candles as SmcCandle[], 3);
-  }, [candles, on]);
+    return detectSMC(toate as SmcCandle[], 3);
+  }, [toate, on]);
 
   // Scara de preț cuprinde lumânările ȘI straturile aprinse — altfel o EMA 200
   // sau o bandă Bollinger ar ieși din cadru fără nicio explicație.
@@ -308,7 +328,10 @@ function ChartCanvas({
 
           {/* Zone SMC — sub lumânări, ca să nu le acopere */}
           {smc?.orderBlocks.map((z, i) => {
-            const i0 = tIndex.get(z.time) ?? 0;
+            // O zonă formată înainte de fereastră se desenează de la marginea
+            // din stânga: -1 o face să intre din afara cadrului, în loc să pară
+            // că a început exact la prima lumânare vizibilă.
+            const i0 = tIndex.get(z.time) ?? -1;
             const c = z.type === "bull" ? "#34d399" : "#fb5c72";
             return (
               <g key={`ob${i}`} opacity={z.mitigated ? 0.4 : 1}>
@@ -330,7 +353,7 @@ function ChartCanvas({
             );
           })}
           {smc?.fvgs.map((z, i) => {
-            const i0 = tIndex.get(z.time) ?? 0;
+            const i0 = tIndex.get(z.time) ?? -1;
             const c = z.type === "bull" ? "#818cf8" : "#a78bfa";
             return (
               <rect

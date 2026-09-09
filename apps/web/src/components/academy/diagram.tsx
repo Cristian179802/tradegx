@@ -80,34 +80,69 @@ export function Diagram({ def, lang }: { def: DiagramDef; lang: Lang }) {
           })}
 
           {/* Niveluri orizontale (S/R, limite) */}
-          {def.levels?.map((lv, i) => {
-            const c = lv.color ?? TEXT;
-            return (
-              <g key={`l${i}`}>
-                <line
-                  x1={0}
-                  x2={width}
-                  y1={y(lv.y)}
-                  y2={y(lv.y)}
-                  stroke={c}
-                  strokeWidth={1.2}
-                  strokeDasharray={lv.dashed === false ? undefined : "5 4"}
-                />
-                {lv.label && (
-                  <text
-                    x={width - 4}
-                    y={y(lv.y) - 4}
-                    fontSize={10.5}
-                    fill={c}
-                    textAnchor="end"
-                    fontWeight={700}
-                  >
-                    {lv.label}
-                  </text>
-                )}
-              </g>
-            );
-          })}
+          {(() => {
+            if (!def.levels?.length) return null;
+
+            // ── Etichetele nu se calcă una pe alta ──────────────────────────
+            // Toate etichetele de nivel stau lipite de marginea dreaptă, deci
+            // două niveluri apropiate le suprapun și devin ilizibile. Iar
+            // uneori nivelurile TREBUIE să fie apropiate: în exercițiul de stop
+            // loss, o variantă e „chiar peste intrare" — apropierea e chiar
+            // ideea.
+            //
+            // Deci LINIA rămâne la locul ei, adevărată, iar doar TEXTUL se
+            // împinge cât să încapă. Mergem de jos în sus (y crește în jos în
+            // SVG) și ridicăm fiecare etichetă care s-ar lipi de precedenta.
+            const MIN_GAP = 12;
+            const ordered = def.levels
+              .map((lv, i) => ({ lv, i, ly: y(lv.y) - 4 }))
+              .sort((a, b) => b.ly - a.ly);
+            for (let k = 1; k < ordered.length; k++) {
+              const prev = ordered[k - 1]!;
+              const cur = ordered[k]!;
+              if (prev.ly - cur.ly < MIN_GAP) cur.ly = prev.ly - MIN_GAP;
+            }
+            const labelY = new Map(ordered.map((o) => [o.i, o.ly]));
+
+            return def.levels.map((lv, i) => {
+              const c = lv.color ?? TEXT;
+              const ly = labelY.get(i)!;
+              const trueY = y(lv.y) - 4;
+              return (
+                <g key={`l${i}`}>
+                  <line
+                    x1={0}
+                    x2={width}
+                    y1={y(lv.y)}
+                    y2={y(lv.y)}
+                    stroke={c}
+                    strokeWidth={1.2}
+                    strokeDasharray={lv.dashed === false ? undefined : "5 4"}
+                  />
+                  {lv.label && (
+                    <>
+                      {/* Eticheta împinsă mai mult de 2px își pierde legătura
+                          cu linia ei; o cârjă subțire o leagă înapoi. */}
+                      {Math.abs(ly - trueY) > 2 && (
+                        <line
+                          x1={width - 6}
+                          x2={width - 6}
+                          y1={ly + 1}
+                          y2={trueY + 2}
+                          stroke={c}
+                          strokeWidth={0.8}
+                          opacity={0.5}
+                        />
+                      )}
+                      <text x={width - 10} y={ly} fontSize={10.5} fill={c} textAnchor="end" fontWeight={700}>
+                        {lv.label}
+                      </text>
+                    </>
+                  )}
+                </g>
+              );
+            });
+          })()}
 
           {/* Trendlines */}
           {def.trend?.map((t, i) => (
