@@ -129,7 +129,7 @@ export function SetupSessionMatrix({
   }
 
   return (
-    <section className="tg-surface rounded-2xl overflow-hidden">
+    <section className="tg-surface rounded-2xl overflow-hidden" data-testid="setup-session-matrix">
       <div className="p-5 pb-4">
         <div className="flex items-start justify-between gap-4">
           <Antet t={t} />
@@ -157,19 +157,22 @@ export function SetupSessionMatrix({
 
       {/* ── Banda de statistici: aici se vede recalcularea ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[color:var(--line-1)] border-y border-[color:var(--line-1)]">
-        <Statistica eticheta={t("trades")} valoare={String(activ.tranzactii)} />
+        <Statistica eticheta={t("trades")} valoare={String(activ.tranzactii)} testid="stat-trades" />
         <Statistica
           eticheta={t("winRate")}
+          testid="stat-winrate"
           valoare={pct(activ.winRate)}
           ton={activ.winRate == null ? "ink" : activ.winRate >= 50 ? "gain" : "loss"}
         />
         <Statistica
           eticheta={t("expectancy")}
+          testid="stat-expectancy"
           valoare={activ.expectancyR == null ? "—" : `${activ.expectancyR >= 0 ? "+" : ""}${activ.expectancyR.toFixed(2)}R`}
           ton={activ.expectancyR == null ? "ink" : activ.expectancyR >= 0 ? "gain" : "loss"}
         />
         <Statistica
           eticheta={t("net")}
+          testid="stat-net"
           valoare={bani(activ.net)}
           ton={activ.net === 0 ? "ink" : activ.net > 0 ? "gain" : "loss"}
         />
@@ -184,6 +187,7 @@ export function SetupSessionMatrix({
               {sesiuniPrezente.map((s) => (
                 <th key={s} className="p-0">
                   <button
+                    data-testid={`session-filter-${s.toLowerCase()}`}
                     onClick={() => comuta(sesiuni, setSesiuni, s)}
                     className={cn(
                       "w-full rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] transition-colors",
@@ -213,6 +217,7 @@ export function SetupSessionMatrix({
                 <tr key={setup}>
                   <th className="p-0">
                     <button
+                      data-testid={`setup-filter-${setup.toLowerCase()}`}
                       onClick={() => comuta(setupuri, setSetupuri, setup)}
                       className={cn(
                         "w-full rounded-lg px-2 py-2 text-left text-[11px] font-bold transition-colors",
@@ -241,6 +246,7 @@ export function SetupSessionMatrix({
                     return (
                       <td key={sesiune} className="p-0">
                         <button
+                          data-testid={`cell-${setup.toLowerCase()}-${sesiune.toLowerCase()}`}
                           onClick={() => n > 0 && alegeCelula(setup, sesiune)}
                           disabled={n === 0}
                           title={mic ? t("smallSampleTip", { n, prag: PRAG_ESANTION }) : undefined}
@@ -328,14 +334,16 @@ function Statistica({
   eticheta,
   valoare,
   ton = "ink",
+  testid,
 }: {
   eticheta: string;
   valoare: string;
   ton?: "ink" | "gain" | "loss";
+  testid?: string;
 }) {
   const color = ton === "gain" ? "var(--gain)" : ton === "loss" ? "var(--loss)" : "var(--ink-1)";
   return (
-    <div className="bg-[color:var(--s-2)] px-4 py-3.5 min-w-0">
+    <div className="bg-[color:var(--s-2)] px-4 py-3.5 min-w-0" data-testid={testid} data-value={valoare}>
       <p className="text-[9.5px] font-bold uppercase tracking-[0.14em] leading-tight text-[color:var(--ink-4)] mb-1.5">
         {eticheta}
       </p>

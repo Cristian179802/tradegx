@@ -18,6 +18,7 @@ import {
 import { TrendingUp, TrendingDown, Trophy, AlertTriangle, Target, BarChart3,
          Sigma, RotateCcw, Repeat, Receipt, Timer } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
+import { useChartReady } from "@/components/analytics/chart-ready";
 
 interface Summary {
   totalTrades: number;
@@ -144,6 +145,11 @@ const darkTooltipStyle = {
 };
 
 export function AnalyticsClient({ data }: { data: AnalyticsData }) {
+  // Declarate aici, înaintea oricărui `return` timpuriu: ordinea hook-urilor
+  // trebuie să fie aceeași la fiecare randare.
+  const equityRef = React.useRef<HTMLDivElement>(null);
+  useChartReady(equityRef, !data.empty && (data.equityCurve?.length ?? 0) > 0);
+
   const t = useTranslations("analytics");
   if (data.empty) {
     return (
@@ -264,7 +270,14 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       </div>
 
       {/* Equity curve */}
-      <div className="rounded-xl border border-indigo-500/20 bg-zinc-900/80 p-4 cyber-card">
+      {/* `data-chart-ready` apare abia când curba nu se mai schimbă — vezi
+          chart-ready.ts. Scriptul de captură așteaptă atributul ăsta; fără el
+          ar filma graficul pe jumătate trasat. */}
+      <div
+        ref={equityRef}
+        data-testid="equity-chart"
+        className="rounded-xl border border-indigo-500/20 bg-zinc-900/80 p-4 cyber-card"
+      >
         <h2 className="text-sm font-bold text-zinc-200 mb-3 flex items-center gap-2"><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />{t("chartEquity")}</h2>
         <ResponsiveContainer width="100%" height={150}>
           <AreaChart data={equityCurve} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
