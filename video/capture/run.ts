@@ -25,8 +25,10 @@ const CFG = {
   // sesiune sunt chiar subiectul videoului.
   timezone: process.env.CAPTURE_TZ ?? "Europe/Bucharest",
   locale: process.env.CAPTURE_LOCALE ?? "ro-RO",
-  iesire: process.env.CAPTURE_OUT ?? "/studio/out/raw.mkv",
-  capturi: process.env.CAPTURE_SHOTS ?? "/studio/out",
+  // Relative la directorul de lucru, deci corecte și în container (WORKDIR
+  // /studio) și rulate nativ din video/. Fără ramuri per mediu.
+  iesire: process.env.CAPTURE_OUT ?? "out/raw.mkv",
+  capturi: process.env.CAPTURE_SHOTS ?? "out",
 } as const;
 
 /** Așteptare care nu depinde de rețea — doar pentru ritm, nu pentru încărcări. */

@@ -63,4 +63,7 @@ COPY entrypoint.sh /studio/entrypoint.sh
 RUN chmod +x /studio/entrypoint.sh
 
 ENTRYPOINT ["/studio/entrypoint.sh"]
-CMD ["npm", "run", "capture"]
+# entrypoint.sh a pornit deja ecranul (e ENTRYPOINT), deci comanda de aici
+# trebuie să fie DOAR captura. `npm run capture` ar chema entrypoint-ul a doua
+# oară, iar al doilea Xvfb ar eșua pe :99 deja ocupat.
+CMD ["npx", "tsx", "capture/run.ts"]

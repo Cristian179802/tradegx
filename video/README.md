@@ -5,19 +5,34 @@ din `docs/VIDEO_SPEC.md`, cu constrângerile din `docs/FAZA_3.md`.
 
 ## Rulare
 
+### În WSL2 (recomandat pentru dezvoltare)
+
+O singură dată:
+
 ```bash
 cd video
+npm run setup:wsl       # Xvfb, ffmpeg, fonturi, Node, Chromium
+```
+
+Apoi, de fiecare dată:
+
+```bash
+npm run capture         # scoate out/raw.mkv
+```
+
+De ce nativ și nu Docker pentru dezvoltare: fazele 4-6 din spec sunt iterație
+pe ritm — schimbi un `hold` în timeline, rulezi, te uiți, schimbi iar. Cu
+Docker, fiecare tur ar cere un `docker build`. Nativ, e o comandă și câteva
+secunde.
+
+### În Docker (pentru CI, faza 8)
+
+```bash
 npm run studio          # build + run, scoate out/raw.mkv
 ```
 
-Sau pe bucăți:
-
-```bash
-npm run studio:build
-npm run studio:run
-```
-
-Cere **Docker**. Nu rulează pe Windows fără Docker Desktop sau WSL2.
+Pe Windows, Docker Desktop rulează el însuși peste WSL2 — deci nu ocolește
+instalarea lui, o adaugă. De aceea calea de dezvoltare e WSL2 direct.
 
 Reglaje prin variabile de mediu (`docker run -e ...`):
 
@@ -88,12 +103,14 @@ A fost, în faza de setup. L-am scos când a primit dependința de Playwright:
 Vercel rulează exact asta la fiecare deploy — site-ul ar fi început să descarce
 Playwright și browserele lui ca să construiască o pagină de Next.
 
-Deci `video/` are propriul `node_modules`, instalat doar înăuntrul containerului.
+Deci `video/` are propriul `node_modules`, instalat de `setup:wsl` local sau de
+`Dockerfile` în container — niciodată de `npm install` la rădăcină.
 
 ## Fișiere
 
 ```
-Dockerfile          chromium + Xvfb + ffmpeg + fonturi
+setup-wsl.sh        pregătește Ubuntu din WSL2 (fără Docker)
+Dockerfile          același mediu, pentru CI
 entrypoint.sh       pornește ecranul și atât — sincronizarea NU e aici
 capture/run.ts      orchestratorul: browser, verificări, filmare, oprire curată
 capture/env.ts      cele cinci verificări de mediu
