@@ -13,7 +13,12 @@
     "studio": "npm run studio:build && npm run studio:run",
     "direct": "./entrypoint.sh tsx director.ts",
     "direct:raw": "tsx director.ts",
-    "direct:dry": "tsx director.ts --dry"
+    "direct:dry": "tsx director.ts --dry",
+    "local:build": "bash local-server.sh build",
+    "local:start": "bash local-server.sh start",
+    "local:stop": "bash local-server.sh stop",
+    "local:verifica": "bash local-server.sh verifica",
+    "direct:local": "APP_URL=http://localhost:3000 ./entrypoint.sh tsx director.ts"
   },
   "dependencies": {
     "playwright": "1.56.0"
