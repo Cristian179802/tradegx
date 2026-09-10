@@ -54,6 +54,15 @@ interface DataTableProps<T> {
   sortDir?: "asc" | "desc";
   onSort?: (key: string) => void;
   className?: string;
+  /**
+   * Atribute puse pe `<tr>`, calculate din rând.
+   *
+   * Există pentru selectorii stabili de care are nevoie scriptul de captură:
+   * el trebuie să găsească „rândul cu status OPEN”, iar tabelul ăsta e generic
+   * și nu are voie să știe ce e un status. Așa domeniul rămâne în
+   * `trades-table.tsx`, unde îi e locul.
+   */
+  rowAttrs?: (row: T) => Record<string, string | undefined>;
 }
 
 export function DataTable<T>({
@@ -67,6 +76,7 @@ export function DataTable<T>({
   sortDir,
   onSort,
   className,
+  rowAttrs,
 }: DataTableProps<T>) {
   const [primary, ...rest] = columns;
   const cardFields = rest.filter((c) => !c.hideOnMobile);
@@ -137,6 +147,7 @@ export function DataTable<T>({
               data.map((row) => (
                 <tr
                   key={keyFn(row)}
+                  {...(rowAttrs ? rowAttrs(row) : {})}
                   className={cn(
                     "border-b border-zinc-800/40 transition-all duration-100 cyber-row",
                     onRowClick && "cursor-pointer hover:bg-zinc-800/60"

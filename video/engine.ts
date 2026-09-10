@@ -59,6 +59,18 @@ export interface Beat {
   hold: number;
   /** Selector așteptat înainte de acțiune. Timpul petrecut aici e „mort”. */
   waitFor?: string;
+  /**
+   * Selector care trebuie să DISPARĂ după acțiune.
+   *
+   * Există fiindcă o acțiune poate să pară că a reușit și să nu fi făcut nimic.
+   * S-a filmat exact așa: click pe „Confirmă” într-un dialog de închidere,
+   * serverul a răspuns 403, dialogul a rămas deschis — iar filmul a mers liniștit
+   * mai departe cu o fereastră blocată în cadru. Nicio eroare, nicăieri, până la
+   * montaj.
+   *
+   * Cu câmpul ăsta, o acțiune fără efect oprește filmarea pe loc.
+   */
+  waitForGone?: string;
   /** Consumat de faza 5 pentru zoom automat. Doar pe `click`. */
   zoom?: { scale: number; easing: string };
   /** Explicație pentru beats care nu fac ce zice specul. Apare în `--dry`. */
@@ -228,33 +240,62 @@ function mulberry32(seed: number) {
 
 // ── Ce se injectează în pagină ───────────────────────────────────────────────
 //
+// ATENȚIE dacă editezi blocul de mai jos: e un template literal, deci NICIUN
+// accent grav înăuntru, nici măcar în comentarii. Unul singur închide șirul la
+// mijloc, iar erorile care ies („',' expected”, pe rânduri care par corecte) nu
+// seamănă deloc cu cauza. S-a întâmplat de trei ori.
+//
 // Scris ca ȘIR, nu ca funcție. O funcție ar trece prin transformarea esbuild a
 // lui tsx și ar chema `__name` în browser — vezi nota din capture/run.ts.
 const SCRIPT_CURSOR = String.raw`
 (() => {
   if (window.__tgx) return;
 
-  const strat = document.createElement("div");
-  strat.id = "__tgx_strat";
-  strat.style.cssText =
-    "position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2147483647";
-  document.documentElement.appendChild(strat);
-
-  // Sageata. Desenata inline ca sa nu depinda de nicio resursa externa: o
-  // imagine care nu se incarca ar lasa cadrul fara cursor, si s-ar vedea abia
-  // in film.
-  const sageata = document.createElement("div");
-  sageata.style.cssText =
-    "position:absolute;left:0;top:0;width:24px;height:24px;will-change:transform;" +
-    "transform:translate(-100px,-100px);filter:drop-shadow(0 2px 4px rgba(0,0,0,.55))";
-  sageata.innerHTML =
-    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none">' +
-    '<path d="M5.5 3.2 L18.4 12.6 L12.2 13.1 L15.0 19.6 L12.3 20.8 L9.5 14.2 L5.5 18.1 Z" ' +
-    'fill="#fff" stroke="rgba(9,9,11,.85)" stroke-width="1.1" stroke-linejoin="round"/></svg>';
-  strat.appendChild(sageata);
-
+  // Stratul se creeaza LENES, la prima folosire — nu aici.
+  //
+  // Scriptul asta e injectat cu addInitScript, care ruleaza la inceputul
+  // documentului, INAINTE de orice cod al paginii. La momentul acela
+  // document.documentElement poate fi inca null, iar un appendChild pe null
+  // arunca — si o exceptie intr-un init script nu se vede nicaieri: nu apare in
+  // consola paginii, nu opreste nimic. Efectul era ca window.__tgx ramanea
+  // nedefinit dupa fiecare navigare, si abia al doilea beat de pe pagina noua
+  // pica cu „Cannot read properties of undefined”.
+  let _strat = null;
+  let _sageata = null;
   let x = -100, y = -100;
-  const pune = (nx, ny) => { x = nx; y = ny; sageata.style.transform = "translate(" + nx + "px," + ny + "px)"; };
+
+  function strat() {
+    if (_strat && _strat.isConnected) return _strat;
+    const radacina = document.body || document.documentElement;
+    if (!radacina) return null;
+
+    _strat = document.createElement("div");
+    _strat.id = "__tgx_strat";
+    _strat.style.cssText =
+      "position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2147483647";
+    radacina.appendChild(_strat);
+
+    // Sageata. Desenata inline ca sa nu depinda de nicio resursa externa: o
+    // imagine care nu se incarca ar lasa cadrul fara cursor, si s-ar vedea abia
+    // in film.
+    _sageata = document.createElement("div");
+    _sageata.style.cssText =
+      "position:absolute;left:0;top:0;width:24px;height:24px;will-change:transform;" +
+      "transform:translate(-100px,-100px);filter:drop-shadow(0 2px 4px rgba(0,0,0,.55))";
+    _sageata.innerHTML =
+      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none">' +
+      '<path d="M5.5 3.2 L18.4 12.6 L12.2 13.1 L15.0 19.6 L12.3 20.8 L9.5 14.2 L5.5 18.1 Z" ' +
+      'fill="#fff" stroke="rgba(9,9,11,.85)" stroke-width="1.1" stroke-linejoin="round"/></svg>';
+    _strat.appendChild(_sageata);
+    _sageata.style.transform = "translate(" + x + "px," + y + "px)";
+    return _strat;
+  }
+
+  const pune = (nx, ny) => {
+    x = nx; y = ny;
+    if (!strat()) return;
+    _sageata.style.transform = "translate(" + nx + "px," + ny + "px)";
+  };
 
   const api = {
     pozitie: () => ({ x, y }),
@@ -289,11 +330,13 @@ const SCRIPT_CURSOR = String.raw`
 
     // Unda de click. 300ms, ca in spec.
     unda(cx, cy) {
+      const parinte = strat();
+      if (!parinte) return;
       const d = document.createElement("div");
       d.style.cssText =
         "position:absolute;left:" + cx + "px;top:" + cy + "px;width:14px;height:14px;margin:-7px 0 0 -7px;" +
         "border-radius:50%;border:2px solid rgba(129,140,248,.95);background:rgba(129,140,248,.22)";
-      strat.appendChild(d);
+      parinte.appendChild(d);
       const an = d.animate(
         [
           { transform: "scale(0.35)", opacity: 1 },
@@ -341,11 +384,13 @@ const SCRIPT_CURSOR = String.raw`
     // numarul din keyframes.json inseamna acelasi lucru ca in film.
     marker(culoare, cadre) {
       return new Promise((gata) => {
+        const radacina = document.body || document.documentElement;
+        if (!radacina) return gata();
         const d = document.createElement("div");
         d.id = "__tgx_marker";
         d.style.cssText =
           "position:fixed;left:0;top:0;width:100%;height:100%;z-index:2147483647;background:" + culoare;
-        document.documentElement.appendChild(d);
+        radacina.appendChild(d);
         let n = 0;
         const pas = () => {
           n++;
@@ -420,8 +465,8 @@ export class Regizor {
     const de = this.t;
     const rez = await treaba();
     const pana = this.t;
-    // Sub 150ms nu merită tăiat: tăietura însăși se vede mai mult decât pauza.
-    if (pana - de >= 150) this.morti.push({ de, pana, motiv });
+    // Sub 80ms nu merită tăiat: tăietura însăși se vede mai mult decât pauza.
+    if (pana - de >= 80) this.morti.push({ de, pana, motiv });
     return rez;
   }
 
@@ -429,11 +474,41 @@ export class Regizor {
     return /^[.#[]/.test(target) ? target : `[data-testid="${target}"]`;
   }
 
+  /**
+   * Unde e centrul elementului, în pixeli de fereastră.
+   *
+   * Măsurarea e refăcută până iese, nu o singură dată. Prima variantă chema
+   * `boundingBox()` o dată și arunca dacă venea gol — iar gol vine exact în
+   * milisecundele în care pagina încă se așază: nod înlocuit de o re-randare,
+   * lățime încă 0 până se aplică fontul. Probat direct în pagină, două secunde
+   * mai târziu, același selector avea o casetă perfect validă.
+   *
+   * `scrollIntoViewIfNeeded` e „IfNeeded”: nu mișcă nimic dacă elementul e deja
+   * în cadru, deci nu introduce derulări nedorite în film. Dar dacă ținta a
+   * ajuns sub marginea de jos, fără el am da click în afara ferestrei.
+   */
   private async centru(target: string): Promise<{ x: number; y: number }> {
-    const el = this.opt.page.locator(this.selector(target)).first();
-    const box = await el.boundingBox();
-    if (!box) throw new Error(`nu găsesc „${target}” pe ecran`);
-    return { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+    // Măsurarea e marcată „moartă”: durează câteva drumuri prin CDP, timp în
+    // care pe ecran nu se mișcă absolut nimic — cursorul stă, pagina stă.
+    //
+    // Fără marcajul ăsta, timpul se aduna în durata beat-ului și `--dry` mințea
+    // cu secunde bune: scena Sync ieșea filmată în 20s pentru 6s declarați, iar
+    // diferența nu se vedea nicăieri în raport. Acum e unde îi e locul, printre
+    // intervalele pe care faza 5 le taie.
+    return this.faraCadre(`măsor poziția lui ${target}`, async () => {
+      const el = this.opt.page.locator(this.selector(target)).first();
+      await el.waitFor({ state: "visible", timeout: 30_000 });
+      await el.scrollIntoViewIfNeeded({ timeout: 10_000 }).catch(() => {});
+
+      for (let i = 0; i < 30; i++) {
+        const box = await el.boundingBox();
+        if (box && box.width > 0 && box.height > 0) {
+          return { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+        }
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      throw new Error(`„${target}” e vizibil dar n-are dimensiune nici după 3s`);
+    });
   }
 
   /**
@@ -461,17 +536,33 @@ export class Regizor {
     const start = Date.now();
     let i = 0;
     const PAS_REAL = 24; // ms între mișcările mouse-ului real
-    for (let tinta = PAS_REAL; tinta <= durata; tinta += PAS_REAL) {
+
+    // Bucla e condusă de CEAS, nu de numărul de pași.
+    //
+    // Prima variantă itera `durata / 24` ori și dormea între iterații. Pe hârtie
+    // asta dă exact `durata`. În realitate fiecare `mouse.move` e un drum
+    // dus-întors prin CDP, iar pe mașina asta — două nuclee, cu ffmpeg
+    // înregistrând în paralel — un drum costă mai mult decât cei 24ms de pas.
+    // Somnul devenea negativ, se sărea peste el, dar iterațiile TOT se făceau
+    // toate: o mișcare de 620ms declarați ieșea în 3 secunde. Scena Sync a ieșit
+    // așa cu 2.6 secunde peste buget, per beat.
+    //
+    // Acum întrebăm ceasul: la momentul t, unde ar trebui să fie cursorul? Pe o
+    // mașină înceată ies mai puține mișcări reale — cursorul DESENAT rămâne
+    // fluid, fiindcă el e animat în pagină — dar durata e cea cerută.
+    while (true) {
+      const t = Date.now() - start;
+      if (t >= durata) break;
       let urm = puncte[i + 1];
-      while (urm && urm.t <= tinta) {
+      while (urm && urm.t <= t) {
         i++;
         urm = puncte[i + 1];
       }
       const p = puncte[i];
       if (!p) break;
-      const ramas = tinta - (Date.now() - start);
-      if (ramas > 0) await new Promise((r) => setTimeout(r, ramas));
       await this.opt.page.mouse.move(p.x, p.y);
+      const ramas = PAS_REAL - (Date.now() - start - t);
+      if (ramas > 0) await new Promise((r) => setTimeout(r, ramas));
     }
     await this.opt.page.mouse.move(la.x, la.y);
     await desenat;
@@ -497,7 +588,17 @@ export class Regizor {
     const start = this.t;
     const page = this.opt.page;
 
-    await this.asteapta(beat);
+    // `waitFor` înseamnă altceva pentru `goto` decât pentru restul.
+    //
+    // La orice altă acțiune descrie o precondiție: elementul trebuie să existe
+    // pe pagina CURENTĂ înainte să ne atingem de el. La `goto` descrie
+    // destinația: „pagina e gata când apare asta”.
+    //
+    // Prima variantă aștepta mereu înainte. Rezultatul: primul beat cerea
+    // `[data-chart-ready]` pe panoul de control, unde nu există niciun grafic,
+    // și pica după 60 de secunde — fără să fi navigat vreodată. `--dry` n-are
+    // cum să prindă asta: acolo nu există pagină.
+    if (beat.action !== "goto") await this.asteapta(beat);
 
     switch (beat.action) {
       case "goto": {
@@ -512,6 +613,8 @@ export class Regizor {
             this.pozitie
           );
         });
+        // Abia acum: pagina nouă e încărcată, deci selectorul are unde să apară.
+        await this.asteapta(beat);
         break;
       }
 
@@ -566,9 +669,15 @@ export class Regizor {
         // Intervalul între caractere variază, dar e SEED-UIT: la interval fix
         // tastarea arată robotic, la interval aleator nu se poate reproduce
         // aceeași filmare de două ori.
+        // Ca la mișcare: intervalul se măsoară de la ÎNCEPUTUL caracterului, nu
+        // după ce s-a întors apăsarea. Fiecare apăsare e tot un drum prin CDP;
+        // dacă am dormi intervalul întreg PESTE el, tastarea ar dura de două ori
+        // cât spune `--dry`.
         for (const ch of beat.text) {
+          const tinta = Math.round(MS_PER_CARACTER_MIN + this.rnd() * MS_PER_CARACTER_VAR);
+          const t0 = Date.now();
           await el.pressSequentially(ch, { delay: 0 });
-          await this.pauza(Math.round(MS_PER_CARACTER_MIN + this.rnd() * MS_PER_CARACTER_VAR));
+          await this.pauza(tinta - (Date.now() - t0));
         }
         break;
       }
@@ -605,6 +714,22 @@ export class Regizor {
     }
 
     await this.pauza(beat.hold);
+
+    if (beat.waitForGone) {
+      const disparut = await this.opt.page
+        .locator(this.selector(beat.waitForGone))
+        .first()
+        .waitFor({ state: "hidden", timeout: 15_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (!disparut) {
+        throw new Error(
+          `beat „${beat.id}”: „${beat.waitForGone}” trebuia să dispară după acțiune, ` +
+          `dar e tot pe ecran. Acțiunea n-a avut efect — nu filmez mai departe.`
+        );
+      }
+    }
+
     this.beats.push({ id: beat.id, scena: beat.scena, start, sfarsit: this.t });
   }
 

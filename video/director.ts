@@ -269,6 +269,30 @@ async function filmeaza(beats: Beat[], singur: string | null): Promise<void> {
     console.log(`  timeline        ${fmtSec(kf.durataMs)} filmat, ${kf.scene.length} scene`);
     const mort = kf.morti.reduce((s, m) => s + (m.pana - m.de), 0);
     console.log(`  din care mort   ${fmtSec(mort)} (se taie la montaj)`);
+
+    // Cât s-a abătut fiecare scenă de la ce spunea `--dry`.
+    //
+    // Fără tabelul ăsta, `--dry` devine o poveste frumoasă: ajustezi 200ms într-o
+    // scenă care în realitate iese cu două secunde peste, și nu afli niciodată.
+    // Timpul mort se scade — el se taie oricum la montaj.
+    console.log("\n── abaterea față de --dry ──────────────────────────────────────");
+    const declaratPeScena = new Map<Scena, number>();
+    for (const b of beats) {
+      declaratPeScena.set(b.scena, (declaratPeScena.get(b.scena) ?? 0) + durataBeat(b));
+    }
+    for (const s of kf.scene) {
+      const mortInScena = kf.morti
+        .filter((m) => m.de >= s.start && m.pana <= s.sfarsit)
+        .reduce((a, m) => a + (m.pana - m.de), 0);
+      const viu = s.sfarsit - s.start - mortInScena;
+      const declarat = declaratPeScena.get(s.scena) ?? 0;
+      const d = viu - declarat;
+      console.log(
+        `  ${s.scena.padEnd(9)} declarat ${String(declarat).padStart(6)}ms · ` +
+        `filmat ${String(Math.round(viu)).padStart(6)}ms · ` +
+        `${d >= 0 ? "+" : ""}${Math.round(d)}ms`
+      );
+    }
     console.log("────────────────────────────────────────────────────────────────");
 
     if (octeti < 200_000) {

@@ -30,6 +30,7 @@
 #   ./local-server.sh build     sincronizează, instalează dacă e nevoie, compilează
 #   ./local-server.sh start     pornește serverul (în prim-plan)
 #   ./local-server.sh verifica   compară sursa și build ID-ul servit
+#   ./local-server.sh seed      repopulează contul demo
 #   ./local-server.sh stop      oprește serverul
 
 set -euo pipefail
@@ -87,6 +88,44 @@ cmd_sync() {
   echo "  în   $COPIE"
   rsync -a --delete "${EXCLUDE[@]}" "$SURSA/" "$COPIE/"
   echo "  gata"
+  scrie_env_baza
+}
+
+# Ce bază de date vede copia.
+#
+# Next citește `.env.local` ÎNAINTEA lui `.env`, iar `.env.local` din working
+# tree are `DATABASE_URL=…localhost:5432` — baza de dezvoltare de pe Windows,
+# care nu are contul demo. Filmarea trebuie să meargă pe aceeași bază ca
+# producția, adică pe cea din `.env`.
+#
+# Nu atingem `.env.local`: e configurația de lucru a mașinii. În schimb scriem
+# în COPIE un `.env.production.local`, care are prioritate peste `.env.local` la
+# `next start`, și care conține DOAR `DATABASE_URL`. Restul cheilor — secretul
+# de sesiune, NEXTAUTH_URL — rămân de unde erau.
+#
+# Valoarea se mută dintr-un fișier în altul fără să treacă prin vreun log.
+scrie_env_baza() {
+  local linie
+  linie="$(grep -E '^DATABASE_URL=' "${WEB}/.env" 2>/dev/null | head -1 || true)"
+  if [ -z "$linie" ]; then
+    echo "  apps/web/.env nu are DATABASE_URL — nu pot fixa baza de date." >&2
+    return 1
+  fi
+  {
+    echo "# Generat de video/local-server.sh la fiecare sync. Nu edita."
+    echo "$linie"
+    # NextAuth v5 refuză gazdele în care nu are încredere. Pe Vercel se
+    # activează singur (detectează platforma); la `next start` pe localhost, nu.
+    # Fără asta, `/api/auth/csrf` întoarce 500 și login-ul se întoarce la
+    # `/login?error=Configuration` — un mesaj care nu spune nimic despre gazdă.
+    #
+    # E strict o chestiune de servire locală, deci stă aici, în fișierul
+    # generat pentru copie, nu în configurația produsului.
+    echo "AUTH_TRUST_HOST=true"
+  } > "${WEB}/.env.production.local"
+  local gazda
+  gazda="$(printf '%s' "$linie" | sed -E 's|^DATABASE_URL=||; s|"||g; s|^[a-z]+://[^@]*@||; s|/.*$||; s|\?.*$||')"
+  echo "  baza de date pentru copie: ${gazda}"
 }
 
 # Amprenta sursei din care s-a compilat, plus build ID-ul rezultat. Scrisă la
@@ -101,7 +140,12 @@ cmd_sync() {
 # Întrebarea care contează oricum nu era „sunt identice acum”, ci „build-ul
 # care se servește vine din working tree-ul de acum”. Asta se răspunde cu o
 # amprentă luată la momentul build-ului și păstrată lângă el.
-STAMP() { echo "${COPIE}/.tgx-amprenta"; }
+# Stă LÂNGĂ copie, nu ÎN ea. Prima variantă o punea înăuntru, iar `rsync
+# --delete` o ștergea la următoarea sincronizare — fișierul nu există în sursă,
+# deci era exact genul de gunoi pe care --delete îl curăță. Rezultatul: după
+# orice `sync`, verificarea spunea „nu s-a făcut niciun build" despre un build
+# perfect valid.
+STAMP() { echo "${COPIE}.amprenta"; }
 
 cmd_verifica_sursa() {
   local acum inregistrata
@@ -175,7 +219,10 @@ cmd_start() {
   echo "  Din alt terminal:  ./local-server.sh verifica"
   echo
   cd "$WEB"
-  exec npx next start -p "$PORT"
+  # Ieșirea merge și în jurnal: când serverul răspunde cu 500, stiva de eroare e
+  # singurul loc care spune de ce, iar prin conducta care ajunge la mine se
+  # tamponează și nu se vede până se termină procesul.
+  npx next start -p "$PORT" 2>&1 | tee /tmp/tgx-next.log
 }
 
 cmd_stop() {
@@ -189,6 +236,23 @@ cmd_stop() {
     sleep 1
     echo "  oprit (PID $p)"
   fi
+}
+
+# Seed-ul rulează din COPIE, nu din working tree.
+#
+# Prisma Client din `node_modules` de pe Windows are engine-ul generat pentru
+# „windows”, iar în WSL cere „debian-openssl-3.0.x” — deci un seed pornit din
+# /mnt/c moare la prima interogare. Copia are propriul client, generat pentru
+# Linux de `postinstall`.
+#
+# Baza de date e aceeași în ambele cazuri: cea din apps/web/.env.
+cmd_seed() {
+  if [ ! -d "${COPIE}/node_modules" ]; then
+    echo "  Copia n-are node_modules. Rulează întâi: ./local-server.sh build" >&2
+    exit 1
+  fi
+  echo "── seed cont demo ──────────────────────────────────"
+  ( cd "$WEB" && npm run --silent db:seed:demo )
 }
 
 cmd_verifica() {
@@ -243,6 +307,7 @@ case "${1:-build}" in
   build)    cmd_build ;;
   start)    cmd_start ;;
   stop)     cmd_stop ;;
+  seed)     cmd_seed ;;
   verifica) cmd_verifica ;;
-  *) echo "necunoscut: $1 (sync | build | start | stop | verifica)" >&2; exit 1 ;;
+  *) echo "necunoscut: $1 (sync | build | seed | start | stop | verifica)" >&2; exit 1 ;;
 esac

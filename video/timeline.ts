@@ -51,31 +51,112 @@ export const TIMELINE: Beat[] = [
   },
 
   // ── SYNC · 3–9s ────────────────────────────────────────────────────────────
-  // NU se poate filma ca în spec. Vezi raportul: contul demo e `MANUAL`, fără
-  // MetaAPI, iar butonul de sincronizare nu face nimic pe el. Rezerv durata,
-  // cu pagina deja pe jurnal — acolo ar apărea tranzacția — ca montajul să
-  // poată insera secvența fără să mute nimic în jur.
+  //
+  // Închiderea unei tranzacții prin fluxul REAL al aplicației. Nu simulăm o
+  // sincronizare MetaAPI: pe contul demo nu există, iar „se sincronizează
+  // automat” ar fi o afirmație falsă.
+  //
+  // ATENȚIE la textul care se pune peste beat-ul ăsta în faza 5. Ce se vede pe
+  // ecran e că prețul de ieșire ȘI P&L-ul se tastează amândouă — dialogul de
+  // închidere le cere pe amândouă, iar butonul de confirmare stă dezactivat
+  // până sunt completate. Deci textul NU poate spune „P&L fără input manual”;
+  // cadrul ar arăta exact contrariul.
+  //
+  // Ce e adevărat și se vede: după închidere, R, expectanța, win rate-ul,
+  // curba de capital și celula din Setup × Sesiune se recalculează singure.
+  //
+  // CONSECINȚĂ: filmarea CONSUMĂ tranzacția deschisă. A doua rulare la rând nu
+  // mai găsește niciun rând cu status OPEN și se oprește aici. De aceea
+  // `npm run film` rulează seed-ul înainte de captură — dependența e în comandă,
+  // nu în capul cuiva.
   {
-    id: "sync-jurnal",
+    id: "sync-lista",
     scena: "sync",
+    action: "goto",
+    url: "/trades",
+    waitFor: '[data-testid="trade-row"][data-status="OPEN"]',
+    duration: 0,
+    hold: 0,
+  },
+  {
+    id: "sync-deschide",
+    scena: "sync",
+    action: "click",
+    // Rândul deschis, nu un id: seed-ul generează id-uri noi la fiecare rulare.
+    target: '[data-testid="trade-row"][data-status="OPEN"]',
+    duration: 620,
+    hold: 200,
+    waitFor: '[data-testid="trade-row"][data-status="OPEN"]',
+  },
+  {
+    id: "sync-buton-inchide",
+    scena: "sync",
+    action: "click",
+    target: "close-trade",
+    waitFor: "close-trade",
+    duration: 560,
+    hold: 350,
+    zoom: { scale: 1.5, easing: "cubic-bezier(0.4,0,0.2,1)" },
+  },
+  {
+    id: "sync-pret",
+    scena: "sync",
+    action: "type",
+    target: "close-exit-price",
+    waitFor: "close-exit-price",
+    // Ieșirea la 1.7 × distanța până la stop. Vezi INCHIDERE_FILMATA din seed:
+    // cele două trebuie să rămână împreună, altfel prețul și R-ul se contrazic
+    // în cadru.
+    text: "2395.25",
+    duration: 460,
+    hold: 150,
+  },
+  {
+    id: "sync-pnl",
+    scena: "sync",
+    action: "type",
+    target: "close-pnl",
+    text: "476.00",
+    duration: 380,
+    hold: 200,
+  },
+  {
+    id: "sync-confirma",
+    scena: "sync",
+    action: "click",
+    target: "close-confirm",
+    // Dialogul TREBUIE să se închidă. Dacă nu, acțiunea n-a avut efect și
+    // filmarea se oprește, în loc să meargă mai departe cu el blocat în cadru.
+    //
+    // BLOCAT ACUM: contul demo are `role: "DEMO"`, iar middleware-ul refuză
+    // orice cerere care nu e GET pe /api/ — deci închiderea răspunde 403.
+    // Poarta e corectă (credențialele demo sunt publice) și nu se atinge. Vezi
+    // raportul: filmarea are nevoie de un utilizator dedicat, care nu e DEMO.
+    waitForGone: "close-confirm",
+    duration: 420,
+    hold: 1425,
+    zoom: { scale: 1.4, easing: "cubic-bezier(0.4,0,0.2,1)" },
+    nota: "După confirmare, R și P&L apar calculate pe pagina de detaliu.",
+  },
+
+  // ── JURNAL · 9–17s ─────────────────────────────────────────────────────────
+  // Căutarea filtrează lista pe setup, apoi se deschide tranzacția. Setup-ul,
+  // R:R-ul și rezultatul sunt pe rând, reale, din seed — nu se scrie nimic.
+  //
+  // Navigarea asta e obligatorie și a lipsit o rulare: pe vremea când scena
+  // Sync era un beat rezervat, ea aducea pagina pe /journal. Fluxul nou de
+  // închidere se termină pe pagina de detaliu a tranzacției, deci scena
+  // următoare trebuie să-și aducă singură pagina. Durata e 0 — încărcarea e
+  // timp mort și se taie la montaj.
+  {
+    id: "jurnal-deschide-pagina",
+    scena: "jurnal",
     action: "goto",
     url: "/journal",
     waitFor: "journal-row",
     duration: 0,
     hold: 0,
   },
-  {
-    id: "sync-rezervat",
-    scena: "sync",
-    action: "rezervat",
-    duration: 6000,
-    hold: 0,
-    nota: "TODO_SYNC — MetaAPI neconfigurat pe contul demo. Vezi raportul fazei 4.",
-  },
-
-  // ── JURNAL · 9–17s ─────────────────────────────────────────────────────────
-  // Căutarea filtrează lista pe setup, apoi se deschide tranzacția. Setup-ul,
-  // R:R-ul și rezultatul sunt pe rând, reale, din seed — nu se scrie nimic.
   {
     id: "jurnal-cauta",
     scena: "jurnal",

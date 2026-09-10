@@ -433,6 +433,66 @@ function construiesteTranzactii(
   });
 }
 
+// ── Tranzacția deschisă ─────────────────────────────────────────────────────
+//
+// Una singură, lăsată DESCHISĂ intenționat. Regizorul o închide în timpul
+// filmării, prin fluxul real al aplicației — nu simulăm o sincronizare MetaAPI
+// care pe contul ăsta nu există.
+//
+// Trei constrângeri, toate cu motiv:
+//
+//  1. NU atinge nicio combinație cu FVG. Când se închide în timpul filmării,
+//     celula ei se schimbă — iar cifrele FVG·London și FVG·Asia sunt exact
+//     numerele pentru care există tot videoul. Deci setup ORDER_BLOCK.
+//
+//  2. Se construiește DUPĂ cele închise. Generatorul e determinist, iar orice
+//     apel de `rand()` strecurat înainte ar deplasa tot șirul și ar schimba
+//     fiecare tranzacție de dinainte. Aici nu folosim deloc `rand()`: valorile
+//     sunt fixe, scrise de mână.
+//
+//  3. Prețurile și R-ul spun aceeași poveste. Riscul e distanța până la stop
+//     (2382.50 → 2375.00 = 7.50), ieșirea pe care o tastează regizorul e la
+//     1.7 × distanța aia, iar P&L-ul e 1.7 × R_MONEY. Publicul e SMC; dacă
+//     R-ul afișat nu s-ar potrivi cu prețurile, s-ar vedea imediat.
+//
+// `riskRewardRatio` rămâne null cât e deschisă: R-ul e rezultat, nu plan, și
+// apare abia după închidere. Ăsta e chiar punctul beat-ului.
+
+/** Ce tastează regizorul în dialogul de închidere. Ține-le împreună cu prețurile. */
+export const INCHIDERE_FILMATA = {
+  exitPrice: "2395.25",
+  pnlMoney: "476.00",
+} as const;
+
+function construiesteTranzactieDeschisa(accountId: string): Prisma.TradeCreateManyInput {
+  const entry = 2382.5;
+  const stop = 2375.0;
+  const tinta = 2400.0;
+
+  return {
+    accountId,
+    symbol: "XAUUSD",
+    instrumentType: "METALS",
+    direction: "BUY",
+    entryPrice: entry,
+    // După ultima tranzacție închisă (5 sept), ca să fie prima în listă.
+    // Marți, 8 septembrie 2026, 09:12 UTC — în fereastra London.
+    entryTime: new Date(Date.UTC(2026, 8, 8, 9, 12, 0)),
+    lotSize: 0.37,
+    stopLoss: stop,
+    takeProfit: tinta,
+    riskMoney: R_MONEY,
+    riskPercent: Number(((R_MONEY / INITIAL_BALANCE) * 100).toFixed(2)),
+    setupType: "ORDER_BLOCK",
+    sessionType: "LONDON",
+    killzone: "LONDON",
+    timeframe: "H1",
+    status: "OPEN",
+    brokerSource: "MANUAL",
+    tags: [],
+  } satisfies Prisma.TradeCreateManyInput;
+}
+
 // ── Verificarea ─────────────────────────────────────────────────────────────
 
 interface Abatere {
@@ -556,7 +616,12 @@ async function main() {
     throw new Error("datele generate nu respectă specul");
   }
 
-  await prisma.trade.createMany({ data: tranzactii });
+  // Deschisa NU intra in `verifica`: acolo se masoara statistica tranzactiilor
+  // INCHISE (win rate, expectancy, curba de capital), iar una fara rezultat ar
+  // strica fiecare medie fara sa insemne nimic.
+  const deschisa = construiesteTranzactieDeschisa(account.id);
+
+  await prisma.trade.createMany({ data: [...tranzactii, deschisa] });
 
   const sold = INITIAL_BALANCE + tranzactii.reduce((s, t) => s + Number(t.pnlMoney), 0);
   await prisma.tradingAccount.update({
@@ -564,8 +629,17 @@ async function main() {
     data: { balance: Number(sold.toFixed(2)) },
   });
 
-  console.log(`\n  scrise: ${tranzactii.length} tranzacții`);
-  console.log(`  sold:   ${INITIAL_BALANCE} → ${sold.toFixed(2)} USD`);
+  console.log(`\n  scrise: ${tranzactii.length} închise + 1 deschisă`);
+  console.log(
+    `  deschisă: ${deschisa.symbol} ${deschisa.direction} · ${deschisa.setupType} · ` +
+    `${deschisa.sessionType} · intrare ${deschisa.entryPrice} · stop ${deschisa.stopLoss}`
+  );
+  console.log(
+    `            se închide la ${INCHIDERE_FILMATA.exitPrice} → ` +
+    `+$${INCHIDERE_FILMATA.pnlMoney} = ` +
+    `+${(Number(INCHIDERE_FILMATA.pnlMoney) / R_MONEY).toFixed(2)}R`
+  );
+  console.log(`  sold:   ${INITIAL_BALANCE} → ${sold.toFixed(2)} USD (doar din cele închise)`);
 }
 
 main()

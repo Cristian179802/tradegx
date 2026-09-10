@@ -184,6 +184,9 @@ export function TradesTable({ trades, loading }: TradesTableProps) {
       columns={columns}
       data={trades}
       keyFn={(r) => r.id}
+      // Scriptul de captură caută rândul deschis, nu un id anume: seed-ul
+      // generează id-uri noi la fiecare rulare.
+      rowAttrs={(r) => ({ "data-testid": "trade-row", "data-status": r.status })}
       onRowClick={(row) => router.push(`/trades/${row.id}`)}
       loading={loading}
       emptyMessage={t("emptyTable")}

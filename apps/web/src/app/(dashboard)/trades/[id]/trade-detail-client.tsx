@@ -311,6 +311,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
             <Button
               size="sm"
               onClick={() => setCloseOpen(true)}
+              data-testid="close-trade"
               className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 gap-1.5"
             >
               <XCircle className="h-3.5 w-3.5" />
@@ -599,6 +600,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                 <input
                   type="number"
                   step="0.00001"
+                  data-testid="close-exit-price"
                   placeholder={String(Number(trade.entryPrice).toFixed(5))}
                   className="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
                   value={closeData.exitPrice}
@@ -611,6 +613,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                   type="number"
                   step="0.01"
                   placeholder="0.00"
+                  data-testid="close-pnl"
                   className="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
                   value={closeData.pnlMoney}
                   onChange={(e) => setCloseData((d) => ({ ...d, pnlMoney: e.target.value }))}
@@ -655,6 +658,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
             </Button>
             <Button
               onClick={handleCloseTrade}
+              data-testid="close-confirm"
               disabled={isClosing || !closeData.exitPrice || !closeData.pnlMoney}
               className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
             >
