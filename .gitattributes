@@ -1,0 +1,16 @@
+# ── Sfârșituri de linie ──────────────────────────────────────────────────────
+#
+# Regula e îngustă intenționat: NU normalizăm tot repo-ul, fiindcă asta ar
+# rescrie mii de fișiere într-un singur commit și ar ascunde orice altceva.
+#
+# Aici sunt doar fișierele pe care CRLF le STRICĂ, nu doar le murdărește:
+# un script shell cu CRLF primește în Linux „bad interpreter: /usr/bin/env
+# bash^M" — un mesaj care nu seamănă deloc cu cauza, și care apare abia
+# înăuntrul containerului.
+#
+# Pe Windows, `core.autocrlf` transformă LF în CRLF la checkout. `eol=lf` îi
+# spune lui git să lase fișierele astea în pace.
+
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.Dockerfile text eol=lf
