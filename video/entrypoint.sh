@@ -59,12 +59,29 @@ if xdpyinfo -display "${D}" >/dev/null 2>&1; then
     echo "  ecran ${D} era deja pornit, aceeași geometrie — îl refolosesc"
   else
     echo "  ecran ${D} rulează cu ${DIM}, nu ${W}x${H_ECRAN} — îl opresc"
-    # Tiparul e ancorat cu `^` dintr-un motiv foarte practic: `pkill -f` compară
-    # cu linia de comandă ÎNTREAGĂ a fiecărui proces — inclusiv a shell-ului
-    # care rulează pkill-ul, a cărui linie conține chiar șirul căutat. Un
-    # `pkill -f "Xvfb ${D}"` neancorat se sinucide: ieșire 15, iar restul
-    # scriptului nu mai rulează niciodată.
-    pkill -f "^Xvfb ${D} " 2>/dev/null || true
+
+    # Pe cine oprim se AFLĂ, nu se ghicește: lock-ul lui X conține chiar PID-ul
+    # serverului care ține display-ul. E singura sursă exactă.
+    #
+    # Alternativa evidentă, `pkill -f "Xvfb ${D}"`, e o capcană dublă:
+    #  - `-f` compară cu linia de comandă ÎNTREAGĂ a fiecărui proces, inclusiv
+    #    a shell-ului care rulează pkill-ul — a cărui linie conține exact șirul
+    #    căutat. Se sinucide: ieșire 15, restul scriptului nu mai rulează.
+    #  - ancorat cu `^` nu se mai sinucide, dar ratează un Xvfb pornit prin cale
+    #    absolută (`/usr/bin/Xvfb :99 …`), fiindcă argv[0] e atunci calea. Testat:
+    #    prin PATH mergea, prin cale absolută nu.
+    #
+    # Verificăm că PID-ul chiar e un Xvfb înainte să trimitem ceva: lock-ul poate
+    # fi vechi, iar între timp numărul putea fi refolosit de alt proces.
+    PID_X="$(tr -dc '0-9' < "${LOCK}" 2>/dev/null || true)"
+    if [ -n "${PID_X}" ] && [ "$(ps -p "${PID_X}" -o comm= 2>/dev/null)" = "Xvfb" ]; then
+      kill "${PID_X}" 2>/dev/null || true
+    else
+      # Fără lock folosibil: tiparul, care acceptă și calea absolută. Nu se poate
+      # sinucide — linia de comandă a shell-ului nu începe cu „Xvfb" și nu
+      # conține „/Xvfb ${D} ".
+      pkill -f "(^|/)Xvfb ${D} " 2>/dev/null || true
+    fi
     for i in $(seq 1 30); do
       xdpyinfo -display "${D}" >/dev/null 2>&1 || break
       sleep 0.1
