@@ -10,7 +10,10 @@
     "capture:raw": "tsx capture/run.ts",
     "studio:build": "docker build -t tradegx-studio .",
     "studio:run": "docker run --rm --shm-size=1g -v \"$PWD/out:/studio/out\" tradegx-studio",
-    "studio": "npm run studio:build && npm run studio:run"
+    "studio": "npm run studio:build && npm run studio:run",
+    "direct": "./entrypoint.sh tsx director.ts",
+    "direct:raw": "tsx director.ts",
+    "direct:dry": "tsx director.ts --dry"
   },
   "dependencies": {
     "playwright": "1.56.0"

@@ -73,12 +73,15 @@ function StatCard({
   sub,
   positive,
   icon: Icon,
+  testid,
 }: {
   label: string;
   value: string;
   sub?: string;
   positive?: boolean;
   icon: React.ComponentType<{ className?: string }>;
+  /** Pus doar pe casetele atinse de scriptul de captură. */
+  testid?: string;
 }) {
   const accentColor = positive === true ? "emerald" : positive === false ? "rose" : "indigo";
   const bgMap: Record<string, string> = {
@@ -92,7 +95,7 @@ function StatCard({
     indigo:  "text-indigo-400 bg-indigo-500/15",
   };
   return (
-    <div className={cn("rounded-xl border bg-zinc-900/80 p-3 transition-all duration-200 group card-3d", bgMap[accentColor])}>
+    <div data-testid={testid} className={cn("rounded-xl border bg-zinc-900/80 p-3 transition-all duration-200 group card-3d", bgMap[accentColor])}>
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider leading-[15px] min-h-[30px] sm:min-h-0">{label}</p>
         <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center", iconMap[accentColor])}>
@@ -227,6 +230,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
             sub={t("subPerTrade")}
             positive={summary.expectancy >= 0}
             icon={Sigma}
+            testid="stat-card-expectancy"
           />
           <StatCard
             label={t("kRecovery")}

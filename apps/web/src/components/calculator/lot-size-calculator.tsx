@@ -212,6 +212,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               type="number"
               step="0.1"
               placeholder="20"
+              data-testid="calc-sl-pips"
               className="bg-zinc-800 border-zinc-700 text-zinc-100 num input-cyber"
               value={stopLossPips}
               onChange={(e) => setStopLossPips(e.target.value)}
@@ -252,9 +253,13 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
           </div>
 
           {/* Main result */}
-          <div className="text-center mb-6 py-4 bg-zinc-900/50 rounded-xl border border-zinc-800">
+          <div data-testid="calc-result" className="text-center mb-6 py-4 bg-zinc-900/50 rounded-xl border border-zinc-800">
             <p className="text-xs text-zinc-600 uppercase tracking-wider mb-1">{t("recommended")}</p>
-            <p className="text-5xl font-black text-white num tracking-tight">
+            <p
+              data-testid="calc-lot-size"
+              data-value={result.lotSize.toFixed(2)}
+              className="text-5xl font-black text-white num tracking-tight"
+            >
               {result.lotSize.toFixed(2)}
             </p>
             <p className="text-sm text-zinc-500 mt-1">{t("standardLots")}</p>

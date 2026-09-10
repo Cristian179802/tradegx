@@ -167,7 +167,16 @@ function TradeRow({ trade }: { trade: JournalTrade }) {
   const hasJournal = !!trade.journal;
 
   return (
-    <div className="border border-zinc-800/80 rounded-2xl overflow-hidden hover:border-zinc-700 transition-all duration-200 bg-zinc-900/80 card-3d">
+    <div
+      // Scriptul de captură deschide primul rând din listă, oricare ar fi el —
+      // deci identificatorul e pe TIP, nu pe id-ul tranzacției, care se schimbă
+      // la fiecare rulare a seed-ului. `data-trade-id` rămâne pentru cazul în
+      // care e nevoie de un rând anume.
+      data-testid="journal-row"
+      data-trade-id={trade.id}
+      data-expanded={expanded ? "true" : "false"}
+      className="border border-zinc-800/80 rounded-2xl overflow-hidden hover:border-zinc-700 transition-all duration-200 bg-zinc-900/80 card-3d"
+    >
       {/* Main Row */}
       <div
         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-800/30 transition-colors"
@@ -490,6 +499,7 @@ export function JournalClient({ trades, stats }: JournalClientProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
           <input
             type="text"
+            data-testid="journal-search"
             placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
