@@ -341,14 +341,46 @@ function genereazaDate(n: number): Date[] {
   return Array.from({ length: n }, (_, i) => zileLucratoare[Math.floor(i * pas)]!);
 }
 
+/**
+ * Instrumentele, distribuite ca fiecare să iasă în jurul mediei globale.
+ *
+ * DE CE NU LA ÎNTÂMPLARE: prima versiune folosea `pick(INSTRUMENTS)`, iar
+ * hazardul a scos GBPUSD la 18.8% win rate. Nu e greșit — un trader chiar are
+ * instrumente slabe — dar în datele ASTEA e un semnal nedorit: căutătorul de
+ * avantaje al aplicației l-ar scoate în față ÎNAINTEA poveștii FVG/Asia, adică
+ * exact peste cadrul pe care se construiește tot videoul.
+ *
+ * Deci împărțim câștigurile și pierderile în cote egale pe instrument, apoi
+ * amestecăm cine primește ce. Rezultatul: fiecare instrument iese la ~47%, iar
+ * ordinea în listă rămâne fără tipar vizibil (o distribuție rotativă curată ar
+ * fi la fel de suspectă ca un outlier).
+ *
+ * Nu atinge nimic altceva: R-ii, fazele, setup-urile și sesiunile sunt deja
+ * fixate în `construiestePlan()`, iar P&L-ul vine din R. Doar simbolul se
+ * schimbă, deci win rate-ul global, drawdown-urile și contrastul FVG rămân
+ * identice.
+ */
+function atribuieInstrumente(plan: Planificata[]): (typeof INSTRUMENTS)[number][] {
+  const cote = (n: number) =>
+    shuffle(Array.from({ length: n }, (_, i) => INSTRUMENTS[i % INSTRUMENTS.length]!));
+
+  const pentruCastiguri = cote(plan.filter((t) => t.castig).length);
+  const pentruPierderi = cote(plan.filter((t) => !t.castig).length);
+
+  let wi = 0;
+  let li = 0;
+  return plan.map((t) => (t.castig ? pentruCastiguri[wi++]! : pentruPierderi[li++]!));
+}
+
 function construiesteTranzactii(
   accountId: string
 ): Prisma.TradeCreateManyInput[] {
   const plan = construiestePlan();
   const zile = genereazaDate(plan.length);
+  const instrumente = atribuieInstrumente(plan);
 
   return plan.map((t, i) => {
-    const instr = pick(INSTRUMENTS);
+    const instr = instrumente[i]!;
     const [h0, h1] = SESSION_HOURS[t.session];
     const entryTime = new Date(zile[i]!);
     entryTime.setUTCHours(randInt(h0, h1), randInt(0, 59), 0, 0);

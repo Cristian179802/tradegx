@@ -3113,5 +3113,22 @@
     "sourceServer": "server",
     "sourceBrowserHint": "Error that happened in a user's browser",
     "sourceServerHint": "Error that happened on the server"
+  },
+  "crossTab": {
+    "title": "Setup × Session",
+    "subtitle": "Same setup, different session — does it work the same?",
+    "hint": "Click a cell, a setup or a session to filter. The stats above recalculate.",
+    "filtering": "Showing: {setup} · {session}",
+    "allSetups": "all setups",
+    "allSessions": "all sessions",
+    "reset": "Reset",
+    "trades": "Trades",
+    "winRate": "Win rate",
+    "expectancy": "Expectancy",
+    "net": "Net",
+    "total": "Total",
+    "empty": "No trades yet with both setup AND session filled in. Add them when logging trades to see what works, and when.",
+    "smallSampleLegend": "Striped cells have fewer than {prag} trades. A percentage on that few isn't a statistic — one more trade moves it by tens of points.",
+    "smallSampleTip": "Only {n} trades — below the {prag} threshold where a percentage means something"
   }
 }

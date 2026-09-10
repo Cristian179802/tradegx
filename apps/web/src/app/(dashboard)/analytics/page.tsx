@@ -10,6 +10,8 @@ import { getAccountScope } from "@/lib/account-scope";
 import { redirect } from "next/navigation";
 import { AnalyticsClient } from "./analytics-client";
 import { PerformanceHeatmap } from "@/components/analytics/performance-heatmap";
+import { SetupSessionMatrix } from "@/components/analytics/setup-session-matrix";
+import { construiesteCrossTab } from "@/lib/analytics/cross-tab";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("analytics");
@@ -44,6 +46,9 @@ export default async function AnalyticsPage() {
         instrumentType: true,
         setupType: true,
         killzone: true,
+        // Sesiunea lipsea din interogare, deci pagina nu putea încrucișa
+        // setup-ul cu ea — vezi matricea Setup × Sesiune de mai jos.
+        sessionType: true,
         pnlMoney: true,
         pnlPercent: true,
         riskMoney: true,
@@ -309,10 +314,23 @@ export default async function AnalyticsPage() {
     pnlDistribution,
   };
 
+  // Matricea Setup × Sesiune. Se trimit CELULE, nu tranzacții: din ele se
+  // reconstituie exact orice combinație de filtre, prin adunare — deci
+  // filtrarea se face în browser, instantaneu, și poate fi animată.
+  const crossTab = construiesteCrossTab(
+    closedTrades.map((tr) => ({
+      setupType: tr.setupType,
+      sessionType: tr.sessionType,
+      pnlMoney: tr.pnlMoney == null ? null : Number(tr.pnlMoney),
+      riskMoney: tr.riskMoney == null ? null : Number(tr.riskMoney),
+    }))
+  );
+
   return (
     <div className="space-y-6">
       <AnalyticsHeader t={t} tTax={tTax} />
       <AnalyticsClient data={data} />
+      <SetupSessionMatrix celule={crossTab} currency={primaryCurrency} />
       <PerformanceHeatmap />
     </div>
   );

@@ -3113,5 +3113,22 @@
     "sourceServer": "server",
     "sourceBrowserHint": "Eroare apărută în browserul unui utilizator",
     "sourceServerHint": "Eroare apărută pe server"
+  },
+  "crossTab": {
+    "title": "Setup × Sesiune",
+    "subtitle": "Același setup, sesiune diferită — merge la fel?",
+    "hint": "Apasă pe o celulă, pe un setup sau pe o sesiune ca să filtrezi. Statisticile de sus se recalculează.",
+    "filtering": "Se afișează: {setup} · {session}",
+    "allSetups": "toate setup-urile",
+    "allSessions": "toate sesiunile",
+    "reset": "Resetează",
+    "trades": "Tranzacții",
+    "winRate": "Win rate",
+    "expectancy": "Expectanță",
+    "net": "Net",
+    "total": "Total",
+    "empty": "Nu există încă tranzacții cu setup ȘI sesiune completate. Adaugă-le la înregistrare ca să vezi ce funcționează și când.",
+    "smallSampleLegend": "Celulele dungate au sub {prag} tranzacții. Un procent pe atât de puține nu e o statistică — o singură tranzacție în plus îl mută cu zeci de puncte.",
+    "smallSampleTip": "Doar {n} tranzacții — sub pragul de {prag} de la care procentul înseamnă ceva"
   }
 }
