@@ -29,6 +29,9 @@ const CFG = {
   // /studio) și rulate nativ din video/. Fără ramuri per mediu.
   iesire: process.env.CAPTURE_OUT ?? "out/raw.mkv",
   capturi: process.env.CAPTURE_SHOTS ?? "out",
+  // Trebuie sa fie ACEEASI valoare ca in entrypoint.sh, altfel fereastra si
+  // ecranul nu se potrivesc.
+  rezervaCrom: Number(process.env.CAPTURE_CHROME_RESERVE ?? 140),
 } as const;
 
 /** Așteptare care nu depinde de rețea — doar pentru ritm, nu pentru încărcări. */
@@ -48,7 +51,9 @@ async function deschideBrowser(): Promise<Browser> {
       "--hide-scrollbars",
       // Fereastra ocupă exact ecranul, fără decorații — altfel apare o bordură
       // de window manager în captură.
-      `--window-size=${CFG.latime},${CFG.inaltime}`,
+      // Fereastra ocupa tot ecranul, inclusiv rezerva de crom: asa pagina de sub
+      // bara de adrese are exact inaltimea ceruta.
+      `--window-size=${CFG.latime},${CFG.inaltime + CFG.rezervaCrom}`,
       "--window-position=0,0",
       "--start-fullscreen",
       "--kiosk",
@@ -97,7 +102,24 @@ async function main() {
     colorScheme: "dark",
   });
 
+  // `tsx` compilează prin esbuild, care injectează un ajutor numit `__name`
+  // pentru a păstra numele funcțiilor. Când o funcție ajunge în browser prin
+  // `page.evaluate`, i se trimite SURSA transformată — care cheamă `__name`,
+  // inexistent acolo. Rezultatul e „ReferenceError: __name is not defined" la
+  // prima evaluare, un mesaj care nu spune nimic despre cauza reală.
+  //
+  // Îl definim ca funcție identitate în fiecare pagină. Scris ca șir, nu ca
+  // funcție: o funcție ar trece prin aceeași transformare și ar avea aceeași
+  // problemă.
+  await context.addInitScript({ content: "globalThis.__name = globalThis.__name || ((f) => f);" });
+
   const page = await context.newPage();
+  // Prima pagină se deschide înainte de orice `goto`, deci scriptul de mai sus
+  // se aplică; dar `addInitScript` prinde doar navigările următoare, iar pagina
+  // curentă e încă `about:blank`. Nimic de făcut aici — primul `goto` vine
+  // imediat.
+  // Recorder-ul primeste decalajul abia dupa ce masuram cromul in browser —
+  // vezi mai jos. Pana atunci, 0.
   const rec = new Inregistrare({
     display: CFG.display,
     latime: CFG.latime,
@@ -129,6 +151,24 @@ async function main() {
 
     await page.screenshot({ path: `${CFG.capturi}/inainte-de-filmare.png` });
 
+    // Cât ocupă taburile și bara de adrese, MĂSURAT — nu ghicit. Diferă între
+    // versiuni de Chromium, iar o valoare greșită fie lasă bara în cadru, fie
+    // taie din pagină.
+    const crom = await page.evaluate(() => window.outerHeight - window.innerHeight);
+
+    // Rezerva de pe ecran e finită. Dacă acest Chromium are cromul mai înalt
+    // decât ea (altă versiune, o bară de marcaje apărută de undeva), decupajul
+    // ar depăși marginea de jos a ecranului: ffmpeg fie refuză, fie umple cu
+    // negru. Mai bine se oprește aici, cu numărul de care are nevoie.
+    if (crom > CFG.rezervaCrom) {
+      throw new Error(
+        `cromul browserului are ${crom}px, dar rezerva de pe ecran e ${CFG.rezervaCrom}px. ` +
+        `Repornește cu CAPTURE_CHROME_RESERVE=${Math.ceil(crom / 10) * 10}.`
+      );
+    }
+    rec.seteazaDecalaj(crom);
+    console.log(`  cromul browserului: ${crom}px din ${CFG.rezervaCrom}px rezervă — filmez de sub el`);
+
     // ── De aici încolo se filmează ──
     console.log("  pornesc înregistrarea…");
     rec.porneste();
@@ -157,10 +197,27 @@ async function main() {
 
     await page.screenshot({ path: `${CFG.capturi}/dupa-filtrare.png` });
 
-    const { secunde, octeti } = await rec.opreste();
+    const { secunde, octeti, cadre, fpsReal } = await rec.opreste();
 
     console.log("\n── rezultat ────────────────────────────────────────");
     console.log(`  raw.mkv         ${(octeti / 1024 / 1024).toFixed(1)} MB · ${secunde.toFixed(1)}s`);
+    // Cadrele REALE, nu cele cerute. Vezi masoaraCadre() din recorder.ts:
+    // antetul fisierului scrie mereu framerate-ul cerut, deci fara masuratoarea
+    // asta o captura la 25fps arata identic cu una la 60.
+    const procent = CFG.fps > 0 ? (fpsReal / CFG.fps) * 100 : 0;
+    console.log(
+      `  cadre           ${cadre} → ${fpsReal.toFixed(1)} fps reali din ${CFG.fps} ceruti ` +
+      `(${procent.toFixed(0)}%)`
+    );
+    if (procent < 85) {
+      console.warn(
+        `
+  ATENTIE: s-au prins doar ${procent.toFixed(0)}% din cadre. Animatiile vor` +
+        ` sacada.
+  Incearca o rezolutie mai mica (CAPTURE_WIDTH=1280 CAPTURE_HEIGHT=720)` +
+        ` sau o masina mai puternica.`
+      );
+    }
     console.log(`  cifrele filmate FVG · Asia → ${citite.tranzactii} tranzacții, ` +
       `${citite.winRate}, ${citite.expectanta}, ${citite.net}`);
     console.log(`  capturi         ${CFG.capturi}/inainte-de-filmare.png, dupa-filtrare.png`);

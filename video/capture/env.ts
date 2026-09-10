@@ -39,7 +39,22 @@ export async function verificaMediul(page: Page): Promise<RezultatVerificare[]> 
   // deci nu e o dovadă. Măsurăm LĂȚIMEA aceluiași text în fontul de brand și
   // într-unul inexistent: dacă ies identice, fontul n-a fost aplicat, ci
   // înlocuit tăcut.
-  const fonturi = await page.evaluate(() => {
+  //
+  // Măsurarea trebuie să vină DUPĂ ce fonturile chiar s-au încărcat, altfel
+  // verificarea devine o cursă: la `domcontentloaded` fișierele pot fi încă pe
+  // drum, canvas-ul cade pe fallback, și primești „Inter ÎNLOCUIT" pe un mediu
+  // perfect sănătos. S-a întâmplat: aceeași mașină, aceeași pagină, două
+  // rezultate diferite la două rulări consecutive.
+  //
+  // `document.fonts.ready` singur nu ajunge — el așteaptă fonturile pe care
+  // pagina le-a CERUT deja. Le cerem explicit, apoi așteptăm.
+  const fonturi = await page.evaluate(async () => {
+    await Promise.all([
+      document.fonts.load('32px "Space Grotesk"'),
+      document.fonts.load('32px "Inter"'),
+    ]).catch(() => {});
+    await document.fonts.ready;
+
     const masoara = (family: string) => {
       const c = document.createElement("canvas").getContext("2d")!;
       c.font = `32px ${family}`;

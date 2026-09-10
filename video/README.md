@@ -96,6 +96,31 @@ docker run --rm --shm-size=1g \
 
 (`deviceScaleFactor` se schimbă în `capture/run.ts`, unde e comentat de ce.)
 
+## Cât duce mașina asta
+
+Măsurat pe laptopul de dezvoltare (Intel Celeron N4500, 2 nuclee, 1.1 GHz), cu
+`x264 -preset ultrafast -qp 0`, două rulări curate una după alta:
+
+| cadru     | cadre reale | din 60 cerute | cel mai mare salt | intervale > 40ms |
+| --------- | ----------- | ------------- | ----------------- | ---------------- |
+| 1280×720  | 54.6 fps    | 91%           | 50 ms             | 6 din 343        |
+| 1920×1080 | 26.2 fps    | 44%           | 133 ms            | 52 din 174       |
+
+**1080p60 nu se poate filma pe mașina asta.** Nu e o problemă de codec și nici
+de disc — ambele au fost testate: `ffvhuff`, care aproape nu cere procesor, a
+ieșit mai PROST (17.5 fps, 210 MB), iar scrisul în `/tmp` față de `/mnt/c` n-a
+schimbat nimic. Rămâne procesorul.
+
+Ce nu se vede: fișierul rezultat scrie tot „60 fps" în antet, indiferent câte
+cadre s-au prins. De asta `recorder.ts` numără pachetele reale — altfel o
+captură la 26 fps arată identic cu una bună până la montaj.
+
+Recomandarea pentru fazele 4–6, care sunt iterație pe ritm: **local la 720p**,
+unde 91% e suficient ca să judeci dacă o tranziție e prea rapidă sau prea lentă.
+Masterul la 1080p60 se scoate pe altceva — o mașină cu 4+ nuclee reale, sau
+runner-ul din faza 8. Numerele și textul din cadru sunt identice; se schimbă
+doar câte cadre intră între ele.
+
 ## De ce `video/` nu e workspace npm
 
 A fost, în faza de setup. L-am scos când a primit dependința de Playwright:
