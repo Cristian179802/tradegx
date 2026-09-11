@@ -44,6 +44,19 @@ if [ -z "$ROL_INITIAL" ]; then
   echo "  Nu pot citi rolul contului demo din baza de filmare." >&2
   exit 1
 fi
+
+# Starea de repaus a contului demo e DEMO. Punct.
+#
+# Prima variantă restaura „rolul de la început”, ceea ce sună corect și e greșit:
+# dacă o rulare anterioară a fost omorâtă cu SIGKILL, trap-ul n-a apucat să
+# ruleze și rolul a rămas USER. Rularea următoare citea USER, îl considera
+# starea normală, și „restaura” tot USER — contul rămânea ridicat la nesfârșit,
+# raportând de fiecare dată că a pus totul la loc.
+if [ "$ROL_INITIAL" != "DEMO" ]; then
+  echo "  ATENȚIE: rolul era ${ROL_INITIAL}, nu DEMO — o rulare anterioară nu l-a restaurat."
+  echo "  La final îl pun pe DEMO, nu pe ${ROL_INITIAL}."
+  ROL_INITIAL="DEMO"
+fi
 RESTAURAT=0
 
 restaureaza() {

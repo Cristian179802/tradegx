@@ -119,8 +119,10 @@ export class Inregistrare {
     // apucat e pierdut definitiv — pe când o pagină care randează cu 30ms mai
     // târziu nu se vede în film. Deci, când se strânge, ffmpeg trebuie servit
     // primul.
-    const nice = process.env.CAPTURE_NICE;
-    const [comanda, argFinale] = nice
+    // Implicit -10, nu gol: e cel mai ieftin castig masurat (60fps: 20% -> 85%,
+    // 30fps: 84% -> 92%). `CAPTURE_NICE=0` il dezactiveaza.
+    const nice = process.env.CAPTURE_NICE ?? "-10";
+    const [comanda, argFinale] = nice && nice !== "0"
       ? ["nice", ["-n", nice, "ffmpeg", ...argumente]]
       : ["ffmpeg", argumente];
 

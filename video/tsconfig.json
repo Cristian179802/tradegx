@@ -20,6 +20,8 @@
     "capture/**/*.ts",
     "engine.ts",
     "timeline.ts",
-    "director.ts"
+    "director.ts",
+    "compose.ts",
+    "texte.ts"
   ]
 }
