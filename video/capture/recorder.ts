@@ -41,6 +41,9 @@ function codecArgs(): string[] {
     // ffvhuff nu ține pasul, ăsta e ultimul refugiu.
     return ["-c:v", "rawvideo", "-pix_fmt", "yuv444p"];
   }
+  // yuv444p implicit; `CAPTURE_PIXFMT=yuv420p` există ca să pot MĂSURA cât
+  // costă croma întreagă, nu ca să fie folosit fără să se știe ce se pierde.
+  const pix = process.env.CAPTURE_PIXFMT ?? "yuv444p";
   return [
     "-c:v", "libx264",
     "-preset", "ultrafast",
@@ -49,7 +52,7 @@ function codecArgs(): string[] {
     // orizontală, iar textul mic de interfață colorat (verde/roșu pe fundal
     // închis) capătă margini murdare. Pe un intermediar lossless ar fi absurd
     // să pierdem tocmai asta.
-    "-pix_fmt", "yuv444p",
+    "-pix_fmt", pix,
   ];
 }
 
@@ -109,7 +112,19 @@ export class Inregistrare {
       "-y", iesire,
     ];
 
-    this.proces = spawn("ffmpeg", argumente, { stdio: ["pipe", "ignore", "pipe"] });
+    // `CAPTURE_NICE` pune ffmpeg înaintea restului la împărțirea procesorului.
+    //
+    // Pe două nuclee, ffmpeg, Chromium și serverul se bat pe aceleași cicluri.
+    // Cadrele pierdute NU se recuperează — un cadru pe care x11grab nu l-a
+    // apucat e pierdut definitiv — pe când o pagină care randează cu 30ms mai
+    // târziu nu se vede în film. Deci, când se strânge, ffmpeg trebuie servit
+    // primul.
+    const nice = process.env.CAPTURE_NICE;
+    const [comanda, argFinale] = nice
+      ? ["nice", ["-n", nice, "ffmpeg", ...argumente]]
+      : ["ffmpeg", argumente];
+
+    this.proces = spawn(comanda, argFinale, { stdio: ["pipe", "ignore", "pipe"] });
     this.pornitLa = Date.now();
     this.proces.stderr?.on("data", (b) => (this.stderr += String(b)));
     this.proces.on("error", (e) => {

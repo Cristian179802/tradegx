@@ -173,6 +173,33 @@ function pregatirePentru(id: string): Beat[] {
   return [...pregatire, tinta];
 }
 
+/**
+ * O scenă întreagă, cu navigarea de care are nevoie.
+ *
+ * Există pentru varianta de rezervă la framerate: dacă 60fps nu intră pentru tot
+ * timeline-ul, se filmează DOAR scena care contează la 60 și restul la 30, iar
+ * cele două se lipesc la montaj. Un `--beat` singur n-ar ajunge — money shot-ul
+ * are patru acțiuni, iar contrastul London/Asia se vede doar în succesiunea lor.
+ *
+ * Dacă scena nu-și aduce singură pagina, împrumutăm ultimul `goto` de dinaintea
+ * ei. Scena `money` și-o aduce (money-analytics), dar `jurnal` de pildă nu.
+ */
+function pentruScena(nume: string): Beat[] {
+  const beats = TIMELINE.filter((b) => b.scena === nume);
+  if (beats.length === 0) {
+    const scene = [...new Set(TIMELINE.map((b) => b.scena))].join(", ");
+    throw new Error(`scenă necunoscută „${nume}”. Există: ${scene}`);
+  }
+  if (beats[0]!.action === "goto") return beats;
+
+  const primul = TIMELINE.indexOf(beats[0]!);
+  for (let j = primul - 1; j >= 0; j--) {
+    const b = TIMELINE[j];
+    if (b && b.action === "goto") return [{ ...b, hold: 0 }, ...beats];
+  }
+  return beats;
+}
+
 // ── Rularea ──────────────────────────────────────────────────────────────────
 
 async function filmeaza(beats: Beat[], singur: string | null): Promise<void> {
@@ -315,14 +342,22 @@ async function main() {
   const argumente = process.argv.slice(2);
   const dry = argumente.includes("--dry");
   const beatArg = argumente.find((a) => a.startsWith("--beat="));
+  const scenaArg = argumente.find((a) => a.startsWith("--scena="));
   const singur = beatArg ? beatArg.slice("--beat=".length) : null;
+  const scena = scenaArg ? scenaArg.slice("--scena=".length) : null;
+
+  const alese = singur
+    ? pregatirePentru(singur)
+    : scena
+      ? pentruScena(scena)
+      : TIMELINE;
 
   if (dry) {
-    uscat(singur ? pregatirePentru(singur) : TIMELINE);
+    uscat(alese);
     return;
   }
 
-  await filmeaza(singur ? pregatirePentru(singur) : TIMELINE, singur);
+  await filmeaza(alese, singur ?? (scena ? `scena ${scena}` : null));
 }
 
 void main();
