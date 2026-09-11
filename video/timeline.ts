@@ -13,6 +13,31 @@ import type { Beat } from "./engine";
 // Timpul petrecut în `goto` și `waitFor` NU intră în socoteală: e marcat „mort”
 // în keyframes.json și tăiat la montaj. De aceea bugetul de 45s se citește pe
 // suma de `duration + hold`, nu pe cât durează rularea.
+//
+// ── De ce sumele declarate sunt SUB buget ──
+//
+// Ce se declară aici NU e ce iese pe ecran. Fiecare beat interactiv mai costă
+// câteva sute de milisecunde pe care nu le controlăm: drumurile prin CDP pentru
+// click, unda de click, repictarea paginii. Măsurat pe filmul livrat:
+//
+//   hook  +88ms   sync +2180ms   jurnal +1687ms
+//   money +676ms  context −950ms  scale +9ms   cta +0ms
+//
+// Prima rundă a ieșit la 49.13s în loc de 45, iar money shot-ul se termina la
+// 34.07s în loc de 28 — ambele verificări fixe din FAZA_6, picate. Cauza nu era
+// ritmul, ci că bugetul se citea pe cifrele declarate, nu pe cele filmate.
+//
+// Deci acum fiecare scenă declară BUGETUL MINUS depășirea ei măsurată, ca
+// rezultatul filmat să cadă pe buget. `--dry` va arăta totalul sub 45s cu exact
+// suma compensărilor; raportul de la finalul capturii e cel care contează.
+//
+// ── De ce sync are 8s și jurnal 6 ──
+//
+// Bugetul din spec dădea 6s pentru sync și 8 pentru jurnal. Sync are însă cinci
+// pași interactivi și două câmpuri tastate: nu încape în 6s fără ca dialogul de
+// închidere să se completeze cu o viteză la care nimeni nu poate citi ce scrie.
+// Jurnal — caută, deschide, citește — se strânge mai ușor. Schimbul păstrează
+// money shot-ul exact la 17–28s, care e constrângerea care contează.
 
 export const TIMELINE: Beat[] = [
   // ── HOOK · 0–3s ────────────────────────────────────────────────────────────
@@ -45,7 +70,7 @@ export const TIMELINE: Beat[] = [
     id: "hook-privire",
     scena: "hook",
     action: "hold",
-    duration: 2250,
+    duration: 2102,
     hold: 0,
     nota: "Cadru pe cădere. Zoom-ul pe segmentul de drawdown se pune în faza 5.",
   },
@@ -84,8 +109,8 @@ export const TIMELINE: Beat[] = [
     action: "click",
     // Rândul deschis, nu un id: seed-ul generează id-uri noi la fiecare rulare.
     target: '[data-testid="trade-row"][data-status="OPEN"]',
-    duration: 620,
-    hold: 200,
+    duration: 580,
+    hold: 150,
     waitFor: '[data-testid="trade-row"][data-status="OPEN"]',
   },
   {
@@ -94,8 +119,8 @@ export const TIMELINE: Beat[] = [
     action: "click",
     target: "close-trade",
     waitFor: "close-trade",
-    duration: 560,
-    hold: 350,
+    duration: 520,
+    hold: 300,
     zoom: { scale: 1.5, easing: "cubic-bezier(0.4,0,0.2,1)" },
   },
   {
@@ -109,7 +134,7 @@ export const TIMELINE: Beat[] = [
     // în cadru.
     text: "2395.25",
     duration: 460,
-    hold: 150,
+    hold: 140,
   },
   {
     id: "sync-pnl",
@@ -118,7 +143,7 @@ export const TIMELINE: Beat[] = [
     target: "close-pnl",
     text: "476.00",
     duration: 380,
-    hold: 200,
+    hold: 197,
   },
   {
     id: "sync-confirma",
@@ -138,7 +163,9 @@ export const TIMELINE: Beat[] = [
     // pagina încă nerepictată, iar cifrele apăreau exact când filmul pleca.
     waitForAfter: '[data-testid="trade-status"][data-status="CLOSED"]',
     duration: 420,
-    hold: 1425,
+    // Runda 1 a ieșit cu 854ms sub bugetul scenei; diferența se întoarce aici,
+    // în holdul care arată plata: „Închis · +$476.00 · R:R 1:1.70”.
+    hold: 2279,
     zoom: { scale: 1.4, easing: "cubic-bezier(0.4,0,0.2,1)" },
     nota: "După confirmare, R și P&L apar calculate pe pagina de detaliu.",
   },
@@ -170,23 +197,24 @@ export const TIMELINE: Beat[] = [
     // underscore, deci un sir cu spatiu nu potriveste nimic si randul de
     // dupa n-ar mai exista. Prins la `--dry`, inainte sa se filmeze.
     text: "fair",
-    duration: 520,
-    hold: 850,
+    duration: 450,
+    hold: 450,
   },
   {
     id: "jurnal-deschide",
     scena: "jurnal",
     action: "click",
     target: "journal-row",
-    duration: 620,
-    hold: 2600,
-    zoom: { scale: 1.55, easing: "cubic-bezier(0.4,0,0.2,1)" },
+    duration: 520,
+    hold: 1400,
+    zoom: { scale: 1.2, easing: "cubic-bezier(0.4,0,0.2,1)" },
   },
   {
     id: "jurnal-citeste",
     scena: "jurnal",
     action: "hold",
-    duration: 3030,
+    // La fel ca la sync: 851ms puși înapoi, aici, unde se citește tranzacția.
+    duration: 1960,
     hold: 0,
   },
 
@@ -209,7 +237,7 @@ export const TIMELINE: Beat[] = [
     action: "scroll",
     target: "setup-session-matrix",
     duration: 800,
-    hold: 700,
+    hold: 600,
     nota: "Camera ajunge prima. Abia după se atinge vreun filtru.",
   },
   {
@@ -218,7 +246,7 @@ export const TIMELINE: Beat[] = [
     action: "click",
     target: "setup-filter-fair_value_gap",
     duration: 520,
-    hold: 1250,
+    hold: 1150,
     zoom: { scale: 1.45, easing: "cubic-bezier(0.4,0,0.2,1)" },
   },
   {
@@ -227,8 +255,8 @@ export const TIMELINE: Beat[] = [
     action: "click",
     target: "cell-fair_value_gap-london",
     duration: 460,
-    hold: 2650,
-    zoom: { scale: 1.8, easing: "cubic-bezier(0.4,0,0.2,1)" },
+    hold: 2450,
+    zoom: { scale: 1.45, easing: "cubic-bezier(0.4,0,0.2,1)" },
   },
   {
     id: "money-asia",
@@ -239,8 +267,8 @@ export const TIMELINE: Beat[] = [
     // Holdul cel mai lung din tot filmul. Aici stă contrastul: același setup,
     // altă sesiune, 61% față de 23%. Dacă privirea nu apucă să compare, restul
     // celor 45 de secunde n-au servit la nimic.
-    hold: 4160,
-    zoom: { scale: 1.8, easing: "cubic-bezier(0.4,0,0.2,1)" },
+    hold: 3884,
+    zoom: { scale: 1.45, easing: "cubic-bezier(0.4,0,0.2,1)" },
   },
 
   // ── CONTEXT · 28–36s ───────────────────────────────────────────────────────
@@ -250,7 +278,7 @@ export const TIMELINE: Beat[] = [
     action: "scroll",
     target: "equity-chart",
     duration: 700,
-    hold: 1600,
+    hold: 1900,
   },
   {
     id: "context-asteptare",
@@ -258,7 +286,7 @@ export const TIMELINE: Beat[] = [
     action: "scroll",
     target: "stat-card-expectancy",
     duration: 600,
-    hold: 1500,
+    hold: 1800,
   },
   {
     id: "context-calculator",
@@ -282,7 +310,7 @@ export const TIMELINE: Beat[] = [
     id: "context-lot",
     scena: "context",
     action: "hold",
-    duration: 2630,
+    duration: 2961,
     hold: 0,
     nota: "Lotul recomandat se recalculează la tastare.",
   },
@@ -292,7 +320,7 @@ export const TIMELINE: Beat[] = [
     id: "scale-rezervat",
     scena: "scale",
     action: "rezervat",
-    duration: 5000,
+    duration: 4991,
     hold: 0,
     nota: "TODO_MOBILE — aplicația mobilă e Expo, nu se filmează în pipeline-ul ăsta. Se completează în post.",
   },
@@ -311,8 +339,8 @@ export const TIMELINE: Beat[] = [
 /** Bugetul din specificație, ca `--dry` să poată spune cât se abate fiecare scenă. */
 export const BUGET: Record<string, number> = {
   hook: 3000,
-  sync: 6000,
-  jurnal: 8000,
+  sync: 8000,
+  jurnal: 6000,
   money: 11000,
   context: 8000,
   scale: 5000,
