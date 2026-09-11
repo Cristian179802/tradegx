@@ -106,9 +106,24 @@ cmd_sync() {
 # Valoarea se mută dintr-un fișier în altul fără să treacă prin vreun log.
 scrie_env_baza() {
   local linie
-  linie="$(grep -E '^DATABASE_URL=' "${WEB}/.env" 2>/dev/null | head -1 || true)"
+  # Baza de filmare, NU cea din `.env`.
+  #
+  # `.env` are DATABASE_URL-ul de producție — Supabase, cu utilizatori reali și
+  # clienți plătitori. Am filmat pe el fără să-mi dau seama, și era cât pe ce să
+  # ridic acolo rolul contului demo, care are parolă publică.
+  #
+  # Nu există cădere înapoi pe `.env`. Dacă baza de filmare lipsește, serverul
+  # nu pornește. O cădere „doar de data asta” e exact felul în care se ajunge
+  # din nou pe producție fără să observe nimeni.
+  local env_video="${TGX_VIDEO_ENV:-/root/tradegx-video.env}"
+  if [ ! -f "$env_video" ]; then
+    echo "  Nu există baza locală de filmare (${env_video})." >&2
+    echo "  Rulează:  ./local-db.sh" >&2
+    return 1
+  fi
+  linie="$(grep -E '^DATABASE_URL=' "$env_video" | head -1 || true)"
   if [ -z "$linie" ]; then
-    echo "  apps/web/.env nu are DATABASE_URL — nu pot fixa baza de date." >&2
+    echo "  ${env_video} nu are DATABASE_URL." >&2
     return 1
   fi
   {

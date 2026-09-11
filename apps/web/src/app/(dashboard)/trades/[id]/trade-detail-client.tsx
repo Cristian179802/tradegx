@@ -255,7 +255,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                 {trade.timeframe && (
                   <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-lg">{trade.timeframe}</span>
                 )}
-                <span className={cn(
+                <span data-testid="trade-status" data-status={trade.status} className={cn(
                   "text-xs px-2 py-0.5 rounded border",
                   trade.status === "OPEN"
                     ? "bg-amber-500/10 text-amber-400 border-amber-500/20"

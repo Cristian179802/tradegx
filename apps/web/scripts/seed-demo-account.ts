@@ -621,6 +621,23 @@ async function main() {
   // strica fiecare medie fara sa insemne nimic.
   const deschisa = construiesteTranzactieDeschisa(account.id);
 
+  // Regula nu se verifică din ochi la fiecare rulare, se verifică aici.
+  //
+  // Tranzacția deschisă se închide ÎN TIMPUL filmării, deci celula ei din
+  // Setup × Sesiune se schimbă sub ochii camerei. Dacă ar fi pe FVG, s-ar
+  // schimba chiar cifrele pentru care există tot videoul — FVG · London 61% și
+  // FVG · Asia 23.1% — între secunda 9 și secunda 28, fără ca cineva să observe
+  // până la montaj.
+  if (deschisa.setupType === "FAIR_VALUE_GAP") {
+    throw new Error(
+      "Tranzacția deschisă are setup FAIR_VALUE_GAP. Închiderea ei în timpul " +
+      "filmării ar muta cifrele din money shot. Alege alt setup."
+    );
+  }
+  console.log(
+    `\n  ✓ tranzacția deschisă e pe ${deschisa.setupType} — nu atinge nicio combinație FVG`
+  );
+
   await prisma.trade.createMany({ data: [...tranzactii, deschisa] });
 
   const sold = INITIAL_BALANCE + tranzactii.reduce((s, t) => s + Number(t.pnlMoney), 0);

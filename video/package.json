@@ -18,8 +18,8 @@
     "local:start": "bash local-server.sh start",
     "local:stop": "bash local-server.sh stop",
     "local:verifica": "bash local-server.sh verifica",
-    "direct:local": "APP_URL=http://localhost:3000 ./entrypoint.sh tsx director.ts",
-    "film": "bash local-server.sh seed && APP_URL=http://localhost:3000 ./entrypoint.sh tsx director.ts"
+    "film": "bash film.sh",
+    "local:db": "bash local-db.sh"
   },
   "dependencies": {
     "playwright": "1.56.0"

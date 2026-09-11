@@ -71,6 +71,20 @@ export interface Beat {
    * Cu câmpul ăsta, o acțiune fără efect oprește filmarea pe loc.
    */
   waitForGone?: string;
+  /**
+   * Selector care trebuie să APARĂ după acțiune, înainte să înceapă holdul.
+   *
+   * Holdul e locul unde privirea prinde rezultatul. Dacă rezultatul întârzie —
+   * o repictare după refresh, o cerere la server — holdul se consumă pe starea
+   * VECHE și filmul pleacă mai departe exact când apărea plata. S-a filmat așa:
+   * la +1.4s pagina încă scria „Deschis”, iar „+$476.00, R:R 1:1.70” apărea la
+   * +2.2s, după ce beat-ul se terminase.
+   *
+   * Așteptarea e timp mort — se taie la montaj — deci holdul declarat în
+   * `timeline.ts` cade ÎNTOTDEAUNA pe starea finală, indiferent cât de înceată
+   * e mașina. Altfel ritmul ar trebui recalibrat la fiecare procesor.
+   */
+  waitForAfter?: string;
   /** Consumat de faza 5 pentru zoom automat. Doar pe `click`. */
   zoom?: { scale: number; easing: string };
   /** Explicație pentru beats care nu fac ce zice specul. Apare în `--dry`. */
@@ -713,15 +727,21 @@ export class Regizor {
       }
     }
 
-    await this.pauza(beat.hold);
-
+    // Verificările vin ÎNAINTEA holdului, nu după: holdul trebuie să cadă pe
+    // starea finală, altfel se consumă pe cea veche.
     if (beat.waitForGone) {
-      const disparut = await this.opt.page
-        .locator(this.selector(beat.waitForGone))
-        .first()
-        .waitFor({ state: "hidden", timeout: 15_000 })
-        .then(() => true)
-        .catch(() => false);
+      // Și asta e timp mort: se așteaptă serverul, pe ecran nu se schimbă nimic
+      // în afara unui dialog care se stinge. Nemarcat, umfla scena Sync cu o
+      // secundă în raportul de abatere — adică exact raportul după care se
+      // ajustează ritmul în faza 6 ar fi mințit.
+      const disparut = await this.faraCadre(`aștept să dispară ${beat.waitForGone}`, () =>
+        this.opt.page
+          .locator(this.selector(beat.waitForGone!))
+          .first()
+          .waitFor({ state: "hidden", timeout: 15_000 })
+          .then(() => true)
+          .catch(() => false)
+      );
       if (!disparut) {
         throw new Error(
           `beat „${beat.id}”: „${beat.waitForGone}” trebuia să dispară după acțiune, ` +
@@ -730,6 +750,16 @@ export class Regizor {
       }
     }
 
+    if (beat.waitForAfter) {
+      await this.faraCadre(`aștept rezultatul: ${beat.waitForAfter}`, async () => {
+        await this.opt.page
+          .locator(this.selector(beat.waitForAfter!))
+          .first()
+          .waitFor({ state: "visible", timeout: 30_000 });
+      });
+    }
+
+    await this.pauza(beat.hold);
     this.beats.push({ id: beat.id, scena: beat.scena, start, sfarsit: this.t });
   }
 

@@ -133,6 +133,10 @@ export const TIMELINE: Beat[] = [
     // Poarta e corectă (credențialele demo sunt publice) și nu se atinge. Vezi
     // raportul: filmarea are nevoie de un utilizator dedicat, care nu e DEMO.
     waitForGone: "close-confirm",
+    // Holdul trebuie să prindă plata, nu drumul spre ea: badge-ul „Închis”,
+    // +$476.00, +0.71%, R:R 1:1.70. Fără asta, holdul de 1425ms se consuma pe
+    // pagina încă nerepictată, iar cifrele apăreau exact când filmul pleca.
+    waitForAfter: '[data-testid="trade-status"][data-status="CLOSED"]',
     duration: 420,
     hold: 1425,
     zoom: { scale: 1.4, easing: "cubic-bezier(0.4,0,0.2,1)" },
