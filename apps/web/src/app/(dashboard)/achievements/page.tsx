@@ -5,7 +5,7 @@ import * as React from "react";
 import { Flame, Medal, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CountUp } from "@/components/ui/count-up";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { ACADEMY, TOTAL_LESSONS, lessonKey } from "@/lib/academy";
 import { PASS_THRESHOLD, QUIZZES } from "@/lib/academy/quiz";
 import { useAcademyProgress } from "@/components/academy/use-academy";
@@ -140,7 +140,7 @@ export default function AchievementsPage() {
             <div className="rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/[0.08] to-zinc-900/80 p-5 text-center">
               <Flame className="w-6 h-6 text-orange-400 mx-auto mb-2" />
               <p className="text-3xl font-black text-orange-300 num">
-                <CountUp value={data?.streak.current ?? 0} />
+                <RollingNumber value={String(data?.streak.current ?? 0)} />
               </p>
               <p className="text-[11px] font-bold text-zinc-500 mt-1">
                 {t("streakCurrent")}
@@ -149,14 +149,14 @@ export default function AchievementsPage() {
             <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 text-center">
               <Trophy className="w-6 h-6 text-zinc-500 mx-auto mb-2" />
               <p className="text-3xl font-black text-zinc-200 num">
-                <CountUp value={data?.streak.best ?? 0} />
+                <RollingNumber value={String(data?.streak.best ?? 0)} delay={70} />
               </p>
               <p className="text-[11px] font-bold text-zinc-500 mt-1">{t("streakBest")}</p>
             </div>
             <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/[0.08] to-zinc-900/80 p-5 text-center">
               <Medal className="w-6 h-6 text-amber-400 mx-auto mb-2" />
               <p className="text-3xl font-black text-amber-300 num">
-                <CountUp value={unlockedCount} />
+                <RollingNumber value={String(unlockedCount)} delay={140} />
                 <span className="text-lg text-zinc-500">/{all.length}</span>
               </p>
               <p className="text-[11px] font-bold text-zinc-500 mt-1">{t("unlocked")}</p>

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Landmark, TrendingUp, TrendingDown, Activity, Shield, Gauge, Target, Scale, Layers, Trophy } from "lucide-react";
 import type { InstitutionalData } from "@/lib/institutional";
 import { cn } from "@/lib/utils";
+import { RollingNumber } from "@/components/ui/rolling-number";
 
 function money(n: number, currency: string, locale: string) {
   return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "en-US", {
@@ -85,7 +86,7 @@ export function InstitutionalClient({ data }: { data: InstitutionalData }) {
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-indigo-400/70 mb-2">{t("portfolio")}</p>
             <div className="flex items-end gap-3 flex-wrap">
               <span className={cn("text-4xl font-black num", posReturn ? "text-emerald-400" : "text-rose-400")}>
-                {posReturn ? "+" : ""}{fmt(p.returnPct, 2)}%
+                <RollingNumber value={`${posReturn ? "+" : ""}${fmt(p.returnPct, 2)}%`} />
               </span>
               <span className={cn("text-lg font-bold num mb-0.5", posReturn ? "text-emerald-400/80" : "text-rose-400/80")}>
                 {p.netPnl >= 0 ? "+" : ""}{money(p.netPnl, currency, locale)}
@@ -127,7 +128,7 @@ export function InstitutionalClient({ data }: { data: InstitutionalData }) {
               <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500">{t(`m_${c.key}`)}</span>
             </div>
             <p className="text-2xl font-black num" style={{ color: `rgb(${c.g.rgb})` }}>
-              {fmt(c.value, c.fmtD)}{c.value != null && c.suffix ? c.suffix : ""}
+              <RollingNumber value={`${fmt(c.value, c.fmtD)}${c.value != null && c.suffix ? c.suffix : ""}`} delay={140 + i * 60} />
             </p>
             <p className="text-[10px] text-zinc-600 mt-0.5 leading-tight">{t(`h_${c.key}`)}</p>
           </motion.div>

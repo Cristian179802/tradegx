@@ -18,6 +18,7 @@ import {
   ChevronRight, AlertTriangle, Share2, Check, PlayCircle,
 } from "lucide-react";
 import { TradeReplay } from "@/components/trades/trade-replay";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { tApiError } from "@/lib/api-error-dict";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -287,7 +288,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                 "text-4xl font-black num tracking-tight",
                 isProfit ? "text-emerald-400" : "text-rose-400"
               )}>
-                {isProfit ? "+" : ""}{formatCurrency(pnl, trade.account.currency)}
+                <RollingNumber value={`${isProfit ? "+" : ""}${formatCurrency(pnl, trade.account.currency)}`} />
               </p>
               <div className="flex items-center justify-end gap-2 mt-1">
                 {pnlPct !== null && (

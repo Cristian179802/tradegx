@@ -15,7 +15,7 @@ import {
   Copy, Flame, Orbit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CountUp } from "@/components/ui/count-up";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { EASE, Reveal, BreathingGlow, MarketBackdrop } from "@/components/landing/fx";
 import { HeroCinematic } from "@/components/landing/hero-cinematic";
@@ -33,12 +33,24 @@ function CountOnView({
 }: {
   value: number; decimals?: number; prefix?: string; suffix?: string; className?: string;
 }) {
+  const text =
+    prefix +
+    value.toLocaleString("ro-RO", { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) +
+    suffix;
+  return <RollOnView value={text} className={className} />;
+}
+
+// Odometru care pornește abia când cifra intră în cadru. Pe landing scroll-ul
+// ajunge la ea după câteva secunde; dacă s-ar arma la montare, omul ar găsi
+// numărul deja așezat și n-ar vedea nimic.
+function RollOnView({ value, className }: { value: string; className?: string }) {
   const ref = React.useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   return (
     <span ref={ref} className={className}>
-      {inView ? <CountUp value={value} decimals={decimals} prefix={prefix} suffix={suffix} duration={1400} />
-              : <>{prefix}0{suffix}</>}
+      {inView
+        ? <RollingNumber value={value} duration={1400} />
+        : <span className="opacity-0" aria-hidden>{value}</span>}
     </span>
   );
 }
@@ -496,7 +508,7 @@ function Features({ t }: { t: TT }) {
               </div>
               <div className="rounded-lg bg-zinc-950/50 border border-zinc-800/60 p-2.5 text-center">
                 <p className="text-[8px] text-zinc-600 uppercase font-bold tracking-wide">{t("btVolume")}</p>
-                <p className="text-2xl font-black text-indigo-300 num">0.52</p>
+                <p className="text-2xl font-black text-indigo-300 num"><RollOnView value="0.52" /></p>
               </div>
             </div>
           </BentoTile>
@@ -504,7 +516,7 @@ function Features({ t }: { t: TT }) {
           {/* Lot Calculator */}
           <BentoTile span="col-span-1" rgb="109,117,246" Icon={Calculator} label={t("f6T")} delay={0.15}>
             <div className="text-center py-1">
-              <p className="text-3xl font-black num leading-none" style={{ color: "var(--accent)" }}>0.52</p>
+              <p className="text-3xl font-black num leading-none" style={{ color: "var(--accent)" }}><RollOnView value="0.52" /></p>
               <p className="text-[9px] text-zinc-600 mt-1">EURUSD · 20 pips</p>
             </div>
           </BentoTile>

@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PaywallCard } from "@/components/billing/paywall-card";
-import { CountUp } from "@/components/ui/count-up";
+import { RollingNumber } from "@/components/ui/rolling-number";
 
 // ── Simulator Monte Carlo ───────────────────────────────────────────────────
 // Reeșantionează (cu înlocuire) randamentele REALE ale traderului și rulează
@@ -298,7 +298,7 @@ export default function MonteCarloPage() {
                 <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.05] p-5 text-center">
                   <Trophy className="w-5 h-5 text-emerald-400 mx-auto mb-2" />
                   <p className="text-3xl font-black text-emerald-400 num">
-                    <CountUp value={result.pTarget} decimals={1} suffix="%" />
+                    <RollingNumber value={`${result.pTarget.toFixed(1)}%`} />
                   </p>
                   <p className="text-[11px] text-zinc-500 mt-1 font-semibold">
                     {t("pTarget", { target: targetPct })}
@@ -307,7 +307,7 @@ export default function MonteCarloPage() {
                 <div className="rounded-2xl border border-rose-500/25 bg-rose-500/[0.05] p-5 text-center">
                   <ShieldAlert className="w-5 h-5 text-rose-400 mx-auto mb-2" />
                   <p className="text-3xl font-black text-rose-400 num">
-                    <CountUp value={result.pRuin} decimals={1} suffix="%" />
+                    <RollingNumber value={`${result.pRuin.toFixed(1)}%`} delay={70} />
                   </p>
                   <p className="text-[11px] text-zinc-500 mt-1 font-semibold">
                     {t("pRuin", { dd: maxDDPct })}
@@ -316,7 +316,7 @@ export default function MonteCarloPage() {
                 <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 text-center">
                   <Percent className="w-5 h-5 text-zinc-500 mx-auto mb-2" />
                   <p className="text-3xl font-black text-zinc-300 num">
-                    <CountUp value={result.pNeither} decimals={1} suffix="%" />
+                    <RollingNumber value={`${result.pNeither.toFixed(1)}%`} delay={140} />
                   </p>
                   <p className="text-[11px] text-zinc-500 mt-1 font-semibold">
                     {t("pNeither", { trades: nTrades })}

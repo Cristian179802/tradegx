@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getTranslations, getLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { verifyShareToken } from "@/lib/share";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { TrendingUp, TrendingDown, ArrowRight, ShieldCheck } from "lucide-react";
 
 interface Props {
@@ -113,7 +114,7 @@ export default async function SharedTradePage({ params, searchParams }: Props) {
             {pnlPct != null && (
               <div className="text-right">
                 <p className={`text-3xl font-black num ${isProfit ? "text-emerald-400" : "text-rose-400"}`}>
-                  {isProfit ? "+" : ""}{pnlPct.toFixed(2)}%
+                  <RollingNumber value={`${isProfit ? "+" : ""}${pnlPct.toFixed(2)}%`} />
                 </p>
                 {rr && <span className="text-[11px] text-zinc-500 num">R:R 1:{rr}</span>}
               </div>

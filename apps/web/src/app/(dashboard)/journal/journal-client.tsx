@@ -15,6 +15,7 @@ import {
   X,
   StickyNote,
 } from "lucide-react";
+import { RollingNumber } from "@/components/ui/rolling-number";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -150,7 +151,7 @@ function StatCard({
     <div className={`tg-surface tg-boot rounded-2xl p-4 ${border}`}>
       <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--ink-4)" }}>{label}</p>
       <p className="text-2xl font-black num tracking-tight" style={valueStyle}>
-        {value}
+        <RollingNumber value={value} />
       </p>
       {sub && <p className="text-[11px] mt-1" style={{ color: "var(--ink-4)" }}>{sub}</p>}
     </div>

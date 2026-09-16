@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { PREMIUM_PRICE_MONTHLY, PREMIUM_PRICE_ANNUAL, PREMIUM_PRICE_ANNUAL_PER_MONTH } from "@/lib/pricing";
 
 // label/free/pro = chei → pricing.* (traduse la randare; valorile bool raman)
@@ -190,7 +191,7 @@ export default function PricingPage() {
               <p className="text-zinc-500 text-sm">{t("freeDesc")}</p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-black text-white">€0</span>
+              <span className="text-4xl font-black text-white num"><RollingNumber value="€0" /></span>
               <span className="text-zinc-500 text-sm ml-2">{t("forever")}</span>
             </div>
             <Link href="/register">
@@ -250,7 +251,7 @@ export default function PricingPage() {
               </p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-black text-white num">€{displayPrice}</span>
+              <span className="text-4xl font-black text-white num"><RollingNumber value={`€${displayPrice}`} /></span>
               <span className="text-zinc-500 text-sm ml-2">{t("perMonth")}</span>
               {annual && (
                 <p className="text-xs text-zinc-500 mt-1">
@@ -319,7 +320,7 @@ export default function PricingPage() {
               <p className="text-zinc-400 text-sm">{t("premiumDesc")}</p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-black text-white num">€{premiumDisplayPrice}</span>
+              <span className="text-4xl font-black text-white num"><RollingNumber value={`€${premiumDisplayPrice}`} /></span>
               <span className="text-zinc-500 text-sm ml-2">{t("perMonth")}</span>
               {annual && (
                 <p className="text-xs text-zinc-500 mt-1">

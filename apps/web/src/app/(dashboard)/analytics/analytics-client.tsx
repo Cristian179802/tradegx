@@ -1,5 +1,6 @@
 "use client";
 
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { useTranslations } from "next-intl";
 import * as React from "react";
 import {
@@ -74,6 +75,7 @@ function StatCard({
   positive,
   icon: Icon,
   testid,
+  intarziere = 0,
 }: {
   label: string;
   value: string;
@@ -82,6 +84,8 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
   /** Pus doar pe casetele atinse de scriptul de captură. */
   testid?: string;
+  /** Decalaj în ms pentru cascada de pornire a odometrelor. */
+  intarziere?: number;
 }) {
   const accentColor = positive === true ? "emerald" : positive === false ? "rose" : "indigo";
   const bgMap: Record<string, string> = {
@@ -108,7 +112,12 @@ function StatCard({
           positive === true ? "text-emerald-400 neon-emerald" : positive === false ? "text-rose-400 neon-rose" : "text-zinc-100"
         )}
       >
-        {value}
+        {/* Odometru, nu text. Cifrele se rostogolesc la intrarea în pagină și
+            la fiecare schimbare de filtru — diferența dintre „un număr apare pe
+            ecran" și „un aparat afișează o măsurătoare".
+            `intarziere` face cascadă: casetele pornesc una după alta, de la
+            stânga la dreapta, în loc să tresară toate deodată. */}
+        <RollingNumber value={value} delay={intarziere} />
       </p>
       {sub && <p className="text-[10px] text-zinc-500 mt-0.5">{sub}</p>}
     </div>
@@ -177,6 +186,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <StatCard
+          intarziere={0}
           label={t("kWinRate")}
           value={`${summary.winRate}%`}
           sub={t("subTrades", { n: summary.totalTrades })}
@@ -184,12 +194,14 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           icon={Target}
         />
         <StatCard
+          intarziere={70}
           label={t("kNetPnl")}
           value={fmt(summary.totalPnl)}
           positive={summary.totalPnl >= 0}
           icon={summary.totalPnl >= 0 ? TrendingUp : TrendingDown}
         />
         <StatCard
+          intarziere={140}
           label={t("kProfitFactor")}
           value={summary.profitFactor !== null ? String(summary.profitFactor) : "—"}
           positive={summary.profitFactor !== null ? summary.profitFactor >= 1 : undefined}
@@ -197,12 +209,14 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           icon={BarChart3}
         />
         <StatCard
+          intarziere={210}
           label={t("kAvgWinLoss")}
           value={`${fmt(summary.avgWin)} / ${fmt(summary.avgLoss)}`}
           sub={t("subAvgRR", { rr: summary.avgRR })}
           icon={Trophy}
         />
         <StatCard
+          intarziere={280}
           label={t("kMaxDD")}
           value={`${summary.maxDrawdown.toFixed(1)}%`}
           positive={summary.maxDrawdown < 10}
@@ -225,6 +239,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           {/* Asteptarea. Singura cifra care raspunde la "merita sa continui?":
               cat aduce, in medie, fiecare tranzactie. */}
           <StatCard
+            intarziere={0}
             label={t("kExpectancy")}
             value={fmt(summary.expectancy)}
             sub={t("subPerTrade")}
@@ -233,6 +248,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
             testid="stat-card-expectancy"
           />
           <StatCard
+            intarziere={70}
             label={t("kRecovery")}
             value={summary.recoveryFactor !== null ? String(summary.recoveryFactor) : "—"}
             sub={summary.recoveryFactor !== null ? t("subRecovery") : t("subRecoveryNone")}
@@ -242,12 +258,14 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
           {/* Seria de pierderi ramane neutra ca si culoare: fara sa stim cat
               risti pe tranzactie, cinci la rand nu e nici bine, nici rau. */}
           <StatCard
+            intarziere={140}
             label={t("kLossStreak")}
             value={String(summary.maxLossStreak)}
             sub={t("subWinStreak", { n: summary.maxWinStreak })}
             icon={Repeat}
           />
           <StatCard
+            intarziere={210}
             label={t("kCosts")}
             value={fmt(summary.totalCosts)}
             sub={summary.costRatio !== null ? t("subCostRatio", { p: summary.costRatio }) : t("subNoCosts")}
@@ -257,6 +275,7 @@ export function AnalyticsClient({ data }: { data: AnalyticsData }) {
               tinute mai mult, ai efectul de dispozitie — media pe toate
               tranzactiile l-ar ascunde exact. */}
           <StatCard
+            intarziere={280}
             label={t("kDuration")}
             value={
               summary.avgDurationWin === 0 && summary.avgDurationLoss === 0

@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft, TrendingUp, TrendingDown, Target, Activity,
@@ -169,7 +170,7 @@ function KpiCard({
           <Icon className={cn("h-3 w-3", colorMap[col])} />
         </div>
       </div>
-      <p className={cn("text-2xl font-black num tracking-tight", colorMap[col], neon === "emerald" && "neon-emerald", neon === "rose" && "neon-rose", neon === "amber" && "neon-amber", neon === "violet" && "neon-violet")}>{value}</p>
+      <p className={cn("text-2xl font-black num tracking-tight", colorMap[col], neon === "emerald" && "neon-emerald", neon === "rose" && "neon-rose", neon === "amber" && "neon-amber", neon === "violet" && "neon-violet")}><RollingNumber value={value} /></p>
       {sub && <p className="text-[11px] text-zinc-600 mt-0.5 num">{sub}</p>}
     </div>
   );
@@ -340,7 +341,7 @@ export function ResultsClient({ backtest }: { backtest: BacktestData }) {
           </div>
           <div className="ml-auto text-right">
             <p className={cn("text-xl font-black num", netPnl >= 0 ? "neon-emerald" : "neon-rose")}>
-              {netPnl >= 0 ? "+" : ""}{netPnl.toFixed(2)}$
+              <RollingNumber value={`${netPnl >= 0 ? "+" : ""}${netPnl.toFixed(2)}$`} />
             </p>
             {pnlPct !== null && (
               <p className={cn("text-xs num", netPnl >= 0 ? "text-emerald-500" : "text-rose-500")}>

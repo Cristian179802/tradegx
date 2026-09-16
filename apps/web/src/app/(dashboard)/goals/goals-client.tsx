@@ -4,6 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import { Target, TrendingUp, Loader2, Save, Trophy, Shield, AlertTriangle, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { useToast } from "@/hooks/use-toast";
 
 interface PropAccount {
@@ -107,7 +108,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t("monthlyProfit")}</span>
               </div>
               <p className={cn("text-2xl font-black num", (data?.progress.pnl ?? 0) >= 0 ? "text-emerald-400" : "text-rose-400")}>
-                {(data?.progress.pnl ?? 0) >= 0 ? "+" : ""}{money(data?.progress.pnl ?? 0, c)}
+                <RollingNumber value={`${(data?.progress.pnl ?? 0) >= 0 ? "+" : ""}${money(data?.progress.pnl ?? 0, c)}`} />
               </p>
               {data?.targets.monthlyProfitTarget ? (
                 <>
@@ -123,7 +124,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
                 <BarChart3 className="w-4 h-4 text-violet-400" />
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t("trades")}</span>
               </div>
-              <p className="text-2xl font-black num text-violet-300">{data?.progress.trades ?? 0}</p>
+              <p className="text-2xl font-black num text-violet-300"><RollingNumber value={String(data?.progress.trades ?? 0)} delay={70} /></p>
               {data?.targets.monthlyTradeTarget ? (
                 <>
                   <p className="text-xs text-zinc-500 mt-1 mb-2">{t("ofTarget", { value: data.targets.monthlyTradeTarget })}</p>
@@ -138,7 +139,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
                 <Target className="w-4 h-4 text-indigo-400" />
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t("winRate")}</span>
               </div>
-              <p className="text-2xl font-black num text-indigo-300">{data?.progress.winRate ?? 0}%</p>
+              <p className="text-2xl font-black num text-indigo-300"><RollingNumber value={`${data?.progress.winRate ?? 0}%`} delay={140} /></p>
               {data?.targets.monthlyWinRateTarget ? (
                 <>
                   <p className="text-xs text-zinc-500 mt-1 mb-2">{t("ofTarget", { value: data.targets.monthlyWinRateTarget + "%" })}</p>

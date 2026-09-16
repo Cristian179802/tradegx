@@ -4,6 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import { Gauge, Dices, RefreshCw, TrendingUp, TrendingDown, AlertTriangle, Activity, Grid3x3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { CorrelationHeatmap } from "@/components/tools/correlation-heatmap";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -196,13 +197,13 @@ function RiskOfRuin() {
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-zinc-800/40 border border-zinc-700/40 p-4 text-center">
           <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">{t("expectancy")}</p>
-          <p className={cn("text-2xl font-black num", edgeColor)}>{expectancy >= 0 ? "+" : ""}{expectancy.toFixed(2)}R</p>
+          <p className={cn("text-2xl font-black num", edgeColor)}><RollingNumber value={`${expectancy >= 0 ? "+" : ""}${expectancy.toFixed(2)}R`} /></p>
           <p className="text-[10px] text-zinc-600 mt-1">{expectancy > 0 ? t("hasEdge") : t("noEdge")}</p>
         </div>
         <div className={cn("rounded-xl border p-4 text-center",
           ror < 1 ? "bg-emerald-500/8 border-emerald-500/20" : ror < 10 ? "bg-amber-500/8 border-amber-500/20" : "bg-rose-500/8 border-rose-500/20")}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">{t("rorTitle")}</p>
-          <p className={cn("text-2xl font-black num", rorColor)}>{ror < 0.1 && ror > 0 ? "<0.1" : ror.toFixed(1)}%</p>
+          <p className={cn("text-2xl font-black num", rorColor)}><RollingNumber value={`${ror < 0.1 && ror > 0 ? "<0.1" : ror.toFixed(1)}%`} delay={70} /></p>
           <p className={cn("text-[10px] mt-1", rorColor)}>{rorLabel}</p>
         </div>
       </div>

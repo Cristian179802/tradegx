@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Shield, TrendingDown, AlertTriangle, Target, DollarSign, BarChart3, CheckCircle2, XCircle, Zap } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
+import { RollingNumber } from "@/components/ui/rolling-number";
 
 interface AccountData {
   id: string; name: string; type: string; currency: string;
@@ -132,7 +133,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
             <DollarSign className={cn("h-3.5 w-3.5", data.todayPnl >= 0 ? "text-emerald-500" : "text-rose-500")} />
           </div>
           <p className={cn("text-xl font-black num", data.todayPnl >= 0 ? "text-emerald-400 neon-emerald" : "text-rose-400 neon-rose")}>
-            {data.todayPnl >= 0 ? "+" : ""}{formatCurrency(data.todayPnl, selectedAccount?.currency ?? "USD")}
+            <RollingNumber value={`${data.todayPnl >= 0 ? "+" : ""}${formatCurrency(data.todayPnl, selectedAccount?.currency ?? "USD")}`} />
           </p>
         </div>
 
@@ -146,7 +147,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
             <BarChart3 className="h-3.5 w-3.5 text-zinc-500" />
           </div>
           <p className={cn("text-xl font-black num", data.todayTradeCount >= data.user.maxTradesPerDay ? "text-rose-400" : "text-zinc-100")}>
-            {data.todayTradeCount} <span className="text-sm font-medium text-zinc-600">/ {data.user.maxTradesPerDay}</span>
+            <RollingNumber value={String(data.todayTradeCount)} delay={70} /> <span className="text-sm font-medium text-zinc-600">/ {data.user.maxTradesPerDay}</span>
           </p>
         </div>
 
@@ -162,7 +163,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
           {dailyLossStatus && selectedAccount?.maxDailyLossPct ? (
             <>
               <p className={cn("text-xl font-black num", dailyLossStatus.safe ? "text-zinc-100" : "text-rose-400")}>
-                {dailyLossStatus.pct.toFixed(0)}%
+                <RollingNumber value={`${dailyLossStatus.pct.toFixed(0)}%`} delay={140} />
               </p>
               <div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                 <div
@@ -188,7 +189,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
           {drawdownStatus ? (
             <>
               <p className={cn("text-xl font-black num", drawdownStatus.safe ? "text-zinc-100" : "text-amber-400")}>
-                -{drawdownStatus.dd.toFixed(1)}%
+                <RollingNumber value={`-${drawdownStatus.dd.toFixed(1)}%`} delay={210} />
               </p>
               {drawdownStatus.maxDD && (
                 <div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
@@ -287,7 +288,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
                 <p className="text-[11px] text-zinc-500 mt-0.5">{t("maxRiskSub")}</p>
               </div>
               <p className="text-xl font-black text-rose-400 num neon-rose">
-                -{formatCurrency(riskAmount, selectedAccount?.currency ?? "USD")}
+                <RollingNumber value={`-${formatCurrency(riskAmount, selectedAccount?.currency ?? "USD")}`} />
               </p>
             </div>
 
@@ -298,7 +299,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
                 <p className="text-[11px] text-zinc-500 mt-0.5">{t("recVolumeSub")}</p>
               </div>
               <p className="text-2xl font-black text-indigo-300 num" style={{ textShadow: "0 0 12px rgba(99,102,241,0.6)" }}>
-                {lotSize}
+                <RollingNumber value={String(lotSize)} delay={70} />
               </p>
             </div>
 
@@ -309,7 +310,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
                 <p className="text-[11px] text-zinc-500 mt-0.5">{t("tp2Sub")}</p>
               </div>
               <p className="text-xl font-black text-emerald-400 num neon-emerald">
-                +{formatCurrency(tpAmount, selectedAccount?.currency ?? "USD")}
+                <RollingNumber value={`+${formatCurrency(tpAmount, selectedAccount?.currency ?? "USD")}`} delay={140} />
               </p>
             </div>
 
