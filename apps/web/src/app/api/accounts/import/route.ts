@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { autoDetectAndParse, parseByPlatform, detectInstrumentType } from "@/lib/parsers/index";
 import { apiError } from "@/lib/api-error";
+import { sesiuneaTranzactiei } from "@tradegx/core";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -104,6 +105,12 @@ export async function POST(req: NextRequest) {
           direction: trade.direction,
           entryPrice: trade.entryPrice,
           entryTime: trade.entryTime,
+          // Sesiunea, dedusa din ora de intrare.
+          //
+          // Calea asta nu trece prin formular, deci nu are killzone — dar ora o are
+          // mereu. Fara linia asta, tranzactiile sincronizate automat nu apareau deloc
+          // in matricea Setup x Sesiune, oricat de multe ar fi fost.
+          sessionType: sesiuneaTranzactiei({ entryTime: trade.entryTime }),
           exitPrice: trade.exitPrice,
           exitTime: trade.exitTime,
           lotSize: trade.lotSize,

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sesiuneaTranzactiei } from "@tradegx/core";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { tradeSchema } from "@/lib/validations";
@@ -116,6 +117,18 @@ export async function PATCH(
         ...(pnlMoney !== undefined ? { pnlMoney, pnlPercent } : {}),
         ...(rest.entryTime && { entryTime: new Date(rest.entryTime) }),
         ...(rest.exitTime !== undefined && { exitTime: rest.exitTime ? new Date(rest.exitTime) : null }),
+        // Dacă se schimbă killzone-ul sau ora de intrare, sesiunea trebuie să
+        // urmeze. Altfel o tranzacție reetichetată rămâne în coloana veche din
+        // matrice — sau, dacă n-avea sesiune, rămâne invizibilă pentru totdeauna.
+        ...(rest.killzone !== undefined || rest.entryTime !== undefined || rest.sessionType !== undefined
+          ? {
+              sessionType: sesiuneaTranzactiei({
+                sessionType: rest.sessionType,
+                killzone: rest.killzone ?? existing.killzone,
+                entryTime: rest.entryTime ?? existing.entryTime,
+              }),
+            }
+          : {}),
         durationMinutes,
       },
       include: {

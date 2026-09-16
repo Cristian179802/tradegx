@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sesiuneaTranzactiei } from "@tradegx/core";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -215,6 +216,12 @@ async function importRows(
           direction,
           entryPrice,
           entryTime,
+          // Sesiunea, dedusa din ora de intrare.
+          //
+          // Calea asta nu trece prin formular, deci nu are killzone — dar ora o are
+          // mereu. Fara linia asta, tranzactiile sincronizate automat nu apareau deloc
+          // in matricea Setup x Sesiune, oricat de multe ar fi fost.
+          sessionType: sesiuneaTranzactiei({ entryTime: entryTime }),
           exitPrice: exitPrice ?? null,
           exitTime: exitTime ?? null,
           lotSize,

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/twofactor";
 import { detectInstrumentType } from "@/lib/parsers/index";
 import type { ExchangeTrade } from "@/lib/exchanges/bybit";
+import { sesiuneaTranzactiei } from "@tradegx/core";
 
 // ── Motorul de sincronizare cu bursele ───────────────────────────────────────
 //
@@ -68,6 +69,12 @@ async function insertTrades(
         direction: t.direction,
         entryPrice: t.entryPrice,
         entryTime: t.entryTime,
+        // Sesiunea, dedusa din ora de intrare.
+        //
+        // Calea asta nu trece prin formular, deci nu are killzone — dar ora o are
+        // mereu. Fara linia asta, tranzactiile sincronizate automat nu apareau deloc
+        // in matricea Setup x Sesiune, oricat de multe ar fi fost.
+        sessionType: sesiuneaTranzactiei({ entryTime: t.entryTime }),
         exitPrice: t.exitPrice,
         exitTime: t.exitTime,
         lotSize: t.lotSize,

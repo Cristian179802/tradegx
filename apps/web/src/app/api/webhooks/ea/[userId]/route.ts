@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createHmac } from "crypto";
 import { detectInstrumentType } from "@/lib/parsers/index";
 import { checkTradingRuleViolations } from "@/lib/trading-rules";
+import { sesiuneaTranzactiei } from "@tradegx/core";
 
 function getUserToken(userId: string): string {
   const secret = process.env.NEXTAUTH_SECRET ?? "apex-trader-secret";
@@ -142,6 +143,12 @@ export async function POST(
         direction,
         entryPrice:     openPrice,
         entryTime:      openTime,
+        // Sesiunea, dedusa din ora de intrare.
+        //
+        // Calea asta nu trece prin formular, deci nu are killzone — dar ora o are
+        // mereu. Fara linia asta, tranzactiile sincronizate automat nu apareau deloc
+        // in matricea Setup x Sesiune, oricat de multe ar fi fost.
+        sessionType: sesiuneaTranzactiei({ entryTime: openTime }),
         exitPrice:      closePrice,
         exitTime:       closeTime,
         lotSize:        lots,

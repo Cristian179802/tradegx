@@ -6,6 +6,7 @@ export * from "./metrics";
 export * from "./smc";
 export * from "./smc-detect";
 export * from "./auth";
+export * from "./sessions";
 
 // Tipuri de domeniu partajate (aliniate cu Prisma, fără a importa @prisma/client)
 export type TradeDirection = "BUY" | "SELL";

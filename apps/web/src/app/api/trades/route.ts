@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sesiuneaTranzactiei } from "@tradegx/core";
 import { auth } from "@/lib/auth";
 import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
@@ -175,7 +176,16 @@ export async function POST(req: NextRequest) {
       setupType: data.setupType ?? null,
       killzone: data.killzone ?? null,
       timeframe: data.timeframe ?? null,
-      sessionType: data.sessionType ?? null,
+      // Sesiunea se DEDUCE, nu se așteaptă.
+      //
+      // Formularul de tranzacție trimite `killzone`, niciodată `sessionType` —
+      // deci linia asta era `data.sessionType ?? null`, adică mereu null, iar
+      // tranzacția nu apărea în matricea Setup × Sesiune. Etichetai degeaba.
+      sessionType: sesiuneaTranzactiei({
+        sessionType: data.sessionType,
+        killzone: data.killzone,
+        entryTime: data.entryTime,
+      }),
       status: data.status,
       tags: data.tags,
       riskMoney: riskMoney,
