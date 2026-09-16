@@ -268,7 +268,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               data-value={result.lotSize.toFixed(2)}
               className="text-5xl font-black text-white num tracking-tight"
             >
-              <RollingNumber value={result.lotSize.toFixed(2)} />
+              <RollingNumber value={result.lotSize.toFixed(2)} duration={420} stagger={30} />
             </p>
             <p className="text-sm text-zinc-500 mt-1">{t("standardLots")}</p>
           </div>
@@ -283,7 +283,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
                 riskColor === "emerald" ? "text-emerald-400 neon-emerald"
                 : riskColor === "amber" ? "text-amber-400 neon-amber"
                 : "text-rose-400 neon-rose")}>
-                <RollingNumber value={`$${result.riskAmount.toFixed(2)}`} delay={90} />
+                <RollingNumber value={`$${result.riskAmount.toFixed(2)}`} duration={420} stagger={30} />
               </p>
             </div>
             <div className={cn("rounded-xl p-4 border text-center",
@@ -295,7 +295,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
                 riskColor === "emerald" ? "text-emerald-400 neon-emerald"
                 : riskColor === "amber" ? "text-amber-400 neon-amber"
                 : "text-rose-400 neon-rose")}>
-                <RollingNumber value={`${result.riskPercent.toFixed(2)}%`} delay={160} />
+                <RollingNumber value={`${result.riskPercent.toFixed(2)}%`} duration={420} stagger={30} />
               </p>
             </div>
           </div>

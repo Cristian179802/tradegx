@@ -288,7 +288,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
                 <p className="text-[11px] text-zinc-500 mt-0.5">{t("maxRiskSub")}</p>
               </div>
               <p className="text-xl font-black text-rose-400 num neon-rose">
-                <RollingNumber value={`-${formatCurrency(riskAmount, selectedAccount?.currency ?? "USD")}`} />
+                <RollingNumber value={`-${formatCurrency(riskAmount, selectedAccount?.currency ?? "USD")}`} duration={420} stagger={30} />
               </p>
             </div>
 
@@ -299,7 +299,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
                 <p className="text-[11px] text-zinc-500 mt-0.5">{t("recVolumeSub")}</p>
               </div>
               <p className="text-2xl font-black text-indigo-300 num" style={{ textShadow: "0 0 12px rgba(99,102,241,0.6)" }}>
-                <RollingNumber value={String(lotSize)} delay={70} />
+                <RollingNumber value={String(lotSize)} duration={420} stagger={30} />
               </p>
             </div>
 
@@ -310,7 +310,7 @@ export function RiskManagerClient({ data }: { data: RiskData }) {
                 <p className="text-[11px] text-zinc-500 mt-0.5">{t("tp2Sub")}</p>
               </div>
               <p className="text-xl font-black text-emerald-400 num neon-emerald">
-                <RollingNumber value={`+${formatCurrency(tpAmount, selectedAccount?.currency ?? "USD")}`} delay={140} />
+                <RollingNumber value={`+${formatCurrency(tpAmount, selectedAccount?.currency ?? "USD")}`} duration={420} stagger={30} />
               </p>
             </div>
 
