@@ -18,7 +18,10 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { RollingNumber } from "@/components/ui/rolling-number";
-import { PREMIUM_PRICE_MONTHLY, PREMIUM_PRICE_ANNUAL, PREMIUM_PRICE_ANNUAL_PER_MONTH } from "@/lib/pricing";
+import {
+  PREMIUM_PRICE_MONTHLY, PREMIUM_PRICE_ANNUAL, PREMIUM_PRICE_ANNUAL_PER_MONTH,
+  PRICE_MONTHLY, PRICE_ANNUAL, PRICE_ANNUAL_PER_MONTH, ANNUAL_SAVINGS_PCT, fmtPrice,
+} from "@/lib/pricing";
 
 // label/free/pro = chei → pricing.* (traduse la randare; valorile bool raman)
 const FEATURES = [
@@ -95,20 +98,14 @@ export default function PricingPage() {
   }
 
   // Premium urmează aceeași regulă: echivalentul lunar se calculează din total.
-  const premiumDisplayPrice = annual
-    ? (PREMIUM_PRICE_ANNUAL_PER_MONTH % 1 === 0
-        ? String(PREMIUM_PRICE_ANNUAL_PER_MONTH)
-        : PREMIUM_PRICE_ANNUAL_PER_MONTH.toFixed(2).replace(".", ","))
-    : String(PREMIUM_PRICE_MONTHLY);
+  const premiumDisplayPrice = fmtPrice(annual ? PREMIUM_PRICE_ANNUAL_PER_MONTH : PREMIUM_PRICE_MONTHLY);
 
-  // Sursa de adevăr sunt cele două prețuri din Stripe: €10/lună și €100/an.
-  // Echivalentul lunar al planului anual se CALCULEAZĂ din total, ca să nu apară
-  // niciodată o nepotrivire între ce scrie pe pagină și ce se încasează.
-  const monthlyPrice = 10;
-  const annualTotal = 100;
-  const annualMonthly = annualTotal / 12; // 8,33
-  const displayPrice = annual ? annualMonthly.toFixed(2) : String(monthlyPrice);
-  const savings = Math.round(((monthlyPrice - annualMonthly) / monthlyPrice) * 100); // 17%
+  // Sursa de adevăr sunt cele două prețuri din Stripe, ținute în lib/pricing.
+  // Pagina nu-și mai scrie singură cifrele: altfel PRO ajungea „€8.33" cu punct
+  // și Premium „€20,83" cu virgulă, pe aceeași pagină.
+  const annualTotal = PRICE_ANNUAL;
+  const displayPrice = fmtPrice(annual ? PRICE_ANNUAL_PER_MONTH : PRICE_MONTHLY);
+  const savings = ANNUAL_SAVINGS_PCT;
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
@@ -251,7 +248,7 @@ export default function PricingPage() {
               </p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-black text-white num"><RollingNumber value={`€${displayPrice}`} /></span>
+              <span className="text-4xl font-black text-white num"><RollingNumber value={displayPrice} /></span>
               <span className="text-zinc-500 text-sm ml-2">{t("perMonth")}</span>
               {annual && (
                 <p className="text-xs text-zinc-500 mt-1">
@@ -320,7 +317,7 @@ export default function PricingPage() {
               <p className="text-zinc-400 text-sm">{t("premiumDesc")}</p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-black text-white num"><RollingNumber value={`€${premiumDisplayPrice}`} /></span>
+              <span className="text-4xl font-black text-white num"><RollingNumber value={premiumDisplayPrice} /></span>
               <span className="text-zinc-500 text-sm ml-2">{t("perMonth")}</span>
               {annual && (
                 <p className="text-xs text-zinc-500 mt-1">
