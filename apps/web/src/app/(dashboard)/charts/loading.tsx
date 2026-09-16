@@ -1,3 +1,5 @@
+import { aleatorStabil } from "@/lib/pseudo-random";
+
 export default function ChartsLoading() {
   return (
     <div className="space-y-4 h-[calc(100vh-7rem)]">
@@ -36,9 +38,14 @@ export default function ChartsLoading() {
           <div className="flex-1 flex flex-col h-full p-4">
             {/* Fake OHLC candlesticks */}
             <div className="flex-1 flex items-end gap-1 pb-8">
+              {/* Determinist: un schelet trebuie să existe din primul cadru,
+                  deci nu-l putem amâna până la montare — dar cu `Math.random()`
+                  serverul și browserul desenau alte lumânări, iar hidratarea
+                  pica. Variația rămâne, întâmplarea nu. */}
               {Array.from({ length: 60 }, (_, i) => {
-                const h = 30 + Math.sin(i * 0.3) * 20 + Math.random() * 15;
-                const bodyH = h * 0.5 + Math.random() * 10;
+                const r = aleatorStabil(i * 2654435761);
+                const h = 30 + Math.sin(i * 0.3) * 20 + r() * 15;
+                const bodyH = h * 0.5 + r() * 10;
                 return (
                   <div key={i} className="flex-1 flex flex-col items-center justify-end gap-0.5">
                     <div className="w-px bg-zinc-700/40" style={{ height: `${h}%` }} />

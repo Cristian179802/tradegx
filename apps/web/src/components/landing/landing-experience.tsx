@@ -20,6 +20,7 @@ import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { EASE, Reveal, BreathingGlow, MarketBackdrop } from "@/components/landing/fx";
 import { HeroCinematic } from "@/components/landing/hero-cinematic";
 import { MagneticButton } from "@/components/landing/parallax";
+import { aleatorStabil } from "@/lib/pseudo-random";
 
 // ── Landing experience ───────────────────────────────────────────────────────
 // Prezentare premium, parallax de sus până jos. Doar transform/opacity (GPU) +
@@ -718,12 +719,16 @@ const VISION_META = [
 ];
 
 function VisionTeaser({ t }: { t: TT }) {
-  // câmp de stele static (CSS pur, generat o singură dată)
-  const stars = React.useMemo(
-    () => Array.from({ length: 70 }, () => ({
-      x: Math.random() * 100, y: Math.random() * 100,
-      s: 1 + Math.random() * 1.6, o: 0.15 + Math.random() * 0.5,
-    })), []);
+  // Câmp de stele static — determinist, ca serverul și browserul să deseneze
+  // exact aceleași 70 de puncte. Cu `Math.random()` ieșeau alte poziții de
+  // fiecare parte și hidratarea pica pe pagina principală.
+  const stars = React.useMemo(() => {
+    const r = aleatorStabil(0x57a12);
+    return Array.from({ length: 70 }, () => ({
+      x: r() * 100, y: r() * 100,
+      s: 1 + r() * 1.6, o: 0.15 + r() * 0.5,
+    }));
+  }, []);
 
   return (
     <section className="tg-section relative px-6 overflow-hidden">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import * as React from "react";
 import Decimal from "decimal.js";
 import { Input } from "@/components/ui/input";
@@ -46,6 +46,13 @@ function isJPYPair(symbol: string): boolean {
 
 export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalculatorProps) {
   const t = useTranslations("calc");
+  // Locale EXPLICIT pentru cifre. Componenta e client dar se randeaza si pe
+  // server, iar `toLocaleString()` fara argument foloseste locale-ul
+  // sistemului: Node pune alt separator de mii decat browserul, hidratarea
+  // esueaza si React arunca #418. Erau 5 aparitii in jurnalul de productie,
+  // toate pe pagina asta.
+  const locale = useLocale();
+  const nrLocal = locale === "en" ? "en-US" : "ro-RO";
   const [accountId, setAccountId] = React.useState(accounts[0]?.id ?? "");
   const [riskPct, setRiskPct] = React.useState(String(defaultRiskPct));
   const [riskMode, setRiskMode] = React.useState<"percent" | "money">("percent");
@@ -120,13 +127,13 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
               <SelectContent className="bg-zinc-800 border-zinc-700">
                 {accounts.map((a) => (
                   <SelectItem key={a.id} value={a.id} className="text-zinc-100">
-                    {a.name} ({Number(a.balance).toLocaleString()} {a.currency})
+                    {a.name} ({Number(a.balance).toLocaleString(nrLocal)} {a.currency})
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-zinc-600 mt-1">
-              {t("balanceLabel")} <span className="text-zinc-400 num">{balance.toNumber().toLocaleString()} {account?.currency}</span>
+              {t("balanceLabel")} <span className="text-zinc-400 num">{balance.toNumber().toLocaleString(nrLocal)} {account?.currency}</span>
             </p>
           </div>
 

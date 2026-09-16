@@ -77,15 +77,31 @@ function fmtShort(value: number) {
   return `${sign}${abs.toFixed(2)}`;
 }
 
-// Salut localizat: primește textele deja traduse (morning/day/evening)
-function greeting(name: string, texts: { morning: string; day: string; evening: string }) {
-  const h = new Date().getHours();
+// ── Ora și data: se citesc DUPĂ montare, niciodată la randare ────────────────
+//
+// `new Date()` chemat în corpul componentei dă alt rezultat pe server decât în
+// browser, iar componenta asta se randează în amândouă. Serverul e pe UTC, iar
+// utilizatorul pe Europe/Bucharest: între miezul nopții și ora 3 serverul e încă
+// în ziua precedentă, deci textul serverului și cel al clientului nu se
+// potrivesc. React arunca „Minified React error #418" — hidratarea eșuată — și
+// se vede în jurnalul de erori: /dashboard și /calculator, de mai multe ori.
+//
+// Ceasul din pagină era deja făcut corect, cu `useEffect`. Salutul și data
+// folosesc acum aceeași sursă.
+
+/** Salut localizat: primește textele deja traduse (morning/day/evening). */
+function greeting(
+  acum: Date,
+  name: string,
+  texts: { morning: string; day: string; evening: string }
+) {
+  const h = acum.getHours();
   const salut = h < 12 ? texts.morning : h < 18 ? texts.day : texts.evening;
   return `${salut}, ${name}`;
 }
 
-function todayLocalized(locale: string) {
-  return new Date().toLocaleDateString(locale === "en" ? "en-US" : "ro-RO", {
+function todayLocalized(acum: Date, locale: string) {
+  return acum.toLocaleDateString(locale === "en" ? "en-US" : "ro-RO", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 }
@@ -146,6 +162,7 @@ function StatePanel({
   };
 }) {
   const up = pnlToday >= 0;
+  const locale = useLocale();
 
   return (
     <div className="tg-panel tg-boot tg-boot-edge relative overflow-hidden rounded-2xl border">
@@ -175,7 +192,10 @@ function StatePanel({
             </p>
             {hasAccountValue ? (
               <p className="text-[26px] leading-none font-black tabular-nums text-[color:var(--ink-1)]">
-                {accountValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                {/* Locale EXPLICIT. Cu `undefined`, Node alege altul decât
+                    browserul, iar separatorul de mii diferă — încă o hidratare
+                    eșuată, pe cea mai mare cifră de pe ecran. */}
+                {accountValue.toLocaleString(locale === "en" ? "en-US" : "ro-RO", { maximumFractionDigits: 2 })}
                 <span className="ml-1.5 text-[12px] font-bold text-[color:var(--ink-4)]">{currency}</span>
               </p>
             ) : (
@@ -423,13 +443,19 @@ export function DashboardClient({ data }: { data: DashboardData }) {
     recentTrades, pairPerformance, sparklines,
   } = data;
 
-  const [currentTime, setCurrentTime] = useState("");
+  // `null` până la montare: pe server nu există „acum" care să se potrivească
+  // cu al utilizatorului.
+  const [acum, setAcum] = useState<Date | null>(null);
   useEffect(() => {
-    const tick = () => setCurrentTime(new Date().toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+    const tick = () => setAcum(new Date());
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
+
+  const currentTime = acum
+    ? acum.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    : "";
 
   const maxPairPnl = Math.max(...pairPerformance.map(p => Math.abs(p.pnl)), 1);
 
@@ -472,12 +498,18 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         openPositions={openPositions}
         currency={currency}
         spark={sparklines.pnl}
-        greetingText={greeting(userName, {
-          morning: t("greetingMorning"),
-          day: t("greetingDay"),
-          evening: t("greetingEvening"),
-        })}
-        dateText={todayLocalized(locale)}
+        // Până la montare arătăm doar numele: e adevărat la orice oră, în orice
+        // fus. Salutul complet apare în aceeași clipă cu ceasul.
+        greetingText={
+          acum
+            ? greeting(acum, userName, {
+                morning: t("greetingMorning"),
+                day: t("greetingDay"),
+                evening: t("greetingEvening"),
+              })
+            : userName
+        }
+        dateText={acum ? todayLocalized(acum, locale) : ""}
         timeText={currentTime}
         labels={{
           balance: t("accountValue"),

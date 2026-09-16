@@ -60,18 +60,38 @@ export function BreathingGlow({ className }: { className?: string }) {
 }
 
 // ── Fundal ambiental global: particule care plutesc ─────────────────────────
-export function MarketBackdrop() {
-  const particles = React.useMemo(
-    () => Array.from({ length: 14 }, () => ({
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      size: 2 + Math.random() * 3,
-      dur: 6 + Math.random() * 8,
-      delay: Math.random() * 6,
-      up: Math.random() > 0.5,
-    })), []);
+interface Particula {
+  left: number; top: number; size: number; dur: number; delay: number; up: boolean;
+}
 
-  const reduced = prefersReduced();
+export function MarketBackdrop() {
+  // Particulele se nasc DUPĂ montare, nu la randare.
+  //
+  // `Math.random()` chemat în corpul componentei dă alte poziții pe server decât
+  // în browser. React primește un HTML cu 14 puncte într-un loc, randează 14
+  // puncte în alt loc, încearcă să împace nodurile și pică cu „Failed to execute
+  // 'removeChild' on 'Node'". E în jurnalul de erori al producției, pe `/`.
+  //
+  // `prefersReduced()` avea aceeași problemă în mic: pe server întoarce mereu
+  // `false`, fiindcă nu există `window` — deci serverul randa particule pe care
+  // clientul le scotea imediat.
+  //
+  // Sunt pur decorative: absența lor în primul cadru nu se vede.
+  const [particles, setParticles] = React.useState<Particula[]>([]);
+
+  React.useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setParticles(
+      Array.from({ length: 14 }, () => ({
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        size: 2 + Math.random() * 3,
+        dur: 6 + Math.random() * 8,
+        delay: Math.random() * 6,
+        up: Math.random() > 0.5,
+      }))
+    );
+  }, []);
 
   return (
     <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
@@ -79,7 +99,7 @@ export function MarketBackdrop() {
       <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 20% 10%, rgba(99,102,241,0.06), transparent 45%), radial-gradient(ellipse at 85% 60%, rgba(139,92,246,0.05), transparent 50%)" }} />
 
       {/* Particule care plutesc */}
-      {!reduced && particles.map((p, i) => (
+      {particles.map((p, i) => (
         <motion.span
           key={i}
           className="absolute rounded-full"
