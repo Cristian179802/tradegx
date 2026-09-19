@@ -380,11 +380,15 @@
     "lots": "loturi",
     "paramsTitle": "Parametri calcul",
     "pipEquals": "1 pip = {val} pentru {symbol}",
-    "pipValueLabel": "Valoare pip / lot standard ($)",
-    "pipAuto": "(auto: {val}$)",
+    "pipValueLabel": "Valoare pip / lot standard ({moneda})",
+    "pipAuto": "(calculat: {val})",
     "standardLots": "loturi standard",
     "emptyTitle": "Introdu parametrii pentru a calcula volumul",
-    "emptyHint": "Stop loss pips + risc → volum optim"
+    "emptyHint": "Stop loss pips + risc → volum optim",
+    "pipManual": "Valoare introdusă manual — o folosim pe asta.",
+    "pipLoading": "Se ia prețul…",
+    "pipFromPrice": "Calculat din prețul curent {pret}.",
+    "pipUnknown": "Nu putem calcula valoarea pipului pentru {symbol} pe un cont în {moneda}. Ia-o din platformă și scrie-o aici."
   },
   "market": {
     "title": "Selector Piață",

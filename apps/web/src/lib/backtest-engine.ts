@@ -1,3 +1,4 @@
+import { pipSize, pipValue as pipValueCore } from "@tradegx/core";
 ﻿// ─── TradeGx Backtesting Engine ───────────────────────────────────────────
 // Pure functions — no I/O, no Prisma. Receives candles + config, returns results.
 
@@ -403,40 +404,36 @@ function calcDIPlusMinus(
 
 // ─── Pip value & lot sizing ────────────────────────────────────────────────────
 
-function pipSize(symbol: string): number {
-  // Gold/Silver/Metals: pip = $0.01
-  if (symbol === "XAUUSD" || symbol === "XAGUSD" || symbol === "XPTUSD") return 0.01;
-  // Indices (US30, NAS100, SP500, etc.): pip = 1 point
-  if (["US30","NAS100","SP500","US2000","GER40","UK100"].some(s => symbol.includes(s))) return 1.0;
-  // Crypto: pip = $0.01
-  if (symbol.includes("BTC") || symbol.includes("ETH") || symbol.includes("BNB") || symbol.includes("SOL") || symbol.includes("XRP")) return 0.01;
-  // Oil/Commodities: pip = $0.01
-  if (symbol === "CRUDE" || symbol === "BRENT" || symbol === "NATGAS") return 0.01;
-  // JPY pairs
-  if (symbol.includes("JPY")) return 0.01;
-  // Standard forex
-  return 0.0001;
-}
 
-function pipValue(symbol: string): number {
-  // USD value of 1 pip for 1 standard lot
-  // Gold: 100 oz lot, $0.01 pip → $1/pip
-  if (symbol === "XAUUSD") return 1;
-  // Silver: 5000 oz lot, $0.001 pip → $5/pip
-  if (symbol === "XAGUSD") return 5;
-  // Platinum: 50 oz lot
-  if (symbol === "XPTUSD") return 0.5;
-  // Indices: ~$5 per pip per mini-lot (use $5 for simplicity at 0.01 lot level)
-  if (["US30","NAS100","SP500","US2000"].some(s => symbol.includes(s))) return 5;
-  // Crypto: very variable, use $1/pip as conservative estimate
-  if (symbol.includes("BTC") || symbol.includes("ETH")) return 1;
-  if (symbol.includes("BNB") || symbol.includes("SOL") || symbol.includes("XRP")) return 1;
-  // Oil: 1000 barrels per lot, $0.01 pip → $10/pip
-  if (symbol === "CRUDE" || symbol === "BRENT") return 10;
-  // JPY pairs
-  if (symbol.includes("JPY")) return 1000;
-  // Standard forex: $10/pip
-  return 10;
+
+// Mărimea pipului vine din `@tradegx/core` — o singură definiție pentru toată
+// aplicația (`pipSize` e importat sus).
+
+// Valori pe instrumentele care NU sunt perechi valutare. Rămân aici fiindcă
+// mărimea contractului diferă de la broker la broker, iar backtestul trebuie
+// să dea un rezultat reproductibil, nu unul care depinde de cine îl rulează.
+const PIP_NEFOREX: Record<string, number> = {
+  XAUUSD: 1,     // 100 uncii × 0,01
+  XAGUSD: 50,    // 5.000 uncii × 0,01
+  XPTUSD: 1,
+  CRUDE: 10,     // 1.000 barili × 0,01
+  BRENT: 10,
+  NATGAS: 10,
+};
+
+/**
+ * Valoarea unui pip pentru un lot, în dolari.
+ *
+ * Pe perechile valutare se CALCULEAZĂ din preț. Varianta de dinainte întorcea
+ * 1000 pentru orice pereche cu JPY: alea sunt yeni, nu dolari. Un backtest pe
+ * USDJPY raporta astfel un profit de ~150 de ori mai mare decât cel real.
+ */
+function pipValue(symbol: string, price: number): number {
+  const fix = PIP_NEFOREX[symbol];
+  if (fix != null) return fix;
+  if (["US30", "NAS100", "SP500", "US2000", "GER40", "UK100"].some((s) => symbol.includes(s))) return 5;
+  if (["BTC", "ETH", "BNB", "SOL", "XRP"].some((s) => symbol.includes(s))) return 1;
+  return pipValueCore({ symbol, price, accountCurrency: "USD" }) ?? 10;
 }
 
 function calcLotSize(
@@ -450,7 +447,7 @@ function calcLotSize(
   const slDistance = Math.abs(entryPrice - stopLossPrice);
   const slPips = slDistance / pipSize(symbol);
   if (slPips <= 0) return 0.01;
-  const pv = pipValue(symbol);
+  const pv = pipValue(symbol, entryPrice);
   const lots = riskAmount / (slPips * pv);
   return Math.max(0.01, Math.min(parseFloat(lots.toFixed(2)), 50));
 }
@@ -1032,8 +1029,8 @@ export function runBacktest(candles: Candle[], config: BacktestConfig): Backtest
 
       if (exitPrice !== null) {
         const rawPnl = openTrade.direction === "BUY"
-          ? (exitPrice - openTrade.entryPrice) / pipSize(symbol) * pipValue(symbol) * openTrade.lotSize
-          : (openTrade.entryPrice - exitPrice) / pipSize(symbol) * pipValue(symbol) * openTrade.lotSize;
+          ? (exitPrice - openTrade.entryPrice) / pipSize(symbol) * pipValue(symbol, exitPrice) * openTrade.lotSize
+          : (openTrade.entryPrice - exitPrice) / pipSize(symbol) * pipValue(symbol, exitPrice) * openTrade.lotSize;
         const totalComm = openTrade.commission * 2; // entry + exit
         const netPnl = rawPnl - totalComm;
 
@@ -1100,8 +1097,8 @@ export function runBacktest(candles: Candle[], config: BacktestConfig): Backtest
     const lastC = candles[candles.length - 1];
     const exitPrice = lastC.close;
     const rawPnl = openTrade.direction === "BUY"
-      ? (exitPrice - openTrade.entryPrice) / pipSize(symbol) * pipValue(symbol) * openTrade.lotSize
-      : (openTrade.entryPrice - exitPrice) / pipSize(symbol) * pipValue(symbol) * openTrade.lotSize;
+      ? (exitPrice - openTrade.entryPrice) / pipSize(symbol) * pipValue(symbol, exitPrice) * openTrade.lotSize
+      : (openTrade.entryPrice - exitPrice) / pipSize(symbol) * pipValue(symbol, exitPrice) * openTrade.lotSize;
     const totalComm = openTrade.commission * 2;
     const netPnl = rawPnl - totalComm;
     const rr = Math.abs(openTrade.tp - openTrade.entryPrice) /

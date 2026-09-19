@@ -168,7 +168,7 @@ export function RiskLab({
         {/* Rezultate */}
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <Readout label={T1.lot[lang]} value={lot.toFixed(2)} unit={T1.lots[lang]} tone="accent" big />
+            <Readout label={T1.lot[lang]} value={lot == null ? "—" : lot.toFixed(2)} unit={T1.lots[lang]} tone="accent" big />
             <Readout label={T1.riskMoney[lang]} value={`$${fmtMoney(riskMoney)}`} tone="loss" big />
           </div>
 

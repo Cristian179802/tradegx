@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Calculator, TrendingUp } from "lucide-react";
+import { pipValue, perecheDeConversie, pipSize } from "@tradegx/core";
 import { RollingNumber } from "@/components/ui/rolling-number";
 
 interface Account {
@@ -28,22 +29,10 @@ interface LotSizeCalculatorProps {
   defaultRiskPct?: number;
 }
 
-// Approximate pip values per standard lot in USD (updated manually)
-const PIP_VALUES: Record<string, number> = {
-  EURUSD: 10, GBPUSD: 10, AUDUSD: 10, NZDUSD: 10, USDCAD: 7.7,
-  USDCHF: 10.9, USDJPY: 6.9, EURGBP: 12.5, EURJPY: 6.9, GBPJPY: 6.9,
-  XAUUSD: 10, XAGUSD: 50, BTCUSD: 1, ETHUSD: 1,
-  DEFAULT: 10,
-};
-
-function getPipValue(symbol: string): number {
-  const upper = symbol.toUpperCase().replace(/[^A-Z]/g, "");
-  return PIP_VALUES[upper] ?? PIP_VALUES.DEFAULT;
-}
-
-function isJPYPair(symbol: string): boolean {
-  return symbol.toUpperCase().includes("JPY");
-}
+// Valorile pip erau scrise de mână aici: USDJPY 6.9, USDCHF 10.9, USDCAD 7.7.
+// Au fost corecte la un curs de acum câteva luni. Valoarea unui pip depinde de
+// cursul zilei, iar tabelul nu avea cum să știe asta — pe un calculator de lot,
+// eroarea se plătește direct. Acum se cere prețul și se calculează.
 
 export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalculatorProps) {
   const t = useTranslations("calc");
@@ -64,6 +53,56 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
 
   const account = accounts.find((a) => a.id === accountId);
   const balance = account ? new Decimal(Number(account.balance)) : new Decimal(0);
+  const moneda = account?.currency ?? "USD";
+
+  // ── Valoarea pipului, din preț ─────────────────────────────────────────────
+  //
+  // Două cotații, în cel mai rău caz: simbolul însuși și — doar pentru perechi
+  // încrucișate (EURGBP pe cont în dolari) — perechea de conversie.
+  const [pret, setPret] = React.useState<number | null>(null);
+  const [cursuri, setCursuri] = React.useState<Record<string, number>>({});
+  const [ceremPret, setCeremPret] = React.useState(false);
+
+  React.useEffect(() => {
+    const sim = symbol.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (sim.length < 3) return;
+
+    let anulat = false;
+    const ceasornic = setTimeout(async () => {
+      setCeremPret(true);
+      const iaPret = async (s: string): Promise<number | null> => {
+        try {
+          const r = await fetch(`/api/charts/quote?symbol=${s}`);
+          if (!r.ok) return null;
+          const j = await r.json();
+          return typeof j.price === "number" ? j.price : null;
+        } catch {
+          return null;
+        }
+      };
+
+      const p = await iaPret(sim);
+      if (anulat) return;
+      setPret(p);
+
+      const conv = perecheDeConversie(sim, moneda);
+      if (conv) {
+        const c = await iaPret(conv);
+        if (anulat) return;
+        setCursuri(c == null ? {} : { [conv]: c });
+      } else {
+        setCursuri({});
+      }
+      if (!anulat) setCeremPret(false);
+    }, 400);
+
+    return () => { anulat = true; clearTimeout(ceasornic); setCeremPret(false); };
+  }, [symbol, moneda]);
+
+  const pipCalculat = React.useMemo(
+    () => pipValue({ symbol, price: pret ?? undefined, accountCurrency: moneda, rates: cursuri }),
+    [symbol, pret, moneda, cursuri],
+  );
 
   // Derived calculations
   const result = React.useMemo(() => {
@@ -81,11 +120,8 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
       riskAmount = new Decimal(money);
     }
 
-    const pipVal = customPipValue
-      ? parseFloat(customPipValue)
-      : getPipValue(symbol);
-
-    if (!pipVal) return null;
+    const pipVal = customPipValue ? parseFloat(customPipValue) : pipCalculat;
+    if (!pipVal || pipVal <= 0) return null;
 
     // lotSize = riskAmount / (slPips * pipValuePerLot)
     const lotSize = riskAmount.div(new Decimal(slPips).mul(new Decimal(pipVal)));
@@ -100,7 +136,7 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
       riskPercent: riskPercent.toDecimalPlaces(2),
       pipValue: new Decimal(pipVal),
     };
-  }, [balance, riskPct, riskMoney, riskMode, stopLossPips, symbol, customPipValue]);
+  }, [balance, riskPct, riskMoney, riskMode, stopLossPips, customPipValue, pipCalculat]);
 
   const riskPctNum = parseFloat(riskPct) || 0;
   const riskColor = riskPctNum <= 1 ? "emerald" : riskPctNum <= 2 ? "amber" : "rose";
@@ -227,27 +263,42 @@ export function LotSizeCalculator({ accounts, defaultRiskPct = 1 }: LotSizeCalcu
             />
             {symbol && (
               <p className="text-xs text-zinc-600 mt-1">
-                {t("pipEquals", { val: isJPYPair(symbol) ? "0.01" : "0.0001", symbol })}
+                {t("pipEquals", { val: String(pipSize(symbol)), symbol })}
               </p>
             )}
           </div>
 
-          {/* Custom pip value */}
+          {/* Valoarea pipului: calculată din preț, sau cerută dacă n-o putem ști */}
           <div>
             <label className="text-xs font-medium text-zinc-400 block mb-1">
-              {t("pipValueLabel")}{" "}
-              <span className="text-zinc-600 font-normal">
-                {t("pipAuto", { val: getPipValue(symbol) })}
-              </span>
+              {t("pipValueLabel", { moneda })}{" "}
+              {pipCalculat != null && (
+                <span className="text-zinc-600 font-normal">
+                  {t("pipAuto", { val: pipCalculat.toFixed(2) })}
+                </span>
+              )}
             </label>
             <Input
               type="number"
               step="0.01"
-              placeholder={String(getPipValue(symbol))}
+              placeholder={pipCalculat != null ? pipCalculat.toFixed(2) : "—"}
               className="bg-zinc-800 border-zinc-700 text-zinc-100 num input-cyber"
               value={customPipValue}
               onChange={(e) => setCustomPipValue(e.target.value)}
             />
+            {customPipValue ? (
+              <p className="text-[11px] text-zinc-600 mt-1">{t("pipManual")}</p>
+            ) : ceremPret ? (
+              <p className="text-[11px] text-zinc-600 mt-1">{t("pipLoading")}</p>
+            ) : pipCalculat != null && pret != null ? (
+              <p className="text-[11px] text-zinc-600 mt-1">
+                {t("pipFromPrice", { pret: pret.toLocaleString(nrLocal, { maximumFractionDigits: 5 }) })}
+              </p>
+            ) : (
+              <p className="text-[11px] text-amber-400/80 mt-1">
+                {t("pipUnknown", { symbol: symbol.toUpperCase(), moneda })}
+              </p>
+            )}
           </div>
         </div>
       </div>

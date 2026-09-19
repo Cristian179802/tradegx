@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sesiuneaTranzactiei } from "@tradegx/core";
+import { sesiuneaTranzactiei, calcRiskMoney } from "@tradegx/core";
 import { auth } from "@/lib/auth";
 import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
@@ -14,23 +14,30 @@ function calcPnlPercent(pnlMoney: number, balance: number): number {
 }
 
 function calcRisk(
-  direction: string,
   entryPrice: number,
   stopLoss: number | null | undefined,
   lotSize: number,
   balance: number,
-  symbol = ""
+  symbol = "",
+  accountCurrency = "USD"
 ) {
   if (!stopLoss) return { riskMoney: null, riskPercent: null };
-  const priceDiff =
-    direction === "BUY"
-      ? entryPrice - stopLoss
-      : stopLoss - entryPrice;
-  // Detectează perechile JPY (pip = 0.01, nu 0.0001)
-  const isJPY = /JPY/i.test(symbol);
-  const contractSize = 100000;
-  const pipSize = isJPY ? 0.01 : 0.0001;
-  const riskMoney = Math.abs(priceDiff) * lotSize * contractSize * pipSize;
+
+  // Valoarea pipului se calculează din preț și din moneda contului — vezi
+  // `packages/core/src/pip.ts`. Varianta de dinainte înmulțea pip × contract și
+  // trata rezultatul ca dolari, deci pe perechile cu JPY raporta un risc de
+  // ~150 de ori mai mare decât cel real.
+  //
+  // Când nu se poate ști (pereche încrucișată, fără curs), rămâne `null`.
+  // Un câmp gol e onest; o cifră greșită despre cât riști, nu.
+  const riskMoney = calcRiskMoney({
+    entryPrice,
+    stopLoss,
+    lotSize,
+    symbol,
+    accountCurrency,
+  });
+  if (riskMoney == null) return { riskMoney: null, riskPercent: null };
   const riskPercent = balance > 0 ? (riskMoney / balance) * 100 : null;
   return { riskMoney, riskPercent };
 }
@@ -141,12 +148,12 @@ export async function POST(req: NextRequest) {
   const pnlMoney = data.pnlMoney ?? null;
   const pnlPercent = pnlMoney != null ? calcPnlPercent(pnlMoney, balance) : null;
   const { riskMoney, riskPercent } = calcRisk(
-    data.direction,
     data.entryPrice,
     data.stopLoss,
     data.lotSize,
     balance,
-    data.symbol   // pentru detectarea corectă a pipSize JPY
+    data.symbol,
+    account.currency
   );
 
   let durationMinutes: number | null = null;

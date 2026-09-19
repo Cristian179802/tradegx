@@ -1,6 +1,7 @@
 // @tradegx/core — logică pură partajată între web și mobile.
 // SINGURA sursă de adevăr pentru risc, SMC și tipuri shared.
 
+export * from "./pip";
 export * from "./risk";
 export * from "./metrics";
 export * from "./smc";

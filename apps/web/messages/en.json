@@ -380,11 +380,15 @@
     "lots": "lots",
     "paramsTitle": "Calculation parameters",
     "pipEquals": "1 pip = {val} for {symbol}",
-    "pipValueLabel": "Pip value / standard lot ($)",
-    "pipAuto": "(auto: ${val})",
+    "pipValueLabel": "Pip value / standard lot ({moneda})",
+    "pipAuto": "(computed: {val})",
     "standardLots": "standard lots",
     "emptyTitle": "Enter the parameters to calculate the volume",
-    "emptyHint": "Stop loss pips + risk → optimal volume"
+    "emptyHint": "Stop loss pips + risk → optimal volume",
+    "pipManual": "Manually entered — this is the value we use.",
+    "pipLoading": "Fetching the price…",
+    "pipFromPrice": "Computed from the current price {pret}.",
+    "pipUnknown": "We cannot compute the pip value for {symbol} on a {moneda} account. Take it from your platform and enter it here."
   },
   "market": {
     "title": "Market Selector",

@@ -121,7 +121,9 @@ export function RiskPanel({
   const forex = isForex(symbol);
   const riskMoney = balance * (riskPct / 100);
   const rr = entry && sl && tp ? riskReward(entry, sl, tp) : null;
-  const lots = forex && entry && sl ? positionSize({ balance, riskPct, entryPrice: entry, stopLoss: sl, symbol }) : null;
+  const lots = forex && entry && sl
+    ? positionSize({ balance, riskPct, entryPrice: entry, stopLoss: sl, symbol, price: price ?? entry, accountCurrency: currency })
+    : null;
   const units = !forex && entry && sl && Math.abs(entry - sl) > 0 ? riskMoney / Math.abs(entry - sl) : null;
   const rewardMoney = rr != null ? riskMoney * rr : null;
   const slWrong = direction === "BUY" ? sl >= entry : sl <= entry;
