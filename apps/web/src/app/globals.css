@@ -900,59 +900,6 @@ tr.cyber-row:hover {
   initial-value: 135deg;
 }
 
-.tg-iridescent {
-  position: relative;
-  isolation: isolate;
-}
-.tg-iridescent::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;                 /* grosimea inelului */
-  background: conic-gradient(
-    from var(--tg-ir-angle, 135deg),
-    rgba(109,117,246,0)    0deg,
-    rgba(109,117,246,0.38) 55deg,
-    rgba(167,139,250,0.45) 110deg,
-    rgba(96,214,255,0.34)  165deg,
-    rgba(109,117,246,0)    225deg,
-    rgba(109,117,246,0)    360deg
-  );
-  /* Taie interiorul: rămâne doar rama de 1px */
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  opacity: 0;
-  transition: opacity 420ms ease;
-  pointer-events: none;
-  z-index: 2;
-}
-.tg-iridescent:hover::after { opacity: 1; }
-
-/* Specular: o pată de lumină rece care urmărește cursorul, peste bordură.
-   --tg-ir-x/y vin tot din JS, în procente. */
-.tg-iridescent::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: radial-gradient(
-    120px circle at var(--tg-ir-x, 50%) var(--tg-ir-y, 0%),
-    rgba(255,255,255,0.06),
-    transparent 60%
-  );
-  opacity: 0;
-  transition: opacity 420ms ease;
-  pointer-events: none;
-  z-index: 1;
-}
-.tg-iridescent:hover::before { opacity: 1; }
-
-@media (prefers-reduced-motion: reduce) {
-  .tg-iridescent::after, .tg-iridescent::before { transition: none; }
-}
-
 /* ── Focus vizibil, accesibil și de brand ──────────────────────────────────
    Niciodată `outline: none` fără înlocuitor — navigarea cu tastatura trebuie
    să fie evidentă. */
@@ -1226,8 +1173,12 @@ tr.cyber-row:hover {
               box-shadow 220ms ease;
 }
 
-/* Lumina de pe suprafață. `z-index: 0` o ține sub conținut, iar `isolation`
-   de mai sus împiedică scurgerea în afara cardului. */
+/* Lumina de pe suprafață.
+
+   `z-index: -1` + `isolation: isolate` pe card = lumina stă deasupra
+   fundalului și SUB conținut, fără nicio regulă pe copii. Varianta de dinainte
+   punea `position: relative` pe toți copiii, ceea ce bătea utilitarul
+   `absolute` al lui Tailwind și rupea orice card cu elemente poziționate. */
 .tg-lumina::after,
 .tg-panel::after,
 .tg-surface::after,
@@ -1236,7 +1187,7 @@ tr.cyber-row:hover {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   border-radius: inherit;
   pointer-events: none;
   opacity: var(--lit, 0);
@@ -1250,17 +1201,6 @@ tr.cyber-row:hover {
     color-mix(in oklab, var(--accent) 12%, transparent) 30%,
     transparent 68%
   );
-}
-
-/* Conținutul stă deasupra luminii. */
-.tg-lumina > *,
-.tg-panel > *,
-.tg-surface > *,
-.premium-card > *,
-.card-3d > *,
-.cyber-card > * {
-  position: relative;
-  z-index: 1;
 }
 
 /* Marginea de sus, aprinsă în dreptul cursorului. La `--lit: 0` rămâne linia
@@ -1311,8 +1251,14 @@ tr.cyber-row:hover {
   opacity: 1;
   transform: none;
 }
+/* Conținutul tot se dezvăluie, dar prin opacitate: nu se mișcă nimic pe ecran. */
 @media (prefers-reduced-motion: reduce) {
-  .tg-reveal { opacity: 1; transform: none; transition: none; }
+  .tg-reveal {
+    transform: none;
+    transition: opacity 260ms ease;
+    transition-delay: var(--intarziere, 0ms);
+  }
+  .tg-reveal.vazut { opacity: 1; }
 }
 
 /* ── Scheletul de încărcare: instrument care pornește ───────────────────────
@@ -1357,8 +1303,10 @@ tr.cyber-row:hover {
 @keyframes tg-traseaza {
   to { stroke-dashoffset: 0; }
 }
+/* Trasarea rămâne: o linie care se desenează nu deplasează nimic pe ecran.
+   O scurtăm, atât. */
 @media (prefers-reduced-motion: reduce) {
-  .tg-trasare { animation: none; stroke-dashoffset: 0; }
+  .tg-trasare { animation-duration: 400ms; }
 }
 
 /* ── Pulsul zilei ───────────────────────────────────────────────────────────
@@ -1396,8 +1344,12 @@ body[data-puls="jos"]::before { opacity: 1; --puls: rgba(251, 92, 114, 0.05); }
 .tg-pagina {
   animation: tg-intrare 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+/* Aceeași regulă: pagina nouă APARE, dar fără să urce. */
 @media (prefers-reduced-motion: reduce) {
-  .tg-pagina { animation: none; }
+  .tg-pagina { animation: tg-aparitie 200ms ease both; }
+}
+@keyframes tg-aparitie {
+  from { opacity: 0; }
 }
 
 ::view-transition-old(root) {

@@ -18,7 +18,6 @@ import { AmbientState } from "@/components/dashboard/ambient-state";
 import { AutoRefresh } from "@/components/dashboard/auto-refresh";
 import { RollingNumber } from "@/components/ui/rolling-number";
 import { Sparkline } from "@/components/charts/sparkline";
-import { useIridescent } from "@/components/ui/use-iridescent";
 import { cn } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -286,13 +285,10 @@ const ACCENT_MAP = {
 
 function KPICard({ label, value, sub, trend, sparkData, sparkColor, icon: Icon, accent = "indigo", delay = 0 }: KPICardProps) {
   const a = ACCENT_MAP[accent];
-  const ir = useIridescent<HTMLDivElement>();
   return (
     <div
-      ref={ir.ref}
-      onMouseMove={ir.onMouseMove}
       className={cn(
-        "relative rounded-2xl border overflow-hidden transition-all duration-300 group cursor-default tg-boot tg-boot-edge tg-iridescent",
+        "relative rounded-2xl border overflow-hidden group cursor-default tg-boot tg-boot-edge tg-lumina",
         a.card
       )}
       style={{
