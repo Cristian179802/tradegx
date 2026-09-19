@@ -201,7 +201,12 @@
     "pw1": "10,000 simulations on the real distribution of your trades",
     "pw2": "Probability of hitting the target vs. risk of failing the challenge",
     "pw3": "Equity percentiles + histogram + alternative paths",
-    "pw4": "Configurable parameters: target, max drawdown, number of trades"
+    "pw4": "Configurable parameters: target, max drawdown, number of trades",
+    "conMedian": "Median",
+    "conBanda50": "50% of scenarios",
+    "conBanda90": "90% of scenarios",
+    "conTarget": "Target",
+    "conRuin": "Limit"
   },
   "billing": {
     "title": "Subscription & Billing",
@@ -3148,6 +3153,9 @@
     "total": "Total",
     "empty": "No trades yet with both setup AND session filled in. Add them when logging trades to see what works, and when.",
     "smallSampleLegend": "Striped cells have fewer than {prag} trades. A percentage on that few isn't a statistic — one more trade moves it by tens of points.",
-    "smallSampleTip": "Only {n} trades — below the {prag} threshold where a percentage means something"
+    "smallSampleTip": "Only {n} trades — below the {prag} threshold where a percentage means something",
+    "relief": "Relief",
+    "plat": "Flat",
+    "smallSampleShort": "Under {prag} trades — too few to mean anything."
   }
 }

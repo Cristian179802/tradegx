@@ -22,6 +22,8 @@ interface SimResult {
   percentiles: { p5: number; p25: number; p50: number; p75: number; p95: number };
   samplePaths: number[][]; // câteva trasee de equity pentru vizual
   avgMaxDD: number;
+  /** Conul: percentilele echității la FIECARE pas, nu doar la final. */
+  con: { p5: number[]; p25: number[]; p50: number[]; p75: number[]; p95: number[] };
 }
 
 function simulate(
@@ -36,6 +38,18 @@ function simulate(
   let hitRuin = 0;
   let ddSum = 0;
   const samplePaths: number[][] = [];
+
+  // Echitatea tuturor simulărilor, la fiecare pas. De aici iese conul.
+  // nSims × (nTrades+1) numere: la valorile din pagină, sub doi megaocteți.
+  // `Float64Array` în loc de `number[]` fiindcă la zeci de mii de valori
+  // diferența de alocare chiar se simte în browser.
+  const laPas: Float64Array[] = Array.from(
+    { length: nTrades + 1 },
+    () => new Float64Array(nSims),
+  );
+
+  // Toate simulările pornesc din 100.
+  laPas[0]!.fill(100);
 
   for (let s = 0; s < nSims; s++) {
     let equity = 100;
@@ -52,6 +66,7 @@ function simulate(
       const dd = ((peak - equity) / peak) * 100;
       if (dd > maxDD) maxDD = dd;
 
+      laPas[i + 1]![s] = equity;
       if (s < 6) path.push(equity);
 
       if (outcome === null) {
@@ -70,6 +85,18 @@ function simulate(
   const sorted = [...finals].sort((a, b) => a - b);
   const q = (p: number) => sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))];
 
+  // Sortăm o dată pe pas și citim cele cinci praguri din același vector.
+  const con = { p5: [] as number[], p25: [] as number[], p50: [] as number[], p75: [] as number[], p95: [] as number[] };
+  for (const pas of laPas) {
+    const v = pas.slice().sort();
+    const la = (p: number) => v[Math.min(v.length - 1, Math.floor(p * v.length))]!;
+    con.p5.push(la(0.05));
+    con.p25.push(la(0.25));
+    con.p50.push(la(0.5));
+    con.p75.push(la(0.75));
+    con.p95.push(la(0.95));
+  }
+
   return {
     pTarget: (hitTarget / nSims) * 100,
     pRuin: (hitRuin / nSims) * 100,
@@ -78,6 +105,7 @@ function simulate(
     percentiles: { p5: q(0.05), p25: q(0.25), p50: q(0.5), p75: q(0.75), p95: q(0.95) },
     samplePaths,
     avgMaxDD: ddSum / nSims,
+    con,
   };
 }
 
@@ -131,37 +159,92 @@ function Histogram({ finals, targetPct, axisLabel }: { finals: number[]; targetP
 }
 
 // ── Trasee equity mostră ────────────────────────────────────────────────────
-function Paths({ paths, targetPct, maxDDPct }: { paths: number[][]; targetPct: number; maxDDPct: number }) {
+// ── Conul de incertitudine ──────────────────────────────────────────────────
+//
+// Înainte, aici erau șase trasee colorate. Șase trasee din cinci mii nu spun
+// nimic despre probabilitate: ochiul le citește ca pe șase VIITORI POSIBILI și
+// le dă tuturor aceeași greutate. Dacă din întâmplare cinci ies bine, pleci cu
+// o impresie falsă.
+//
+// Conul arată DISTRIBUȚIA: între ce valori stau 90% din scenarii, între ce
+// valori stau jumătate, și pe unde trece mediana. Aceeași simulare, citită
+// onest. Forma lui spune și altceva, care nu se vede în procente: incertitudinea
+// crește cu fiecare tranzacție — de asta e un con, nu un tub.
+function Con({
+  con, targetPct, maxDDPct, etichete,
+}: {
+  con: { p5: number[]; p25: number[]; p50: number[]; p75: number[]; p95: number[] };
+  targetPct: number;
+  maxDDPct: number;
+  etichete: { median: string; banda50: string; banda90: string; target: string; ruin: string };
+}) {
   const W = 560;
-  const H = 180;
-  const all = paths.flat();
-  const min = Math.min(...all, 100 - maxDDPct - 5);
-  const max = Math.max(...all, 100 + targetPct + 5);
-  const span = max - min;
+  const H = 190;
+  const n = con.p50.length;
+  if (n < 2) return null;
+
+  const praguri = [100 + targetPct, 100 - maxDDPct];
+  const min = Math.min(...con.p5, ...praguri) - 2;
+  const max = Math.max(...con.p95, ...praguri) + 2;
+  const span = max - min || 1;
+
+  const x = (i: number) => (i / (n - 1)) * W;
   const y = (v: number) => H - ((v - min) / span) * H;
-  const colors = ["#818cf8", "#34d399", "#fbbf24", "#f472b6", "#38bdf8", "#a78bfa"];
+
+  // O bandă = marginea de sus la dreapta, marginea de jos înapoi la stânga.
+  const banda = (sus: number[], jos: number[]) =>
+    sus.map((v, i) => `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ") +
+    " " +
+    jos.map((v, i) => `L ${x(n - 1 - i).toFixed(1)} ${y(jos[n - 1 - i]!).toFixed(1)}`).join(" ") +
+    " Z";
+
+  const linie = (vals: number[]) =>
+    vals.map((v, i) => `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
-      <line x1={0} x2={W} y1={y(100 + targetPct)} y2={y(100 + targetPct)} stroke="#10b981" strokeWidth={1} strokeDasharray="5 4" />
-      <line x1={0} x2={W} y1={y(100)} y2={y(100)} stroke="#3f3f46" strokeWidth={1} />
-      {paths.map((p, pi) => (
-        <polyline
-          key={pi}
-          fill="none"
-          stroke={colors[pi % colors.length]}
-          strokeWidth={1.4}
-          opacity={0.85}
-          points={p.map((v, i) => `${(i / (p.length - 1)) * W},${y(v)}`).join(" ")}
-        />
-      ))}
-      <text x={4} y={y(100 + targetPct) - 4} fontSize={10} fill="#10b981" fontWeight={600}>
-        Target +{targetPct}%
-      </text>
-      <text x={4} y={y(100) - 4} fontSize={10} fill="#71717a">
-        100%
-      </text>
-    </svg>
+    <figure className="m-0">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img"
+           aria-label={`${etichete.banda90} · ${etichete.median}`}>
+        {/* 90% din scenarii */}
+        <path d={banda(con.p95, con.p5)} fill="rgba(129,140,248,0.10)" />
+        {/* jumătatea din mijloc */}
+        <path d={banda(con.p75, con.p25)} fill="rgba(129,140,248,0.20)" />
+
+        {/* Pragurile: ținta sus, pierderea maximă jos. Punctate, ca să nu fie
+            confundate cu un traseu. */}
+        <line x1={0} x2={W} y1={y(100 + targetPct)} y2={y(100 + targetPct)}
+              stroke="var(--gain)" strokeWidth={1} strokeDasharray="5 4" opacity={0.8} />
+        <line x1={0} x2={W} y1={y(100 - maxDDPct)} y2={y(100 - maxDDPct)}
+              stroke="var(--loss)" strokeWidth={1} strokeDasharray="5 4" opacity={0.8} />
+        <line x1={0} x2={W} y1={y(100)} y2={y(100)} stroke="var(--line-2)" strokeWidth={1} />
+
+        {/* Mediana se trasează: e drumul „normal", nu unul dintre multe. */}
+        <path d={linie(con.p50)} fill="none" stroke="var(--accent)" strokeWidth={2}
+              strokeLinecap="round" strokeLinejoin="round" className="tg-trasare" />
+
+        <text x={4} y={y(100 + targetPct) - 4} fontSize={10} fill="var(--gain)" fontWeight={600}>
+          {etichete.target} +{targetPct}%
+        </text>
+        <text x={4} y={y(100 - maxDDPct) + 12} fontSize={10} fill="var(--loss)" fontWeight={600}>
+          {etichete.ruin} −{maxDDPct}%
+        </text>
+      </svg>
+
+      <figcaption className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[10px] text-zinc-500">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-4 h-2 rounded-sm" style={{ background: "rgba(129,140,248,0.20)" }} />
+          {etichete.banda50}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-4 h-2 rounded-sm" style={{ background: "rgba(129,140,248,0.10)" }} />
+          {etichete.banda90}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-4 h-[2px] rounded-sm" style={{ background: "var(--accent)" }} />
+          {etichete.median}
+        </span>
+      </figcaption>
+    </figure>
   );
 }
 
@@ -363,7 +446,18 @@ export default function MonteCarloPage() {
                 <h3 className="text-xs font-black text-zinc-300 uppercase tracking-wide mb-3">
                   {t("pathsTitle")}
                 </h3>
-                <Paths paths={result.samplePaths} targetPct={targetPct} maxDDPct={maxDDPct} />
+                <Con
+                    con={result.con}
+                    targetPct={targetPct}
+                    maxDDPct={maxDDPct}
+                    etichete={{
+                      median: t("conMedian"),
+                      banda50: t("conBanda50"),
+                      banda90: t("conBanda90"),
+                      target: t("conTarget"),
+                      ruin: t("conRuin"),
+                    }}
+                  />
               </div>
 
               <p className="text-[10px] text-zinc-600 leading-relaxed">

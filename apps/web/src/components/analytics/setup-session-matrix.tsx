@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Grid3x3, Info, RotateCcw } from "lucide-react";
+import { Grid3x3, Info, RotateCcw, Box } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MatrixRelief } from "@/components/analytics/matrix-relief";
 import { formatCurrency } from "@/lib/utils";
 import { RollingNumber } from "@/components/ui/rolling-number";
 import {
@@ -79,6 +80,10 @@ export function SetupSessionMatrix({
   const t = useTranslations("crossTab");
   const [setupuri, setSetupuri] = React.useState<string[]>([]);
   const [sesiuni, setSesiuni] = React.useState<string[]>([]);
+  // Plat e implicit, deliberat: e forma pe care o poate citi oricine, inclusiv
+  // un cititor de ecran. Relieful e o a doua lectură a acelorași date, nu un
+  // înlocuitor.
+  const [relief, setRelief] = React.useState(false);
 
   // Doar liniile și coloanele care CHIAR au date. Un tabel 11×4 gol pe
   // trei sferturi arată ca o funcție stricată, nu ca un tabel.
@@ -133,14 +138,24 @@ export function SetupSessionMatrix({
       <div className="p-5 pb-4">
         <div className="flex items-start justify-between gap-4">
           <Antet t={t} />
-          {areFiltru && (
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Comutatorul stă mereu; resetul apare doar când ai ce reseta. */}
+            <button
+              onClick={() => setRelief((v) => !v)}
+              aria-pressed={relief}
+              className="shrink-0 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[color:var(--ink-4)] hover:text-[color:var(--ink-2)] transition-colors px-2 py-1 rounded-md hover:bg-[color:var(--s-4)]"
+            >
+              <Box className="w-3 h-3" /> {relief ? t("plat") : t("relief")}
+            </button>
+            {areFiltru && (
             <button
               onClick={reset}
               className="shrink-0 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[color:var(--ink-4)] hover:text-[color:var(--ink-2)] transition-colors px-2 py-1 rounded-md hover:bg-[color:var(--s-4)]"
             >
               <RotateCcw className="w-3 h-3" /> {t("reset")}
             </button>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Ce e selectat acum, în cuvinte. Chip-urile din tabel arată SELECȚIA,
@@ -179,6 +194,27 @@ export function SetupSessionMatrix({
       </div>
 
       {/* ── Matricea ── */}
+      {relief ? (
+        <MatrixRelief
+          setupuri={setupuriPrezente}
+          sesiuni={sesiuniPrezente}
+          celule={celule.map((c) => ({
+            setup: c.setup,
+            sesiune: c.sesiune,
+            tranzactii: c.tranzactii,
+            winRate: c.tranzactii > 0 ? (c.castiguri / c.tranzactii) * 100 : null,
+          }))}
+          eticheteSesiuni={SESSION_LABELS}
+          eticheteSetupuri={Object.fromEntries(setupuriPrezente.map((x) => [x, t(`setup_${x}`)]))}
+          onAlege={alegeCelula}
+          selectat={
+            setupuri.length === 1 && sesiuni.length === 1
+              ? { setup: setupuri[0]!, sesiune: sesiuni[0]! }
+              : null
+          }
+          notaEsantion={t("smallSampleShort", { prag: PRAG_ESANTION })}
+        />
+      ) : (
       <div className="p-5 pt-4 overflow-x-auto">
         <table className="w-full min-w-[520px] border-separate border-spacing-1">
           <thead>
@@ -309,6 +345,7 @@ export function SetupSessionMatrix({
           {t("smallSampleLegend", { prag: PRAG_ESANTION })}
         </p>
       </div>
+      )}
     </section>
   );
 }

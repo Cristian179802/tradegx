@@ -201,7 +201,12 @@
     "pw1": "10.000 de simulări pe distribuția reală a tranzacțiilor tale",
     "pw2": "Probabilitatea de a atinge targetul vs. riscul de a pica challenge-ul",
     "pw3": "Percentile de equity + histogramă + trasee alternative",
-    "pw4": "Parametri configurabili: target, drawdown maxim, număr de tranzacții"
+    "pw4": "Parametri configurabili: target, drawdown maxim, număr de tranzacții",
+    "conMedian": "Mediana",
+    "conBanda50": "50% din scenarii",
+    "conBanda90": "90% din scenarii",
+    "conTarget": "Țintă",
+    "conRuin": "Prag"
   },
   "billing": {
     "title": "Abonament & Facturare",
@@ -3148,6 +3153,9 @@
     "total": "Total",
     "empty": "Nu există încă tranzacții cu setup ȘI sesiune completate. Adaugă-le la înregistrare ca să vezi ce funcționează și când.",
     "smallSampleLegend": "Celulele dungate au sub {prag} tranzacții. Un procent pe atât de puține nu e o statistică — o singură tranzacție în plus îl mută cu zeci de puncte.",
-    "smallSampleTip": "Doar {n} tranzacții — sub pragul de {prag} de la care procentul înseamnă ceva"
+    "smallSampleTip": "Doar {n} tranzacții — sub pragul de {prag} de la care procentul înseamnă ceva",
+    "relief": "Relief",
+    "plat": "Plat",
+    "smallSampleShort": "Sub {prag} tranzacții — prea puține ca să însemne ceva."
   }
 }
