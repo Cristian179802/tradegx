@@ -58,3 +58,4 @@ apps/web/test-webpush.mjs
 
 # Fișier temporar de migrare: conține parola bazei de date.
 .env.migrate
+.copii-date/

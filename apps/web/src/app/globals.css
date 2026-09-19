@@ -1202,6 +1202,7 @@ tr.cyber-row:hover {
    Variabilele `--lx/--ly` (procente) și `--tx/--ty` (−1..1) sunt scrise din JS
    de un SINGUR ascultător pe document — vezi `components/fx/lumina.tsx`.
    Fără cursor deasupra, toate sunt la valorile implicite și nu se vede nimic. */
+.tg-lumina,
 .tg-panel,
 .tg-surface,
 .premium-card,
@@ -1219,6 +1220,7 @@ tr.cyber-row:hover {
 
 /* Lumina de pe suprafață. `z-index: 0` o ține sub conținut, iar `isolation`
    de mai sus împiedică scurgerea în afara cardului. */
+.tg-lumina::after,
 .tg-panel::after,
 .tg-surface::after,
 .premium-card::after,
@@ -1239,6 +1241,7 @@ tr.cyber-row:hover {
 }
 
 /* Conținutul stă deasupra luminii. */
+.tg-lumina > *,
 .tg-panel > *,
 .tg-surface > *,
 .premium-card > *,
@@ -1250,6 +1253,7 @@ tr.cyber-row:hover {
 
 /* Marginea de sus, aprinsă în dreptul cursorului. La `--lit: 0` rămâne linia
    discretă dinainte; sub cursor devine un filament. */
+.tg-lumina::before,
 .tg-panel::before,
 .tg-surface::before,
 .premium-card::before,
@@ -1272,7 +1276,7 @@ tr.cyber-row:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tg-panel, .tg-surface, .premium-card, .card-3d, .cyber-card {
+  .tg-lumina, .tg-panel, .tg-surface, .premium-card, .card-3d, .cyber-card {
     transform: none;
     transition: box-shadow 260ms ease;
   }

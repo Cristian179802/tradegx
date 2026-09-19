@@ -125,7 +125,7 @@ export function RegisterForm() {
     return (
       <div className="relative animate-fade-in">
         <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-emerald-500/20 via-transparent to-indigo-500/15 blur-sm" />
-        <div className="relative bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-10 text-center shadow-2xl shadow-black/40">
+        <div className="tg-lumina relative bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-10 text-center shadow-2xl shadow-black/40">
           <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent rounded-full" />
 
           <div className="relative w-16 h-16 mx-auto mb-5">
@@ -172,7 +172,7 @@ export function RegisterForm() {
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-indigo-500/20 via-transparent to-violet-500/15 blur-sm" />
 
       {/* Card */}
-      <div className="relative bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-8 shadow-2xl shadow-black/40">
+      <div className="tg-lumina relative bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-8 shadow-2xl shadow-black/40">
         <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent rounded-full" />
 
         {/* PRO trial badge */}

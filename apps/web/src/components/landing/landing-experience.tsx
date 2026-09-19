@@ -247,7 +247,7 @@ function Hero({ t }: { t: TT }) {
           {/* Panou stânga: semnal AI */}
           <motion.div initial={{ opacity: 0, x: -40, rotateY: 12 }} animate={{ opacity: 1, x: 0, rotateY: 8 }} transition={{ duration: 0.9, delay: 0.75, ease: EASE }}
             className="hidden md:block" style={{ transformStyle: "preserve-3d" }}>
-            <div className="relative rounded-2xl border border-indigo-500/25 bg-zinc-900/70 backdrop-blur-xl p-3.5 shadow-2xl shadow-black/50">
+            <div className="tg-lumina relative rounded-2xl border border-indigo-500/25 bg-zinc-900/70 backdrop-blur-xl p-3.5 shadow-2xl shadow-black/50">
               <HudCorners rgb="129,140,248" size={10} inset={5} />
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-[9px] uppercase tracking-widest text-indigo-300/80">Signal · HPS</span>
@@ -263,7 +263,7 @@ function Hero({ t }: { t: TT }) {
 
           {/* Panou central: dashboard-ul */}
           <motion.div initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.6, ease: EASE }}>
-            <Tilt3D className="relative rounded-2xl border border-zinc-700/60 bg-zinc-900/75 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden">
+            <Tilt3D className="tg-lumina relative rounded-2xl border border-zinc-700/60 bg-zinc-900/75 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/80 to-transparent" />
               <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800/60">
                 <div className="w-2.5 h-2.5 rounded-full bg-rose-500/60" /><div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" /><div className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
@@ -293,7 +293,7 @@ function Hero({ t }: { t: TT }) {
           {/* Panou dreapta: AI Coach */}
           <motion.div initial={{ opacity: 0, x: 40, rotateY: -12 }} animate={{ opacity: 1, x: 0, rotateY: -8 }} transition={{ duration: 0.9, delay: 0.9, ease: EASE }}
             className="hidden md:block" style={{ transformStyle: "preserve-3d" }}>
-            <div className="relative rounded-2xl border border-violet-500/25 bg-zinc-900/70 backdrop-blur-xl p-3.5 shadow-2xl shadow-black/50">
+            <div className="tg-lumina relative rounded-2xl border border-violet-500/25 bg-zinc-900/70 backdrop-blur-xl p-3.5 shadow-2xl shadow-black/50">
               <HudCorners rgb="167,139,250" size={10} inset={5} />
               <div className="flex items-center gap-1.5 mb-2">
                 <Brain className="w-3.5 h-3.5 text-violet-300" />
@@ -399,7 +399,7 @@ function BentoTile({
       transition={{ duration: 0.5, delay, ease: EASE }}
     >
       <Tilt3D
-        className="tg-holo group relative h-full rounded-2xl border bg-zinc-900/50 backdrop-blur-md p-4 overflow-hidden"
+        className="tg-lumina tg-holo group relative h-full rounded-2xl border bg-zinc-900/50 backdrop-blur-md p-4 overflow-hidden"
         style={{ borderColor: `rgba(${rgb},0.35)`, boxShadow: `0 0 0 1px rgba(${rgb},0.05), 0 8px 30px -12px rgba(${rgb},0.25)` }}
       >
         <div className="absolute top-0 left-0 right-0 h-px opacity-80" style={{ background: `linear-gradient(90deg,transparent,rgb(${rgb}),transparent)` }} />
@@ -627,7 +627,7 @@ function NumbersAct({ t }: { t: TT }) {
 
 function Kpi({ rgb, Icon, label, children }: { rgb: string; Icon: React.ComponentType<{ className?: string }>; label: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border bg-zinc-900/80 backdrop-blur-xl px-4 py-3 shadow-xl shadow-black/40" style={{ borderColor: `rgba(${rgb},0.3)` }}>
+    <div className="tg-lumina rounded-2xl border bg-zinc-900/80 backdrop-blur-xl px-4 py-3 shadow-xl shadow-black/40" style={{ borderColor: `rgba(${rgb},0.3)` }}>
       <div className="flex items-center gap-2 mb-1.5">
         <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `rgba(${rgb},0.14)`, color: `rgb(${rgb})` }}><Icon className="w-3.5 h-3.5" /></div>
         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{label}</span>
@@ -652,7 +652,7 @@ function HowItWorks({ t }: { t: TT }) {
           <div className="grid md:grid-cols-3 gap-6">
             {STEP_META.map((m, i) => (
               <Reveal key={i} delay={i * 0.15}>
-                <div className="relative rounded-2xl border p-6 h-full bg-zinc-900/60 backdrop-blur-sm overflow-hidden" style={{ borderColor: `rgba(${m.rgb},0.22)` }}>
+                <div className="tg-lumina relative rounded-2xl border p-6 h-full bg-zinc-900/60 backdrop-blur-sm overflow-hidden" style={{ borderColor: `rgba(${m.rgb},0.22)` }}>
                   <HudCorners rgb={m.rgb} size={11} inset={6} opacity={0.4} />
                   <div className="absolute top-0 left-0 right-0 h-px opacity-70" style={{ background: `linear-gradient(90deg,transparent,rgba(${m.rgb},0.8),transparent)` }} />
                   <div className="flex items-start gap-3 mb-5">
@@ -683,7 +683,7 @@ function Trust({ t }: { t: TT }) {
         <div className="mt-14 grid md:grid-cols-3 gap-4">
           {COMMIT_META.map((m, i) => (
             <Reveal key={i} delay={i * 0.12}>
-              <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/60 p-6 h-full">
+              <div className="tg-lumina rounded-2xl border border-zinc-800/80 bg-zinc-900/60 p-6 h-full">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: `rgba(${m.rgb},0.12)`, color: `rgb(${m.rgb})` }}><m.Icon className="w-5 h-5" /></div>
                 <h3 className="text-zinc-100 text-sm font-black mb-2">{t(`c${i + 1}T`)}</h3>
                 <p className="text-zinc-400 text-sm leading-relaxed">{t(`c${i + 1}Text`)}</p>
@@ -761,7 +761,7 @@ function VisionTeaser({ t }: { t: TT }) {
           {VISION_META.map((m, i) => (
             <Reveal key={m.tK} delay={i * 0.12}>
               <Tilt3D
-                className="relative h-full rounded-2xl border bg-zinc-950/60 backdrop-blur-md p-6 overflow-hidden"
+                className="tg-lumina relative h-full rounded-2xl border bg-zinc-950/60 backdrop-blur-md p-6 overflow-hidden"
                 style={{ borderColor: `rgba(${m.rgb},0.3)`, boxShadow: `0 0 0 1px rgba(${m.rgb},0.05), 0 20px 50px -20px rgba(${m.rgb},0.3)` }}
               >
                 <HudCorners rgb={m.rgb} size={12} inset={7} />
@@ -844,7 +844,7 @@ function Faq({ t }: { t: TT }) {
         <div className="mt-10 space-y-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Reveal key={i} delay={i * 0.05}>
-              <details className="group rounded-2xl border border-zinc-800/80 bg-zinc-900/50 open:border-indigo-500/30 transition-colors">
+              <details className="tg-lumina group rounded-2xl border border-zinc-800/80 bg-zinc-900/50 open:border-indigo-500/30 transition-colors">
                 <summary className="flex items-center justify-between cursor-pointer list-none px-5 py-4 text-sm font-bold text-zinc-200 [&::-webkit-details-marker]:hidden">
                   {t(`faq${i}Q`)}<ChevronRight className="w-4 h-4 text-zinc-600 group-open:rotate-90 transition-transform shrink-0 ml-3" />
                 </summary>

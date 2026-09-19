@@ -17,7 +17,7 @@ import * as React from "react";
 // declanșează nici randare React, nici recalcul de layout — doar compunere.
 // Se poate face la fiecare cadru fără să coste nimic.
 
-const CARDURI = ".tg-panel, .tg-surface, .premium-card, .card-3d, .cyber-card";
+const CARDURI = ".tg-lumina, .tg-panel, .tg-surface, .premium-card, .card-3d, .cyber-card";
 
 export function Lumina() {
   React.useEffect(() => {

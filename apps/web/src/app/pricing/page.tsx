@@ -182,7 +182,7 @@ export default function PricingPage() {
         {/* Plan cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 max-w-5xl mx-auto">
           {/* Free */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+          <div className="tg-lumina bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
             <div className="mb-6">
               <h3 className="text-xl font-bold text-zinc-100 mb-1">{t("freeName")}</h3>
               <p className="text-zinc-500 text-sm">{t("freeDesc")}</p>
@@ -235,7 +235,7 @@ export default function PricingPage() {
           </div>
 
           {/* PRO */}
-          <div className="relative bg-gradient-to-br from-indigo-500/5 via-violet-500/5 to-purple-500/5 border border-indigo-500/30 rounded-2xl p-8">
+          <div className="tg-lumina relative bg-gradient-to-br from-indigo-500/5 via-violet-500/5 to-purple-500/5 border border-indigo-500/30 rounded-2xl p-8">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
               <Badge className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-0 px-4 py-1 shadow-lg shadow-indigo-500/30">
                 {t("mostPopular")}
@@ -306,7 +306,7 @@ export default function PricingPage() {
               mari. Nu vinde funcții noi, vinde VOLUM: cine folosește coach-ul
               zilnic atinge plafonul Pro, iar treapta asta e răspunsul, în loc
               să-l lăsăm blocat până luna viitoare. */}
-          <div className="relative bg-zinc-900/50 border border-amber-500/25 rounded-2xl p-8">
+          <div className="tg-lumina relative bg-zinc-900/50 border border-amber-500/25 rounded-2xl p-8">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
               <Badge className="bg-amber-500/15 text-amber-300 border border-amber-500/30 px-4 py-1">
                 {t("premiumTag")}

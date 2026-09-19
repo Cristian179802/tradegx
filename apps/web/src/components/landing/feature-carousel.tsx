@@ -122,7 +122,7 @@ export function FeatureCarousel({ items }: { items: FeatureSlide[] }) {
             <div>
               <div className="flex items-center gap-3 mb-5">
                 <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center border shrink-0"
+                  className="tg-lumina w-14 h-14 rounded-2xl flex items-center justify-center border shrink-0"
                   style={{ background: `rgba(${meta.rgb},0.12)`, borderColor: `rgba(${meta.rgb},0.3)` }}
                 >
                   <Icon className="w-7 h-7" style={{ color: meta.accent }} />
@@ -137,7 +137,7 @@ export function FeatureCarousel({ items }: { items: FeatureSlide[] }) {
 
             {/* Dreapta: vizual mock 3D */}
             <div
-              className="relative rounded-2xl border border-zinc-800/60 bg-zinc-950/50 p-5 h-[220px] overflow-hidden"
+              className="tg-lumina relative rounded-2xl border border-zinc-800/60 bg-zinc-950/50 p-5 h-[220px] overflow-hidden"
               style={{ boxShadow: `inset 0 1px 0 rgba(255,255,255,0.04), 0 0 40px rgba(${meta.rgb},0.06)` }}
             >
               <div className="flex items-center gap-1.5 mb-4">
