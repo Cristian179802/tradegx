@@ -290,17 +290,6 @@ body {
   position: relative;
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
-.premium-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.06) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-}
-.premium-card:hover::before { opacity: 1; }
 .premium-card:hover {
   box-shadow: 0 0 0 1px rgba(99,102,241,0.15), 0 8px 32px rgba(0,0,0,0.35);
 }
@@ -1233,8 +1222,7 @@ tr.cyber-row:hover {
 .tg-panel::after,
 .tg-surface::after,
 .premium-card::after,
-.card-3d::after,
-.cyber-card::after {
+.card-3d::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -1265,8 +1253,7 @@ tr.cyber-row:hover {
 .tg-panel::before,
 .tg-surface::before,
 .premium-card::before,
-.card-3d::before,
-.cyber-card::before {
+.card-3d::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
