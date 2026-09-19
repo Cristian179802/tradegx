@@ -3,7 +3,13 @@ name: Backup baza de date
 # Supabase Free NU are backupuri automate. Aplicația ține jurnalele de trading ale
 # unor clienți plătitori, deci o copie proprie nu e opțională.
 #
-# Rulează duminica la 03:00 UTC și poate fi pornit oricând manual.
+# RITMUL. Zilnic la 03:17 UTC, nu săptămânal. Un jurnal de trading se schimbă în
+# fiecare zi de lucru; la o rulare pe săptămână, o rulare ratată însemna două
+# săptămâni de date fără copie. Minutul 17, nu 00: programatorul GitHub adună
+# cozi la fix și întârzie joburile cu zeci de minute.
+#
+# RETENȚIA. Copiile zilnice se țin 30 de zile, cea de duminică 90. Așa ai
+# adâncime de trei luni fără să plătești pentru 90 de arhive zilnice.
 #
 # Necesită secretul SUPABASE_DB_URL în GitHub (Settings → Secrets → Actions), cu
 # șirul SESSION POOLER (portul 5432, gazda `...pooler.supabase.com`).
@@ -13,7 +19,7 @@ name: Backup baza de date
 
 on:
   schedule:
-    - cron: "0 3 * * 0"
+    - cron: "17 3 * * *"
   workflow_dispatch: {}
 
 concurrency:
@@ -57,12 +63,83 @@ jobs:
           fi
           echo "✓ arhivă validă"
 
-      - name: Încarcă
+      # ── Proba de restaurare ────────────────────────────────────────────────
+      #
+      # Un backup pe care nu l-ai restaurat niciodată e o ipoteză, nu un backup.
+      # Duminica îl turnăm într-un Postgres gol și numărăm ce a ajuns acolo.
+      # Dacă restaurarea pică, aflăm duminică — nu în ziua în care chiar trebuie.
+      - name: Probă de restaurare (duminica)
+        run: |
+          set -euo pipefail
+          zi=$(date -u +%u)   # 7 = duminică
+          if [ "$zi" != "7" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "Nu e duminică și nu e rulare manuală — sar peste probă."
+            exit 0
+          fi
+
+          docker run -d --name proba -e POSTGRES_PASSWORD=proba -p 55432:5432 postgres:17
+          for i in $(seq 1 30); do
+            if docker exec proba pg_isready -U postgres >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+
+          docker cp "$NUME" proba:/tmp/arhiva.dump
+          docker exec proba psql -U postgres -c 'CREATE DATABASE proba;'
+          docker exec proba pg_restore -U postgres -d proba --no-owner --no-privileges /tmp/arhiva.dump
+
+          randuri=$(docker exec proba psql -U postgres -d proba -tAc \
+            "SELECT COALESCE(SUM(n_live_tup),0) FROM pg_stat_user_tables;")
+          echo "rânduri restaurate: $randuri"
+          docker rm -f proba >/dev/null
+
+          if [ "${randuri:-0}" -lt 1 ]; then
+            echo "Restaurarea a reușit dar baza e goală. Backup NEVALID."
+            exit 1
+          fi
+          echo "✓ arhiva chiar se restaurează"
+
+      - name: Încarcă (zilnic, 30 de zile)
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.NUME }}
           path: ${{ env.NUME }}
-          # Maximul permis de GitHub. Backupul cel mai vechi pe care îl ai la
-          # îndemână acoperă trei luni în urmă.
+          retention-days: 30
+          if-no-files-found: error
+
+      # Copia de duminică se ține trei luni: adâncime pentru „era corect acum
+      # două luni?", fără costul a 90 de arhive zilnice.
+      - name: Încarcă (duminica, 90 de zile)
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          if [ "$(date -u +%u)" = "7" ]; then
+            echo "LUNG=1" >> "$GITHUB_ENV"
+          fi
+      - name: Copie de lungă durată
+        if: ${{ env.LUNG == '1' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lung-${{ env.NUME }}
+          path: ${{ env.NUME }}
           retention-days: 90
           if-no-files-found: error
+
+      # ── Alarma ─────────────────────────────────────────────────────────────
+      #
+      # Un backup care pică în tăcere e egal cu niciun backup. GitHub trimite un
+      # email care se pierde între celelalte; asta ajunge unde te uiți oricum.
+      # Nu pică jobul dacă lipsesc secretele — o alarmă neconfigurată nu trebuie
+      # să transforme un backup reușit într-unul eșuat.
+      - name: Anunță eșecul pe Telegram
+        if: failure()
+        continue-on-error: true
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_ALERT_CHAT_ID }}
+        run: |
+          if [ -z "${TOKEN:-}" ] || [ -z "${CHAT:-}" ]; then
+            echo "Fără TELEGRAM_BOT_TOKEN / TELEGRAM_ALERT_CHAT_ID — nu pot anunța."
+            exit 0
+          fi
+          text="🔴 BACKUP EȘUAT — TradeGx%0A%0ARulare: ${{ github.run_id }}%0AVezi: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -d chat_id="${CHAT}" -d text="${text}" >/dev/null

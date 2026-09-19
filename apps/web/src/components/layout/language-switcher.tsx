@@ -4,12 +4,12 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
+import { LIMBI, LIMBI_ACTIVE } from "@/i18n/locales";
 
-// ── Comutator de limbă (RO/EN) ──────────────────────────────────────────────
+// ── Comutator de limbă ─────────────────────────────────────────────────────
 // Setează cookie-ul `locale` (citit de next-intl pe server), sincronizează
 // limba Academiei (localStorage) și reîmprospătează UI-ul instant.
 
-const LOCALES = ["ro", "en"] as const;
 
 export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
@@ -38,7 +38,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
       role="group"
       aria-label="Limbă / Language"
     >
-      {LOCALES.map((l) => (
+      {LIMBI_ACTIVE.map((l) => (
         <button
           key={l}
           onClick={() => switchTo(l)}
@@ -49,8 +49,9 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
               ? "bg-indigo-500/20 text-indigo-300"
               : "text-zinc-500 hover:text-zinc-300"
           )}
+          title={LIMBI[l].nume}
         >
-          {l}
+          {LIMBI[l].eticheta}
         </button>
       ))}
     </div>

@@ -1,12 +1,12 @@
 import { getRequestConfig } from "next-intl/server";
 import { cookies } from "next/headers";
+import { esteLimba, LIMBA_IMPLICITA } from "./locales";
 
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
   const locale = cookieStore.get("locale")?.value ?? "ro";
-  // Doar limbile cu dicționar existent (altfel import-ul aruncă la runtime)
-  const validLocales = ["ro", "en"];
-  const resolvedLocale = validLocales.includes(locale) ? locale : "ro";
+  // Lista limbilor active sta intr-un singur loc: src/i18n/locales.ts.
+  const resolvedLocale = esteLimba(locale) ? locale : LIMBA_IMPLICITA;
 
   return {
     locale: resolvedLocale,
