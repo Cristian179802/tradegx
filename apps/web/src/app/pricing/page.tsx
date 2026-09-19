@@ -380,16 +380,17 @@ export default function PricingPage() {
             {t("compTitle")}
           </h2>
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="grid grid-cols-3 text-sm font-semibold text-zinc-400 border-b border-zinc-800 px-6 py-3">
+            <div className="grid grid-cols-[1.6fr_repeat(3,minmax(0,1fr))] text-sm font-semibold text-zinc-400 border-b border-zinc-800 px-6 py-3">
               <span>{t("colFeature")}</span>
               <span className="text-center">{t("colFree")}</span>
               <span className="text-center text-indigo-400">{t("colPro")}</span>
+              <span className="text-center text-amber-400">{t("colPremium")}</span>
             </div>
             {FEATURES.map((f, i) => (
               <div
                 key={f.label}
                 className={cn(
-                  "grid grid-cols-3 items-center px-6 py-3.5 text-sm",
+                  "grid grid-cols-[1.6fr_repeat(3,minmax(0,1fr))] items-center px-6 py-3.5 text-sm",
                   i % 2 === 0 ? "bg-zinc-900/30" : ""
                 )}
               >
