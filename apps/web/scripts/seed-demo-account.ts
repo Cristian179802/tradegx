@@ -1,12 +1,11 @@
 /**
- * Seed pentru contul demo folosit în materialele video.
- * Specificația: docs/VIDEO_SPEC.md, secțiunea 2.
+ * Seed pentru contul demo: date realiste pentru prezentări și teste manuale.
  *
  * ── DE CE EXISTĂ ────────────────────────────────────────────────────────────
  * Publicul e SMC/ICT și miroase datele false instant. Un win rate de 68%, o
  * curbă de capital fără nicio cădere, setup-uri distribuite perfect egal —
  * fiecare dintre ele spune „generat", iar odată ce privitorul a gândit asta,
- * restul videoului nu mai contează.
+ * restul nu mai contează.
  *
  * ── TREI REGULI ─────────────────────────────────────────────────────────────
  *
@@ -108,7 +107,7 @@ interface Cell {
 }
 
 const COMPOSITION: Cell[] = [
-  // ── Insight-ul plantat. Astea trei celule sunt motivul videoului. ────────
+  // ── Insight-ul plantat. Astea trei celule sunt motivul seed-ului. ────────
   { setup: "FAIR_VALUE_GAP", session: "LONDON", trades: 23, wins: 14 }, // 60.9%
   { setup: "FAIR_VALUE_GAP", session: "ASIAN", trades: 13, wins: 3 }, //  23.1%
   { setup: "FAIR_VALUE_GAP", session: "NEW_YORK", trades: 8, wins: 4 }, // 50.0%
@@ -348,7 +347,7 @@ function genereazaDate(n: number): Date[] {
  * hazardul a scos GBPUSD la 18.8% win rate. Nu e greșit — un trader chiar are
  * instrumente slabe — dar în datele ASTEA e un semnal nedorit: căutătorul de
  * avantaje al aplicației l-ar scoate în față ÎNAINTEA poveștii FVG/Asia, adică
- * exact peste cadrul pe care se construiește tot videoul.
+ * exact peste cadrul pe care se construiește toată prezentarea.
  *
  * Deci împărțim câștigurile și pierderile în cote egale pe instrument, apoi
  * amestecăm cine primește ce. Rezultatul: fiecare instrument iese la ~47%, iar
@@ -443,7 +442,7 @@ function construiesteTranzactii(
 //
 //  1. NU atinge nicio combinație cu FVG. Când se închide în timpul filmării,
 //     celula ei se schimbă — iar cifrele FVG·London și FVG·Asia sunt exact
-//     numerele pentru care există tot videoul. Deci setup ORDER_BLOCK.
+//     numerele pe care se sprijină demonstrația. Deci setup ORDER_BLOCK.
 //
 //  2. Se construiește DUPĂ cele închise. Generatorul e determinist, iar orice
 //     apel de `rand()` strecurat înainte ar deplasa tot șirul și ar schimba
@@ -625,7 +624,7 @@ async function main() {
   //
   // Tranzacția deschisă se închide ÎN TIMPUL filmării, deci celula ei din
   // Setup × Sesiune se schimbă sub ochii camerei. Dacă ar fi pe FVG, s-ar
-  // schimba chiar cifrele pentru care există tot videoul — FVG · London 61% și
+  // schimba chiar cifrele pe care se sprijină demonstrația — FVG · London 61% și
   // FVG · Asia 23.1% — între secunda 9 și secunda 28, fără ca cineva să observe
   // până la montaj.
   if (deschisa.setupType === "FAIR_VALUE_GAP") {
