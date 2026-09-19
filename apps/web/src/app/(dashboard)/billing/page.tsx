@@ -262,7 +262,7 @@ export default function BillingPage() {
           )}
 
           {/* ── Comparația planurilor ── */}
-          <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 overflow-hidden">
+          <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 overflow-hidden">
             <div className="grid grid-cols-[1fr_5rem_5rem] sm:grid-cols-[1fr_7rem_7rem]">
               {/* Header */}
               <div className="px-4 sm:px-5 py-4 border-b border-zinc-800" />

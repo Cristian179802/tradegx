@@ -146,7 +146,7 @@ export default function AchievementsPage() {
                 {t("streakCurrent")}
               </p>
             </div>
-            <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 text-center">
+            <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 text-center">
               <Trophy className="w-6 h-6 text-zinc-500 mx-auto mb-2" />
               <p className="text-3xl font-black text-zinc-200 num">
                 <RollingNumber value={String(data?.streak.best ?? 0)} delay={70} />

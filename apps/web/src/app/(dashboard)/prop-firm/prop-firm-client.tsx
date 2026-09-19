@@ -301,7 +301,7 @@ export function PropFirmClient() {
       {loading ? (
         <div className="space-y-4">{[1, 2].map((i) => <div key={i} className="h-44 rounded-2xl bg-zinc-800/40 animate-pulse" />)}</div>
       ) : accounts.length === 0 ? (
-        <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-10 text-center">
+        <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-10 text-center">
           <Shield className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
           <p className="text-sm font-semibold text-zinc-300">{t("noChallengeAccount")}</p>
           <p className="text-xs text-zinc-500 mt-1 max-w-md mx-auto">

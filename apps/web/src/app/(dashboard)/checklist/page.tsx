@@ -108,7 +108,7 @@ export default function ChecklistPage() {
       </div>
 
       {/* Listă iteme */}
-      <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 divide-y divide-zinc-800/50">
+      <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 divide-y divide-zinc-800/50">
         {items.map((it) => (
           <div key={it.id} className="flex items-center gap-3 px-4 py-3 group">
             <button onClick={() => toggle(it.id)} className="shrink-0">

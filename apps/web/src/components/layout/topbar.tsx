@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { NotificationDropdown } from "@/components/layout/notification-dropdown";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { AccountSwitcher } from "@/components/layout/account-switcher";
+import { EquitySpark } from "@/components/layout/equity-spark";
 import { navMetaForRoute } from "@/components/layout/command-rail";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -104,6 +105,12 @@ export function Topbar() {
         </div>
 
         <div className="flex-1" />
+
+        {/* Curba contului, pe ORICE pagină. Un produs cu douăzeci de ecrane are
+            nevoie de un element care rămâne același peste tot; aici e chiar
+            lucrul pentru care omul a venit. Aceeași cerere dă și tonul de
+            fundal al zilei. */}
+        <EquitySpark />
 
         <div className="flex items-center gap-1.5 shrink-0">
           {session?.user?.isTrialing && (

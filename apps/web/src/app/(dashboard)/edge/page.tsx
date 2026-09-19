@@ -188,7 +188,7 @@ export default function EdgeFinderPage() {
       ) : (
         <>
           {/* Sumar */}
-          <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 px-5 py-3.5 flex items-center gap-2 text-xs text-zinc-500">
+          <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 px-5 py-3.5 flex items-center gap-2 text-xs text-zinc-500">
             <Info className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
             <span>
               {t("summary", { count: report.totalTrades })}

@@ -4,6 +4,14 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const config = {
+  // ── Tranziții între pagini ────────────────────────────────────────────────
+  // Navigarea nu mai clipește: ecranul vechi se stinge în timp ce cel nou urcă.
+  // Next se ocupă de partea grea — așteaptă datele înainte să facă instantaneul,
+  // altfel tranziția ar îngheța pagina cât ține cererea de rețea.
+  // Aspectul e definit in globals.css, la regulile ::view-transition-*.
+  experimental: {
+    viewTransition: true,
+  },
   // Compilează pachetele interne din monorepo (sursă TS, fără build separat)
   transpilePackages: ["@tradegx/core", "@tradegx/ui-tokens", "@tradegx/config", "@tradegx/api-client"],
   images: {

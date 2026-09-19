@@ -5,6 +5,8 @@ import { getLocale, getMessages } from "next-intl/server";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 import { ClientErrorReporter } from "@/components/client-error-reporter";
+import { Lumina } from "@/components/fx/lumina";
+import { Reveal } from "@/components/fx/reveal";
 
 const SEO = {
   ro: {
@@ -115,13 +117,23 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${grotesk.variable}`}
     >
-      <body className="min-h-screen bg-background antialiased font-sans">
+      {/* `tg-grain` pe <body>, nu doar pe dashboard: paginile publice (login,
+          prețuri, share) arătau altfel decât interiorul aplicației fiindcă le
+          lipsea exact stratul ăsta. Aceeași textură peste tot = un singur produs. */}
+      <body className="min-h-screen bg-background antialiased font-sans tg-grain">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
             {/* Ascultă erorile de browser pe TOATE paginile, inclusiv cele
                 publice: pe landing sau în formularul de înregistrare, o eroare
                 costă un client care încă n-a devenit client. */}
             <ClientErrorReporter />
+            {/* Lumina care urmărește cursorul și observatorul de intrare în
+                cadru stau la rădăcină, nu doar în dashboard: cardurile de pe
+                landing și de pe pagina de prețuri sunt primele pe care le vede
+                cineva care încă nu e client. Amândouă sunt un singur ascultător
+                și nu randează nimic. */}
+            <Lumina />
+            <Reveal />
             {children}
           </Providers>
         </NextIntlClientProvider>

@@ -101,7 +101,12 @@ export function RollingNumber({
                 className="flex flex-col"
                 style={{
                   transform: `translateY(${armed ? -d : 0}em)`,
-                  transition: reduced ? "none" : `transform ${duration}ms cubic-bezier(0.16, 1, 0.3, 1)`,
+                  // Proprietăți separate, nu scurtătura `transition`: React se
+                  // plânge când amesteci scurtătura cu o proprietate din ea, iar
+                  // la rerandare ordinea chiar poate pierde întârzierea.
+                  transitionProperty: reduced ? "none" : "transform",
+                  transitionDuration: reduced ? "0ms" : `${duration}ms`,
+                  transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
                   transitionDelay: reduced ? "0ms" : `${delay + fromRight * stagger}ms`,
                   willChange: "transform",
                 }}

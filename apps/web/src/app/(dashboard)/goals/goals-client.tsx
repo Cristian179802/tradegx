@@ -102,7 +102,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
           {/* Progres obiective lunare */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Profit */}
-            <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
+            <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t("monthlyProfit")}</span>
@@ -119,7 +119,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
             </div>
 
             {/* Trades */}
-            <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
+            <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
               <div className="flex items-center gap-2 mb-3">
                 <BarChart3 className="w-4 h-4 text-violet-400" />
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t("trades")}</span>
@@ -134,7 +134,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
             </div>
 
             {/* Win rate */}
-            <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
+            <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
               <div className="flex items-center gap-2 mb-3">
                 <Target className="w-4 h-4 text-indigo-400" />
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t("winRate")}</span>
@@ -150,7 +150,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
           </div>
 
           {/* Setare obiective */}
-          <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
+          <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
             <h2 className="text-sm font-bold text-zinc-200 mb-4">{t("setTitle")}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
@@ -187,7 +187,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
               <span className="text-xs text-zinc-600">{t("propSub")}</span>
             </div>
             {propAccounts.length === 0 ? (
-              <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-8 text-center">
+              <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-8 text-center">
                 <p className="text-sm text-zinc-500">{t("propEmpty")}</p>
               </div>
             ) : (
@@ -197,7 +197,7 @@ export function GoalsClient({ propAccounts }: { propAccounts: PropAccount[] }) {
                   const ddUsedPct = ddLimit > 0 ? Math.min(100, (a.ddPct / ddLimit) * 100) : 0;
                   const ddDanger = ddUsedPct >= 80;
                   return (
-                    <div key={a.id} className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
+                    <div key={a.id} className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <p className="text-sm font-bold text-zinc-200">{a.name}</p>

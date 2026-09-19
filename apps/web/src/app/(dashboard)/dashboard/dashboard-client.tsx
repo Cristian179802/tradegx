@@ -17,6 +17,7 @@ import { OnboardingGuide } from "@/components/dashboard/onboarding-guide";
 import { AmbientState } from "@/components/dashboard/ambient-state";
 import { AutoRefresh } from "@/components/dashboard/auto-refresh";
 import { RollingNumber } from "@/components/ui/rolling-number";
+import { Sparkline } from "@/components/charts/sparkline";
 import { useIridescent } from "@/components/ui/use-iridescent";
 import { cn } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
@@ -104,39 +105,6 @@ function todayLocalized(acum: Date, locale: string) {
   return acum.toLocaleDateString(locale === "en" ? "en-US" : "ro-RO", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
-}
-
-// ─── Animated Sparkline ───────────────────────────────────────────────────────
-
-function Sparkline({
-  data, color = "#10b981", width = 72, height = 28, filled = false,
-}: {
-  data: number[]; color?: string; width?: number; height?: number; filled?: boolean;
-}) {
-  if (data.length < 2) return <div style={{ width, height }} />;
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-  const points = data.map((v, i) => [
-    (i / (data.length - 1)) * width,
-    height - ((v - min) / range) * (height - 2) - 1,
-  ]);
-  const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
-  const areaPath = path + ` L ${width} ${height} L 0 ${height} Z`;
-  const gradId = `sg-${color.replace("#", "")}`;
-
-  return (
-    <svg width={width} height={height} className="overflow-visible">
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      {filled && <path d={areaPath} fill={`url(#${gradId})`} />}
-      <path d={path} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
 }
 
 // ─── Panoul de stare ──────────────────────────────────────────────────────────
@@ -245,7 +213,7 @@ function StatePanel({
               simtit — spune daca urci sau cobori, dintr-o privire laterala. */}
           {spark.length > 1 && (
             <div className="hidden sm:block opacity-70">
-              <Sparkline data={spark} color={up ? "var(--gain)" : "var(--loss)"} width={96} height={30} filled />
+              <Sparkline data={spark} color={up ? "var(--gain)" : "var(--loss)"} width={96} height={30} filled traseaza intarziere={260} />
             </div>
           )}
         </div>

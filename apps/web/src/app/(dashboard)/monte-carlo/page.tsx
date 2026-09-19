@@ -270,7 +270,7 @@ export default function MonteCarloPage() {
       ) : (
         <>
           {/* Parametri */}
-          <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
+          <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <NumInput label={t("inTrades")} value={nTrades} onChange={setNTrades} min={10} max={500} />
               <NumInput label={t("inTarget")} value={targetPct} onChange={setTargetPct} suffix="%" min={1} max={100} />
@@ -313,7 +313,7 @@ export default function MonteCarloPage() {
                     {t("pRuin", { dd: maxDDPct })}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 text-center">
+                <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 text-center">
                   <Percent className="w-5 h-5 text-zinc-500 mx-auto mb-2" />
                   <p className="text-3xl font-black text-zinc-300 num">
                     <RollingNumber value={`${result.pNeither.toFixed(1)}%`} delay={140} />
@@ -325,7 +325,7 @@ export default function MonteCarloPage() {
               </div>
 
               {/* Percentile */}
-              <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
+              <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
                 <h3 className="text-xs font-black text-zinc-300 uppercase tracking-wide mb-3">
                   {t("equityTitle", { trades: nTrades })}
                 </h3>
@@ -359,7 +359,7 @@ export default function MonteCarloPage() {
               </div>
 
               {/* Trasee mostră */}
-              <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
+              <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5">
                 <h3 className="text-xs font-black text-zinc-300 uppercase tracking-wide mb-3">
                   {t("pathsTitle")}
                 </h3>

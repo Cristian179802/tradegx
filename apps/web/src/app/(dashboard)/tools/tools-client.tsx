@@ -67,7 +67,7 @@ function CurrencyStrength() {
   const maxAbs = Math.max(...strengths.map((s) => Math.abs(s.value)), 0.1);
 
   return (
-    <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
+    <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-emerald-500/12 border border-emerald-500/20 flex items-center justify-center">
@@ -175,7 +175,7 @@ function RiskOfRuin() {
   );
 
   return (
-    <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
+    <div className="tg-panel tg-reveal rounded-2xl border border-zinc-800/70 bg-zinc-900/80 p-5 premium-card">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-8 h-8 rounded-lg bg-rose-500/12 border border-rose-500/20 flex items-center justify-center">
           <Dices className="w-4 h-4 text-rose-400" />
