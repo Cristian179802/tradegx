@@ -10,6 +10,10 @@ import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Plus, Pencil, ExternalLink, Link2, CheckCircle2, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { tApiError } from "@/lib/api-error-dict";
+import { servereCunoscute } from "@/lib/brokers";
+
+// Lista e fixă: se construiește o dată, la încărcarea modulului.
+const SERVERE = servereCunoscute();
 
 interface Account {
   id: string;
@@ -144,12 +148,22 @@ function MetaApiConnect() {
               </div>
               <div>
                 <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide block mb-1">{t("serverLabel")}</label>
+                {/* `list` dă căutare nativă peste serverele cunoscute și lasă
+                    câmpul liber: orice server MT4/MT5 merge, listat sau nu. */}
                 <input
                   value={server}
                   onChange={(e) => setServer(e.target.value)}
-                  placeholder="ICMarketsSC-Live"
+                  placeholder="ICMarketsSC-Live01"
+                  list="servere-mt"
+                  autoComplete="off"
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/60 transition-colors"
                 />
+                <datalist id="servere-mt">
+                  {SERVERE.map((s) => (
+                    <option key={s.server} value={s.server}>{s.firma}</option>
+                  ))}
+                </datalist>
+                <p className="text-[10px] text-zinc-600 mt-1">{t("serverHint")}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>

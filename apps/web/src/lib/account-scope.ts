@@ -2,7 +2,7 @@
 //
 // Până acum, TOATE rutele de date interogau cu `account: { userId }`, adică
 // amestecau fiecare cont al utilizatorului într-o singură statistică. Un cont
-// FTMO de 100.000 $ și unul Binance de 500 $ ajungeau în aceeași rată de câștig,
+// cont finanțat de 100.000 $ și unul de crypto de 500 $ ajungeau în aceeași rată de câștig,
 // aceeași curbă de echitate, același drawdown. Cifra rezultată nu descria niciun
 // cont real — era o medie fără sens, iar utilizatorul nu avea cum să o vadă ca
 // atare.

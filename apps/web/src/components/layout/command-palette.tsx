@@ -33,7 +33,7 @@ const COMMANDS: Cmd[] = [
   { navKey: "goals", href: "/goals", icon: Trophy, keywords: "goals target prop obiective" },
   { navKey: "calculator", href: "/calculator", icon: Calculator, keywords: "lot size risc calculator" },
   { navKey: "riskManager", href: "/risk-manager", icon: Shield, keywords: "risc risk" },
-  { navKey: "propFirm", href: "/prop-firm", icon: Award, keywords: "ftmo challenge funded prop" },
+  { navKey: "propFirm", href: "/prop-firm", icon: Award, keywords: "challenge funded prop firma finantare" },
   { navKey: "accounts", href: "/accounts", icon: TrendingUp, keywords: "accounts broker sync mt4 mt5 conturi" },
   { navKey: "analytics", href: "/analytics", icon: BarChart3, keywords: "analytics statistici metrici analiza" },
   { navKey: "edge", href: "/edge", icon: Crosshair, keywords: "edge leak statistici tipare" },

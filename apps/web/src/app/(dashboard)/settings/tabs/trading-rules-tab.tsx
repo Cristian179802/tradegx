@@ -166,7 +166,7 @@ export function TradingRulesTab({
                         />
                       </FormControl>
                       <FormDescription className="text-zinc-600 text-xs">
-                        {t("ftmoLoss")}
+                        {t("exLoss")}
                       </FormDescription>
                       <FormMessage className="text-rose-400" />
                     </FormItem>
@@ -191,7 +191,7 @@ export function TradingRulesTab({
                         />
                       </FormControl>
                       <FormDescription className="text-zinc-600 text-xs">
-                        {t("ftmoDrawdown")}
+                        {t("exDrawdown")}
                       </FormDescription>
                       <FormMessage className="text-rose-400" />
                     </FormItem>

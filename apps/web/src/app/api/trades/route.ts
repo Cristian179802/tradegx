@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Fără `accountId` explicit în cerere, lista urmează contul selectat — nu mai
-  // amestecă toate conturile. Un cont FTMO și unul Binance sunt două jurnale
+  // amestecă toate conturile. Un cont finanțat și unul de crypto sunt două jurnale
   // diferite; afișate împreună, nu descriu niciunul.
   const scope = await getAccountScope(userId);
 

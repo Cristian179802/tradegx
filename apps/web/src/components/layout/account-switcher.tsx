@@ -331,7 +331,7 @@ export function AccountSwitcher() {
           </DropdownMenuLabel>
 
           {/* Vederea agregată — utilă, dar ca alegere explicită. Ca implicit,
-              amesteca un FTMO de 100.000 $ cu un Binance de 500 $ intr-o cifră
+              amesteca un cont finanțat de 100.000 $ cu un Binance de 500 $ intr-o cifră
               care nu descria niciun cont real. Apare doar de la două conturi în
               sus: cu unul singur, „toate" și „acela" sunt același lucru. */}
           {accounts.length > 1 && (

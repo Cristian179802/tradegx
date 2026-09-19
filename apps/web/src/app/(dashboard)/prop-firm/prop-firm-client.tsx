@@ -7,6 +7,7 @@ import {
   CheckCircle2, XCircle, Clock, AlertTriangle, Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SABLOANE, firmeSortate, sablon } from "@/lib/brokers";
 import { useToast } from "@/hooks/use-toast";
 
 interface Rules {
@@ -26,14 +27,10 @@ interface Account {
   status: "PASSED" | "FAILED" | "IN_PROGRESS" | "NO_RULES";
 }
 
-// Presetări reguli — valori reprezentative (verifică regulile exacte ale programului tău)
-const PRESETS: { name: string; profitTarget: number | null; maxDailyLossPct: number | null; maxDrawdownPct: number | null; minTradingDays: number | null }[] = [
-  { name: "FTMO",        profitTarget: 10, maxDailyLossPct: 5, maxDrawdownPct: 10, minTradingDays: 4 },
-  { name: "The5ers",     profitTarget: 8,  maxDailyLossPct: 5, maxDrawdownPct: 10, minTradingDays: 3 },
-  { name: "FundedNext",  profitTarget: 8,  maxDailyLossPct: 5, maxDrawdownPct: 10, minTradingDays: 5 },
-  { name: "MyFundedFX",  profitTarget: 8,  maxDailyLossPct: 5, maxDrawdownPct: 12, minTradingDays: 0 },
-  { name: "Custom",      profitTarget: null, maxDailyLossPct: null, maxDrawdownPct: null, minTradingDays: null },
-];
+// Firma și regulile sunt două lucruri diferite: firma e cu cine tranzacționezi,
+// șablonul e forma limitelor. Atribuirea unor cifre fixe unei firme anume ar fi
+// o minciună cu termen de expirare — programele își schimbă regulile des.
+const FIRME_PROP = firmeSortate("PROP");
 
 const STATUS_CFG = {
   PASSED:      { label: "passed", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30", Icon: CheckCircle2 },
@@ -97,16 +94,22 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
     minTradingDays: acc.rules.minTradingDays?.toString() ?? "",
   });
 
-  function applyPreset(name: string) {
-    const p = PRESETS.find((x) => x.name === name)!;
-    setForm({
-      propFirm: name,
-      profitTarget: p.profitTarget?.toString() ?? "",
+  const [sablonAles, setSablonAles] = React.useState<string | null>(null);
+
+  function aplicaSablon(id: string) {
+    const p = sablon(id);
+    if (!p) return;
+    setSablonAles(id);
+    setForm((f) => ({
+      ...f,
+      profitTarget: p.profitTargetPct?.toString() ?? "",
       maxDailyLossPct: p.maxDailyLossPct?.toString() ?? "",
       maxDrawdownPct: p.maxDrawdownPct?.toString() ?? "",
       minTradingDays: p.minTradingDays?.toString() ?? "",
-    });
+    }));
   }
+
+  const sablonCurent = sablonAles ? sablon(sablonAles) : undefined;
 
   async function save() {
     setSaving(true);
@@ -207,16 +210,39 @@ function AccountCard({ acc, onSaved }: { acc: Account; onSaved: () => void }) {
       {editing && (
         <div className="px-5 pb-5 border-t border-zinc-800/60 pt-4 space-y-4">
           <div>
-            <label className="text-[11px] text-zinc-500 font-medium block mb-1.5">{t("preset")}</label>
+            <label className="text-[11px] text-zinc-500 font-medium block mb-1.5">{t("firmaLabel")}</label>
+            <input
+              value={form.propFirm}
+              onChange={(e) => setForm((f) => ({ ...f, propFirm: e.target.value }))}
+              list="firme-prop"
+              autoComplete="off"
+              placeholder="—"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/60 transition-colors"
+            />
+            <datalist id="firme-prop">
+              {FIRME_PROP.map((f) => <option key={f.id} value={f.nume} />)}
+            </datalist>
+            <p className="text-[10px] text-zinc-600 mt-1">{t("firmaHint")}</p>
+          </div>
+
+          <div>
+            <label className="text-[11px] text-zinc-500 font-medium block mb-1.5">{t("sablonLabel")}</label>
             <div className="flex flex-wrap gap-1.5">
-              {PRESETS.map((pre) => (
-                <button key={pre.name} onClick={() => applyPreset(pre.name)}
+              {SABLOANE.map((sb) => (
+                <button key={sb.id} onClick={() => aplicaSablon(sb.id)}
                   className={cn("px-2.5 py-1 text-xs rounded-lg border transition-colors",
-                    form.propFirm === pre.name ? "bg-indigo-600/30 border-indigo-500/50 text-indigo-300" : "border-zinc-700 text-zinc-500 hover:text-zinc-300")}>
-                  {pre.name}
+                    sablonAles === sb.id ? "bg-indigo-600/30 border-indigo-500/50 text-indigo-300" : "border-zinc-700 text-zinc-500 hover:text-zinc-300")}>
+                  {t(`sabloane.${sb.cheie}`)}
                 </button>
               ))}
             </div>
+            <p className="text-[10px] text-zinc-600 mt-1.5">{t("sablonHint")}</p>
+            {sablonCurent?.tipDrawdown === "TRAILING" && (
+              <p className="text-[10px] text-amber-400/80 mt-1.5 flex items-start gap-1.5">
+                <AlertTriangle className="w-3 h-3 shrink-0 mt-px" />
+                {t("ddStaticNote")}
+              </p>
+            )}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[

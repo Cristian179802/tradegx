@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { getEffectivePlan, PRO_REQUIRED } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 // Datele se filtreaza pe contul selectat. Inainte, toate conturile erau
-// amestecate intr-o singura statistica — un FTMO de 100.000 $ si un Binance de
+// amestecate intr-o singura statistica — un cont finanțat de 100.000 $ si un Binance de
 // 500 $ in aceeasi rata de castig, cifra care nu descria niciun cont real.
 import { getAccountScope } from "@/lib/account-scope";
 import { rateLimit } from "@/lib/rate-limit";
