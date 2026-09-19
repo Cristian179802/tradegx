@@ -18,40 +18,53 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { RollingNumber } from "@/components/ui/rolling-number";
+import { AI_QUOTA } from "@/lib/plan";
 import {
   PREMIUM_PRICE_MONTHLY, PREMIUM_PRICE_ANNUAL, PREMIUM_PRICE_ANNUAL_PER_MONTH,
   PRICE_MONTHLY, PRICE_ANNUAL, PRICE_ANNUAL_PER_MONTH, ANNUAL_SAVINGS_PCT, fmtPrice,
 } from "@/lib/pricing";
 
 // label/free/pro = chei → pricing.* (traduse la randare; valorile bool raman)
+// Coloana Premium nu e scrisă de mână: e identică cu PRO peste tot, fiindcă
+// Premium E Pro — cu cote AI mai mari. Diferența reală se vede în cele trei
+// rânduri de cote de mai jos, care se CITESC din `AI_QUOTA`, deci nu pot rămâne
+// în urma codului. Un tabel de preț care promite altceva decât face aplicația e
+// cea mai scumpă greșeală posibilă pe pagina asta.
 const FEATURES = [
-  { label: "pf1", free: true, pro: true },
-  { label: "pf2", free: true, pro: true },
-  { label: "pf3", free: true, pro: true },
-  { label: "pf4", free: true, pro: true },
-  { label: "pf5", free: true, pro: true },
-  { label: "pf6", free: true, pro: true },
-  { label: "pf7", free: "1", pro: "valUnlimitedF" },
-  { label: "pf8", free: "val3PerMonth", pro: "valUnlimited" },
-  { label: "pf9", free: false, pro: true },
-  { label: "pf10", free: false, pro: true },
-  { label: "pf11", free: false, pro: true },
-  { label: "pf12", free: false, pro: true },
-  { label: "pf13", free: false, pro: true },
-  { label: "pf14", free: false, pro: true },
-  { label: "pf15", free: false, pro: true },
-  { label: "pf16", free: false, pro: true },
-  { label: "pf17", free: false, pro: true },
-  { label: "pf18", free: false, pro: true },
+  { label: "pf1", free: true, pro: true, premium: true },
+  { label: "pf2", free: true, pro: true, premium: true },
+  { label: "pf3", free: true, pro: true, premium: true },
+  { label: "pf4", free: true, pro: true, premium: true },
+  { label: "pf5", free: true, pro: true, premium: true },
+  { label: "pf6", free: true, pro: true, premium: true },
+  { label: "pf7", free: "1", pro: "valUnlimitedF", premium: "valUnlimitedF" },
+  { label: "pf8", free: "val3PerMonth", pro: "valUnlimited", premium: "valUnlimited" },
+  { label: "pf9", free: false, pro: true, premium: true },
+  { label: "pf10", free: false, pro: true, premium: true },
+  { label: "pf11", free: false, pro: true, premium: true },
+  { label: "pf12", free: false, pro: true, premium: true },
+  { label: "pf13", free: false, pro: true, premium: true },
+  { label: "pf14", free: false, pro: true, premium: true },
+  { label: "pf15", free: false, pro: true, premium: true },
+  { label: "pf16", free: false, pro: true, premium: true },
+  { label: "pf17", free: false, pro: true, premium: true },
+  { label: "pf18", free: false, pro: true, premium: true },
   // Adăugate după sesiunile de dezvoltare recente. Toate sunt LIVE — lista de
   // preț nu promite nimic care nu există deja în aplicație.
-  { label: "pf19", free: false, pro: true },  // Binance + Bybit nativ
-  { label: "pf20", free: false, pro: true },  // metrici instituționale
-  { label: "pf21", free: false, pro: true },  // analiză 3D zi × oră
-  { label: "pf22", free: true,  pro: true },  // overlay SMC pe grafice
-  { label: "pf23", free: false, pro: true },  // istoric complet la import
-  { label: "pf24", free: true,  pro: true },  // notificări browser + Telegram
+  { label: "pf19", free: false, pro: true, premium: true },  // Binance + Bybit nativ
+  { label: "pf20", free: false, pro: true, premium: true },  // metrici instituționale
+  { label: "pf21", free: false, pro: true, premium: true },  // analiză 3D zi × oră
+  { label: "pf22", free: true, pro: true, premium: true },  // overlay SMC pe grafice
+  { label: "pf23", free: false, pro: true, premium: true },  // istoric complet la import
+  { label: "pf24", free: true, pro: true, premium: true },  // notificări browser + Telegram
 ];
+
+/** Cele trei cote AI, singura diferență între PRO și Premium. */
+const COTE = [
+  { label: "pfChat", cheie: "chat" },
+  { label: "pfChart", cheie: "chartAnalyze" },
+  { label: "pfTrade", cheie: "tradeAnalyze" },
+] as const;
 
 const FAQ = [
   { q: "fq1Q", a: "fq1A" },
@@ -402,6 +415,41 @@ export default function PricingPage() {
                   ) : (
                     <span className="text-indigo-300 font-medium">{t.has(f.pro) ? t(f.pro) : f.pro}</span>
                   )}
+                </span>
+                <span className="text-center">
+                  {typeof f.premium === "boolean" ? (
+                    f.premium ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-zinc-700 mx-auto" />
+                    )
+                  ) : (
+                    <span className="text-amber-300 font-medium">{t.has(f.premium) ? t(f.premium) : f.premium}</span>
+                  )}
+                </span>
+              </div>
+            ))}
+
+            {/* Cotele AI — singura diferență reală între PRO și Premium.
+                Cifrele se citesc din `AI_QUOTA`, deci tabelul nu poate rămâne
+                în urma codului. */}
+            {COTE.map((c, i) => (
+              <div
+                key={c.label}
+                className={cn(
+                  "grid grid-cols-[1.6fr_repeat(3,minmax(0,1fr))] items-center px-6 py-3.5 text-sm",
+                  (FEATURES.length + i) % 2 === 0 ? "bg-zinc-900/30" : "",
+                )}
+              >
+                <span className="text-zinc-300">{t(c.label)}</span>
+                <span className="text-center">
+                  <XCircle className="w-4 h-4 text-zinc-700 mx-auto" />
+                </span>
+                <span className="text-center text-indigo-300 font-medium num">
+                  {t("valPerMonth", { n: AI_QUOTA.PRO[c.cheie] })}
+                </span>
+                <span className="text-center text-amber-300 font-medium num">
+                  {t("valPerMonth", { n: AI_QUOTA.PREMIUM[c.cheie] })}
                 </span>
               </div>
             ))}

@@ -2340,7 +2340,12 @@
     "pmf2": "400 AI Coach questions a month",
     "pmf3": "60 AI chart analyses a month",
     "pmf4": "120 AI trade analyses a month",
-    "pmf5": "Priority support"
+    "pmf5": "Priority support",
+    "colPremium": "Premium",
+    "pfChat": "AI Coach questions",
+    "pfChart": "AI chart analyses",
+    "pfTrade": "AI trade analyses",
+    "valPerMonth": "{n} / month"
   },
   "legalCommon": {
     "backToSite": "Back to site",

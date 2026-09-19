@@ -7,6 +7,7 @@ import { LocaleWidget } from "@/components/dashboard/locale-widget";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { TrialBanner } from "@/components/billing/trial-banner";
+import { Pagina } from "@/components/fx/pagina";
 
 export default async function DashboardLayout({
   children,
@@ -31,7 +32,7 @@ export default async function DashboardLayout({
           className="flex-1 overflow-y-auto mesh-bg"
           style={{ background: "#09090b" }}
         >
-          <div className="p-5 md:p-6 pb-28 md:pb-6 max-w-[1600px] mx-auto w-full">{children}</div>
+          <Pagina className="p-5 md:p-6 pb-28 md:pb-6 max-w-[1600px] mx-auto w-full">{children}</Pagina>
         </main>
       </div>
       <LocaleWidget />

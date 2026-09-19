@@ -2340,7 +2340,12 @@
     "pmf2": "400 întrebări AI Coach pe lună",
     "pmf3": "60 analize AI pe grafic pe lună",
     "pmf4": "120 analize AI pe tranzacție pe lună",
-    "pmf5": "Prioritate la suport"
+    "pmf5": "Prioritate la suport",
+    "colPremium": "Premium",
+    "pfChat": "Întrebări AI Coach",
+    "pfChart": "Analize AI pe grafic",
+    "pfTrade": "Analize AI pe tranzacție",
+    "valPerMonth": "{n} / lună"
   },
   "legalCommon": {
     "backToSite": "Înapoi la site",
