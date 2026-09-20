@@ -201,6 +201,11 @@ export function ProvizorAuth({ children }: { children: React.ReactNode }) {
   );
 
   const deconecteaza = React.useCallback(async () => {
+    // Scoatem telefonul de pe lista de notificari INAINTE sa pierdem tokenul:
+    // dupa stergerea sesiunii n-am mai avea cu ce autoriza cererea, iar
+    // telefonul ar continua sa primeasca alerte pentru un cont din care a iesit.
+    const { scoateNotificari } = await import("./notificari");
+    await scoateNotificari();
     await stergeSesiune();
     setStare({ utilizator: null, pornit: true });
   }, []);

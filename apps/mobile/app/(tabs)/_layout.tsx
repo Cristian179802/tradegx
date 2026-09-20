@@ -5,6 +5,8 @@ import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { T } from "../../src/theme";
+import { useAuth } from "../../src/lib/auth";
+import { useInregistrareNotificari } from "../../src/lib/notificari";
 
 // ── Bara de file ─────────────────────────────────────────────────────────────
 //
@@ -43,6 +45,11 @@ function Iconita({
 }
 
 export default function TabsLayout() {
+  // Permisiunea de notificari se cere AICI, dupa autentificare — nu la prima
+  // deschidere, cand omul inca n-a vazut ce face aplicatia si refuza.
+  const { utilizator } = useAuth();
+  useInregistrareNotificari(Boolean(utilizator));
+
   const bataie = React.useCallback(() => {
     Haptics.selectionAsync().catch(() => {});
   }, []);

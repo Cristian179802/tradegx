@@ -7,11 +7,10 @@
     "scheme": "tradegx",
     "userInterfaceStyle": "dark",
     "newArchEnabled": false,
-    "backgroundColor": "#09090b",
+    "backgroundColor": "#07080c",
+    "primaryColor": "#6d75f6",
     "icon": "./assets/icon.png",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tradegx.app",
@@ -21,21 +20,38 @@
     },
     "android": {
       "package": "com.tradegx.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#09090b"
-      }
+        "backgroundColor": "#07080c"
+      },
+      "permissions": ["android.permission.POST_NOTIFICATIONS"],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "edgeToEdgeEnabled": true
     },
     "plugins": [
       "expo-router",
       "expo-font",
       "expo-asset",
+      "expo-secure-store",
       [
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
-          "backgroundColor": "#09090b",
+          "backgroundColor": "#07080c",
           "imageWidth": 220
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/adaptive-icon.png",
+          "color": "#6d75f6"
         }
       ]
     ],
