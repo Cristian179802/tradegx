@@ -17,7 +17,9 @@ export function bani(valoare: number, moneda = "USD", cuSemn = true): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-  return `${semn}${n} ${moneda}`;
+  // Moneda goală e cerută explicit de ecranele unde unitatea e deja scrisă în
+  // antet; fără condiția asta ar rămâne un spațiu în coada fiecărei sume.
+  return moneda ? `${semn}${n} ${moneda}` : `${semn}${n}`;
 }
 
 /** Sume mari, prescurtate: „+30,8k USD". Pentru cifrele-titlu. */

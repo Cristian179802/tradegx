@@ -108,16 +108,14 @@ export function createApiClient(config: ApiClientConfig = {}) {
         request("/api/user/trading-rules", { method: "PATCH", body: json(data) }),
     },
 
-    assistant: {
-      chat: (data: unknown) =>
-        request("/api/ai-assistant/chat", { method: "POST", body: json(data) }),
-    },
-
     charts: {
       candles: (symbol: string, tf: string) =>
         request(`/api/charts/candles?symbol=${encodeURIComponent(symbol)}&tf=${tf}`),
-      quote: (symbol: string) =>
-        request(`/api/charts/quote?symbol=${encodeURIComponent(symbol)}`),
+      /** `cuSold` aduce și soldul contului activ — o interogare în plus, cerută explicit. */
+      quote: (symbol: string, cuSold = false) =>
+        request(
+          `/api/charts/quote?symbol=${encodeURIComponent(symbol)}${cuSold ? "&withBalance=1" : ""}`,
+        ),
       trades: (symbol: string, from: number, to: number) =>
         request(
           `/api/charts/trades?symbol=${encodeURIComponent(symbol)}&from=${from}&to=${to}`,
@@ -129,6 +127,11 @@ export function createApiClient(config: ApiClientConfig = {}) {
     market: {
       correlations: () => request("/api/market/correlations"),
       pulse: () => request("/api/nav/pulse"),
+      /** Cotații pentru mai multe perechi deodată, cu variația zilei. */
+      cotatii: (simboluri: string[]) =>
+        request(
+          `/api/integrations/twelvedata/quote?symbols=${encodeURIComponent(simboluri.join(","))}`,
+        ),
     },
 
     watchlist: {
@@ -136,6 +139,11 @@ export function createApiClient(config: ApiClientConfig = {}) {
       add: (data: unknown) => request("/api/watchlist", { method: "POST", body: json(data) }),
       remove: (id: string) => request(`/api/watchlist/${id}`, { method: "DELETE" }),
     },
+
+    /** Vederea instituțională: aceeași funcție ca pagina web, ca date. */
+    institutional: () => request("/api/institutional"),
+
+    riskManager: () => request("/api/risk-manager"),
 
     gamification: () => request("/api/gamification"),
 

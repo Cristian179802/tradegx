@@ -22,6 +22,12 @@ export interface StareCerere<T> {
   incarca: boolean;
   reimprospateaza: boolean;
   eroare: string | null;
+  /**
+   * Codul HTTP al ultimei erori. Ecranele au nevoie de el ca să deosebească
+   * „a picat rețeaua" de 402 — a doua nu e o defecțiune, e o ușă spre PRO, iar
+   * textul crud al erorii pe fundal roșu ar arăta ca prima.
+   */
+  stare: number | null;
   /** Reia cererea păstrând datele afișate. */
   reia: () => void;
 }
@@ -34,6 +40,7 @@ export function useCerere<T>(
   const [incarca, setIncarca] = React.useState(true);
   const [reimprospateaza, setReimprospateaza] = React.useState(false);
   const [eroare, setEroare] = React.useState<string | null>(null);
+  const [stare, setStare] = React.useState<number | null>(null);
   const [tur, setTur] = React.useState(0);
 
   // `aducator` se schimbă la fiecare randare dacă e scris inline; îl ținem
@@ -54,14 +61,17 @@ export function useCerere<T>(
         if (anulat) return;
         setDate(d);
         setEroare(null);
+        setStare(null);
       })
       .catch((e: unknown) => {
         if (anulat) return;
         if (e instanceof ApiError) {
           // 401 după reîmprospătare înseamnă sesiune moartă; poarta din layout
           // se ocupă de ieșire. Aici nu arătăm „Neautorizat" peste ecran.
-          setEroare(e.status === 401 ? null : e.message);
+          setStare(e.status);
+          setEroare(e.status === 401 || e.status === 402 ? null : e.message);
         } else {
+          setStare(null);
           setEroare("Fără conexiune. Trage în jos ca să reîncerci.");
         }
       })
@@ -77,5 +87,5 @@ export function useCerere<T>(
 
   const reia = React.useCallback(() => setTur((t) => t + 1), []);
 
-  return { date, incarca, reimprospateaza, eroare, reia };
+  return { date, incarca, reimprospateaza, eroare, stare, reia };
 }
