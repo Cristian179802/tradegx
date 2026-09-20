@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sesiuneaTranzactiei, calcRiskMoney } from "@tradegx/core";
-import { auth } from "@/lib/auth";
 import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { getAccountScope } from "@/lib/account-scope";
@@ -114,8 +113,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
@@ -138,7 +137,7 @@ export async function POST(req: NextRequest) {
 
   // Verify account belongs to user
   const account = await prisma.tradingAccount.findFirst({
-    where: { id: data.accountId, userId: session.user.id },
+    where: { id: data.accountId, userId },
   });
   if (!account) {
     return NextResponse.json({ error: "Cont negăsit" }, { status: 404 });
@@ -219,14 +218,14 @@ export async function POST(req: NextRequest) {
   // Create journal entry if notes provided
   if (notes) {
     await prisma.journalEntry.create({
-      data: { tradeId: trade.id, userId: session.user.id, preNotes: notes },
+      data: { tradeId: trade.id, userId, preNotes: notes },
     });
   }
 
   // Check trading rule violations asynchronously (non-blocking)
   if (data.status === "CLOSED" && pnlMoney != null) {
     checkTradingRuleViolations({
-      userId: session.user.id,
+      userId,
       accountId: data.accountId,
       tradePnl: pnlMoney,
     }).catch(() => {});

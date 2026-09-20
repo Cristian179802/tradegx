@@ -104,6 +104,9 @@ export function createApiClient(config: ApiClientConfig = {}) {
 
     dailyReview: () => request("/api/daily-review"),
 
+    /** Curba contului + rezultatul zilei, o singura interogare. */
+    equitySpark: () => request("/api/equity/spark"),
+
     alerts: {
       list: () => request("/api/alerts"),
       markAllRead: () => request("/api/alerts", { method: "PATCH" }),
