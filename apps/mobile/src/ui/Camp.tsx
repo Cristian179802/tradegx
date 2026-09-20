@@ -37,6 +37,10 @@ export interface CampProps {
   onSubmit?: () => void;
   returnKeyType?: "done" | "next" | "go";
   autoFocus?: boolean;
+  /** Text lung: câmpul crește, iar tastatura primește rând nou. */
+  multilinie?: boolean;
+  /** Înălțimea în rânduri, când e multilinie. */
+  randuri?: number;
 }
 
 export function Camp({
@@ -54,6 +58,8 @@ export function Camp({
   onSubmit,
   returnKeyType,
   autoFocus,
+  multilinie = false,
+  randuri = 4,
 }: CampProps) {
   const [focalizat, setFocalizat] = React.useState(false);
   const p = React.useRef(new Animated.Value(0)).current;
@@ -77,7 +83,15 @@ export function Camp({
   return (
     <View style={style}>
       <Text style={st.eticheta}>{eticheta}</Text>
-      <Animated.View style={[st.cutie, { borderColor: culoareMargine }]}>
+      <Animated.View
+        style={[
+          st.cutie,
+          // Pe text lung, eticheta-sufix stă sus, lângă primul rând — nu
+          // plutind la mijlocul unui câmp de patru rânduri.
+          multilinie && { alignItems: "flex-start" as const },
+          { borderColor: culoareMargine },
+        ]}
+      >
         <TextInput
           value={valoare}
           onChangeText={onChange}
@@ -93,7 +107,14 @@ export function Camp({
           returnKeyType={returnKeyType}
           autoFocus={autoFocus}
           selectionColor={T.accent.base}
-          style={[st.input, numeric && st.numeric, numeric && cifre]}
+          multiline={multilinie}
+          textAlignVertical={multilinie ? "top" : "center"}
+          style={[
+            st.input,
+            numeric && st.numeric,
+            numeric && cifre,
+            multilinie && { minHeight: randuri * 22 },
+          ]}
         />
         {sufix ? <Text style={st.sufix}>{sufix}</Text> : null}
       </Animated.View>

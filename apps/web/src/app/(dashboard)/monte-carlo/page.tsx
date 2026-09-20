@@ -9,20 +9,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PaywallCard } from "@/components/billing/paywall-card";
 import { RollingNumber } from "@/components/ui/rolling-number";
+import { monteCarlo } from "@tradegx/core";
 
 // ── Simulator Monte Carlo ───────────────────────────────────────────────────
 // Reeșantionează (cu înlocuire) randamentele REALE ale traderului și rulează
 // mii de „vieți alternative" ale contului: P(target), P(ruină), distribuție.
 
+// Simularea a plecat de aici în `@tradegx/core`. Motivul nu e curățenia:
+// aplicația de Android are același ecran, iar cifra „12% șanse să-mi ard
+// contul" trebuie să fie ACEEAȘI pe telefon și pe desktop. Două copii ale
+// aceleiași bucle s-ar fi depărtat la prima corectură, fără ca nimeni să vadă.
+//
+// Numele câmpurilor rămân cele de aici: le folosește tot restul paginii, iar
+// o redenumire în doisprezece locuri ar fi fost risc fără câștig.
+
 interface SimResult {
   pTarget: number;
   pRuin: number;
   pNeither: number;
-  finals: number[]; // equity finală (%) per simulare
+  finals: number[];
   percentiles: { p5: number; p25: number; p50: number; p75: number; p95: number };
-  samplePaths: number[][]; // câteva trasee de equity pentru vizual
+  samplePaths: number[][];
   avgMaxDD: number;
-  /** Conul: percentilele echității la FIECARE pas, nu doar la final. */
   con: { p5: number[]; p25: number[]; p50: number[]; p75: number[]; p95: number[] };
 }
 
@@ -31,81 +39,25 @@ function simulate(
   nTrades: number,
   nSims: number,
   targetPct: number,
-  maxDDPct: number
-): SimResult {
-  const finals: number[] = [];
-  let hitTarget = 0;
-  let hitRuin = 0;
-  let ddSum = 0;
-  const samplePaths: number[][] = [];
-
-  // Echitatea tuturor simulărilor, la fiecare pas. De aici iese conul.
-  // nSims × (nTrades+1) numere: la valorile din pagină, sub doi megaocteți.
-  // `Float64Array` în loc de `number[]` fiindcă la zeci de mii de valori
-  // diferența de alocare chiar se simte în browser.
-  const laPas: Float64Array[] = Array.from(
-    { length: nTrades + 1 },
-    () => new Float64Array(nSims),
-  );
-
-  // Toate simulările pornesc din 100.
-  laPas[0]!.fill(100);
-
-  for (let s = 0; s < nSims; s++) {
-    let equity = 100;
-    let peak = 100;
-    let maxDD = 0;
-    let outcome: "target" | "ruin" | null = null;
-    const path: number[] = [100];
-
-    for (let i = 0; i < nTrades; i++) {
-      const r = returns[(Math.random() * returns.length) | 0];
-      // randament compus pe equity curentă
-      equity *= 1 + r / 100;
-      if (equity > peak) peak = equity;
-      const dd = ((peak - equity) / peak) * 100;
-      if (dd > maxDD) maxDD = dd;
-
-      laPas[i + 1]![s] = equity;
-      if (s < 6) path.push(equity);
-
-      if (outcome === null) {
-        if (equity >= 100 + targetPct) outcome = "target";
-        else if (dd >= maxDDPct) outcome = "ruin";
-      }
-    }
-
-    if (outcome === "target") hitTarget++;
-    else if (outcome === "ruin") hitRuin++;
-    ddSum += maxDD;
-    finals.push(equity);
-    if (s < 6) samplePaths.push(path);
-  }
-
-  const sorted = [...finals].sort((a, b) => a - b);
-  const q = (p: number) => sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))];
-
-  // Sortăm o dată pe pas și citim cele cinci praguri din același vector.
-  const con = { p5: [] as number[], p25: [] as number[], p50: [] as number[], p75: [] as number[], p95: [] as number[] };
-  for (const pas of laPas) {
-    const v = pas.slice().sort();
-    const la = (p: number) => v[Math.min(v.length - 1, Math.floor(p * v.length))]!;
-    con.p5.push(la(0.05));
-    con.p25.push(la(0.25));
-    con.p50.push(la(0.5));
-    con.p75.push(la(0.75));
-    con.p95.push(la(0.95));
-  }
-
+  maxDDPct: number,
+): SimResult | null {
+  const r = monteCarlo({
+    randamente: returns,
+    tranzactii: nTrades,
+    simulari: nSims,
+    tintaPct: targetPct,
+    drawdownPct: maxDDPct,
+  });
+  if (!r) return null;
   return {
-    pTarget: (hitTarget / nSims) * 100,
-    pRuin: (hitRuin / nSims) * 100,
-    pNeither: ((nSims - hitTarget - hitRuin) / nSims) * 100,
-    finals,
-    percentiles: { p5: q(0.05), p25: q(0.25), p50: q(0.5), p75: q(0.75), p95: q(0.95) },
-    samplePaths,
-    avgMaxDD: ddSum / nSims,
-    con,
+    pTarget: r.pTinta,
+    pRuin: r.pRuina,
+    pNeither: r.pNiciuna,
+    finals: r.finale,
+    percentiles: r.percentile,
+    samplePaths: r.trasee,
+    avgMaxDD: r.ddMediu,
+    con: r.con,
   };
 }
 

@@ -88,7 +88,7 @@ export function BaraFile() {
       if (deschis?.id === d.id) return inchide();
       if (d.ruta) {
         if (deschis) inchide();
-        router.push(d.ruta as never);
+        router.navigate(d.ruta as never);
         return;
       }
       deschide(d);
@@ -101,7 +101,7 @@ export function BaraFile() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
       inchide();
       if (e.nativ) {
-        router.push(e.tinta as never);
+        router.navigate(e.tinta as never);
         return;
       }
       const url = `${URL_API}${e.tinta}`;
@@ -110,12 +110,17 @@ export function BaraFile() {
     [inchide, router],
   );
 
+  // Ce buton e aprins se DEDUCE din meniu, nu se scrie a doua oară. Varianta
+  // veche compara bucăți de cale („cale.includes('setari')"); cu douăzeci de
+  // ecrane, fiecare ecran nou ar fi cerut încă o linie aici — și lipsa ei nu
+  // dă eroare, doar o bară care nu arată unde ești.
   const activ = (d: Domeniu): boolean => {
     if (deschis) return deschis.id === d.id;
-    if (d.id === "acasa") return cale === "/" || cale === "/(tabs)";
-    if (d.id === "jurnal") return cale.includes("tranzact") || cale.includes("adauga");
-    if (d.id === "maimult") return cale.includes("setari");
-    return false;
+    if (d.ruta) return potrivit(cale, d.ruta);
+    if (d.potriviri?.some((t) => potrivit(cale, t))) return true;
+    return (d.grupuri ?? []).some((g) =>
+      g.elemente.some((e) => e.nativ && potrivit(cale, e.tinta)),
+    );
   };
 
   return (
@@ -240,6 +245,23 @@ function Rand({ element, onPress }: { element: ElementMeniu; onPress: () => void
       ) : null}
     </Pressable>
   );
+}
+
+/**
+ * Calea curentă corespunde țintei din meniu?
+ *
+ * `usePathname()` nu include grupurile de rute, deci „/(tabs)/tranzactii" din
+ * meniu ajunge pe ecran ca „/tranzactii", iar „/(tabs)" ca „/".
+ */
+function potrivit(cale: string, tinta: string): boolean {
+  const curata = (s: string) => {
+    const fara = s.replace("/(tabs)", "");
+    return fara === "" ? "/" : fara;
+  };
+  const t = curata(tinta);
+  const c = curata(cale);
+  if (t === "/") return c === "/";
+  return c === t || c.startsWith(`${t}/`);
 }
 
 /** Vârful săgeții stă sub butonul care a deschis bula. */

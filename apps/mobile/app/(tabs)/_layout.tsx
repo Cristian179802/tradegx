@@ -2,22 +2,18 @@ import * as React from "react";
 import { Tabs } from "expo-router";
 import { useAuth } from "../../src/lib/auth";
 import { useInregistrareNotificari } from "../../src/lib/notificari";
-import { BaraFile } from "../../src/ui/BaraFile";
 import { T } from "../../src/theme";
 
-// ── Navigarea aplicației ─────────────────────────────────────────────────────
+// ── Filele ───────────────────────────────────────────────────────────────────
 //
-// Bara e construită manual (`BaraFile`), nu cea implicită, fiindcă are nevoie
-// de ceva ce navigatorul standard nu face: patru dintre cele cinci butoane
-// deschid o BULĂ cu subcategorii, ca șina de comandă de pe site, în loc să
-// navigheze direct.
+// Cele patru ecrane care se deschid des rămân FILE adevărate: starea și poziția
+// derulării se păstrează când treci între ele. Restul aplicației (peste
+// douăzeci de ecrane, deschise din bulele meniului) sunt ecrane de stivă — se
+// deschid și se închid, nu are sens să rămână toate montate în memorie.
 //
-// Ecranele rămân file adevărate — starea fiecăruia se păstrează când treci
-// între ele, iar derularea nu se pierde.
-//
-// `href: null` pe „adauga" îl scoate din bară fără să-l scoată din aplicație:
-// rămâne o rută normală, deschisă din bula Jurnal. Butonul „+" din mijloc a
-// dispărut; ocupa cel mai bun loc din bară pentru o singură acțiune.
+// Bara nu se mai desenează aici. A urcat în `app/_layout.tsx`, ca să fie
+// vizibilă și peste ecranele de stivă; `tabBar` întoarce `null` fiindcă
+// navigatorul cere o bară, iar a lui ar fi a doua.
 
 export default function TabsLayout() {
   // Permisiunea de notificări se cere AICI, după autentificare — nu la prima
@@ -27,7 +23,7 @@ export default function TabsLayout() {
 
   return (
     <Tabs
-      tabBar={() => <BaraFile />}
+      tabBar={() => null}
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: T.surface.s0 },

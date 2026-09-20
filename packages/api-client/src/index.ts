@@ -80,6 +80,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
       update: (id: string, data: unknown) => request(`/api/trades/${id}`, { method: "PATCH", body: json(data) }),
       remove: (id: string) => request(`/api/trades/${id}`, { method: "DELETE" }),
       replay: (id: string) => request(`/api/trades/${id}/replay`),
+      analyze: (id: string) => request(`/api/trades/${id}/analyze`, { method: "POST" }),
     },
 
     signals: {
@@ -90,6 +91,79 @@ export function createApiClient(config: ApiClientConfig = {}) {
     analytics: {
       overview: () => request("/api/analytics"),
       timePerformance: () => request("/api/analytics/time-performance"),
+      edge: (zile = 365) => request(`/api/analytics/edge?days=${zile}`),
+      monteCarlo: (zile = 365) => request(`/api/analytics/montecarlo?days=${zile}`),
+    },
+
+    /** Jurnalul: aceeași interogare ca pagina web, expusă ca date. */
+    journal: {
+      list: () => request("/api/journal"),
+      get: (tradeId: string) => request(`/api/trades/${tradeId}/journal`),
+      save: (tradeId: string, data: unknown) =>
+        request(`/api/trades/${tradeId}/journal`, { method: "PUT", body: json(data) }),
+    },
+
+    tradingRules: {
+      update: (data: unknown) =>
+        request("/api/user/trading-rules", { method: "PATCH", body: json(data) }),
+    },
+
+    assistant: {
+      chat: (data: unknown) =>
+        request("/api/ai-assistant/chat", { method: "POST", body: json(data) }),
+    },
+
+    charts: {
+      candles: (symbol: string, tf: string) =>
+        request(`/api/charts/candles?symbol=${encodeURIComponent(symbol)}&tf=${tf}`),
+      quote: (symbol: string) =>
+        request(`/api/charts/quote?symbol=${encodeURIComponent(symbol)}`),
+      trades: (symbol: string, from: number, to: number) =>
+        request(
+          `/api/charts/trades?symbol=${encodeURIComponent(symbol)}&from=${from}&to=${to}`,
+        ),
+      analyze: (data: unknown) =>
+        request("/api/charts/analyze", { method: "POST", body: json(data) }),
+    },
+
+    market: {
+      correlations: () => request("/api/market/correlations"),
+      pulse: () => request("/api/nav/pulse"),
+    },
+
+    watchlist: {
+      list: () => request("/api/watchlist"),
+      add: (data: unknown) => request("/api/watchlist", { method: "POST", body: json(data) }),
+      remove: (id: string) => request(`/api/watchlist/${id}`, { method: "DELETE" }),
+    },
+
+    gamification: () => request("/api/gamification"),
+
+    academy: {
+      progress: () => request("/api/academy/progress"),
+      saveProgress: (data: unknown) =>
+        request("/api/academy/progress", { method: "PUT", body: json(data) }),
+      tutor: (data: unknown) =>
+        request("/api/academy/tutor", { method: "POST", body: json(data) }),
+    },
+
+    community: {
+      posts: (page = 1) => request(`/api/community/posts?page=${page}`),
+      createPost: (data: unknown) =>
+        request("/api/community/posts", { method: "POST", body: json(data) }),
+      react: (id: string, data: unknown) =>
+        request(`/api/community/posts/${id}/react`, { method: "POST", body: json(data) }),
+      teams: () => request("/api/community/teams"),
+      joinByCode: (data: unknown) =>
+        request("/api/community/teams/join-by-code", { method: "POST", body: json(data) }),
+      leave: (id: string) =>
+        request(`/api/community/teams/${id}/leave`, { method: "POST" }),
+    },
+
+    backtesting: {
+      strategies: () => request("/api/backtesting/strategies"),
+      get: (id: string) => request(`/api/backtesting/${id}`),
+      run: (data: unknown) => request("/api/backtesting/run", { method: "POST", body: json(data) }),
     },
 
     goals: {
@@ -110,6 +184,8 @@ export function createApiClient(config: ApiClientConfig = {}) {
     alerts: {
       list: () => request("/api/alerts"),
       markAllRead: () => request("/api/alerts", { method: "PATCH" }),
+      markRead: (id: string) => request(`/api/alerts/${id}`, { method: "PATCH" }),
+      remove: (id: string) => request(`/api/alerts/${id}`, { method: "DELETE" }),
     },
 
     calendar: (week: "last" | "this" | "next" = "this") => request(`/api/calendar?week=${week}`),
@@ -117,6 +193,11 @@ export function createApiClient(config: ApiClientConfig = {}) {
 
     accounts: {
       list: () => request("/api/accounts"),
+      active: () => request("/api/accounts/active"),
+      /** `null` = vederea agregată pe toate conturile. */
+      setActive: (accountId: string | null) =>
+        request("/api/accounts/active", { method: "POST", body: json({ accountId }) }),
+      refresh: () => request("/api/accounts/refresh", { method: "POST" }),
     },
 
     push: {

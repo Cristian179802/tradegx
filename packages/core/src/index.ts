@@ -4,6 +4,7 @@
 export * from "./pip";
 export * from "./risk";
 export * from "./metrics";
+export * from "./montecarlo";
 export * from "./smc";
 export * from "./smc-detect";
 export * from "./auth";

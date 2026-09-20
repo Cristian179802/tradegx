@@ -7,13 +7,21 @@ import type { Ionicons } from "@expo/vector-icons";
 // unde stă oricum contul. Ordinea din fiecare bulă e a site-ului, ca cineva
 // care folosește ambele să nu caute de două ori.
 //
-// `nativ` = ecran în aplicație. Restul deschid pagina reală în browser, ca în
-// Setări. Nu pretindem că avem 54 de ecrane native: o săgeată spune sincer că
-// ieși din aplicație.
+// ȚINTA E CA TOTUL SĂ FIE NATIV, în afară de două. Prima versiune trimitea în
+// browser tot ce nu era portat, cu o săgeată care spunea sincer că ieși din
+// aplicație. Era onest, dar nu era o aplicație — era un meniu de linkuri.
+// Ecranele se scriu pe grupuri; cât timp unul lipsește, elementul lui duce la
+// pagina REALĂ de pe site, nu la o rută care încă nu există.
 //
-// De ce nu am portat tot: pe telefon contează ce faci în treizeci de secunde.
-// Backtesting și Academia sunt muncă de birou; a le face native ar însemna
-// două locuri de întreținut pentru ceva ce nimeni nu deschide în tramvai.
+// Cele două excepții sunt deliberate:
+//   · Abonament — plata trece prin Stripe Checkout. Un formular de card
+//     reconstruit în aplicație ar însemna date de card prin codul nostru și
+//     regulile magazinelor de aplicații pe cap. Browserul e locul corect.
+//   · Roadmap — o pagină de prezentare care se schimbă săptămânal. Copiată
+//     nativ, ar rămâne în urmă fără ca cineva să observe.
+//
+// `nativ` = ecran în aplicație. Fără el, elementul deschide browserul și are
+// săgeata de ieșire.
 
 export type NumeIconita = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -39,6 +47,8 @@ export interface Domeniu {
   iconitaPlina: NumeIconita;
   /** Ruta deschisă la apăsare, dacă domeniul nu are bulă. */
   ruta?: string;
+  /** Rute care aprind butonul fără să fie în listă (ecrane de detaliu). */
+  potriviri?: string[];
   grupuri?: GrupMeniu[];
 }
 
@@ -58,19 +68,15 @@ export const DOMENII: Domeniu[] = [
     eticheta: "Jurnal",
     iconita: "book-outline",
     iconitaPlina: "book",
+    potriviri: ["/tranzactie"],
     grupuri: [
       {
         elemente: [
           { eticheta: "Adaugă tranzacție", iconita: "add-circle", tinta: "/(tabs)/adauga", nativ: true },
           { eticheta: "Tranzacții", iconita: "list", tinta: "/(tabs)/tranzactii", nativ: true },
-        ],
-      },
-      {
-        titlu: "Pe web",
-        elemente: [
-          { eticheta: "Jurnal detaliat", iconita: "create-outline", tinta: "/journal" },
-          { eticheta: "Checklist", iconita: "checkbox-outline", tinta: "/checklist" },
-          { eticheta: "Conturi de trading", iconita: "wallet-outline", tinta: "/accounts" },
+          { eticheta: "Jurnal detaliat", iconita: "create-outline", tinta: "/jurnal", nativ: true },
+          { eticheta: "Checklist", iconita: "checkbox-outline", tinta: "/checklist", nativ: true },
+          { eticheta: "Conturi de trading", iconita: "wallet-outline", tinta: "/conturi", nativ: true },
         ],
       },
     ],
@@ -148,10 +154,10 @@ export const DOMENII: Domeniu[] = [
         ],
       },
       {
-        titlu: "Cont",
+        titlu: "Pe web",
         elemente: [
           { eticheta: "Abonament", iconita: "card-outline", tinta: "/billing" },
-          { eticheta: "Toate setările", iconita: "options-outline", tinta: "/settings" },
+          { eticheta: "Roadmap", iconita: "map-outline", tinta: "/roadmap" },
         ],
       },
     ],
