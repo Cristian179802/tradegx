@@ -213,9 +213,10 @@ const st = StyleSheet.create({
   },
   titlu: {
     color: T.ink.i1, fontSize: T.fontSize.xl, fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },
-  numar: { color: T.ink.i4, fontSize: T.fontSize.xs },
+  numar: { color: T.ink.i4, fontSize: T.fontSize.xs , fontFamily: "Inter_400Regular" },
   filtre: {
     flexDirection: "row",
     gap: T.spacing.sm,
@@ -235,7 +236,7 @@ const st = StyleSheet.create({
     backgroundColor: T.accent.soft,
     borderColor: T.accent.line,
   },
-  textPastila: { color: T.ink.i3, fontSize: T.fontSize.sm, fontWeight: "700" },
+  textPastila: { color: T.ink.i3, fontSize: T.fontSize.sm, fontWeight: "700" , fontFamily: "Inter_700Bold" },
   textPastilaActiv: { color: T.accent.base },
   continut: {
     paddingHorizontal: T.spacing.lg,
@@ -249,14 +250,16 @@ const st = StyleSheet.create({
   randSimbol: { flexDirection: "row", alignItems: "center", gap: T.spacing.sm },
   simbol: {
     color: T.ink.i1, fontSize: T.fontSize.base, fontWeight: "700",
+    fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.tight,
   },
   setup: {
     color: T.ink.i4, fontSize: 10, fontWeight: "700",
+    fontFamily: "Inter_700Bold",
     textTransform: "uppercase", letterSpacing: T.tracking.wide,
   },
-  meta: { color: T.ink.i4, fontSize: T.fontSize.xs, marginTop: 3 },
-  pnl: { fontSize: T.fontSize.base, fontWeight: "800" },
+  meta: { color: T.ink.i4, fontSize: T.fontSize.xs, marginTop: 3 , fontFamily: "Inter_400Regular" },
+  pnl: { fontSize: T.fontSize.base, fontWeight: "800" , fontFamily: "Inter_800ExtraBold" },
   live: {
     flexDirection: "row", alignItems: "center", gap: 5,
     paddingHorizontal: 8, paddingVertical: 4,
@@ -266,11 +269,13 @@ const st = StyleSheet.create({
   punct: { width: 5, height: 5, borderRadius: 3, backgroundColor: T.accent.base },
   textLive: {
     color: T.accent.base, fontSize: 10, fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
   },
-  gol: { color: T.ink.i3, fontSize: T.fontSize.sm, lineHeight: 20 },
+  gol: { color: T.ink.i3, fontSize: T.fontSize.sm, lineHeight: 20 , fontFamily: "Inter_400Regular" },
   eroare: {
     color: T.pnl.loss, fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
     textAlign: "center", padding: T.spacing.lg,
   },
 });

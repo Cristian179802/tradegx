@@ -1,4 +1,5 @@
 import { Platform } from "react-native";
+import { FONT } from "./lib/fonturi";
 import {
   surface, line, ink, accent, pnl, state,
   spacing, radius, fontSize, tracking, duration,
@@ -55,11 +56,16 @@ export const umbra = (nivel: 1 | 2 | 3) => {
  * Fără asta, „1" e mai îngust decât „8" și tot tabelul tremură la fiecare
  * reîmprospătare.
  */
-export const cifre = Platform.select({
-  ios: { fontVariant: ["tabular-nums" as const] },
-  android: { fontVariant: ["tabular-nums" as const] },
-  default: {},
-})!;
+export const cifre = {
+  fontFamily: FONT.cifre,
+  fontVariant: ["tabular-nums" as const],
+};
+
+/** Cifre apăsate — pentru sume mari. Vezi nota despre fontWeight pe Android. */
+export const cifreBold = {
+  fontFamily: FONT.cifreBold,
+  fontVariant: ["tabular-nums" as const],
+};
 
 /** Culoarea semantică a unei sume. Verde/roșu NUMAI aici. */
 export function tonPnl(valoare: number | null | undefined): string {

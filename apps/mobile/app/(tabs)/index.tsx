@@ -310,11 +310,12 @@ const st = StyleSheet.create({
     padding: T.spacing.lg,
     paddingBottom: 110, // bara de file e absolută
   },
-  salut: { color: T.ink.i3, fontSize: T.fontSize.sm },
+  salut: { color: T.ink.i3, fontSize: T.fontSize.sm , fontFamily: "Inter_400Regular" },
   nume: {
     color: T.ink.i1,
     fontSize: T.fontSize.xl,
     fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
     marginTop: 2,
   },
@@ -323,6 +324,7 @@ const st = StyleSheet.create({
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
     fontWeight: "700",
+    fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
   },
@@ -333,11 +335,12 @@ const st = StyleSheet.create({
     marginTop: T.spacing.lg,
     gap: T.spacing.md,
   },
-  faraAzi: { color: T.ink.i3, fontSize: T.fontSize.sm, marginTop: 4 },
+  faraAzi: { color: T.ink.i3, fontSize: T.fontSize.sm, marginTop: 4 , fontFamily: "Inter_400Regular" },
   sectiune: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
     fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
     marginTop: T.spacing.xl,
@@ -352,6 +355,7 @@ const st = StyleSheet.create({
     color: T.accent.base,
     fontSize: T.fontSize.sm,
     fontWeight: "700",
+    fontFamily: "Inter_700Bold",
     marginTop: T.spacing.xl,
     marginBottom: T.spacing.sm,
   },
@@ -369,10 +373,11 @@ const st = StyleSheet.create({
   },
   simbol: {
     color: T.ink.i1, fontSize: T.fontSize.base, fontWeight: "700",
+    fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.tight,
   },
-  meta: { color: T.ink.i4, fontSize: T.fontSize.xs, marginTop: 2 },
-  pnl: { fontSize: T.fontSize.base, fontWeight: "800" },
+  meta: { color: T.ink.i4, fontSize: T.fontSize.xs, marginTop: 2 , fontFamily: "Inter_400Regular" },
+  pnl: { fontSize: T.fontSize.base, fontWeight: "800" , fontFamily: "Inter_800ExtraBold" },
   insignaDeschisa: {
     paddingHorizontal: 8, paddingVertical: 3,
     borderRadius: T.radius.sm,
@@ -382,11 +387,13 @@ const st = StyleSheet.create({
   },
   textDeschisa: {
     color: T.accent.base, fontSize: 10, fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
   },
-  gol: { color: T.ink.i3, fontSize: T.fontSize.sm, lineHeight: 20 },
+  gol: { color: T.ink.i3, fontSize: T.fontSize.sm, lineHeight: 20 , fontFamily: "Inter_400Regular" },
   eroare: {
     color: T.pnl.loss, fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
     marginTop: T.spacing.lg, textAlign: "center",
   },
 });

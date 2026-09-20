@@ -6,6 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ActivityIndicator, View } from "react-native";
 import { ProvizorAuth, useAuth } from "../src/lib/auth";
 import { T } from "../src/theme";
+import { useFonturi } from "../src/lib/fonturi";
 
 // ── Rădăcina aplicației ──────────────────────────────────────────────────────
 //
@@ -23,6 +24,9 @@ import { T } from "../src/theme";
 
 function Poarta({ children }: { children: React.ReactNode }) {
   const { utilizator, pornit } = useAuth();
+  // Fonturile de brand se încarcă din pachet. Până sunt gata NU desenăm text:
+  // altfel primul cadru apare cu fontul telefonului și sare vizibil la schimb.
+  const fonturiGata = useFonturi();
   const segmente = useSegments();
   const router = useRouter();
 
@@ -37,7 +41,7 @@ function Poarta({ children }: { children: React.ReactNode }) {
 
   // Cât timp nu știm dacă e cineva conectat, nu arătăm NICIUN ecran. O clipire
   // de login pentru cineva conectat de trei săptămâni e o scăpare vizibilă.
-  if (!pornit) {
+  if (!pornit || !fonturiGata) {
     return (
       <View style={{ flex: 1, backgroundColor: T.surface.s0, alignItems: "center", justifyContent: "center" }}>
         <ActivityIndicator color={T.accent.base} />

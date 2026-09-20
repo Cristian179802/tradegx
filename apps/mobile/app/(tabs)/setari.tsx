@@ -166,6 +166,7 @@ const st = StyleSheet.create({
   continut: { padding: T.spacing.lg, paddingBottom: 130 },
   titlu: {
     color: T.ink.i1, fontSize: T.fontSize.xl, fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight, marginBottom: T.spacing.lg,
   },
   randCont: { flexDirection: "row", alignItems: "center", gap: T.spacing.md },
@@ -175,11 +176,12 @@ const st = StyleSheet.create({
     backgroundColor: T.accent.soft,
     borderWidth: StyleSheet.hairlineWidth, borderColor: T.accent.line,
   },
-  initiale: { color: T.accent.base, fontSize: T.fontSize.base, fontWeight: "800" },
-  nume: { color: T.ink.i1, fontSize: T.fontSize.base, fontWeight: "700" },
-  email: { color: T.ink.i4, fontSize: T.fontSize.xs, marginTop: 2 },
+  initiale: { color: T.accent.base, fontSize: T.fontSize.base, fontWeight: "800" , fontFamily: "Inter_800ExtraBold" },
+  nume: { color: T.ink.i1, fontSize: T.fontSize.base, fontWeight: "700" , fontFamily: "Inter_700Bold" },
+  email: { color: T.ink.i4, fontSize: T.fontSize.xs, marginTop: 2 , fontFamily: "Inter_400Regular" },
   sectiune: {
     color: T.ink.i4, fontSize: T.fontSize.xs, fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase", letterSpacing: T.tracking.wider,
     marginTop: T.spacing.xl, marginBottom: T.spacing.sm,
   },
@@ -189,7 +191,7 @@ const st = StyleSheet.create({
     paddingHorizontal: T.spacing.lg,
   },
   linieApasata: { backgroundColor: T.surface.s3 },
-  textLinie: { flex: 1, color: T.ink.i2, fontSize: T.fontSize.base },
+  textLinie: { flex: 1, color: T.ink.i2, fontSize: T.fontSize.base , fontFamily: "Inter_400Regular" },
   separator: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: T.line.l1,
@@ -201,9 +203,10 @@ const st = StyleSheet.create({
     borderRadius: T.radius.lg, borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(251,113,133,0.30)",
   },
-  textIesire: { color: T.pnl.loss, fontSize: T.fontSize.base, fontWeight: "700" },
+  textIesire: { color: T.pnl.loss, fontSize: T.fontSize.base, fontWeight: "700" , fontFamily: "Inter_700Bold" },
   versiune: {
     color: T.ink.i4, fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
     textAlign: "center", marginTop: T.spacing.xl,
   },
 });

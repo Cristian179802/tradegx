@@ -141,6 +141,7 @@ const st = StyleSheet.create({
   text: {
     fontSize: T.fontSize.base,
     fontWeight: "700",
+    fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.normal,
   },
   inert: { opacity: 0.45 },

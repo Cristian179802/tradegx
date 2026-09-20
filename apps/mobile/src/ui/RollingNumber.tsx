@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Animated, Easing, StyleSheet, Text, View, type TextStyle } from "react-native";
 import { T, cifre } from "../theme";
+import { familieCifre } from "../lib/fonturi";
 
 // ── Odometru ─────────────────────────────────────────────────────────────────
 //
@@ -66,7 +67,7 @@ export function RollingNumber({
               key={`${i}-${ch}`}
               accessibilityElementsHidden
               importantForAccessibility="no"
-              style={[st.text, cifre, { fontSize: size, color, fontWeight: weight, lineHeight: inaltime }]}
+              style={[st.text, cifre, { fontSize: size, color, fontFamily: familieCifre(weight), lineHeight: inaltime }]}
             >
               {ch}
             </Text>
@@ -127,7 +128,7 @@ function Coloana({
         {CIFRE.map((n) => (
           <Text
             key={n}
-            style={[st.text, cifre, { fontSize: size, color, fontWeight: weight, lineHeight: inaltime, height: inaltime }]}
+            style={[st.text, cifre, { fontSize: size, color, fontFamily: familieCifre(weight), lineHeight: inaltime, height: inaltime }]}
           >
             {n}
           </Text>
