@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { isExchangeSourced } from "@/lib/exchange-sourced";
-import { auth } from "@/lib/auth";
 import { hasPro, FREE_LIMITS } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { tradingAccountSchema } from "@/lib/validations";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const accounts = await prisma.tradingAccount.findMany({
-    where: { userId: session.user.id },
+    where: { userId },
     include: {
       _count: { select: { trades: true } },
     },
@@ -63,15 +63,15 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   // Plan FREE: un singur cont de trading
-  if (!(await hasPro(session.user.id))) {
+  if (!(await hasPro(userId))) {
     const count = await prisma.tradingAccount.count({
-      where: { userId: session.user.id },
+      where: { userId },
     });
     if (count >= FREE_LIMITS.tradingAccounts) {
       return NextResponse.json(
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       ...rest,
       balance,
       initialBalance: balance,
-      userId: session.user.id,
+      userId,
     },
   });
 

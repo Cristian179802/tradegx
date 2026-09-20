@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { sesiuneaTranzactiei } from "@tradegx/core";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { tradeSchema } from "@/lib/validations";
 
@@ -22,13 +22,13 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const { id } = await params;
-  const trade = await getOwnedTrade(id, session.user.id);
+  const trade = await getOwnedTrade(id, userId);
   if (!trade) {
     return NextResponse.json({ error: "Trade negăsit" }, { status: 404 });
   }
@@ -40,13 +40,13 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const { id } = await params;
-  const existing = await getOwnedTrade(id, session.user.id);
+  const existing = await getOwnedTrade(id, userId);
   if (!existing) {
     return NextResponse.json({ error: "Trade negăsit" }, { status: 404 });
   }
@@ -151,13 +151,13 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const { id } = await params;
-  const existing = await getOwnedTrade(id, session.user.id);
+  const existing = await getOwnedTrade(id, userId);
   if (!existing) {
     return NextResponse.json({ error: "Trade negăsit" }, { status: 404 });
   }

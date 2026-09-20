@@ -16,12 +16,26 @@ export interface ApiClientConfig {
   getToken?: () => string | null | Promise<string | null>;
   /** "include" pe web pentru cookie httpOnly. */
   credentials?: RequestCredentials;
+  /**
+   * Chemat o singură dată când o cerere ia 401. Dacă întoarce `true`, cererea
+   * se repetă; altfel eroarea urcă neschimbată.
+   *
+   * DE CE AICI și nu în app: toate metodele de mai jos (`trades`, `analytics`…)
+   * se închid peste `request`-ul de aici. Dacă reîncercarea ar sta în afara
+   * clientului, ar prinde doar apelurile făcute manual prin `request` — restul
+   * ar picat la primul token expirat. E exact greșeala pe care am făcut-o o
+   * dată în `apps/mobile/src/lib/api.ts`.
+   *
+   * Pe mobile: reîmprospătează tokenul din secure-store. Pe web: nefolosit,
+   * cookie-ul NextAuth se reînnoiește singur.
+   */
+  onUnauthorized?: () => boolean | Promise<boolean>;
 }
 
 export function createApiClient(config: ApiClientConfig = {}) {
   const baseUrl = config.baseUrl ?? "";
 
-  async function request<T = unknown>(path: string, opts: RequestInit = {}): Promise<T> {
+  async function oCerere<T>(path: string, opts: RequestInit): Promise<T> {
     const token = config.getToken ? await config.getToken() : null;
     const res = await fetch(`${baseUrl}${path}`, {
       ...opts,
@@ -39,6 +53,19 @@ export function createApiClient(config: ApiClientConfig = {}) {
       throw new ApiError(res.status, msg, data);
     }
     return data as T;
+  }
+
+  async function request<T = unknown>(path: string, opts: RequestInit = {}): Promise<T> {
+    try {
+      return await oCerere<T>(path, opts);
+    } catch (e) {
+      // O SINGURĂ reîncercare. Un 401 care persistă după reîmprospătare
+      // înseamnă sesiune moartă; a insista ar fi o buclă.
+      if (!config.onUnauthorized || !(e instanceof ApiError) || e.status !== 401) throw e;
+      const potContinua = await config.onUnauthorized();
+      if (!potContinua) throw e;
+      return oCerere<T>(path, opts);
+    }
   }
 
   const json = (body: unknown) => JSON.stringify(body);

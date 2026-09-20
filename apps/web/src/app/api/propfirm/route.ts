@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -62,11 +62,11 @@ function computeProgress(
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const accounts = await prisma.tradingAccount.findMany({
-    where: { userId: session.user.id, type: { in: ["CHALLENGE", "LIVE"] } },
+    where: { userId, type: { in: ["CHALLENGE", "LIVE"] } },
     orderBy: { createdAt: "asc" },
     include: { trades: { where: { OR: [{ status: "CLOSED" }, { pnlMoney: { not: null } }] }, select: { entryTime: true, exitTime: true, pnlMoney: true } } },
   });
@@ -110,8 +110,8 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const body = await request.json();
   const parsed = schema.safeParse(body);
@@ -121,7 +121,7 @@ export async function PATCH(request: Request) {
 
   // Verifică proprietatea contului
   const acc = await prisma.tradingAccount.findFirst({
-    where: { id: accountId, userId: session.user.id },
+    where: { id: accountId, userId },
   });
   if (!acc) return NextResponse.json({ error: "Cont negăsit" }, { status: 404 });
 

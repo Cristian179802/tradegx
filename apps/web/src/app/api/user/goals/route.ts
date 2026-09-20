@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { getAccountScope } from "@/lib/account-scope";
 import { z } from "zod";
@@ -11,11 +11,11 @@ const schema = z.object({
 });
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { monthlyProfitTarget: true, monthlyTradeTarget: true, monthlyWinRateTarget: true, currency: true },
   });
 
@@ -23,7 +23,7 @@ export async function GET() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const scope = await getAccountScope(session.user.id);
+  const scope = await getAccountScope(userId);
 
   const monthTrades = await prisma.trade.findMany({
     where: {
@@ -55,8 +55,8 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const body = await request.json();
   const parsed = schema.safeParse(body);
@@ -66,7 +66,7 @@ export async function PATCH(request: Request) {
 
   const data = parsed.data;
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: userId },
     data: {
       ...(data.monthlyProfitTarget !== undefined ? { monthlyProfitTarget: data.monthlyProfitTarget } : {}),
       ...(data.monthlyTradeTarget !== undefined ? { monthlyTradeTarget: data.monthlyTradeTarget } : {}),

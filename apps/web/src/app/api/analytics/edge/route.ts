@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 // Datele se filtreaza pe contul selectat. Inainte, toate conturile erau
 // amestecate intr-o singura statistica — un cont finanțat de 100.000 $ si un Binance de
@@ -11,18 +11,18 @@ import { intParam } from "@/lib/parse-params";
 
 // GET /api/analytics/edge?days=90&accountId=...
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
-  if (!(await hasPro(session.user.id))) {
+  if (!(await hasPro(userId))) {
     return NextResponse.json(PRO_REQUIRED, { status: 402 });
   }
 
   const days = intParam(req.nextUrl.searchParams.get("days"), 365, { min: 1, max: 3650 });
   const accountId = req.nextUrl.searchParams.get("accountId");
 
-  const scope = await getAccountScope(session.user.id);
+  const scope = await getAccountScope(userId);
 
   const trades = await prisma.trade.findMany({
     where: {
