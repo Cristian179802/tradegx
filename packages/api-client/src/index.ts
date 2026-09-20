@@ -148,6 +148,8 @@ export function createApiClient(config: ApiClientConfig = {}) {
     gamification: () => request("/api/gamification"),
 
     academy: {
+      /** Lecțiile, diagramele, quiz-urile și glosarul. Mare; se ține în cache local. */
+      content: () => request("/api/academy/content"),
       progress: () => request("/api/academy/progress"),
       saveProgress: (data: unknown) =>
         request("/api/academy/progress", { method: "PUT", body: json(data) }),

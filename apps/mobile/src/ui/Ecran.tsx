@@ -9,7 +9,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -34,8 +34,15 @@ import { Schelet } from "./Schelet";
 // acolo derularea o ține lista, nu carcasa, și un `ScrollView` în jurul ei ar
 // strica virtualizarea — adică exact ce face lista utilă.
 
-/** Spațiul de sub conținut: bara (64) + margine + o respirație. */
-export const SPATIU_BARA = 112;
+/** Înălțimea barei fără marginea de siguranță a telefonului. */
+export const INALTIME_BARA = 64;
+
+/**
+ * Spațiul de sub conținut. Marginea de siguranță se adună peste, unde se
+ * poate măsura: pe telefoanele cu navigare prin gesturi, ea singură e 24–48px,
+ * iar fără ea ultimul rând dintr-o listă rămâne sub bară.
+ */
+export const SPATIU_BARA = 128;
 
 export function AntetEcran({
   titlu,
@@ -110,6 +117,8 @@ export function Ecran({
   style,
   subsol,
 }: EcranProps) {
+  const jos = useSafeAreaInsets().bottom;
+
   return (
     <View style={st.radacina}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
@@ -149,7 +158,11 @@ export function Ecran({
           </ScrollView>
         )}
 
-        {subsol ? <View style={st.subsol}>{subsol}</View> : null}
+        {subsol ? (
+          <View style={[st.subsol, { bottom: INALTIME_BARA + jos + T.spacing.sm }]}>
+            {subsol}
+          </View>
+        ) : null}
       </SafeAreaView>
     </View>
   );
@@ -202,6 +215,5 @@ const st = StyleSheet.create({
     position: "absolute",
     left: T.spacing.lg,
     right: T.spacing.lg,
-    bottom: 76,
   },
 });

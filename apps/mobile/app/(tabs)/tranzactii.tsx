@@ -17,6 +17,7 @@ import { bani, candva } from "../../src/lib/format";
 import { Card } from "../../src/ui/Card";
 import { Reveal } from "../../src/ui/Reveal";
 import { Schelet } from "../../src/ui/Schelet";
+import { SPATIU_BARA } from "../../src/ui/Ecran";
 import { T, tonPnl, cifre, ATINGERE_MIN } from "../../src/theme";
 
 // ── Tranzacții ───────────────────────────────────────────────────────────────
@@ -240,7 +241,7 @@ const st = StyleSheet.create({
   textPastilaActiv: { color: T.accent.base },
   continut: {
     paddingHorizontal: T.spacing.lg,
-    paddingBottom: 110,
+    paddingBottom: SPATIU_BARA,
   },
   rand: { flexDirection: "row", alignItems: "center", gap: T.spacing.md, minHeight: ATINGERE_MIN - 10 },
   directie: {

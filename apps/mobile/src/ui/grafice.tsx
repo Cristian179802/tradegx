@@ -2,6 +2,7 @@ import * as React from "react";
 import { Animated, Easing, StyleSheet, Text, View } from "react-native";
 import Svg, { Defs, LinearGradient, Line, Path, Rect, Stop } from "react-native-svg";
 import { T, tonPnl } from "../theme";
+import type { DiagramDef } from "../lib/academia";
 
 const PathAnimat = Animated.createAnimatedComponent(Path);
 const RectAnimat = Animated.createAnimatedComponent(Rect);
@@ -90,7 +91,7 @@ export function Curba({
     return () => a.stop();
   }, [drum, intarziere, p]);
 
-  if (!drum) return <View style={{ width: latime, height: inaltime }} />;
+  if (!drum) return <View style={{ width: Math.max(0, latime), height: inaltime }} />;
 
   const deplasare = p.interpolate({ inputRange: [0, 1], outputRange: [lungime, 0] });
 
@@ -173,7 +174,7 @@ export function Bare({
   }, [date, p]);
 
   if (date.length === 0 || latime <= 0) {
-    return <View style={{ width: latime, height: inaltime }} />;
+    return <View style={{ width: Math.max(0, latime), height: inaltime }} />;
   }
 
   const areNegative = date.some((d) => d.valoare < 0);
@@ -284,7 +285,7 @@ export function Con({
     };
   }, [con, latime, inaltime, start]);
 
-  if (!forme) return <View style={{ width: latime, height: inaltime }} />;
+  if (!forme) return <View style={{ width: Math.max(0, latime), height: inaltime }} />;
 
   return (
     <Animated.View style={{ opacity: p }}>
@@ -338,7 +339,7 @@ export function Histograma({
     return { numar, min, interval, varf };
   }, [valori, latime, cosuri]);
 
-  if (!forme) return <View style={{ width: latime, height: inaltime }} />;
+  if (!forme) return <View style={{ width: Math.max(0, latime), height: inaltime }} />;
 
   const pas = latime / cosuri;
 
@@ -386,3 +387,267 @@ const st = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+/* ── Lumânări ─────────────────────────────────────────────────────────────── */
+
+export interface Lumanare {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
+export interface MarcajTranzactie {
+  id: string;
+  direction: string;
+  entryTime: number;
+  entryPrice: number;
+  exitTime: number | null;
+  exitPrice: number | null;
+  pnl: number | null;
+}
+
+/**
+ * Grafic cu lumânări, desenat nativ.
+ *
+ * DE CE NU O PAGINĂ WEB ÎNTR-UN CADRU: un grafic încărcat dintr-un browser
+ * ascuns pornește în două secunde, nu răspunde la atingere ca restul
+ * aplicației, și aduce cu el întrebarea dacă aplicația e doar un site
+ * împachetat. Trei sute de dreptunghiuri desenate direct sunt mai rapide și
+ * arată ca aplicația, nu ca o fereastră în ea.
+ *
+ * Marcajele tranzacțiilor stau pe ACEEAȘI scară de preț ca lumânările. Ruta
+ * lor întoarce timpul în secunde, la fel ca lumânările — o unitate greșită
+ * aici ar pune intrarea ta la cincizeci de mii de ani distanță, adică nicăieri.
+ */
+export function Lumanari({
+  date,
+  latime,
+  inaltime = 260,
+  marcaje = [],
+}: {
+  date: Lumanare[];
+  latime: number;
+  inaltime?: number;
+  marcaje?: MarcajTranzactie[];
+}) {
+  const forme = React.useMemo(() => {
+    if (date.length === 0 || latime <= 0) return null;
+    const min = Math.min(...date.map((c) => c.low));
+    const max = Math.max(...date.map((c) => c.high));
+    const interval = max - min || 1;
+    const m = 6;
+    const y = (v: number) => inaltime - ((v - min) / interval) * (inaltime - m * 2) - m;
+    const pas = latime / date.length;
+    const corp = Math.max(1, Math.min(9, pas * 0.68));
+    const laTimp = (t: number) => {
+      // Căutare binară: la 400 de lumânări și zeci de marcaje, o căutare
+      // liniară pe fiecare marcaj s-ar simți la derulare.
+      let jos = 0, sus = date.length - 1;
+      while (jos < sus) {
+        const mij = (jos + sus) >> 1;
+        if (date[mij]!.time < t) jos = mij + 1;
+        else sus = mij;
+      }
+      return jos * pas + pas / 2;
+    };
+    return { y, pas, corp, laTimp, min, max };
+  }, [date, latime, inaltime]);
+
+  if (!forme) return <View style={{ width: Math.max(0, latime), height: inaltime }} />;
+
+  return (
+    <Svg width={latime} height={inaltime}>
+      {date.map((c, i) => {
+        const urca = c.close >= c.open;
+        const culoare = urca ? T.pnl.gain : T.pnl.loss;
+        const x = i * forme.pas + forme.pas / 2;
+        const sus = forme.y(Math.max(c.open, c.close));
+        const jos = forme.y(Math.min(c.open, c.close));
+        return (
+          <React.Fragment key={`${c.time}-${i}`}>
+            <Line
+              x1={x}
+              y1={forme.y(c.high)}
+              x2={x}
+              y2={forme.y(c.low)}
+              stroke={culoare}
+              strokeWidth={1}
+              opacity={0.75}
+            />
+            <Rect
+              x={x - forme.corp / 2}
+              y={sus}
+              width={forme.corp}
+              // O lumânare doji are corpul de zero pixeli; 1 px o face vizibilă.
+              height={Math.max(1, jos - sus)}
+              fill={culoare}
+              opacity={0.92}
+            />
+          </React.Fragment>
+        );
+      })}
+
+      {marcaje.map((t) => {
+        const x = forme.laTimp(t.entryTime);
+        const y = forme.y(t.entryPrice);
+        const cumparare = t.direction === "BUY";
+        const c = cumparare ? T.pnl.gain : T.pnl.loss;
+        return (
+          <React.Fragment key={t.id}>
+            <Line x1={0} y1={y} x2={latime} y2={y} stroke={c} strokeWidth={1} strokeDasharray={[2, 5]} opacity={0.45} />
+            <Rect x={x - 3.5} y={y - 3.5} width={7} height={7} rx={1.5} fill={c} />
+          </React.Fragment>
+        );
+      })}
+    </Svg>
+  );
+}
+
+/* ── Diagrama unei lecții ─────────────────────────────────────────────────── */
+
+/** Traseu SVG dintr-o serie cu pauze: fiecare pauză începe o bucată nouă. */
+function construieste(
+  serie: (number | null)[],
+  x: (i: number) => number,
+  y: (v: number) => number,
+): string {
+  let d = "";
+  let rupt = true;
+  serie.forEach((v, i) => {
+    if (v == null) { rupt = true; return; }
+    d += `${rupt ? "M" : "L"} ${x(i).toFixed(1)} ${y(v).toFixed(1)} `;
+    rupt = false;
+  });
+  return d.trim();
+}
+
+/**
+ * Diagramele Academiei sunt DATE, nu imagini: lumânări normalizate 0..100, cu
+ * niveluri, zone, săgeți și etichete peste ele. Aceleași date desenează figura
+ * pe site și aici — deci o corectură într-o lecție ajunge în amândouă locurile
+ * fără să exporte nimeni un PNG.
+ *
+ * Axa verticală e inversată față de cum vine: în date, 0 e jos.
+ */
+export function Diagrama({
+  def,
+  latime,
+  inaltime = 190,
+}: {
+  def: DiagramDef;
+  latime: number;
+  inaltime?: number;
+}) {
+  if (latime <= 0 || def.candles.length === 0) {
+    return <View style={{ width: Math.max(0, latime), height: inaltime }} />;
+  }
+
+  const n = def.candles.length;
+  const pas = latime / n;
+  const corp = Math.max(2, Math.min(14, pas * 0.6));
+  const m = 8;
+  const y = (v: number) => inaltime - (v / 100) * (inaltime - m * 2) - m;
+  const x = (i: number) => i * pas + pas / 2;
+
+  return (
+    <Svg width={latime} height={inaltime}>
+      {(def.zones ?? []).map((z, i) => {
+        const x1 = z.x1 != null ? x(z.x1) - pas / 2 : 0;
+        const x2 = z.x2 != null ? x(z.x2) + pas / 2 : latime;
+        const sus = y(Math.max(z.y1, z.y2));
+        const jos = y(Math.min(z.y1, z.y2));
+        return (
+          <Rect
+            key={`z${i}`}
+            x={x1}
+            y={sus}
+            width={Math.max(1, x2 - x1)}
+            height={Math.max(1, jos - sus)}
+            fill={z.color ?? T.accent.base}
+            opacity={0.14}
+          />
+        );
+      })}
+
+      {(def.levels ?? []).map((l, i) => (
+        <Line
+          key={`l${i}`}
+          x1={0}
+          y1={y(l.y)}
+          x2={latime}
+          y2={y(l.y)}
+          stroke={l.color ?? T.line.l2}
+          strokeWidth={1}
+          strokeDasharray={l.dashed === false ? undefined : [3, 4]}
+        />
+      ))}
+
+      {(def.trend ?? []).map((t, i) => (
+        <Line
+          key={`t${i}`}
+          x1={x(t.x1)}
+          y1={y(t.y1)}
+          x2={x(t.x2)}
+          y2={y(t.y2)}
+          stroke={t.color ?? T.ink.i4}
+          strokeWidth={1.4}
+          strokeDasharray={t.dashed ? [4, 4] : undefined}
+        />
+      ))}
+
+      {def.candles.map((c, i) => {
+        if (c.hidden) return null;
+        const urca = c.c >= c.o;
+        const culoare = urca ? T.pnl.gain : T.pnl.loss;
+        const cx = x(i);
+        const sus = y(Math.max(c.o, c.c));
+        const jos = y(Math.min(c.o, c.c));
+        return (
+          <React.Fragment key={`c${i}`}>
+            <Line x1={cx} y1={y(c.h)} x2={cx} y2={y(c.l)} stroke={culoare} strokeWidth={1} opacity={0.8} />
+            <Rect
+              x={cx - corp / 2}
+              y={sus}
+              width={corp}
+              height={Math.max(1.5, jos - sus)}
+              rx={1.5}
+              fill={culoare}
+              opacity={0.92}
+            />
+          </React.Fragment>
+        );
+      })}
+
+      {def.line ? (
+        <Path
+          // O pauză (`null`) RUPE traseul: punctul de după ea începe cu `M`,
+          // nu cu `L`. Altfel s-ar trage o linie dreaptă peste zona în care
+          // indicatorul încă n-are valoare — exact greșeala pe care o explică
+          // lecția despre medii mobile.
+          d={construieste(def.line, x, y)}
+          fill="none"
+          stroke={T.accent.base}
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ) : null}
+
+      {(def.arrows ?? []).map((a, i) => {
+        const cx = x(a.x);
+        const cy = y(a.y);
+        const d = a.dir === "up" ? 1 : -1;
+        const c = a.color ?? (a.dir === "up" ? T.pnl.gain : T.pnl.loss);
+        return (
+          <Path
+            key={`a${i}`}
+            d={`M ${cx} ${cy} L ${cx - 4} ${cy + d * 8} L ${cx + 4} ${cy + d * 8} Z`}
+            fill={c}
+          />
+        );
+      })}
+    </Svg>
+  );
+}

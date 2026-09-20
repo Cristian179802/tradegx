@@ -25,25 +25,82 @@ Android — au nevoie de un development build (`eas build --profile development`
 
 ## Ce conține
 
+Douăzeci și șase de opțiuni de meniu, toate native. Singurele două care
+deschid browserul sunt **Abonamentul** (plata trece prin Stripe Checkout —
+un formular de card reconstruit aici ar însemna date de card prin codul
+nostru) și **Roadmap-ul** (pagină de prezentare care se schimbă săptămânal).
+
 ```
 app/
-  _layout.tsx          poarta de autentificare — UN SINGUR loc care decide
-  login.tsx            email + parolă, 2FA apare doar când serverul îl cere
-  (tabs)/
-    index.tsx          acasă: sold, ziua, performanță, ultimele tranzacții
-    tranzactii.tsx     lista, cu filtre: toate / deschise / închise
-    adauga.tsx         formular + calculator de lot, în același ecran
-    setari.tsx         ce are sens pe telefon; restul deschide web-ul
-  tranzactie/[id].tsx  detaliul unei tranzacții
+  _layout.tsx            poarta de autentificare + bara de jos, peste toată stiva
+  login.tsx              email + parolă, 2FA apare doar când serverul îl cere
+  (tabs)/                cele patru ecrane deschise des — își păstrează starea
+    index.tsx            acasă: sold, ziua, performanță, ultimele tranzacții
+    tranzactii.tsx       lista, cu filtre: toate / deschise / închise
+    adauga.tsx           formular + calculator de lot, în același ecran
+    setari.tsx           contul, notificările, ieșirea
+  tranzactie/[id].tsx    detaliul unei tranzacții
+
+  jurnal/                lista de notat + editorul unei note (înainte / după)
+  checklist.tsx          singurul ecran fără server: se bifează în 30 de secunde
+  conturi.tsx            alege contul pe care îl privește tot restul aplicației
+
+  analitice.tsx          curba, lunile, zilele, orele, setup-urile, instrumentele
+  edge.tsx               unde ai avantaj și unde pierzi (PRO)
+  monte-carlo.tsx        mii de vieți alternative ale contului (PRO)
+  backtesting/           strategiile salvate: rulare + rezultat
+  institutional.tsx      Sharpe, Sortino, Calmar, CAGR (PRO)
+  risc.tsx               mai am voie azi? limitele contului, regulile tale
+  calculator.tsx         câte loturi, ca să risc exact cât am zis
+  obiective.tsx          trei ținte lunare, cu progresul lor
+  prop-firm.tsx          ținta și cele DOUĂ limite ale challenge-ului
+
+  semnale.tsx            ideile zilei, cu invalidarea scrisă (PRO)
+  asistent.tsx           chat pe statisticile contului tău
+  alerte.tsx             ce a observat sistemul fără să-l întrebi
+  grafice.tsx            lumânări native, cu tranzacțiile tale peste ele
+  piata.tsx              pulsul contului + sesiuni + cotații
+  calendar.tsx           evenimente grupate pe zile, în ora telefonului
+  stiri.tsx              titluri filtrate după impact
+  unelte.tsx             puterea valutelor, riscul de ruină, corelații
+
+  academia/              nouă module, lecții, quiz-uri, glosar
+  realizari.tsx          seria și obiceiurile măsurate
+  comunitate.tsx         postări + echipe
+
 src/
-  lib/auth.tsx         token-uri în expo-secure-store, reîmprospătare
-  lib/api.ts           clientul comun, cu bază absolută și Bearer
-  lib/useCerere.ts     încarcă / reîmprospătează / eroare, o singură dată
-  lib/notificari.ts    permisiune cerută DUPĂ autentificare
-  lib/format.ts        bani, procente, date — un singur loc
-  theme.ts             tokenii + ce e specific nativului (umbre, atingere)
-  ui/                  Card, Buton, Camp, RollingNumber, Sparkline, Reveal, Schelet
+  lib/auth.tsx           token-uri în expo-secure-store, reîmprospătare
+  lib/api.ts             clientul comun, cu bază absolută și Bearer
+  lib/asistent.ts        chatul — răspunsul e text, nu JSON, deci nu trece prin client
+  lib/academia.ts        conținutul cursului, cache local + îmbinarea progresului
+  lib/meniu.ts           domeniile din bară și ce e nativ
+  lib/useCerere.ts       încarcă / reîmprospătează / eroare / status HTTP
+  lib/notificari.ts      permisiune cerută DUPĂ autentificare
+  lib/format.ts          bani, procente, date — un singur loc
+  theme.ts               tokenii + ce e specific nativului (umbre, atingere)
+  ui/Ecran.tsx           carcasa oricărui ecran: antet, tragere, eroare, schelet
+  ui/grafice.tsx         curbă, bare, con, histogramă, lumânări, diagrame
+  ui/parti.tsx           pastile, stare goală, bară de progres, statistici
+  ui/TextLectie.tsx      mini-markdown-ul lecțiilor, cu termeni de glosar
+  ui/                    Card, Buton, Camp, RollingNumber, Sparkline, Reveal, Schelet
 ```
+
+### Rute API care există pentru aplicație
+
+Patru pagini web erau componente de server: interogau direct baza și nu
+treceau prin niciun API, deci aplicația n-avea cum să ajungă la ele. Fiecare
+are acum o rută care întoarce EXACT aceleași date:
+
+| Rută | Pentru |
+|---|---|
+| `/api/journal` | Jurnal detaliat |
+| `/api/risk-manager` | Manager de risc |
+| `/api/institutional` | Vedere instituțională |
+| `/api/academy/content` | Lecțiile, diagramele, quiz-urile, glosarul |
+
+Conținutul Academiei se descarcă o dată și se ține în `AsyncStorage`. Un pachet
+partajat ar fi mers offline din prima, dar fiecare lecție nouă ar fi cerut o
+versiune nouă în magazin; așa, o lecție scrisă azi ajunge azi pe telefon.
 
 ## Decizii care par mici și nu sunt
 

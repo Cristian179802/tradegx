@@ -7,11 +7,10 @@ import type { Ionicons } from "@expo/vector-icons";
 // unde stă oricum contul. Ordinea din fiecare bulă e a site-ului, ca cineva
 // care folosește ambele să nu caute de două ori.
 //
-// ȚINTA E CA TOTUL SĂ FIE NATIV, în afară de două. Prima versiune trimitea în
-// browser tot ce nu era portat, cu o săgeată care spunea sincer că ieși din
-// aplicație. Era onest, dar nu era o aplicație — era un meniu de linkuri.
-// Ecranele se scriu pe grupuri; cât timp unul lipsește, elementul lui duce la
-// pagina REALĂ de pe site, nu la o rută care încă nu există.
+// TOTUL E NATIV, în afară de două. Prima versiune trimitea în browser tot ce
+// nu era portat, cu o săgeată care spunea sincer că ieși din aplicație. Era
+// onest, dar nu era o aplicație — era un meniu de linkuri. Acum fiecare
+// opțiune are ecranul ei, construit pe aceleași rute API ca web-ul.
 //
 // Cele două excepții sunt deliberate:
 //   · Abonament — plata trece prin Stripe Checkout. Un formular de card
@@ -117,19 +116,19 @@ export const DOMENII: Domeniu[] = [
       {
         titlu: "AI",
         elemente: [
-          { eticheta: "Semnale", iconita: "flash-outline", tinta: "/signals" },
-          { eticheta: "Asistent AI", iconita: "sparkles-outline", tinta: "/ai-assistant" },
-          { eticheta: "Alerte", iconita: "notifications-outline", tinta: "/alerts" },
+          { eticheta: "Semnale", iconita: "flash-outline", tinta: "/semnale", nativ: true },
+          { eticheta: "Asistent AI", iconita: "sparkles-outline", tinta: "/asistent", nativ: true },
+          { eticheta: "Alerte", iconita: "notifications-outline", tinta: "/alerte", nativ: true },
         ],
       },
       {
         titlu: "Piață",
         elemente: [
-          { eticheta: "Grafice", iconita: "trending-up-outline", tinta: "/charts" },
-          { eticheta: "Piața azi", iconita: "globe-outline", tinta: "/market" },
-          { eticheta: "Calendar economic", iconita: "calendar-outline", tinta: "/calendar" },
-          { eticheta: "Știri", iconita: "newspaper-outline", tinta: "/news" },
-          { eticheta: "Unelte", iconita: "construct-outline", tinta: "/tools" },
+          { eticheta: "Grafice", iconita: "trending-up-outline", tinta: "/grafice", nativ: true },
+          { eticheta: "Piața azi", iconita: "globe-outline", tinta: "/piata", nativ: true },
+          { eticheta: "Calendar economic", iconita: "calendar-outline", tinta: "/calendar", nativ: true },
+          { eticheta: "Știri", iconita: "newspaper-outline", tinta: "/stiri", nativ: true },
+          { eticheta: "Unelte", iconita: "construct-outline", tinta: "/unelte", nativ: true },
         ],
       },
     ],
@@ -148,9 +147,9 @@ export const DOMENII: Domeniu[] = [
       {
         titlu: "Învățare",
         elemente: [
-          { eticheta: "Academia", iconita: "school-outline", tinta: "/academy" },
-          { eticheta: "Realizări", iconita: "medal-outline", tinta: "/achievements" },
-          { eticheta: "Comunitate", iconita: "people-outline", tinta: "/community" },
+          { eticheta: "Academia", iconita: "school-outline", tinta: "/academia", nativ: true },
+          { eticheta: "Realizări", iconita: "medal-outline", tinta: "/realizari", nativ: true },
+          { eticheta: "Comunitate", iconita: "people-outline", tinta: "/comunitate", nativ: true },
         ],
       },
       {

@@ -144,15 +144,10 @@ export default function Backtesting() {
         <Gol
           iconita="flask-outline"
           titlu="Nicio strategie salvată"
-          text="Regulile unei strategii se scriu pe site — sunt prea multe pentru un ecran de telefon. După ce ai una, o rulezi de aici."
-          actiune={
-            <Buton
-              eticheta="Deschide pe site"
-              varianta="secundar"
-              onPress={() => { Linking.openURL(`${URL_API}/backtesting`).catch(() => {}); }}
-              iconita={<Ionicons name="open-outline" size={15} color={T.ink.i1} />}
-            />
-          }
+          // Fără buton spre site: singurele două locuri din aplicație care
+          // deschid browserul sunt abonamentul și roadmap-ul. Textul spune unde
+          // se face treaba, iar cine e la calculator o face acolo.
+          text="Regulile unei strategii se scriu pe site — sunt zeci de condiții imbricate, prea multe pentru un ecran de telefon. După ce ai o strategie salvată, o rulezi de aici."
         />
       ) : (
         <>

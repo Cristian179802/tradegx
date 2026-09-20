@@ -12,6 +12,7 @@ import { RollingNumber } from "../../src/ui/RollingNumber";
 import { Sparkline } from "../../src/ui/Sparkline";
 import { Reveal } from "../../src/ui/Reveal";
 import { Schelet } from "../../src/ui/Schelet";
+import { SPATIU_BARA } from "../../src/ui/Ecran";
 import { T, tonPnl, cifre } from "../../src/theme";
 
 // ── Acasă ────────────────────────────────────────────────────────────────────
@@ -308,7 +309,7 @@ const st = StyleSheet.create({
   radacina: { flex: 1, backgroundColor: T.surface.s0 },
   continut: {
     padding: T.spacing.lg,
-    paddingBottom: 110, // bara de file e absolută
+    paddingBottom: SPATIU_BARA,
   },
   salut: { color: T.ink.i3, fontSize: T.fontSize.sm , fontFamily: "Inter_400Regular" },
   nume: {
