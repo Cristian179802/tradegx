@@ -166,7 +166,7 @@ export function SecurityTab({ initialEnabled, initialBackupCount }: { initialEna
           <p className="text-xs text-zinc-500">{t("backupRemaining", { n: backupCount })}</p>
 
           {/* Regenerare coduri */}
-          <div className="rounded-xl border border-zinc-800/70 bg-zinc-950/40 p-4">
+          <div className="tg-lumina rounded-xl border border-zinc-800/70 bg-zinc-950/40 p-4">
             <p className="text-sm font-semibold text-zinc-200 mb-1">{t("regenTitle")}</p>
             <p className="text-xs text-zinc-500 mb-3">{t("regenDesc")}</p>
             <div className="flex gap-2 items-center flex-wrap">

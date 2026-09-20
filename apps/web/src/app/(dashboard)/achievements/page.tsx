@@ -137,7 +137,7 @@ export default function AchievementsPage() {
         <>
           {/* Streak hero */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/[0.08] to-zinc-900/80 p-5 text-center">
+            <div className="tg-lumina rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/[0.08] to-zinc-900/80 p-5 text-center">
               <Flame className="w-6 h-6 text-orange-400 mx-auto mb-2" />
               <p className="text-3xl font-black text-orange-300 num">
                 <RollingNumber value={String(data?.streak.current ?? 0)} />
@@ -153,7 +153,7 @@ export default function AchievementsPage() {
               </p>
               <p className="text-[11px] font-bold text-zinc-500 mt-1">{t("streakBest")}</p>
             </div>
-            <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/[0.08] to-zinc-900/80 p-5 text-center">
+            <div className="tg-lumina rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/[0.08] to-zinc-900/80 p-5 text-center">
               <Medal className="w-6 h-6 text-amber-400 mx-auto mb-2" />
               <p className="text-3xl font-black text-amber-300 num">
                 <RollingNumber value={String(unlockedCount)} delay={140} />

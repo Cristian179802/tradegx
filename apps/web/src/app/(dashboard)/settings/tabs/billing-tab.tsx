@@ -86,7 +86,7 @@ export function BillingTab({
   return (
     <div className="space-y-6 max-w-2xl">
       {/* Current plan */}
-      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
+      <div className="tg-lumina rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-zinc-400" />
@@ -141,7 +141,7 @@ export function BillingTab({
 
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Monthly */}
-            <div className="rounded-2xl border border-zinc-700/80 bg-zinc-900/80 p-5">
+            <div className="tg-lumina rounded-2xl border border-zinc-700/80 bg-zinc-900/80 p-5">
               <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">{t("monthly")}</p>
               <p className="text-3xl font-black text-zinc-100 mb-4"><RollingNumber value="€10" /> <span className="text-sm font-normal text-zinc-500">{t("perMonth")}</span></p>
               <ul className="space-y-1.5 mb-5">
@@ -157,7 +157,7 @@ export function BillingTab({
             </div>
 
             {/* Annual */}
-            <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-500/8 to-violet-500/5 p-5 relative">
+            <div className="tg-lumina rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-500/8 to-violet-500/5 p-5 relative">
               <span className="absolute -top-2.5 left-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-lg shadow-indigo-500/20">{t("discountBadge")}</span>
               <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">{t("annual")}</p>
               <p className="text-3xl font-black text-zinc-100 mb-1"><RollingNumber value="€8,33" delay={70} /> <span className="text-sm font-normal text-zinc-500">{t("perMonth")}</span></p>

@@ -225,7 +225,7 @@ function MetaApiPanel() {
       </div>
 
       {accounts.map((acc) => (
-        <div key={acc.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+        <div key={acc.id} className="tg-lumina bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
           {/* Account header */}
           <div className="flex items-center justify-between">
             <div>
@@ -410,7 +410,7 @@ function IntegrationCard({
   }
 
   return (
-    <div className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/30">
+    <div className="tg-lumina border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/30">
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-3">

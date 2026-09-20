@@ -78,7 +78,7 @@ export function InstitutionalClient({ data }: { data: InstitutionalData }) {
       {/* Hero portofoliu */}
       <motion.div
         initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-        className="relative rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/[0.08] via-zinc-900/60 to-zinc-900/40 p-6 mb-4 overflow-hidden"
+        className="tg-lumina relative rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/[0.08] via-zinc-900/60 to-zinc-900/40 p-6 mb-4 overflow-hidden"
       >
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/70 to-transparent" />
         <div className="grid md:grid-cols-[1.2fr_1fr] gap-6 items-center">
@@ -118,7 +118,7 @@ export function InstitutionalClient({ data }: { data: InstitutionalData }) {
           <motion.div
             key={c.key}
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.04 }}
-            className="rounded-2xl border bg-zinc-900/50 p-4"
+            className="tg-lumina rounded-2xl border bg-zinc-900/50 p-4"
             style={{ borderColor: `rgba(${c.g.rgb},0.3)` }}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -137,7 +137,7 @@ export function InstitutionalClient({ data }: { data: InstitutionalData }) {
 
       {/* Per cont */}
       {accounts.length > 0 && (
-        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden">
+        <div className="tg-lumina rounded-2xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden">
           <div className="px-5 py-3 border-b border-zinc-800/70">
             <p className="text-sm font-black text-zinc-200">{t("perAccount")}</p>
           </div>

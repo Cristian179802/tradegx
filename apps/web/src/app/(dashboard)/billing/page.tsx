@@ -213,7 +213,7 @@ export default function BillingPage() {
               <button
                 onClick={goPortal}
                 disabled={working !== null}
-                className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-xs font-bold text-zinc-200 hover:border-zinc-600 transition-colors disabled:opacity-60"
+                className="tg-lumina inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-xs font-bold text-zinc-200 hover:border-zinc-600 transition-colors disabled:opacity-60"
               >
                 {working === "portal" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5" />}
                 {t("portalBtn")}
@@ -318,21 +318,21 @@ export default function BillingPage() {
 
           {/* ── Întrebări frecvente ── */}
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-4">
+            <div className="tg-lumina rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-4">
               <ShieldCheck className="w-4 h-4 text-emerald-400 mb-2" />
               <p className="text-xs font-bold text-zinc-200 mb-1">{t("faq1Title")}</p>
               <p className="text-[11px] text-zinc-500 leading-relaxed">
                 {t("faq1Body")}
               </p>
             </div>
-            <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-4">
+            <div className="tg-lumina rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-4">
               <X className="w-4 h-4 text-zinc-500 mb-2" />
               <p className="text-xs font-bold text-zinc-200 mb-1">{t("faq2Title")}</p>
               <p className="text-[11px] text-zinc-500 leading-relaxed">
                 {t("faq2Body")}
               </p>
             </div>
-            <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-4">
+            <div className="tg-lumina rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-4">
               <Lock className="w-4 h-4 text-indigo-400 mb-2" />
               <p className="text-xs font-bold text-zinc-200 mb-1">{t("faq3Title")}</p>
               <p className="text-[11px] text-zinc-500 leading-relaxed">

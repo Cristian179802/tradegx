@@ -410,7 +410,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           </div>
 
           {/* Detailed stats */}
-          <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
+          <div className="tg-lumina rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
             <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">{t("fullParams")}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
               <div>
@@ -463,7 +463,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
 
           {/* Setup & Tags */}
           {(trade.setupType || trade.killzone || trade.tags.length > 0) && (
-            <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
+            <div className="tg-lumina rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
               <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">{t("setupTags")}</h2>
               <div className="flex flex-wrap gap-2">
                 {trade.setupType && (
@@ -479,7 +479,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                   </span>
                 )}
                 {trade.tags.map((tag) => (
-                  <span key={tag} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl bg-zinc-800/80 border border-zinc-700/50 text-zinc-400 font-medium">
+                  <span key={tag} className="tg-lumina flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl bg-zinc-800/80 border border-zinc-700/50 text-zinc-400 font-medium">
                     <Tag className="h-3 w-3" />
                     {tag}
                   </span>
@@ -489,7 +489,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           )}
 
           {/* Screenshots */}
-          <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
+          <div className="tg-lumina rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
             <div className="flex items-center gap-2 mb-4">
               <Camera className="h-4 w-4 text-indigo-400" />
               <h2 className="text-sm font-bold text-zinc-200">{t("screenshotsTitle")}</h2>
@@ -502,7 +502,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
         <div className="space-y-4">
 
           {/* AI Analysis */}
-          <div className="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-zinc-900/80 to-zinc-900/80 p-5">
+          <div className="tg-lumina rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-zinc-900/80 to-zinc-900/80 p-5">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
                 <Sparkles className="h-4 w-4 text-violet-400" />
@@ -562,7 +562,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                     </div>
                   </div>
                 )}
-                <div className="p-3 bg-zinc-900/70 rounded-xl border border-zinc-800/50">
+                <div className="tg-lumina p-3 bg-zinc-900/70 rounded-xl border border-zinc-800/50">
                   <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap">{aiResult.analysis}</p>
                 </div>
               </div>
@@ -570,7 +570,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
           </div>
 
           {/* Journal */}
-          <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
+          <div className="tg-lumina rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-5">
             <div className="flex items-center gap-2 mb-4">
               <BookOpen className="h-4 w-4 text-indigo-400" />
               <h2 className="text-sm font-bold text-zinc-200">{t("journalTitle")}</h2>
@@ -603,7 +603,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                   step="0.00001"
                   data-testid="close-exit-price"
                   placeholder={String(Number(trade.entryPrice).toFixed(5))}
-                  className="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
+                  className="tg-lumina w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
                   value={closeData.exitPrice}
                   onChange={(e) => setCloseData((d) => ({ ...d, exitPrice: e.target.value }))}
                 />
@@ -615,7 +615,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                   step="0.01"
                   placeholder="0.00"
                   data-testid="close-pnl"
-                  className="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
+                  className="tg-lumina w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
                   value={closeData.pnlMoney}
                   onChange={(e) => setCloseData((d) => ({ ...d, pnlMoney: e.target.value }))}
                 />
@@ -625,7 +625,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
               <label className="text-xs font-medium text-zinc-400 block mb-1.5">{t("lExitTime")}</label>
               <input
                 type="datetime-local"
-                className="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 transition-colors"
+                className="tg-lumina w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 transition-colors"
                 value={closeData.exitTime}
                 onChange={(e) => setCloseData((d) => ({ ...d, exitTime: e.target.value }))}
               />
@@ -636,7 +636,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                 <input
                   type="number"
                   step="0.01"
-                  className="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
+                  className="tg-lumina w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
                   value={closeData.commission}
                   onChange={(e) => setCloseData((d) => ({ ...d, commission: e.target.value }))}
                 />
@@ -646,7 +646,7 @@ export function TradeDetailClient({ trade, shareToken }: { trade: Trade; shareTo
                 <input
                   type="number"
                   step="0.01"
-                  className="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
+                  className="tg-lumina w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 num transition-colors"
                   value={closeData.swap}
                   onChange={(e) => setCloseData((d) => ({ ...d, swap: e.target.value }))}
                 />

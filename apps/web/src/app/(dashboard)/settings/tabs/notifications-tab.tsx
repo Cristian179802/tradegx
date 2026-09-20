@@ -91,7 +91,7 @@ function TelegramSection() {
             {t("botNotConfigured")}
           </p>
         ) : connected ? (
-          <div className="flex items-center justify-between gap-3 bg-zinc-800/40 border border-zinc-700/50 rounded-xl px-4 py-3">
+          <div className="tg-lumina flex items-center justify-between gap-3 bg-zinc-800/40 border border-zinc-700/50 rounded-xl px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
                 <Check className="w-4 h-4 text-emerald-400" />

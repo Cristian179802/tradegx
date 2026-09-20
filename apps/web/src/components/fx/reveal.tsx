@@ -11,13 +11,26 @@ import * as React from "react";
 // Starea inițială (invizibil, împins 10px în jos) stă în CSS, nu aici. Dacă
 // scriptul întârzie sau nu rulează deloc, cea mai proastă variantă e conținutul
 // vizibil de la început — nu unul care rămâne ascuns.
+//
+// PLASA DE SIGURANȚĂ. Un efect de intrare are o cale de eșec inacceptabilă:
+// conținut care rămâne invizibil. Se poate întâmpla într-un container cu
+// `overflow` neașteptat, într-un tab ascuns care se afișează altfel decât prin
+// `display`, sau dacă observatorul pur și simplu nu se declanșează. De aceea,
+// la fiecare secundă verificăm: orice element care E PE ECRAN dar n-a fost
+// dezvăluit, se dezvăluie. O animație ratată e un fleac; o pagină goală, nu.
+
+const PLASA_MS = 1000;
 
 export function Reveal({ radacina }: { radacina?: React.RefObject<HTMLElement | null> }) {
   React.useEffect(() => {
-    const tinta = radacina?.current ?? document;
+    const tinta: Document | HTMLElement = radacina?.current ?? document;
+
+    const aratTot = () => {
+      tinta.querySelectorAll(".tg-reveal").forEach((el) => el.classList.add("vazut"));
+    };
 
     if (!("IntersectionObserver" in window)) {
-      tinta.querySelectorAll(".tg-reveal").forEach((el) => el.classList.add("vazut"));
+      aratTot();
       return;
     }
 
@@ -47,9 +60,25 @@ export function Reveal({ radacina }: { radacina?: React.RefObject<HTMLElement | 
       subtree: true,
     });
 
+    // Plasa de siguranță — vezi nota de sus.
+    const plasa = window.setInterval(() => {
+      const ramase = tinta.querySelectorAll(".tg-reveal:not(.vazut)");
+      if (ramase.length === 0) return;
+      for (const el of ramase) {
+        const r = el.getBoundingClientRect();
+        const peEcran =
+          r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
+        if (peEcran) {
+          el.classList.add("vazut");
+          obs.unobserve(el);
+        }
+      }
+    }, PLASA_MS);
+
     return () => {
       obs.disconnect();
       mo.disconnect();
+      window.clearInterval(plasa);
     };
   }, [radacina]);
 

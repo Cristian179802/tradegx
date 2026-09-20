@@ -21,7 +21,7 @@ export default function TradesLoading() {
       </div>
 
       {/* Table skeleton */}
-      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/60 overflow-hidden">
+      <div className="tg-lumina rounded-2xl border border-zinc-800/80 bg-zinc-900/60 overflow-hidden">
         {/* Header */}
         <div className="h-10 border-b border-zinc-800/80 bg-zinc-900/80 flex items-center gap-4 px-4">
           {[80, 60, 100, 70, 80, 80].map((w, i) => (

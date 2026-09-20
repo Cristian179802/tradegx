@@ -252,7 +252,7 @@ export default function EdgeFinderPage() {
                 return (
                   <div
                     key={dim}
-                    className="rounded-xl border border-zinc-800/70 bg-zinc-900/80 overflow-hidden"
+                    className="tg-lumina rounded-xl border border-zinc-800/70 bg-zinc-900/80 overflow-hidden"
                   >
                     <button
                       onClick={() => setOpenDim(isOpen ? null : dim)}

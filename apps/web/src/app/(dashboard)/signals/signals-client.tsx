@@ -116,7 +116,7 @@ function SignalCard({ s }: { s: Signal }) {
 
         {/* Niveluri */}
         <div className="grid grid-cols-3 gap-2 mt-4">
-          <div className="rounded-xl bg-zinc-800/40 border border-zinc-700/40 px-3 py-2">
+          <div className="tg-lumina rounded-xl bg-zinc-800/40 border border-zinc-700/40 px-3 py-2">
             <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-indigo-400/80"><Crosshair className="w-2.5 h-2.5" />Entry</div>
             <p className="text-sm font-black text-zinc-100 num mt-0.5">{fmtPrice(s.entryPrice)}</p>
           </div>
@@ -242,7 +242,7 @@ export function SignalsClient({
           <button
             onClick={() => { triggered.current = false; generate(); }}
             disabled={generating}
-            className="flex items-center gap-2 text-xs text-zinc-400 hover:text-zinc-200 bg-zinc-900 border border-zinc-700/60 rounded-xl px-3 py-2 transition-colors"
+            className="tg-lumina flex items-center gap-2 text-xs text-zinc-400 hover:text-zinc-200 bg-zinc-900 border border-zinc-700/60 rounded-xl px-3 py-2 transition-colors"
           >
             <RefreshCw className={cn("w-3.5 h-3.5", generating && "animate-spin")} />
             {t("refresh")}

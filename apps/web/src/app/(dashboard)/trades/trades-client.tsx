@@ -99,7 +99,7 @@ export function TradesClient({ accounts }: TradesClientProps) {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/60">
+      <div className="tg-lumina flex flex-wrap gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/60">
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />

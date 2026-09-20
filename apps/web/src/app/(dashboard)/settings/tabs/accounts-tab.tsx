@@ -100,7 +100,7 @@ function MetaApiConnect() {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+    <div className="tg-lumina rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setOpen((v) => !v)}
