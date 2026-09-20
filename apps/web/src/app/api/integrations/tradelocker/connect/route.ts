@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { authenticate, listAccounts, type TradeLockerEnv } from "@/lib/tradelocker";
 
@@ -13,9 +13,9 @@ import { authenticate, listAccounts, type TradeLockerEnv } from "@/lib/tradelock
 // Parola trece o singură dată prin server, către TradeLocker, și nu e persistată.
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  if (session.user.role === "DEMO") {
+  const utilizator = await getAuthUser();
+  if (!utilizator) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  if (utilizator.role === "DEMO") {
     return NextResponse.json({ error: "Contul demo este doar pentru vizualizare" }, { status: 403 });
   }
 
@@ -45,9 +45,9 @@ export async function POST(req: NextRequest) {
 
     // Token-ul se păstrează în UserIntegration; parola NU se salvează niciodată.
     await prisma.userIntegration.upsert({
-      where: { userId_service: { userId: session.user.id, service: "tradelocker" } },
+      where: { userId_service: { userId: utilizator.id, service: "tradelocker" } },
       create: {
-        userId: session.user.id,
+        userId: utilizator.id,
         service: "tradelocker",
         apiKey: accessToken,
         config: { env, server, email, refreshToken: refreshToken ?? null },

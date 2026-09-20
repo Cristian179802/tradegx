@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { fetchHistoricalCandles } from "@/lib/yahoo-finance";
 
@@ -16,12 +16,12 @@ function pickTimeframe(durationMs: number): string {
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { id } = await params;
   const trade = await prisma.trade.findFirst({
-    where: { id, account: { userId: session.user.id } },
+    where: { id, account: { userId } },
     select: {
       symbol: true, direction: true, entryPrice: true, exitPrice: true,
       entryTime: true, exitTime: true, stopLoss: true, takeProfit: true,

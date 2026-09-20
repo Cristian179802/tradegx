@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { rateLimit } from "@/lib/rate-limit";
@@ -13,12 +13,12 @@ export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  const { plan } = await getEffectivePlan(session.user.id);
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const { plan } = await getEffectivePlan(userId);
 
   // 10 AI analyses per user per hour
-  const rl = await rateLimit(`ai-analyze:${session.user.id}`, { limit: 10, windowSecs: 60 * 60 });
+  const rl = await rateLimit(`ai-analyze:${userId}`, { limit: 10, windowSecs: 60 * 60 });
   if (!rl.success) {
     return NextResponse.json(
       { error: "Ai atins limita de analize AI. Încearcă din nou mai târziu." },
@@ -26,7 +26,7 @@ export async function POST(
     );
   }
 
-  const buget = await consumaBugetLunar("tradeAnalyze", session.user.id, plan);
+  const buget = await consumaBugetLunar("tradeAnalyze", userId, plan);
   if (buget.cota === 0) return NextResponse.json(PRO_REQUIRED, { status: 402 });
   if (!buget.ok) {
     return NextResponse.json(
@@ -47,7 +47,7 @@ export async function POST(
   const { id } = await params;
 
   const trade = await prisma.trade.findFirst({
-    where: { id, account: { userId: session.user.id } },
+    where: { id, account: { userId } },
     include: {
       account: { select: { name: true, currency: true, balance: true } },
       journalEntry: true,
@@ -109,7 +109,7 @@ export async function POST(
 
   await prisma.journalEntry.upsert({
     where: { tradeId: id },
-    create: { tradeId: id, userId: session.user.id, ...journalData },
+    create: { tradeId: id, userId, ...journalData },
     update: journalData,
   });
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 
 // POST — join a team (public = direct, private = needs inviteCode)
@@ -7,11 +7,10 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { id } = await params;
-  const userId = session.user.id;
 
   const team = await prisma.team.findUnique({
     where: { id },

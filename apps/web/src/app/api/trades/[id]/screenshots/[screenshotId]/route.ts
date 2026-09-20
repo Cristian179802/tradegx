@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string; screenshotId: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { id, screenshotId } = await params;
 
   const screenshot = await prisma.tradeScreenshot.findFirst({
-    where: { id: screenshotId, tradeId: id, trade: { account: { userId: session.user.id } } },
+    where: { id: screenshotId, tradeId: id, trade: { account: { userId } } },
   });
   if (!screenshot) return NextResponse.json({ error: "Negăsit" }, { status: 404 });
 

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 
 // POST { code } — find private team by invite code and join it
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { code } = await req.json().catch(() => ({}));
   if (!code || typeof code !== "string") {
@@ -14,14 +14,14 @@ export async function POST(req: NextRequest) {
 
   const team = await prisma.team.findUnique({
     where: { inviteCode: code.trim().toUpperCase() },
-    include: { members: { where: { userId: session.user.id }, select: { id: true } } },
+    include: { members: { where: { userId }, select: { id: true } } },
   });
 
   if (!team) return NextResponse.json({ error: "Codul este invalid sau expirat" }, { status: 404 });
   if (team.members.length > 0) return NextResponse.json({ error: "Ești deja în această comunitate" }, { status: 409 });
 
   await prisma.teamMember.create({
-    data: { teamId: team.id, userId: session.user.id, role: "MEMBER" },
+    data: { teamId: team.id, userId, role: "MEMBER" },
   });
 
   // Fetch updated team with counts

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { sesiuneaTranzactiei } from "@tradegx/core";
 
@@ -262,8 +262,8 @@ async function importRows(
 // ─── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
@@ -280,7 +280,7 @@ export async function POST(req: NextRequest) {
   }
 
   const account = await prisma.tradingAccount.findFirst({
-    where: { id: accountId, userId: session.user.id },
+    where: { id: accountId, userId },
   });
   if (!account) {
     return NextResponse.json({ error: "Cont negăsit" }, { status: 404 });

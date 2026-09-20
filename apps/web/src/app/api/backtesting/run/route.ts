@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { fetchHistoricalCandles } from "@/lib/yahoo-finance";
@@ -20,8 +20,8 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
@@ -35,18 +35,18 @@ export async function POST(req: NextRequest) {
 
   // Verify strategy ownership
   const strategy = await prisma.strategy.findFirst({
-    where: { id: strategyId, userId: session.user.id, isActive: true },
+    where: { id: strategyId, userId, isActive: true },
   });
   if (!strategy) return NextResponse.json({ error: "Strategie negăsită" }, { status: 404 });
 
   // Plan FREE: maximum 3 backteste pe luna calendaristică curentă
-  if (!(await hasPro(session.user.id))) {
+  if (!(await hasPro(userId))) {
     const monthStart = new Date();
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
     const used = await prisma.backtest.count({
       where: {
-        strategy: { userId: session.user.id },
+        strategy: { userId },
         createdAt: { gte: monthStart },
       },
     });

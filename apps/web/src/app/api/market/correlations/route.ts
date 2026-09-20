@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { fetchHistoricalCandles } from "@/lib/yahoo-finance";
 
 export const maxDuration = 60;
@@ -26,8 +26,8 @@ function pearson(a: number[], b: number[]): number {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   if (CACHE && Date.now() - CACHE.at < TTL) {
     return NextResponse.json(CACHE.data);

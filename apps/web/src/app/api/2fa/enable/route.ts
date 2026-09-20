@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret, verifyToken, generateBackupCodes, hashBackupCodes } from "@/lib/twofactor";
 
 // Confirmă un cod din aplicație → activează 2FA + generează coduri de rezervă.
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { code } = await req.json().catch(() => ({}));
   if (!code || typeof code !== "string") return NextResponse.json({ ok: false, code: "invalid_code" }, { status: 400 });
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { totpSecret: true, totpEnabled: true },
   });
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
   const backupCodes = generateBackupCodes(10);
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: userId },
     data: { totpEnabled: true, totpBackupCodes: hashBackupCodes(backupCodes) },
   });
 

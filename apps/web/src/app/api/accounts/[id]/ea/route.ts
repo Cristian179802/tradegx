@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { createHmac } from "crypto";
 import { generateMQ4, generateMQ5 } from "@/lib/ea-templates";
@@ -28,14 +28,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   // Verify the account belongs to this user (just for auth check)
   const account = await prisma.tradingAccount.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, userId },
     select: { id: true, name: true },
   });
 
@@ -45,7 +45,6 @@ export async function GET(
 
   // Use userId-based token + userId-based webhook URL
   // This allows the EA route to auto-create a new trading account on first sync
-  const userId = session.user.id;
   const token = getUserEaToken(userId);
   const appUrl = getAppUrl();
   const webhookUrl = `${appUrl}/api/webhooks/ea/${userId}`;

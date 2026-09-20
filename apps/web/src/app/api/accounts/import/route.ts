@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { autoDetectAndParse, parseByPlatform, detectInstrumentType } from "@/lib/parsers/index";
 import { apiError } from "@/lib/api-error";
 import { sesiuneaTranzactiei } from "@tradegx/core";
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     let tradingAccount;
     if (tradingAccountId) {
       tradingAccount = await prisma.tradingAccount.findFirst({
-        where: { id: tradingAccountId, userId: session.user.id },
+        where: { id: tradingAccountId, userId },
       });
       if (!tradingAccount) {
         return NextResponse.json({ error: "Cont de trading inexistent" }, { status: 404 });
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     } else {
       tradingAccount = await prisma.tradingAccount.create({
         data: {
-          userId: session.user.id,
+          userId,
           name: accountName,
           type: accountType as any,
           broker: broker || "Import",

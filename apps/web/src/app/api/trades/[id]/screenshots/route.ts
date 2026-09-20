@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 
 async function uploadToCloudinary(
@@ -50,13 +50,13 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { id } = await params;
 
   const trade = await prisma.trade.findFirst({
-    where: { id, account: { userId: session.user.id } },
+    where: { id, account: { userId } },
     select: { id: true },
   });
   if (!trade) return NextResponse.json({ error: "Trade negăsit" }, { status: 404 });
@@ -86,7 +86,7 @@ export async function POST(
     const { url, publicId } = await uploadToCloudinary(
       base64,
       mimeType,
-      `tradegx/${session.user.id}`
+      `tradegx/${userId}`
     );
 
     const screenshot = await prisma.tradeScreenshot.create({

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { sendTelegramMessage } from "@/lib/telegram";
 
@@ -9,11 +9,11 @@ function mask(chatId: string): string {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const integ = await prisma.userIntegration.findUnique({
-    where: { userId_service: { userId: session.user.id, service: "telegram" } },
+    where: { userId_service: { userId, service: "telegram" } },
   });
 
   return NextResponse.json({
@@ -24,8 +24,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   if (!process.env.TELEGRAM_BOT_TOKEN) {
     return NextResponse.json(
@@ -56,20 +56,20 @@ export async function POST(request: Request) {
   }
 
   await prisma.userIntegration.upsert({
-    where: { userId_service: { userId: session.user.id, service: "telegram" } },
+    where: { userId_service: { userId, service: "telegram" } },
     update: { apiKey: id, isActive: true, updatedAt: new Date() },
-    create: { userId: session.user.id, service: "telegram", apiKey: id, isActive: true },
+    create: { userId, service: "telegram", apiKey: id, isActive: true },
   });
 
   return NextResponse.json({ success: true, maskedChatId: mask(id) });
 }
 
 export async function DELETE() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   await prisma.userIntegration.deleteMany({
-    where: { userId: session.user.id, service: "telegram" },
+    where: { userId, service: "telegram" },
   });
 
   return NextResponse.json({ success: true });

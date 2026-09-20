@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { hasPro, PRO_REQUIRED } from "@/lib/plan";
@@ -17,11 +17,11 @@ const alertSchema = z.object({
 });
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const items = await prisma.watchlistItem.findMany({
-    where: { userId: session.user.id },
+    where: { userId },
     orderBy: [{ groupName: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
   });
 
@@ -29,8 +29,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   }
 
   const existing = await prisma.watchlistItem.findUnique({
-    where: { userId_symbol: { userId: session.user.id, symbol: result.data.symbol } },
+    where: { userId_symbol: { userId, symbol: result.data.symbol } },
   });
   if (existing) {
     return NextResponse.json({ error: "Simbolul există deja în watchlist" }, { status: 409 });
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
   const item = await prisma.watchlistItem.create({
     data: {
-      userId: session.user.id,
+      userId,
       symbol: result.data.symbol,
       instrumentType: result.data.instrumentType,
       ...(result.data.groupName != null && { groupName: result.data.groupName }),
@@ -61,9 +61,9 @@ export async function POST(req: NextRequest) {
 // PATCH — setează/șterge pragurile de alertă de preț pe un item.
 // null = dezactivează pragul; undefined = păstrează valoarea existentă.
 export async function PATCH(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  if (!(await hasPro(session.user.id))) {
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  if (!(await hasPro(userId))) {
     return NextResponse.json(PRO_REQUIRED, { status: 402 });
   }
 
@@ -75,7 +75,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   const item = await prisma.watchlistItem.findFirst({
-    where: { id: result.data.id, userId: session.user.id },
+    where: { id: result.data.id, userId },
   });
   if (!item) return NextResponse.json({ error: "Item negăsit" }, { status: 404 });
 

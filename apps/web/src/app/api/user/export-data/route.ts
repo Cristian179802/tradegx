@@ -1,14 +1,13 @@
 ﻿import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
-  const userId = session.user.id;
 
   const [user, accounts, trades, journal, watchlist, alerts, subscription] = await Promise.all([
     prisma.user.findUnique({

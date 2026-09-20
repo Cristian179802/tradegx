@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -16,10 +16,9 @@ function makeInviteCode() {
 
 // GET  — list: public teams + teams user is already in
 export async function GET(_req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
-  const userId = session.user.id;
 
   const [myMemberships, publicTeams] = await Promise.all([
     prisma.teamMember.findMany({
@@ -75,8 +74,8 @@ export async function GET(_req: NextRequest) {
 
 // POST — create team
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
@@ -94,7 +93,7 @@ export async function POST(req: NextRequest) {
       isPublic: result.data.isPublic,
       inviteCode,
       members: {
-        create: { userId: session.user.id, role: "OWNER" },
+        create: { userId, role: "OWNER" },
       },
     },
     include: { _count: { select: { members: true, posts: true } } },

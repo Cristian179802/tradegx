@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/twofactor";
 import { runExchangeSync } from "@/lib/exchange-sync-engine";
@@ -29,12 +29,12 @@ const MIN_INTERVAL_MS = 60_000;
 const MAX_ACCOUNTS = 3;
 
 export async function POST() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const utilizator = await getAuthUser();
+  if (!utilizator) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   // Contul demo are date fixe, puse intenționat. N-are ce împrospăta.
-  if (session.user.role === "DEMO") return NextResponse.json({ ok: true, refreshed: 0 });
+  if (utilizator.role === "DEMO") return NextResponse.json({ ok: true, refreshed: 0 });
 
-  const userId = session.user.id;
+  const userId = utilizator.id;
 
   const accounts = await prisma.tradingAccount.findMany({
     where: { userId, brokerSource: { in: ["BINANCE", "BYBIT"] } },

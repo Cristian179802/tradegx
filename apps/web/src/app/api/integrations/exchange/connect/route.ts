@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { encryptSecret } from "@/lib/twofactor";
 
@@ -22,9 +22,9 @@ import { encryptSecret } from "@/lib/twofactor";
 // nivel de modul, iar încărcarea lor doar când sunt cerute ține rutele ușoare.
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  if (session.user.role === "DEMO") {
+  const utilizator = await getAuthUser();
+  if (!utilizator) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  if (utilizator.role === "DEMO") {
     return NextResponse.json({ error: "Contul demo este doar pentru vizualizare" }, { status: 403 });
   }
 
@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
     const info = await mod.validateKeys(apiKey, apiSecret);
 
     await prisma.userIntegration.upsert({
-      where: { userId_service: { userId: session.user.id, service: provider } },
+      where: { userId_service: { userId: utilizator.id, service: provider } },
       create: {
-        userId: session.user.id,
+        userId: utilizator.id,
         service: provider,
         apiKey,
         config: { secret: encryptSecret(apiSecret) },

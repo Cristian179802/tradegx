@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(_req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const subscription = await prisma.subscription.findUnique({
-    where: { userId: session.user.id },
+    where: { userId },
     select: { stripeCustomerId: true },
   });
 

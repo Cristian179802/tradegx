@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import {
   PRICE_MONTHLY, PRICE_ANNUAL, PRICE_ANNUAL_PER_MONTH, CURRENCY,
@@ -7,8 +7,8 @@ import {
 
 // Returns plan info + current subscription — no secret keys exposed to client
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
@@ -22,7 +22,7 @@ export async function GET() {
   } as const;
 
   let subscription = await prisma.subscription.findUnique({
-    where: { userId: session.user.id },
+    where: { userId },
     select,
   });
 
@@ -41,10 +41,10 @@ export async function GET() {
 
   if (mightBeStale) {
     const { reconcileSubscription } = await import("@/lib/stripe-sync");
-    const repaired = await reconcileSubscription(session.user.id);
+    const repaired = await reconcileSubscription(userId);
     if (repaired) {
       subscription = await prisma.subscription.findUnique({
-        where: { userId: session.user.id },
+        where: { userId },
         select,
       });
     }

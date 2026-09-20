@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/prisma";
@@ -50,8 +50,8 @@ async function uploadToCloudinary(
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
   const buffer = Buffer.from(bytes);
 
   // Try Cloudinary first if user has it configured
-  const cloudinaryConfig = await getCloudinaryConfig(session.user.id);
+  const cloudinaryConfig = await getCloudinaryConfig(userId);
   if (cloudinaryConfig) {
     try {
       const { url, publicId } = await uploadToCloudinary(buffer, file.name, cloudinaryConfig);

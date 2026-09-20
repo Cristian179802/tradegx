@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { tradingAccountSchema } from "@/lib/validations";
 
@@ -14,13 +14,13 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const { id } = await params;
-  const account = await getOwnedAccount(id, session.user.id);
+  const account = await getOwnedAccount(id, userId);
   if (!account) {
     return NextResponse.json({ error: "Cont negăsit" }, { status: 404 });
   }
@@ -32,13 +32,13 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const { id } = await params;
-  const existing = await getOwnedAccount(id, session.user.id);
+  const existing = await getOwnedAccount(id, userId);
   if (!existing) {
     return NextResponse.json({ error: "Cont negăsit" }, { status: 404 });
   }
@@ -77,13 +77,13 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const { id } = await params;
-  const existing = await getOwnedAccount(id, session.user.id);
+  const existing = await getOwnedAccount(id, userId);
   if (!existing) {
     return NextResponse.json({ error: "Cont negăsit" }, { status: 404 });
   }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 
 const VALID_EMOJIS = ["🔥", "🚀", "💡", "💯", "👀", "❤️"];
@@ -8,8 +8,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
@@ -34,7 +34,7 @@ export async function POST(
   if (!post) return NextResponse.json({ error: "Postare negăsită" }, { status: 404 });
 
   const existing = await prisma.communityReaction.findUnique({
-    where: { postId_userId_emoji: { postId, userId: session.user.id, emoji } },
+    where: { postId_userId_emoji: { postId, userId, emoji } },
   });
 
   if (existing) {
@@ -43,7 +43,7 @@ export async function POST(
   }
 
   await prisma.communityReaction.create({
-    data: { postId, userId: session.user.id, emoji },
+    data: { postId, userId, emoji },
   });
   return NextResponse.json({ action: "added", emoji });
 }

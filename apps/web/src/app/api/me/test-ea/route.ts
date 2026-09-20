@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { createHmac } from "crypto";
 
 function getUserToken(userId: string): string {
@@ -12,12 +12,11 @@ function getAppUrl(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
-  const userId = session.user.id;
   const token  = getUserToken(userId);
   const appUrl = getAppUrl();
   const webhookUrl = `${appUrl}/api/webhooks/ea/${userId}`;

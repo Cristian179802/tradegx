@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 
 // ── Agregator de știri Forex/macro din feed-uri RSS publice ──────────────────
 // Server-side cu cache 5 min, ca să nu lovim sursele la fiecare cerere.
@@ -102,8 +102,8 @@ async function fetchFeed(url: string, source: string): Promise<NewsItem[]> {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 

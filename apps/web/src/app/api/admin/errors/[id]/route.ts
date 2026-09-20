@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/api-error";
 
@@ -12,10 +12,10 @@ import { apiError } from "@/lib/api-error";
  * dacă am mai crezut o dată că am reparat asta.
  */
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const utilizator = await getAuthUser();
+  if (!utilizator) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   // Aceeași regulă ca la pagină: cine n-are voie nu află nici măcar că există.
-  if (session.user.role !== "ADMIN") return NextResponse.json({ error: "Negăsit" }, { status: 404 });
+  if (utilizator.role !== "ADMIN") return NextResponse.json({ error: "Negăsit" }, { status: 404 });
 
   const { id } = await ctx.params;
   const body = await req.json().catch(() => null);

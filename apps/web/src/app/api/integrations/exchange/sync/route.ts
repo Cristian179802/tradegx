@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth-bridge";
 import { runExchangeSync, SyncError } from "@/lib/exchange-sync-engine";
 
 // POST /api/integrations/exchange/sync
@@ -18,9 +18,9 @@ import { runExchangeSync, SyncError } from "@/lib/exchange-sync-engine";
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  if (session.user.role === "DEMO") {
+  const utilizator = await getAuthUser();
+  if (!utilizator) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  if (utilizator.role === "DEMO") {
     return NextResponse.json({ error: "Contul demo este doar pentru vizualizare" }, { status: 403 });
   }
 
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await runExchangeSync({
-      userId: session.user.id,
+      userId: utilizator.id,
       provider,
       tradingAccountId: body.tradingAccountId,
       name: body.name,

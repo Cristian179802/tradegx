@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { hasPro, PRO_REQUIRED } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { getDeals, pairDeals } from "@/lib/metaapi";
@@ -7,11 +7,11 @@ import { checkTradingRuleViolations } from "@/lib/trading-rules";
 import { sesiuneaTranzactiei } from "@tradegx/core";
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
-  if (!(await hasPro(session.user.id))) {
+  if (!(await hasPro(userId))) {
     return NextResponse.json(PRO_REQUIRED, { status: 402 });
   }
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   // Verify ownership of the TradeGx account
   const tradingAccount = await prisma.tradingAccount.findFirst({
-    where: { id: tradingAccountId, userId: session.user.id },
+    where: { id: tradingAccountId, userId },
   });
   if (!tradingAccount) {
     return NextResponse.json({ error: "Cont de trading negăsit" }, { status: 404 });
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
   // Get MetaAPI token
   const integration = await prisma.userIntegration.findUnique({
-    where: { userId_service: { userId: session.user.id, service: "metaapi" } },
+    where: { userId_service: { userId, service: "metaapi" } },
   });
   if (!integration?.isActive || !integration.apiKey) {
     return NextResponse.json({ error: "MetaAPI nu este conectat" }, { status: 400 });
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
       // Reguli de risc DOAR pe tranzacții închise recent (live), nu la backfill istoric.
       if (Date.now() - trade.exitTime.getTime() < 15 * 60 * 1000) {
         void checkTradingRuleViolations({
-          userId: session.user.id,
+          userId,
           accountId: tradingAccountId,
           tradePnl: trade.pnlMoney,
         }).catch(() => {});

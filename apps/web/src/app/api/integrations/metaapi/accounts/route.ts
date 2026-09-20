@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { listAccounts } from "@/lib/metaapi";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const integration = await prisma.userIntegration.findUnique({
-    where: { userId_service: { userId: session.user.id, service: "metaapi" } },
+    where: { userId_service: { userId, service: "metaapi" } },
   });
 
   if (!integration?.isActive || !integration.apiKey) {
@@ -22,7 +22,7 @@ export async function GET() {
 
     // Fetch user's TradeGx accounts to show linking status
     const tradingAccounts = await prisma.tradingAccount.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       select: { id: true, name: true, type: true, metaApiId: true },
     });
 

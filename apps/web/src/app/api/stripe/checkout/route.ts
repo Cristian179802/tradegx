@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { apiError } from "@/lib/api-error";
@@ -14,8 +14,8 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id || !session.user.email) {
+  const utilizator = await getAuthUser();
+  if (!utilizator || !utilizator.email) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
     // Get or create Stripe customer
     const existing = await prisma.subscription.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: utilizator.id },
       select: { stripeCustomerId: true },
     });
 
@@ -75,16 +75,16 @@ export async function POST(req: NextRequest) {
 
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: session.user.email,
-        name: session.user.name ?? undefined,
-        metadata: { userId: session.user.id },
+        email: utilizator.email,
+        name: utilizator.name ?? undefined,
+        metadata: { userId: utilizator.id },
       });
       customerId = customer.id;
 
       await prisma.subscription.upsert({
-        where: { userId: session.user.id },
+        where: { userId: utilizator.id },
         create: {
-          userId: session.user.id,
+          userId: utilizator.id,
           stripeCustomerId: customerId,
           plan: "FREE",
           status: "ACTIVE",
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
       // period days is 1", iar cererea eșua înainte de a se crea sesiunea de
       // plată. Nimeni nu putea să se aboneze.
       subscription_data: {
-        metadata: { userId: session.user.id },
+        metadata: { userId: utilizator.id },
       },
       allow_promotion_codes: true,
       billing_address_collection: "auto",

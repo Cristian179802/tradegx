@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -19,11 +19,11 @@ export const dynamic = "force-dynamic";
 // vederea agregată nu are nevoie de o coloană nouă în schemă.
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const active = await prisma.tradingAccount.findFirst({
-    where: { userId: session.user.id, isActive: true },
+    where: { userId, isActive: true },
     orderBy: { createdAt: "desc" },
     select: { id: true, name: true, currency: true, balance: true },
   });
@@ -36,8 +36,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
   if (!body || !("accountId" in body)) {
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   // contul altcuiva trimițând un id străin.
   if (accountId !== null) {
     const owned = await prisma.tradingAccount.findFirst({
-      where: { id: accountId, userId: session.user.id },
+      where: { id: accountId, userId },
       select: { id: true },
     });
     if (!owned) return NextResponse.json({ error: "Cont negăsit" }, { status: 404 });
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   // are două conturi active sau niciunul din greșeală.
   await prisma.$transaction([
     prisma.tradingAccount.updateMany({
-      where: { userId: session.user.id, isActive: true },
+      where: { userId, isActive: true },
       data: { isActive: false },
     }),
     ...(accountId

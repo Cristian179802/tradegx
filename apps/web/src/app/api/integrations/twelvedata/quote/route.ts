@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { getBatchQuotes, getQuote, toTDSymbol, TDQuote } from "@/lib/twelvedata";
 
@@ -163,8 +163,8 @@ async function fetchFreeQuotes(symbols: string[]): Promise<Record<string, TDQuot
 
 // ── Handler GET ──────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
@@ -177,7 +177,7 @@ export async function GET(req: NextRequest) {
   // Determină cheia API TwelveData (utilizator → platformă → lipsă)
   let apiKey: string | null = null;
   const userIntegration = await prisma.userIntegration.findUnique({
-    where: { userId_service: { userId: session.user.id, service: "twelvedata" } },
+    where: { userId_service: { userId, service: "twelvedata" } },
   });
   if (userIntegration?.isActive && userIntegration.apiKey) {
     apiKey = userIntegration.apiKey;

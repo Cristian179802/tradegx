@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { hasPro, PRO_REQUIRED } from "@/lib/plan";
 import { createHmac } from "crypto";
 
@@ -16,15 +16,14 @@ function getAppUrl(): string {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
-  if (!(await hasPro(session.user.id))) {
+  if (!(await hasPro(userId))) {
     return NextResponse.json(PRO_REQUIRED, { status: 402 });
   }
 
-  const userId = session.user.id;
   const token = getTvToken(userId);
   const webhookUrl = `${getAppUrl()}/api/webhooks/tradingview/${userId}?token=${token}`;
 

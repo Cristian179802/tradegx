@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -12,11 +12,11 @@ const strategySchema = z.object({
 });
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const strategies = await prisma.strategy.findMany({
-    where: { userId: session.user.id, isActive: true },
+    where: { userId, isActive: true },
     include: {
       _count: { select: { backtests: true } },
       backtests: {
@@ -41,8 +41,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
   const strategy = await prisma.strategy.create({
     data: {
-      userId: session.user.id,
+      userId,
       name: result.data.name,
       description: result.data.description ?? null,
       type: result.data.type,

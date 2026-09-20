@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { journalEntrySchema } from "@/lib/validations";
 
@@ -7,15 +7,15 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const { id } = await params;
 
   const trade = await prisma.trade.findFirst({
-    where: { id, account: { userId: session.user.id } },
+    where: { id, account: { userId } },
     select: { id: true },
   });
   if (!trade) {
@@ -33,15 +33,15 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
   const { id } = await params;
 
   const trade = await prisma.trade.findFirst({
-    where: { id, account: { userId: session.user.id } },
+    where: { id, account: { userId } },
     select: { id: true },
   });
   if (!trade) {
@@ -60,7 +60,7 @@ export async function PUT(
 
   const journal = await prisma.journalEntry.upsert({
     where: { tradeId: id },
-    create: { tradeId: id, userId: session.user.id, ...result.data },
+    create: { tradeId: id, userId, ...result.data },
     update: result.data,
   });
 

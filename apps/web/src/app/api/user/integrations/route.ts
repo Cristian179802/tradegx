@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { validateToken } from "@/lib/metaapi";
 import { validateKey as validateTwelveData } from "@/lib/twelvedata";
@@ -10,13 +10,13 @@ function maskKey(key: string): string {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const integrations = await prisma.userIntegration.findMany({
-    where: { userId: session.user.id },
+    where: { userId },
     orderBy: { service: "asc" },
   });
 
@@ -33,8 +33,8 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -48,7 +48,7 @@ export async function PATCH(request: Request) {
 
   if (disconnect) {
     await prisma.userIntegration.deleteMany({
-      where: { userId: session.user.id, service },
+      where: { userId, service },
     });
     return NextResponse.json({ success: true, disconnected: true });
   }
@@ -94,7 +94,7 @@ export async function PATCH(request: Request) {
   // ── Save ──────────────────────────────────────────────────────────────────
 
   const integration = await prisma.userIntegration.upsert({
-    where: { userId_service: { userId: session.user.id, service } },
+    where: { userId_service: { userId, service } },
     update: {
       ...(apiKey && { apiKey }),
       ...(config && { config }),
@@ -102,7 +102,7 @@ export async function PATCH(request: Request) {
       updatedAt: new Date(),
     },
     create: {
-      userId: session.user.id,
+      userId,
       service,
       apiKey: apiKey ?? null,
       config: config ?? null,

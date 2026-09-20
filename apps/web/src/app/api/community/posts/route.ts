@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { intParam } from "@/lib/parse-params";
@@ -14,8 +14,8 @@ const createSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
   const page = intParam(searchParams.get("page"), 1, { min: 1 });
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     for (const r of p.reactions) {
       if (!emojiMap[r.emoji]) emojiMap[r.emoji] = { count: 0, reacted: false };
       emojiMap[r.emoji].count++;
-      if (r.userId === session.user.id) emojiMap[r.emoji].reacted = true;
+      if (r.userId === userId) emojiMap[r.emoji].reacted = true;
     }
     const reactions = Object.entries(emojiMap).map(([emoji, { count, reacted }]) => ({
       emoji,
@@ -59,8 +59,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "JSON invalid" }, { status: 400 });
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
   const post = await prisma.communityPost.create({
     data: {
-      userId: session.user.id,
+      userId,
       title: result.data.title,
       content: result.data.content,
       symbol: result.data.symbol ?? null,

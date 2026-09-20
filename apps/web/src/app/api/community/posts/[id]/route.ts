@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -7,8 +7,8 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { id } = await params;
 
@@ -31,7 +31,7 @@ export async function GET(
   for (const r of post.reactions) {
     if (!emojiMap[r.emoji]) emojiMap[r.emoji] = { count: 0, reacted: false };
     emojiMap[r.emoji].count++;
-    if (r.userId === session.user.id) emojiMap[r.emoji].reacted = true;
+    if (r.userId === userId) emojiMap[r.emoji].reacted = true;
   }
   const reactions = Object.entries(emojiMap).map(([emoji, { count, reacted }]) => ({ emoji, count, reacted }));
   const { reactions: _r, ...rest } = post;
@@ -43,13 +43,13 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { id } = await params;
 
   const post = await prisma.communityPost.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, userId },
   });
   if (!post) return NextResponse.json({ error: "Negăsit sau neautorizat" }, { status: 404 });
 
@@ -63,8 +63,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { id } = await params;
   const post = await prisma.communityPost.findUnique({ where: { id }, select: { id: true } });
@@ -78,7 +78,7 @@ export async function POST(
   }
 
   const comment = await prisma.communityComment.create({
-    data: { postId: id, userId: session.user.id, content: result.data.content },
+    data: { postId: id, userId, content: result.data.content },
     include: { user: { select: { id: true, name: true, image: true } } },
   });
 

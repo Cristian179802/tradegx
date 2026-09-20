@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth-bridge";
 import { SyncError } from "@/lib/exchange-sync-engine";
 import { runTradeLockerSync } from "@/lib/tradelocker-sync-engine";
 
@@ -13,9 +13,9 @@ import { runTradeLockerSync } from "@/lib/tradelocker-sync-engine";
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
-  if (session.user.role === "DEMO") {
+  const utilizator = await getAuthUser();
+  if (!utilizator) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  if (utilizator.role === "DEMO") {
     return NextResponse.json({ error: "Contul demo este doar pentru vizualizare" }, { status: 403 });
   }
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await runTradeLockerSync({
-      userId: session.user.id,
+      userId: utilizator.id,
       tradeLockerAccountId: String(body.tradeLockerAccountId ?? ""),
       accNum: Number(body.accNum),
       tradingAccountId: body.tradingAccountId,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -15,11 +15,11 @@ async function getStrategy(id: string, userId: string) {
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { id } = await params;
-  const strategy = await getStrategy(id, session.user.id);
+  const strategy = await getStrategy(id, userId);
   if (!strategy) return NextResponse.json({ error: "Negăsit" }, { status: 404 });
 
   const body = await req.json().catch(() => null);
@@ -32,11 +32,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
   const { id } = await params;
-  const strategy = await getStrategy(id, session.user.id);
+  const strategy = await getStrategy(id, userId);
   if (!strategy) return NextResponse.json({ error: "Negăsit" }, { status: 404 });
 
   await prisma.strategy.update({ where: { id }, data: { isActive: false } });

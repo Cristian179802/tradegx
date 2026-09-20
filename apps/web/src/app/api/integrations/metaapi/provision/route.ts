@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { hasPro, PRO_REQUIRED } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { getDeals, pairDeals } from "@/lib/metaapi";
@@ -71,11 +71,11 @@ async function waitForConnection(accountId: string, maxWaitMs = 30000): Promise<
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
-  if (!(await hasPro(session.user.id))) {
+  if (!(await hasPro(userId))) {
     return NextResponse.json(PRO_REQUIRED, { status: 402 });
   }
 
@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
       });
     } else {
       await prisma.tradingAccount.updateMany({
-      where: { userId: session.user.id, isActive: true },
+      where: { userId, isActive: true },
       data: { isActive: false },
     });
 
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
 
       tradingAccount = await prisma.tradingAccount.create({
         data: {
-          userId: session.user.id,
+          userId,
           name: name || `${platform.toUpperCase()} ${server.split("-")[0]} ${login}`,
           type: (accountType as any) || "LIVE",
           broker: server.split("-")[0],

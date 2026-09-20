@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { rateLimit } from "@/lib/rate-limit";
 import { captureError } from "@/lib/error-monitor";
 import { esteZgomotDeBrowser } from "@/lib/client-error-filter";
@@ -52,7 +52,10 @@ export async function POST(req: NextRequest) {
     if (esteZgomotDeBrowser(message) || esteZgomotDeBrowser(stack)) return raspuns;
 
     // Cine a lovit-o, dacă ştim. Multe erori vin de pe pagini publice.
-    const session = await auth().catch(() => null);
+    // Sesiunea e OPTIONALA aici: ruta primeste si erori de la vizitatori
+    // nelogati. `getAuthUserId` acopera si cookie-ul, si tokenul mobil, deci o
+    // eroare din aplicatie ajunge legata de om, nu anonima.
+    const idUtilizator = await getAuthUserId().catch(() => null);
 
     const err = new Error(message);
     err.stack = stack || undefined;
@@ -60,7 +63,7 @@ export async function POST(req: NextRequest) {
     // se repară altfel decât una de server, iar amestecate s-ar citi mai greu.
     await captureError(`client:${route || "necunoscut"}`, err, {
       route: route || undefined,
-      userId: session?.user?.id,
+      userId: idUtilizator ?? undefined,
     });
   } catch {
     // Un monitor care strică cererea e mai rău decât lipsa lui — cu atât mai mult

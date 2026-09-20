@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import bcrypt from "bcryptjs";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret, verifyToken, verifyBackup } from "@/lib/twofactor";
 
 // Dezactivează 2FA — cere parola ȘI un cod valid (din app sau de rezervă).
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { password, code } = await req.json().catch(() => ({}));
   if (!password || !code) return NextResponse.json({ ok: false, code: "missing_fields" }, { status: 400 });
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { password: true, totpSecret: true, totpEnabled: true, totpBackupCodes: true },
   });
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   if (!valid) return NextResponse.json({ ok: false, code: "invalid_code" }, { status: 400 });
 
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: userId },
     data: { totpEnabled: false, totpSecret: null, totpBackupCodes: [] },
   });
 

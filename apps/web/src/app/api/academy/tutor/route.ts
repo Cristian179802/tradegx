@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { auth } from "@/lib/auth";
 import { getEffectivePlan, PRO_REQUIRED } from "@/lib/plan";
 import { rateLimit } from "@/lib/rate-limit";
 import { apiError, apiErrorText } from "@/lib/api-error";
@@ -87,8 +87,8 @@ ${lesson}
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return new Response(JSON.stringify({ error: "Neautorizat" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
   // Barieră de rafală, înaintea bugetului lunar: cine e oprit aici n-are de ce
   // să piardă din cota lunii.
-  const rl = await rateLimit(`tutor:${session.user.id}`, { limit: 20, windowSecs: 3600 });
+  const rl = await rateLimit(`tutor:${userId}`, { limit: 20, windowSecs: 3600 });
   if (!rl.success) {
     return new Response(
       JSON.stringify({ error: "Ai atins limita de 20 de întrebări pe oră. Revino mai târziu.", code: "RATE" }),
@@ -105,8 +105,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { plan } = await getEffectivePlan(session.user.id);
-  const buget = await consumaBugetLunar("chat", session.user.id, plan);
+  const { plan } = await getEffectivePlan(userId);
+  const buget = await consumaBugetLunar("chat", userId, plan);
 
   // Cotă zero = funcția e închisă pe treapta asta. E o invitație de upgrade
   // (402), nu un „ai consumat tot" despre ceva ce n-a avut niciodată.

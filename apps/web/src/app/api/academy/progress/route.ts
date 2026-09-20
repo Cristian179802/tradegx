@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getAuthUser } from "@/lib/auth-bridge";
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/api-error";
 import {
@@ -49,15 +49,15 @@ function rowToData(row: {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const utilizator = await getAuthUser();
+  if (!utilizator) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
-  if (session.user.role === "DEMO") {
+  if (utilizator.role === "DEMO") {
     return NextResponse.json({ local: true, progress: EMPTY_PROGRESS });
   }
 
   const row = await prisma.academyProgress.findUnique({
-    where: { userId: session.user.id },
+    where: { userId: utilizator.id },
     select: { lessons: true, quizzes: true, drills: true, missed: true },
   });
 
@@ -65,10 +65,10 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+  const utilizator = await getAuthUser();
+  if (!utilizator) return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 
-  if (session.user.role === "DEMO") {
+  if (utilizator.role === "DEMO") {
     return NextResponse.json({ local: true, progress: EMPTY_PROGRESS });
   }
 
@@ -80,7 +80,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const existing = await prisma.academyProgress.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: utilizator.id },
       select: { lessons: true, quizzes: true, drills: true, missed: true },
     });
     const current = rowToData(existing);
@@ -102,8 +102,8 @@ export async function PUT(req: NextRequest) {
     };
 
     await prisma.academyProgress.upsert({
-      where: { userId: session.user.id },
-      create: { userId: session.user.id, ...scriere },
+      where: { userId: utilizator.id },
+      create: { userId: utilizator.id, ...scriere },
       update: scriere,
     });
 

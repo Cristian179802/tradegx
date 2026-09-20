@@ -1,6 +1,6 @@
 ﻿import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { auth } from "@/lib/auth";
+import { getAuthUserId } from "@/lib/auth-bridge";
 import { getEffectivePlan, PRO_REQUIRED } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 // Datele se filtreaza pe contul selectat. Inainte, toate conturile erau
@@ -189,14 +189,14 @@ ${s.last5Trades}
 
 // ─── Route Handler ────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return new Response("Unauthorized", { status: 401 });
+  const userId = await getAuthUserId();
+  if (!userId) return new Response("Unauthorized", { status: 401 });
   // Poarta e „mai ai cotă?", nu „ai PRO?". Pe FREE cota e zero, deci rezultatul
   // e același ca înainte — dar acum diferența dintre „nu ai treapta" și „ai
   // consumat tot" e explicită, iar Premium poate avea altă cotă decât Pro.
-  const { plan } = await getEffectivePlan(session.user.id);
+  const { plan } = await getEffectivePlan(userId);
 
-  if (!(await checkRateLimit(session.user.id))) {
+  if (!(await checkRateLimit(userId))) {
     return new Response(JSON.stringify({ error: "Ai atins limita de 30 mesaje/oră. Revino mai târziu." }), {
       status: 429, headers: { "Content-Type": "application/json" },
     });
@@ -204,7 +204,7 @@ export async function POST(req: NextRequest) {
 
   // Bugetul lunii. DUPĂ limita pe oră: aceea e o barieră de rafală, iar cine e
   // oprit de ea n-are de ce să piardă din cota lunii.
-  const buget = await consumaBugetLunar("chat", session.user.id, plan);
+  const buget = await consumaBugetLunar("chat", userId, plan);
 
   // Cotă zero = funcția e închisă pe treapta asta. E o invitație de upgrade
   // (402), nu un „ai consumat tot" (429) despre ceva ce n-a avut niciodată.
@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const stats = await buildTraderStats(session.user.id);
+    const stats = await buildTraderStats(userId);
     const systemPrompt = buildSystemPrompt(stats, mode);
 
     const stream = await anthropic.messages.stream({
