@@ -87,7 +87,7 @@ npx eas build --platform android --profile production
 | Politică de confidențialitate | `https://www.tradegx.com/privacy` — există |
 | Termeni | `https://www.tradegx.com/terms` — există |
 | Iconiță 512×512 | din `assets/icon.png` |
-| Feature graphic 1024×500 |  — gata |
+| Feature graphic 1024×500 | assets/play-feature-graphic.png — gata |
 | Capturi de ecran (min. 2, telefon) | **lipsesc** — se fac după primul build |
 | Data safety | vezi mai jos |
 | Clasificare de conținut | chestionar, aplicație financiară fără conținut sensibil |
