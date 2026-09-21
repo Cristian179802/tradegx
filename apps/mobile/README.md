@@ -25,25 +25,37 @@ Android — au nevoie de un development build (`eas build --profile development`
 
 ## Ce conține
 
-Douăzeci și șase de opțiuni de meniu, toate native. Singurele două care
-deschid browserul sunt **Abonamentul** (plata trece prin Stripe Checkout —
-un formular de card reconstruit aici ar însemna date de card prin codul
-nostru) și **Roadmap-ul** (pagină de prezentare care se schimbă săptămânal).
+Treizeci și una de opțiuni de meniu, toate native. Nimic din meniu nu mai
+scoate omul din aplicație.
+
+Singurele lucruri care mai deschid browserul: **paginile legale**
+(Confidențialitate, Termeni, Contact — Google Play cere link către politica de
+confidențialitate) și **fereastra de plată**, care e un Custom Tab PESTE
+aplicație, nu Chrome: la închidere ești exact unde erai.
+
+⚠️ Plata stă izolată în `src/lib/plata.ts`. Google cere Play Billing pentru
+abonamente digitale; Stripe într-un Custom Tab e „anti-steering". Trecerea
+schimbă DOAR funcția `cumpara()`.
 
 ```
 app/
   _layout.tsx            poarta de autentificare + bara de jos, peste toată stiva
   login.tsx              email + parolă, 2FA apare doar când serverul îl cere
+  inregistrare.tsx       cont nou; regulile parolei se bifează în timp ce scrii
+  parola-uitata.tsx      linkul de resetare, pe email
   (tabs)/                cele patru ecrane deschise des — își păstrează starea
     index.tsx            acasă: sold, ziua, performanță, ultimele tranzacții
     tranzactii.tsx       lista, cu filtre: toate / deschise / închise
     adauga.tsx           formular + calculator de lot, în același ecran
     setari.tsx           contul, notificările, ieșirea
-  tranzactie/[id].tsx    detaliul unei tranzacții
+  tranzactie/[id].tsx    detaliul unei tranzacții, cu capturi de ecran
+  editare/[id].tsx       corectarea unei tranzacții; ieșirea completată o închide
 
   jurnal/                lista de notat + editorul unei note (înainte / după)
   checklist.tsx          singurul ecran fără server: se bifează în 30 de secunde
   conturi.tsx            alege contul pe care îl privește tot restul aplicației
+  rapoarte.tsx           performanță + fiscal, PDF făcut pe telefon
+  import-export.tsx      CSV / raport de broker în, CSV afară
 
   analitice.tsx          curba, lunile, zilele, orele, setup-urile, instrumentele
   edge.tsx               unde ai avantaj și unde pierzi (PRO)
@@ -58,6 +70,7 @@ app/
   semnale.tsx            ideile zilei, cu invalidarea scrisă (PRO)
   asistent.tsx           chat pe statisticile contului tău
   alerte.tsx             ce a observat sistemul fără să-l întrebi
+  watchlist.tsx          simbolurile tale și pragurile de preț
   grafice.tsx            lumânări native, cu tranzacțiile tale peste ele
   piata.tsx              pulsul contului + sesiuni + cotații
   calendar.tsx           evenimente grupate pe zile, în ora telefonului
@@ -67,19 +80,27 @@ app/
   academia/              nouă module, lecții, quiz-uri, glosar
   realizari.tsx          seria și obiceiurile măsurate
   comunitate.tsx         postări + echipe
+  postare/[id].tsx       firul unei postări, cu comentarii
+  abonament.tsx          planuri, comparație completă, plată
+  roadmap.tsx            ce s-a livrat și ce urmează
+  profil.tsx             toate setările: profil, notificări, 2FA, date
 
 src/
   lib/auth.tsx           token-uri în expo-secure-store, reîmprospătare
   lib/api.ts             clientul comun, cu bază absolută și Bearer
   lib/asistent.ts        chatul — răspunsul e text, nu JSON, deci nu trece prin client
   lib/academia.ts        conținutul cursului, cache local + îmbinarea progresului
+  lib/plata.ts           SINGURUL loc prin care trec banii
+  lib/foaie.ts           PDF-urile, făcute pe telefon din HTML
+  lib/fisiere.ts         poze și fișiere, prin foile de sistem
   lib/meniu.ts           domeniile din bară și ce e nativ
   lib/useCerere.ts       încarcă / reîmprospătează / eroare / status HTTP
   lib/notificari.ts      permisiune cerută DUPĂ autentificare
   lib/format.ts          bani, procente, date — un singur loc
   theme.ts               tokenii + ce e specific nativului (umbre, atingere)
   ui/Ecran.tsx           carcasa oricărui ecran: antet, tragere, eroare, schelet
-  ui/grafice.tsx         curbă, bare, con, histogramă, lumânări, diagrame
+  ui/grafice.tsx         curbă, bare, con, histogramă, diagrame de lecție
+  ui/GraficInteractiv.tsx lumânări cu zoom, pan și unelte de desen
   ui/parti.tsx           pastile, stare goală, bară de progres, statistici
   ui/TextLectie.tsx      mini-markdown-ul lecțiilor, cu termeni de glosar
   ui/                    Card, Buton, Camp, RollingNumber, Sparkline, Reveal, Schelet
@@ -97,6 +118,10 @@ are acum o rută care întoarce EXACT aceleași date:
 | `/api/risk-manager` | Manager de risc |
 | `/api/institutional` | Vedere instituțională |
 | `/api/academy/content` | Lecțiile, diagramele, quiz-urile, glosarul |
+| `/api/report` | Raportul de performanță |
+| `/api/tax-report` | Raportul fiscal |
+| `/api/pricing` | Planurile și comparația (PUBLICĂ) |
+| `/api/roadmap` | Ce s-a livrat și ce urmează (PUBLICĂ) |
 
 Conținutul Academiei se descarcă o dată și se ține în `AsyncStorage`. Un pachet
 partajat ar fi mers offline din prima, dar fiecare lecție nouă ar fi cerut o
