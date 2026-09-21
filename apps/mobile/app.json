@@ -69,7 +69,8 @@
       "router": {},
       "eas": {
         "projectId": "f8920b01-76c7-475e-a14e-f8292220fa00"
-      }
+      },
+      "googleWebClientId": "744127323861-pbhj3ce3m9q8i7ogq0bvdgoqh3cocd1v.apps.googleusercontent.com"
     },
     "owner": "cristianpp"
   }
