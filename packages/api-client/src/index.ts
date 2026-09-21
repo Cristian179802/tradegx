@@ -145,6 +145,20 @@ export function createApiClient(config: ApiClientConfig = {}) {
 
     riskManager: () => request("/api/risk-manager"),
 
+    /**
+     * Crearea contului și recuperarea parolei. NICIUNA nu cere autentificare —
+     * sunt exact lucrurile pe care le face cineva care n-are încă un cont.
+     * `/api/auth` e deja în `publicPrefixes` din middleware.
+     */
+    cont: {
+      inregistrare: (data: unknown) =>
+        request("/api/auth/register", { method: "POST", body: json(data) }),
+      parolaUitata: (email: string) =>
+        request("/api/auth/forgot-password", { method: "POST", body: json({ email }) }),
+      retrimiteVerificarea: (email: string) =>
+        request("/api/auth/resend-verification", { method: "POST", body: json({ email }) }),
+    },
+
     /** Planurile, comparația și întrebările frecvente. Nu cere cont. */
     pricing: (lang = "ro") => request(`/api/pricing?lang=${lang}`),
 
@@ -158,6 +172,46 @@ export function createApiClient(config: ApiClientConfig = {}) {
         request("/api/stripe/checkout", { method: "POST", body: json(data) }),
       /** Portalul Stripe: schimbare card, anulare, facturi. */
       portal: () => request("/api/stripe/portal", { method: "POST" }),
+    },
+
+    /**
+     * Rapoartele, ca CIFRE. PDF-ul se face pe telefon, din aceleași numere:
+     * pagina web îl scoate prin dialogul de tipărire al browserului, care pe
+     * telefon nu există.
+     */
+    rapoarte: {
+      performanta: () => request("/api/report"),
+      fiscal: (an?: string) =>
+        request(`/api/tax-report${an ? `?year=${an}` : ""}`),
+    },
+
+    /** Contul și preferințele. Tot ce era pe web în cele nouă taburi de setări. */
+    utilizator: {
+      setari: () => request("/api/user/settings"),
+      salveazaSetari: (data: unknown) =>
+        request("/api/user/settings", { method: "PATCH", body: json(data) }),
+      profil: (data: unknown) =>
+        request("/api/user/profile", { method: "PATCH", body: json(data) }),
+      notificari: () => request("/api/user/notifications"),
+      salveazaNotificari: (preferences: unknown) =>
+        request("/api/user/notifications", { method: "PATCH", body: json({ preferences }) }),
+      telegram: () => request("/api/user/telegram"),
+      conecteazaTelegram: (data: unknown) =>
+        request("/api/user/telegram", { method: "POST", body: json(data) }),
+      deconecteazaTelegram: () => request("/api/user/telegram", { method: "DELETE" }),
+      /** Toate datele tale, ca JSON. Drept legal, nu funcție de confort. */
+      exportaDate: () => request("/api/user/export-data"),
+      stergeContul: () => request("/api/user/delete-account", { method: "DELETE" }),
+    },
+
+    doiFactori: {
+      stare: () => request("/api/2fa/status"),
+      pregateste: () => request("/api/2fa/setup", { method: "POST" }),
+      porneste: (code: string) =>
+        request("/api/2fa/enable", { method: "POST", body: json({ code }) }),
+      opreste: (code: string) =>
+        request("/api/2fa/disable", { method: "POST", body: json({ code }) }),
+      coduriRezerva: () => request("/api/2fa/backup", { method: "POST" }),
     },
 
     gamification: () => request("/api/gamification"),

@@ -95,9 +95,11 @@ export default function Setari() {
               <Separator />
               <Linie iconita="shield-checkmark-outline" text="Reguli și limite de risc" onPress={() => router.push("/risc")} nativ />
               <Separator />
-              <Linie iconita="settings-outline" text="Toate setările" onPress={() => deschide("/settings")} />
+              <Linie iconita="settings-outline" text="Toate setările" onPress={() => router.push("/profil")} nativ />
               <Separator />
-              <Linie iconita="card-outline" text="Abonament și facturare" onPress={() => deschide("/billing")} />
+              <Linie iconita="document-text-outline" text="Rapoarte" onPress={() => router.push("/rapoarte")} nativ />
+              <Separator />
+              <Linie iconita="card-outline" text="Abonament și facturare" onPress={() => router.push("/abonament")} nativ />
             </Card>
           </Reveal>
 

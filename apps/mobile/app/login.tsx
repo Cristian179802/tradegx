@@ -3,12 +3,14 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useAuth, EroareAuth } from "../src/lib/auth";
@@ -27,6 +29,7 @@ import { T } from "../src/theme";
 // exact când trebuie să corectezi ceva ce ai scris.
 
 export default function Login() {
+  const router = useRouter();
   const { autentifica } = useAuth();
   const [email, setEmail] = React.useState("");
   const [parola, setParola] = React.useState("");
@@ -145,9 +148,37 @@ export default function Login() {
               />
             </Reveal>
 
-            <Reveal intarziere={220}>
+            <Reveal intarziere={200}>
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync().catch(() => {});
+                  router.push("/parola-uitata");
+                }}
+                style={st.legatura}
+                accessibilityRole="button"
+              >
+                <Text style={st.textLegatura}>Ai uitat parola?</Text>
+              </Pressable>
+            </Reveal>
+
+            <Reveal intarziere={260}>
+              <View style={st.separator}>
+                <View style={st.linie} />
+                <Text style={st.sau}>sau</Text>
+                <View style={st.linie} />
+              </View>
+
+              <Buton
+                eticheta="Creează un cont"
+                varianta="secundar"
+                onPress={() => {
+                  Haptics.selectionAsync().catch(() => {});
+                  router.push("/inregistrare");
+                }}
+                plin
+              />
               <Text style={st.nota}>
-                Contul se creează pe tradegx.com. Aplicația folosește același cont.
+                Paisprezece zile de PRO, fără card. Același cont merge și pe tradegx.com.
               </Text>
             </Reveal>
           </ScrollView>
@@ -180,6 +211,24 @@ const st = StyleSheet.create({
     marginTop: 4,
   },
   formular: { gap: 2 },
+  legatura: { alignItems: "center", paddingVertical: T.spacing.lg },
+  textLegatura: {
+    color: T.ink.i3,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+  },
+  separator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: T.spacing.md,
+    marginBottom: T.spacing.lg,
+  },
+  linie: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: T.line.l1 },
+  sau: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+  },
   ajutor: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,

@@ -75,6 +75,7 @@ export const DOMENII: Domeniu[] = [
           { eticheta: "Jurnal detaliat", iconita: "create-outline", tinta: "/jurnal", nativ: true },
           { eticheta: "Checklist", iconita: "checkbox-outline", tinta: "/checklist", nativ: true },
           { eticheta: "Conturi de trading", iconita: "wallet-outline", tinta: "/conturi", nativ: true },
+          { eticheta: "Rapoarte", iconita: "document-text-outline", tinta: "/rapoarte", nativ: true },
         ],
       },
     ],

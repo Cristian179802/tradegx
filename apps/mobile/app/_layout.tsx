@@ -32,8 +32,12 @@ import { useFonturi } from "../src/lib/fonturi";
 // ecranul de login intră cu estompare, fiindcă nu vine „de undeva" — e o
 // schimbare de stare, nu o navigare.
 
-/** Singurele rute vizibile fără sesiune. */
-const PUBLICE = ["login"];
+/**
+ * Rutele vizibile fără sesiune. Toate trei sunt lucruri pe care le face cineva
+ * care N-ARE încă un cont — dacă poarta le-ar trimite la login, „Creează cont"
+ * ar duce înapoi la login, adică nicăieri.
+ */
+const PUBLICE = ["login", "inregistrare", "parola-uitata"];
 
 function Poarta({ children }: { children: React.ReactNode }) {
   const { utilizator, pornit } = useAuth();
@@ -86,6 +90,8 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="login" options={{ animation: "fade" }} />
+              <Stack.Screen name="inregistrare" options={{ animation: "fade" }} />
+              <Stack.Screen name="parola-uitata" options={{ animation: "fade" }} />
               <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
             </Stack>
           </Poarta>

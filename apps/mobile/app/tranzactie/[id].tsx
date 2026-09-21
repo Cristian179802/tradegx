@@ -104,7 +104,23 @@ export default function DetaliuTranzactie() {
             <Ionicons name="chevron-back" size={24} color={T.ink.i1} />
           </Pressable>
           <Text style={st.titluBara} numberOfLines={1}>{t?.symbol ?? "Tranzacție"}</Text>
-          <View style={st.inapoi} />
+          {/* Locul din dreapta era gol doar ca să centreze titlul. Acum are
+              treabă: editarea, care lipsea cu totul din aplicație. */}
+          {t ? (
+            <Pressable
+              onPress={() => {
+                Haptics.selectionAsync().catch(() => {});
+                router.push(`/editare/${t.id}`);
+              }}
+              style={st.inapoi}
+              accessibilityRole="button"
+              accessibilityLabel="Editează tranzacția"
+            >
+              <Ionicons name="create-outline" size={21} color={T.accent.base} />
+            </Pressable>
+          ) : (
+            <View style={st.inapoi} />
+          )}
         </View>
 
         <ScrollView
