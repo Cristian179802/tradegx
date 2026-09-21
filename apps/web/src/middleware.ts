@@ -10,6 +10,10 @@ const publicRoutes = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  // Pornirea conectării cu Google din aplicația de telefon. Se deschide într-o
+  // fereastră peste aplicație, la un om care tocmai de-aia NU e încă logat —
+  // dacă ar fi protejată, ar da 307 spre /login și fluxul n-ar porni deloc.
+  "/mobile-google",
   // Pagini legale + prezentare — obligatoriu publice (vizitatori, scannere, GDPR)
   "/terms",
   "/privacy",

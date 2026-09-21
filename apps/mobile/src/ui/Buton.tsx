@@ -10,6 +10,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { T, ATINGERE_MIN, umbra } from "../theme";
 
@@ -37,6 +38,14 @@ export interface ButonProps {
   /** Ocupă toată lățimea disponibilă. */
   plin?: boolean;
   iconita?: React.ReactNode;
+  /** Iconița după etichetă (săgeată de „mergi mai departe"), nu înaintea ei. */
+  iconitaLaDreapta?: boolean;
+  /**
+   * Degrade indigo→violet, ca butonul principal de pe site. Doar pentru
+   * acțiunea cea mai importantă de pe ecran — dacă apar două pe același ecran,
+   * niciunul nu mai e cel important.
+   */
+  degrade?: boolean;
 }
 
 export function Buton({
@@ -48,6 +57,8 @@ export function Buton({
   style,
   plin = false,
   iconita,
+  iconitaLaDreapta = false,
+  degrade = false,
 }: ButonProps) {
   const p = React.useRef(new Animated.Value(0)).current;
   const inert = dezactivat || incarca;
@@ -80,6 +91,7 @@ export function Buton({
         style={[
           st.baza,
           v.container,
+          degrade && st.faraFundal,
           varianta === "principal" && umbra(1),
           inert && st.inert,
           {
@@ -90,12 +102,22 @@ export function Buton({
           style,
         ]}
       >
+        {degrade ? (
+          <LinearGradient
+            colors={["#6d75f6", "#8b5cf6"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        ) : null}
+
         {/* Conținutul își păstrează locul; indicatorul se suprapune. */}
         <View style={[st.rand, incarca && st.invizibil]}>
-          {iconita}
+          {iconitaLaDreapta ? null : iconita}
           <Text style={[st.text, v.text]} numberOfLines={1}>
             {eticheta}
           </Text>
+          {iconitaLaDreapta ? iconita : null}
         </View>
         {incarca && (
           <View style={StyleSheet.absoluteFill}>
@@ -125,6 +147,8 @@ const VARIANTE: Record<Varianta, { container: ViewStyle; text: { color: string }
 };
 
 const st = StyleSheet.create({
+  // Degradeul e un strat dedesubt; fundalul variantei ar acoperi o parte din el.
+  faraFundal: { backgroundColor: "transparent", borderColor: "transparent", overflow: "hidden" },
   baza: {
     minHeight: ATINGERE_MIN,
     paddingHorizontal: T.spacing.xl,

@@ -16,7 +16,9 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api, ApiError } from "../src/lib/api";
 import { useAuth, EroareAuth } from "../src/lib/auth";
+import { conecteazaCuGoogle } from "../src/lib/google";
 import { Buton } from "../src/ui/Buton";
+import { ButonGoogle } from "../src/ui/ButonGoogle";
 import { Camp } from "../src/ui/Camp";
 import { Reveal } from "../src/ui/Reveal";
 import { T } from "../src/theme";
@@ -47,7 +49,8 @@ interface RaspunsInregistrare {
 
 export default function Inregistrare() {
   const router = useRouter();
-  const { autentifica } = useAuth();
+  const { autentifica, preiaSesiunea } = useAuth();
+  const [google, setGoogle] = React.useState(false);
 
   const [nume, setNume] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -55,6 +58,26 @@ export default function Inregistrare() {
   const [trimite, setTrimite] = React.useState(false);
   const [eroare, setEroare] = React.useState<string | null>(null);
   const [nota, setNota] = React.useState<string | null>(null);
+
+  // Cu Google nu există „înregistrare" separată: dacă adresa e nouă, NextAuth
+  // face contul; dacă există, intri în el. De aceea butonul face exact același
+  // lucru ca pe ecranul de login.
+  async function cuGoogle() {
+    if (google || trimite) return;
+    setGoogle(true);
+    setEroare(null);
+    const r = await conecteazaCuGoogle();
+    if (r.fel === "anulat") { setGoogle(false); return; }
+    if (r.fel === "eroare") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+      setEroare(r.mesaj);
+      setGoogle(false);
+      return;
+    }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    await preiaSesiunea(r);
+  }
+
 
   // Exact regulile din `serverRegisterSchema`. Scrise aici ca omul să le vadă,
   // nu ca să înlocuiască verificarea serverului — aceea rămâne singura care
@@ -205,6 +228,19 @@ export default function Inregistrare() {
                 style={{ marginTop: T.spacing.sm }}
               />
 
+              <View style={st.separator}>
+                <View style={st.linie} />
+                <Text style={st.sau}>SAU CONTINUĂ CU</Text>
+                <View style={st.linie} />
+              </View>
+
+              <ButonGoogle
+                onPress={cuGoogle}
+                incarca={google}
+                dezactivat={trimite}
+                eticheta="Continuă cu Google"
+              />
+
               <Text style={st.acord}>
                 Creând contul accepți Termenii și Politica de confidențialitate.
                 Îți trimitem un email de verificare — poți folosi aplicația și
@@ -234,6 +270,21 @@ export default function Inregistrare() {
 }
 
 const st = StyleSheet.create({
+  separator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: T.spacing.md,
+    marginTop: T.spacing.xl,
+    marginBottom: T.spacing.lg,
+  },
+  linie: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: T.line.l1 },
+  sau: {
+    color: T.ink.i4,
+    fontSize: 9,
+    fontWeight: "700",
+    fontFamily: "Inter_700Bold",
+    letterSpacing: T.tracking.wider,
+  },
   radacina: { flex: 1, backgroundColor: T.surface.s0 },
   continut: {
     flexGrow: 1,

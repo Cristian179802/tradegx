@@ -43,6 +43,7 @@ export const API_ERROR_EN: Record<string, string> = {
   "Dacă adresa există și nu e verificată, am trimis un email nou.":
     "If the address exists and isn't verified, we've sent a new email.",
   "Prea multe încercări. Încearcă din nou mai târziu.": "Too many attempts. Try again later.",
+  "Conectare expirată. Încearcă din nou.": "Sign-in expired. Please try again.",
 
   // Cereri invalide
   "Cerere invalidă": "Invalid request",

@@ -13,11 +13,15 @@ function secret(): string {
   return s;
 }
 
+type Fel = "access" | "refresh" | "exchange";
+
 interface Payload {
   sub: string; // userId
-  type: "access" | "refresh";
+  type: Fel;
   iat: number;
   exp: number;
+  /** Doar pe "exchange": SHA-256 al secretului păstrat de telefon (PKCE). */
+  challenge?: string;
 }
 
 function sign(payload: Omit<Payload, "iat" | "exp">, ttlSec: number): string {
@@ -29,7 +33,7 @@ function sign(payload: Omit<Payload, "iat" | "exp">, ttlSec: number): string {
   return `${data}.${sig}`;
 }
 
-function verify(token: string, type: "access" | "refresh"): Payload | null {
+function verify(token: string, type: Fel): Payload | null {
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   const [header, body, sig] = parts;
@@ -60,4 +64,42 @@ export function verifyAccessToken(token: string): string | null {
 
 export function verifyRefreshToken(token: string): string | null {
   return verify(token, "refresh")?.sub ?? null;
+}
+
+// ── Codul de schimb pentru conectarea cu Google din aplicație ────────────────
+//
+// Conectarea cu Google se face în fereastra de browser, fiindcă acolo trăiește
+// sesiunea NextAuth. La final trebuie să întoarcem telefonului o pereche de
+// token-uri — dar drumul înapoi e un link `tradegx://`, iar pe Android ORICE
+// aplicație poate să înregistreze aceeași schemă. Un token trimis direct prin
+// link ar putea fi prins de altcineva.
+//
+// De aceea prin link trece doar un COD, care singur nu valorează nimic:
+// telefonul își ține un secret pe care nu-l trimite niciodată, pune în link
+// doar amprenta lui, iar codul e legat de amprenta aia. Cine prinde codul nu
+// are secretul, deci nu-l poate preschimba. E același mecanism ca PKCE.
+//
+// Două minute de viață: destul cât să alegi contul Google, prea puțin ca să
+// folosească cuiva mai târziu.
+
+const TTL_SCHIMB = 120;
+
+export function signExchangeCode(userId: string, challenge: string): string {
+  return sign({ sub: userId, type: "exchange", challenge }, TTL_SCHIMB);
+}
+
+/**
+ * Întoarce userId-ul dacă `verifier` e într-adevăr secretul din spatele
+ * amprentei cu care a fost emis codul. `null` în orice alt caz.
+ */
+export function verifyExchangeCode(code: string, verifier: string): string | null {
+  const p = verify(code, "exchange");
+  if (!p?.challenge) return null;
+
+  const asteptat = crypto.createHash("sha256").update(verifier).digest("base64url");
+  const a = Buffer.from(p.challenge);
+  const b = Buffer.from(asteptat);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+
+  return p.sub;
 }

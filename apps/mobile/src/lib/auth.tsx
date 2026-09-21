@@ -137,6 +137,8 @@ export async function reimprospateaza(): Promise<string | null> {
 
 interface Context extends Stare {
   autentifica(email: string, parola: string, cod?: string): Promise<void>;
+  /** Sesiunea vine gata făcută din fluxul Google — vezi `lib/google.ts`. */
+  preiaSesiunea(d: { accessToken: string; refreshToken: string; user: Utilizator }): Promise<void>;
   deconecteaza(): Promise<void>;
 }
 
@@ -200,6 +202,14 @@ export function ProvizorAuth({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const preiaSesiunea = React.useCallback(
+    async (d: { accessToken: string; refreshToken: string; user: Utilizator }) => {
+      await salveazaSesiune(d);
+      setStare({ utilizator: d.user, pornit: true });
+    },
+    [],
+  );
+
   const deconecteaza = React.useCallback(async () => {
     // Scoatem telefonul de pe lista de notificari INAINTE sa pierdem tokenul:
     // dupa stergerea sesiunii n-am mai avea cu ce autoriza cererea, iar
@@ -211,8 +221,8 @@ export function ProvizorAuth({ children }: { children: React.ReactNode }) {
   }, []);
 
   const valoare = React.useMemo<Context>(
-    () => ({ ...stare, autentifica, deconecteaza }),
-    [stare, autentifica, deconecteaza],
+    () => ({ ...stare, autentifica, preiaSesiunea, deconecteaza }),
+    [stare, autentifica, preiaSesiunea, deconecteaza],
   );
 
   return <Ctx.Provider value={valoare}>{children}</Ctx.Provider>;
