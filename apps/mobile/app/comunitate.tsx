@@ -21,13 +21,23 @@ import { Buton } from "../src/ui/Buton";
 import { Reveal } from "../src/ui/Reveal";
 import { Schelet } from "../src/ui/Schelet";
 import { AntetEcran, SPATIU_BARA } from "../src/ui/Ecran";
-import { Gol, Insigna, Segmente } from "../src/ui/parti";
+import { Insigna, Segmente } from "../src/ui/parti";
 import { T, ATINGERE_MIN } from "../src/theme";
 
 // ── Comunitate ───────────────────────────────────────────────────────────────
 //
 // Două file: postările tuturor și echipele. Nimic altceva — o comunitate cu
 // șase secțiuni pe telefon e o comunitate pe care nimeni n-o citește.
+//
+// ECRANUL SE EXPLICĂ PE SINE. Prima versiune arăta o listă goală și o
+// propoziție („fii primul care scrie ceva"), ceea ce presupunea că omul știe
+// deja unde a ajuns. Nu știa: ce e locul ăsta, cu cine vorbesc, ce sunt
+// echipele, de ce aș scrie. O comunitate goală care nu se prezintă arată ca o
+// funcție stricată.
+//
+// De aceea cardul de deschidere spune ce e, iar sugestiile de postare sunt
+// CONCRETE — se apasă și deschid compunerea cu titlul pus. Un câmp gol și
+// „scrie ceva" e cea mai sigură cale spre zero postări.
 //
 // REACȚIILE SE APLICĂ INSTANT, local, și abia apoi pleacă spre server. La o
 // atingere pe un emoji, o rotiță de o secundă ar face gestul să pară stricat.
@@ -42,6 +52,14 @@ import { T, ATINGERE_MIN } from "../src/theme";
 // rău decât lipsa lui. Numărul de comentarii se vede, ca să știi că există.
 
 const EMOJI = ["🔥", "🚀", "💡", "💯", "👀", "❤️"];
+
+/** Începuturi de postare. Se apasă și deschid compunerea cu titlul completat. */
+const SUGESTII = [
+  { titlu: "Greșeala care m-a costat cel mai mult luna asta", iconita: "warning-outline" as const },
+  { titlu: "Setup-ul care îmi merge cel mai bine acum", iconita: "trending-up-outline" as const },
+  { titlu: "O întrebare despre managementul riscului", iconita: "help-circle-outline" as const },
+  { titlu: "Ce am învățat din ultimele 20 de tranzacții", iconita: "school-outline" as const },
+];
 
 const FILE = [
   { v: "postari" as const, e: "Postări" },
@@ -122,6 +140,7 @@ function Postari({
 
   const [local, setLocal] = React.useState<Record<string, Reactie[]>>({});
   const [compune, setCompune] = React.useState(false);
+  const [titluSugerat, setTitluSugerat] = React.useState("");
 
   const postari = c.date?.posts ?? [];
 
@@ -160,6 +179,7 @@ function Postari({
           <Pressable
             onPress={() => {
               Haptics.selectionAsync().catch(() => {});
+              setTitluSugerat("");
               setCompune(true);
             }}
             style={st.actiune}
@@ -194,11 +214,7 @@ function Postari({
             />
           }
           ListEmptyComponent={
-            <Gol
-              iconita="people-outline"
-              titlu="Nicio postare încă"
-              text="Fii primul care scrie ceva. O idee, o greșeală, o întrebare — toate ajută pe cineva."
-            />
+            <Prezentare onScrie={(titlu) => { setTitluSugerat(titlu); setCompune(true); }} />
           }
           renderItem={({ item, index }) => (
             <Reveal intarziere={index < 6 ? index * 50 : 0} style={{ marginBottom: T.spacing.sm }}>
@@ -217,8 +233,9 @@ function Postari({
 
       <DialogPostare
         vizibil={compune}
-        onInchide={() => setCompune(false)}
-        onTrimis={() => { setCompune(false); c.reia(); }}
+        titluInitial={titluSugerat}
+        onInchide={() => { setCompune(false); setTitluSugerat(""); }}
+        onTrimis={() => { setCompune(false); setTitluSugerat(""); c.reia(); }}
       />
     </>
   );
@@ -308,14 +325,91 @@ function CardPostare({
   );
 }
 
+/**
+ * Ce e locul ăsta.
+ *
+ * Apare când nu există nicio postare — adică exact când cineva are cea mai
+ * mare nevoie să afle unde a ajuns. O stare goală care spune doar „fii primul"
+ * presupune că omul știe deja ce e comunitatea, cu cine vorbește și ce câștigă
+ * dacă scrie.
+ */
+function Prezentare({ onScrie }: { onScrie: (titlu: string) => void }) {
+  return (
+    <View>
+      <Card culoareMuchie={T.accent.line}>
+        <View style={st.antetPrezentare}>
+          <View style={st.iconPrezentare}>
+            <Ionicons name="people" size={20} color={T.accent.base} />
+          </View>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={st.titluPrezentare}>Traderii de pe TradeGx</Text>
+            <Text style={st.subPrezentare}>Un loc unde se vorbește despre execuție, nu despre profituri</Text>
+          </View>
+        </View>
+
+        <Text style={st.textPrezentare}>
+          Toți cei care folosesc TradeGx scriu aici: un setup care a mers, o greșeală
+          care a costat, o întrebare la care nu găsesc răspuns. Nimeni nu vinde
+          semnale și nimeni nu-ți cere bani.
+        </Text>
+
+        <View style={st.puncte}>
+          {[
+            { i: "chatbubbles-outline" as const, t: "Scrii o postare, ceilalți comentează și reacționează" },
+            { i: "pricetag-outline" as const, t: "Poți lega postarea de un simbol, ca s-o găsească cine tranzacționează același lucru" },
+            { i: "people-circle-outline" as const, t: "Echipele sunt grupuri închise — intri cu un cod primit de la cineva" },
+          ].map((x) => (
+            <View key={x.t} style={st.punct}>
+              <Ionicons name={x.i} size={15} color={T.accent.base} />
+              <Text style={st.textPunct}>{x.t}</Text>
+            </View>
+          ))}
+        </View>
+      </Card>
+
+      <Text style={st.titluSugestii}>DE UNDE POȚI ÎNCEPE</Text>
+
+      {SUGESTII.map((x, i) => (
+        <Reveal key={x.titlu} intarziere={i * 45} style={{ marginBottom: T.spacing.sm }}>
+          <Card
+            nivel={1}
+            onPress={() => onScrie(x.titlu)}
+            accesibilEticheta={`Scrie o postare: ${x.titlu}`}
+          >
+            <View style={st.randSugestie}>
+              <View style={st.iconSugestie}>
+                <Ionicons name={x.iconita} size={16} color={T.ink.i3} />
+              </View>
+              <Text style={st.textSugestie} numberOfLines={2}>{x.titlu}</Text>
+              <Ionicons name="create-outline" size={15} color={T.accent.base} />
+            </View>
+          </Card>
+        </Reveal>
+      ))}
+
+      <Text style={st.notaPrezentare}>
+        Nu e nicio postare încă — a ta ar fi prima. Comunitatea e nouă, la fel ca
+        aplicația.
+      </Text>
+    </View>
+  );
+}
+
 function DialogPostare({
-  vizibil, onInchide, onTrimis,
+  vizibil, titluInitial, onInchide, onTrimis,
 }: {
   vizibil: boolean;
+  titluInitial?: string;
   onInchide: () => void;
   onTrimis: () => void;
 }) {
   const [titlu, setTitlu] = React.useState("");
+
+  // Titlul venit dintr-o sugestie se pune la deschidere, o singură dată — nu la
+  // fiecare randare, altfel ar șterge ce tocmai a schimbat omul în el.
+  React.useEffect(() => {
+    if (vizibil) setTitlu(titluInitial ?? "");
+  }, [vizibil, titluInitial]);
   const [continut, setContinut] = React.useState("");
   const [simbol, setSimbol] = React.useState("");
   const [trimite, setTrimite] = React.useState(false);
@@ -417,7 +511,32 @@ function Echipe({
 
   const [cod, setCod] = React.useState("");
   const [intra, setIntra] = React.useState(false);
+  const [numeEchipa, setNumeEchipa] = React.useState("");
+  const [creeaza, setCreeaza] = React.useState(false);
   const [eroare, setEroare] = React.useState<string | null>(null);
+
+  const creeazaEchipa = async () => {
+    const n = numeEchipa.trim();
+    if (n.length < 3) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    setCreeaza(true);
+    setEroare(null);
+    try {
+      const e = (await api.community.creeazaEchipa({ name: n, isPublic: true })) as {
+        inviteCode?: string;
+      };
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      setNumeEchipa("");
+      c.reia();
+      if (e.inviteCode) {
+        setEroare(`Echipa e gata. Codul de invitație: ${e.inviteCode}`);
+      }
+    } catch (e) {
+      setEroare(e instanceof ApiError ? e.message : "Nu am putut crea echipa.");
+    } finally {
+      setCreeaza(false);
+    }
+  };
 
   const alaturaCuCod = async () => {
     const t = cod.trim();
@@ -482,6 +601,32 @@ function Echipe({
                 varianta="secundar"
                 plin
               />
+
+              <View style={st.separatorEchipe}>
+                <View style={st.linieEchipe} />
+                <Text style={st.sauEchipe}>sau</Text>
+                <View style={st.linieEchipe} />
+              </View>
+
+              <Camp
+                eticheta="Fă o echipă nouă"
+                valoare={numeEchipa}
+                onChange={setNumeEchipa}
+                placeholder="Cum o cheamă"
+                autoCapitalize="words"
+              />
+              <Buton
+                eticheta="Creează echipa"
+                onPress={creeazaEchipa}
+                incarca={creeaza}
+                dezactivat={numeEchipa.trim().length < 3}
+                plin
+                iconita={<Ionicons name="add" size={15} color="#ffffff" />}
+              />
+              <Text style={st.notaEchipa}>
+                Primești un cod de invitație pe care îl dai celor pe care îi vrei
+                înăuntru.
+              </Text>
             </Card>
 
             {aleMele.length > 0 ? (
@@ -507,11 +652,26 @@ function Echipe({
             ) : null}
 
             {!c.incarca && aleMele.length === 0 && publice.length === 0 ? (
-              <Gol
-                iconita="people-circle-outline"
-                titlu="Nicio echipă disponibilă"
-                text="Echipele se creează de pe site. Dacă ai primit un cod de invitație, îl poți folosi mai sus."
-              />
+              <Card style={{ marginTop: T.spacing.lg }} nivel={1}>
+                <View style={st.antetPrezentare}>
+                  <View style={st.iconPrezentare}>
+                    <Ionicons name="people-circle" size={20} color={T.accent.base} />
+                  </View>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={st.titluPrezentare}>Ce e o echipă</Text>
+                    <Text style={st.subPrezentare}>Un grup închis, cu postările lui</Text>
+                  </View>
+                </View>
+                <Text style={st.textPrezentare}>
+                  Un grup de traderi care discută separat de restul comunității — colegi
+                  de la aceeași firmă de prop, un grup de studiu, prietenii cu care
+                  tranzacționezi. Intri cu un cod primit de la cineva, sau faci tu una
+                  și dai codul mai departe.
+                </Text>
+                <Text style={st.notaPrezentare}>
+                  Nu există nicio echipă publică încă. Poți face prima.
+                </Text>
+              </Card>
             ) : null}
           </View>
         }
@@ -650,6 +810,78 @@ const st = StyleSheet.create({
     textAlign: "center",
     padding: T.spacing.lg,
   },
+  antetPrezentare: { flexDirection: "row", alignItems: "center", gap: T.spacing.md },
+  iconPrezentare: {
+    width: 42,
+    height: 42,
+    borderRadius: T.radius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: T.accent.soft,
+  },
+  titluPrezentare: {
+    color: T.ink.i1,
+    fontSize: T.fontSize.base,
+    fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
+    letterSpacing: T.tracking.tight,
+  },
+  subPrezentare: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  textPrezentare: {
+    color: T.ink.i2,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 21,
+    marginTop: T.spacing.lg,
+  },
+  puncte: { marginTop: T.spacing.md, gap: 9 },
+  punct: { flexDirection: "row", alignItems: "flex-start", gap: T.spacing.sm },
+  textPunct: {
+    flex: 1,
+    color: T.ink.i3,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 19,
+  },
+  titluSugestii: {
+    color: T.ink.i4,
+    fontSize: 10,
+    fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
+    letterSpacing: T.tracking.wider,
+    marginTop: T.spacing.xl,
+    marginBottom: T.spacing.sm,
+  },
+  randSugestie: { flexDirection: "row", alignItems: "center", gap: T.spacing.md },
+  iconSugestie: {
+    width: 32,
+    height: 32,
+    borderRadius: T.radius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: T.surface.s4,
+  },
+  textSugestie: {
+    flex: 1,
+    color: T.ink.i2,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 19,
+  },
+  notaPrezentare: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 18,
+    textAlign: "center",
+    marginTop: T.spacing.lg,
+  },
   voal: { flex: 1, backgroundColor: "rgba(0,0,0,0.62)", justifyContent: "flex-end" },
   foaie: {
     backgroundColor: T.surface.s1,
@@ -690,6 +922,25 @@ const st = StyleSheet.create({
     letterSpacing: T.tracking.wider,
     marginTop: T.spacing.xl,
     marginBottom: T.spacing.sm,
+  },
+  separatorEchipe: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: T.spacing.md,
+    marginVertical: T.spacing.lg,
+  },
+  linieEchipe: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: T.line.l1 },
+  sauEchipe: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+  },
+  notaEchipa: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 17,
+    marginTop: T.spacing.sm,
   },
   antetEchipa: { flexDirection: "row", alignItems: "center", gap: T.spacing.md },
   avatarEchipa: {

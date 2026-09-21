@@ -139,15 +139,38 @@ export default function Backtesting() {
       reimprospateaza={c.reimprospateaza}
       onReia={c.reia}
       eroare={eroare ?? c.eroare}
+      actiune={
+        strategii.length > 0 ? (
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync().catch(() => {});
+              router.push("/strategie-noua");
+            }}
+            style={st.butonNou}
+            accessibilityRole="button"
+            accessibilityLabel="Strategie nouă"
+            hitSlop={8}
+          >
+            <Ionicons name="add" size={19} color={T.accent.base} />
+          </Pressable>
+        ) : undefined
+      }
     >
       {strategii.length === 0 ? (
+        // Starea goală trimitea omul pe site și se oprea acolo — adică un
+        // ecran inutil pentru oricine n-avea deja o strategie salvată de pe
+        // calculator. Acum are un drum: patru tipare gata făcute.
         <Gol
           iconita="flask-outline"
-          titlu="Nicio strategie salvată"
-          // Fără buton spre site: singurele două locuri din aplicație care
-          // deschid browserul sunt abonamentul și roadmap-ul. Textul spune unde
-          // se face treaba, iar cine e la calculator o face acolo.
-          text="Regulile unei strategii se scriu pe site — sunt zeci de condiții imbricate, prea multe pentru un ecran de telefon. După ce ai o strategie salvată, o rulezi de aici."
+          titlu="Nicio strategie încă"
+          text="Alege un tipar gata făcut — încrucișare de medii, ieșire din sesiune, întoarcere din extreme sau urmărire de trend — și rulează-l pe date reale în treizeci de secunde."
+          actiune={
+            <Buton
+              eticheta="Fă prima strategie"
+              onPress={() => router.push("/strategie-noua")}
+              iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+            />
+          }
         />
       ) : (
         <>
@@ -323,6 +346,16 @@ const st = StyleSheet.create({
     marginTop: T.spacing.sm,
   },
   segmente: { paddingVertical: T.spacing.sm, paddingRight: 0 },
+  butonNou: {
+    width: 34,
+    height: 34,
+    borderRadius: T.radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: T.accent.soft,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: T.accent.line,
+  },
   notaRulare: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,

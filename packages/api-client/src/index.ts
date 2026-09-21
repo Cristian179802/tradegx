@@ -252,6 +252,8 @@ export function createApiClient(config: ApiClientConfig = {}) {
         ),
       echipa: (id: string) => request(`/api/community/teams/${id}`),
       teams: () => request("/api/community/teams"),
+      creeazaEchipa: (data: unknown) =>
+        request("/api/community/teams", { method: "POST", body: json(data) }),
       joinByCode: (data: unknown) =>
         request("/api/community/teams/join-by-code", { method: "POST", body: json(data) }),
       leave: (id: string) =>
@@ -260,6 +262,10 @@ export function createApiClient(config: ApiClientConfig = {}) {
 
     backtesting: {
       strategies: () => request("/api/backtesting/strategies"),
+      creeazaStrategie: (data: unknown) =>
+        request("/api/backtesting/strategies", { method: "POST", body: json(data) }),
+      stergeStrategie: (id: string) =>
+        request(`/api/backtesting/strategies/${id}`, { method: "DELETE" }),
       get: (id: string) => request(`/api/backtesting/${id}`),
       run: (data: unknown) => request("/api/backtesting/run", { method: "POST", body: json(data) }),
     },
