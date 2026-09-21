@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,17 +21,20 @@ import { T, ATINGERE_MIN } from "../../src/theme";
 
 // ── Setări ───────────────────────────────────────────────────────────────────
 //
-// Aplicația NU dublează setările din web. Ce se poate schimba aici e ce are
-// sens pe telefon; restul trimite în browser, către pagina reală.
+// Ecranul ăsta e un INDEX, nu o a doua copie a setărilor. Conturile și
+// regulile de risc au ecranele lor native, deci de aici se NAVIGHEAZĂ la ele —
+// până azi erau linkuri spre web, adică al doilea drum spre același lucru,
+// unul dintre ele afară din aplicație.
 //
-// Alternativa — a porta toate cele unsprezece taburi de setări — ar însemna
-// două locuri unde se editează aceleași lucruri, și inevitabil două care
-// diverg.
+// Analytics, Backtesting și Academia au fost scoase de tot: sunt în meniul de
+// jos, cu ecrane proprii. Un rând aici care le deschidea în browser era o
+// urmă din vremea când aplicația n-avea decât șapte ecrane.
 //
 // Deconectarea CERE CONFIRMARE. E acțiunea care șterge sesiunea de pe telefon;
 // un buton care o face din prima atingere, lângă altele, se apasă din greșeală.
 
 export default function Setari() {
+  const router = useRouter();
   const { utilizator, deconecteaza } = useAuth();
   const versiune = Constants.expoConfig?.version ?? "1.0.0";
 
@@ -87,25 +91,13 @@ export default function Setari() {
           <Text style={st.sectiune}>Administrare</Text>
           <Reveal intarziere={60}>
             <Card faraPadding>
-              <Linie iconita="wallet-outline" text="Conturi de trading" onPress={() => deschide("/accounts")} />
+              <Linie iconita="wallet-outline" text="Conturi de trading" onPress={() => router.push("/conturi")} nativ />
               <Separator />
-              <Linie iconita="shield-checkmark-outline" text="Reguli și limite de risc" onPress={() => deschide("/risk-manager")} />
-              <Separator />
-              <Linie iconita="card-outline" text="Abonament și facturare" onPress={() => deschide("/billing")} />
+              <Linie iconita="shield-checkmark-outline" text="Reguli și limite de risc" onPress={() => router.push("/risc")} nativ />
               <Separator />
               <Linie iconita="settings-outline" text="Toate setările" onPress={() => deschide("/settings")} />
-            </Card>
-          </Reveal>
-
-          {/* ── Analiză, care e muncă de birou ── */}
-          <Text style={st.sectiune}>Analiză completă</Text>
-          <Reveal intarziere={120}>
-            <Card faraPadding>
-              <Linie iconita="stats-chart-outline" text="Analytics" onPress={() => deschide("/analytics")} />
               <Separator />
-              <Linie iconita="flask-outline" text="Backtesting" onPress={() => deschide("/backtesting")} />
-              <Separator />
-              <Linie iconita="school-outline" text="Academia" onPress={() => deschide("/academy")} />
+              <Linie iconita="card-outline" text="Abonament și facturare" onPress={() => deschide("/billing")} />
             </Card>
           </Reveal>
 
@@ -136,23 +128,28 @@ export default function Setari() {
 }
 
 function Linie({
-  iconita, text, onPress,
+  iconita, text, onPress, nativ = false,
 }: {
   iconita: React.ComponentProps<typeof Ionicons>["name"];
   text: string;
   onPress: () => void;
+  /** Ecran în aplicație: săgeată de navigare, nu de ieșire în browser. */
+  nativ?: boolean;
 }) {
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [st.linie, pressed && st.linieApasata]}
-      accessibilityRole="link"
+      accessibilityRole={nativ ? "button" : "link"}
       accessibilityLabel={text}
     >
-      <Ionicons name={iconita} size={19} color={T.ink.i3} />
+      <Ionicons name={iconita} size={19} color={nativ ? T.accent.base : T.ink.i3} />
       <Text style={st.textLinie}>{text}</Text>
-      {/* Săgeata spune că se deschide în browser, nu în aplicație. */}
-      <Ionicons name="open-outline" size={15} color={T.ink.i4} />
+      <Ionicons
+        name={nativ ? "chevron-forward" : "open-outline"}
+        size={15}
+        color={T.ink.i4}
+      />
     </Pressable>
   );
 }

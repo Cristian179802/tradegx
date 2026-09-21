@@ -28,11 +28,39 @@ export async function GET() {
   const inceputulZilei = new Date();
   inceputulZilei.setHours(0, 0, 0, 0);
 
-  const [cont, inchise] = await Promise.all([
-    prisma.tradingAccount.findFirst({
-      where: scope.accountId ? { id: scope.accountId } : { userId, isActive: true },
-      select: { balance: true, initialBalance: true, currency: true },
-    }),
+  // „Toate conturile" înseamnă exact ABSENȚA unui cont activ (vezi
+  // `getAccountScope`). Varianta veche cerea totuși `isActive: true` în cazul
+  // agregat, deci nu găsea nimic și întorcea `sold: null` — pe telefon, unde
+  // soldul e prima cifră de pe ecran, se vedea o liniuță în loc de bani.
+  //
+  // În modul agregat se ÎNSUMEAZĂ conturile, ca la `/api/nav/pulse`. Asta și
+  // înseamnă opțiunea: suma a ce ai, nu soldul unui cont ales la întâmplare.
+  const [cont, agregat, primul, inchise] = await Promise.all([
+    scope.accountId
+      ? prisma.tradingAccount.findFirst({
+          where: { id: scope.accountId },
+          select: { balance: true, initialBalance: true, currency: true },
+        })
+      : Promise.resolve(null),
+
+    scope.accountId
+      ? Promise.resolve(null)
+      : prisma.tradingAccount.aggregate({
+          where: { userId },
+          _sum: { balance: true, initialBalance: true },
+          _count: { _all: true },
+        }),
+
+    // Moneda vederii agregate e a primului cont; a amesteca monede într-o
+    // singură sumă e deja o aproximație, dar e ce cere opțiunea.
+    scope.accountId
+      ? Promise.resolve(null)
+      : prisma.tradingAccount.findFirst({
+          where: { userId },
+          orderBy: { createdAt: "asc" },
+          select: { currency: true },
+        }),
+
     prisma.trade.findMany({
       where: { ...scope.where, status: "CLOSED", pnlMoney: { not: null } },
       orderBy: { exitTime: "desc" },
@@ -44,7 +72,14 @@ export async function GET() {
   // Cronologic, ca să putem cumula.
   const cronologic = inchise.reverse();
 
-  const pornire = Number(cont?.initialBalance ?? 0);
+  const areConturi = cont != null || (agregat?._count._all ?? 0) > 0;
+  const soldTotal = cont
+    ? Number(cont.balance)
+    : Number(agregat?._sum.balance ?? 0);
+
+  const pornire = cont
+    ? Number(cont.initialBalance)
+    : Number(agregat?._sum.initialBalance ?? 0);
   let cumulat = pornire;
   const curba: number[] = [pornire];
   let azi = 0;
@@ -59,8 +94,8 @@ export async function GET() {
   return NextResponse.json({
     curba: subtiaza(curba, MAX_PUNCTE),
     pnlAzi: cronologic.length ? azi : null,
-    sold: cont ? Number(cont.balance) : null,
-    moneda: cont?.currency ?? "USD",
+    sold: areConturi ? soldTotal : null,
+    moneda: cont?.currency ?? primul?.currency ?? "USD",
   });
 }
 
