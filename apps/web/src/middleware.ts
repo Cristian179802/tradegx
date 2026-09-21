@@ -39,6 +39,8 @@ const publicPrefixes = [
   // costa un client. Ruta nu citeste si nu scrie nimic al utilizatorului;
   // e limitata la 20/ora per IP si raspunde mereu 204.
   "/api/client-errors",
+  "/api/pricing",   // planurile și comparația — se citesc și fără cont
+  "/api/roadmap",   // ce s-a livrat și ce urmează
   "/_next",
   "/favicon",
   "/images",

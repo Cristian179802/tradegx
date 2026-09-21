@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Alert, Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { api, ApiError, URL_API } from "../../src/lib/api";
+import { api, ApiError } from "../../src/lib/api";
 import { useCerere } from "../../src/lib/useCerere";
 import { bani, candva, procent } from "../../src/lib/format";
 import { Card } from "../../src/ui/Card";
@@ -119,7 +119,7 @@ export default function Backtesting() {
           "Planul gratuit include trei backteste pe lună. Abonamentul se gestionează pe site.",
           [
             { text: "Mai târziu", style: "cancel" },
-            { text: "Vezi planurile", onPress: () => { Linking.openURL(`${URL_API}/pricing`).catch(() => {}); } },
+            { text: "Vezi planurile", onPress: () => router.push("/abonament") },
           ],
         );
       } else {

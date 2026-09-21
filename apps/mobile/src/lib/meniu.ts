@@ -7,17 +7,16 @@ import type { Ionicons } from "@expo/vector-icons";
 // unde stă oricum contul. Ordinea din fiecare bulă e a site-ului, ca cineva
 // care folosește ambele să nu caute de două ori.
 //
-// TOTUL E NATIV, în afară de două. Prima versiune trimitea în browser tot ce
-// nu era portat, cu o săgeată care spunea sincer că ieși din aplicație. Era
-// onest, dar nu era o aplicație — era un meniu de linkuri. Acum fiecare
-// opțiune are ecranul ei, construit pe aceleași rute API ca web-ul.
+// TOTUL E NATIV. Nicio opțiune din meniu nu mai scoate omul din aplicație.
 //
-// Cele două excepții sunt deliberate:
-//   · Abonament — plata trece prin Stripe Checkout. Un formular de card
-//     reconstruit în aplicație ar însemna date de card prin codul nostru și
-//     regulile magazinelor de aplicații pe cap. Browserul e locul corect.
-//   · Roadmap — o pagină de prezentare care se schimbă săptămânal. Copiată
-//     nativ, ar rămâne în urmă fără ca cineva să observe.
+// Abonamentul și Roadmap-ul au fost ultimele două care deschideau browserul.
+// Acum au ecranele lor, alimentate de `/api/pricing` și `/api/roadmap` — adică
+// aceleași texte și aceleași prețuri ca site-ul, luate de la sursă, nu copiate.
+// Copiate, ar fi rămas în urmă la prima schimbare de preț.
+//
+// Singurul lucru care mai deschide o fereastră peste aplicație e PLATA, și
+// aceea într-un Custom Tab din care te întorci unde erai. Vezi `lib/plata.ts`
+// pentru ce înseamnă asta față de regulile Google Play.
 //
 // `nativ` = ecran în aplicație. Fără el, elementul deschide browserul și are
 // săgeata de ieșire.
@@ -153,10 +152,10 @@ export const DOMENII: Domeniu[] = [
         ],
       },
       {
-        titlu: "Pe web",
+        titlu: "Produs",
         elemente: [
-          { eticheta: "Abonament", iconita: "card-outline", tinta: "/billing" },
-          { eticheta: "Roadmap", iconita: "map-outline", tinta: "/roadmap" },
+          { eticheta: "Abonament", iconita: "card-outline", tinta: "/abonament", nativ: true },
+          { eticheta: "Roadmap", iconita: "map-outline", tinta: "/roadmap", nativ: true },
         ],
       },
     ],

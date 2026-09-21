@@ -145,6 +145,21 @@ export function createApiClient(config: ApiClientConfig = {}) {
 
     riskManager: () => request("/api/risk-manager"),
 
+    /** Planurile, comparația și întrebările frecvente. Nu cere cont. */
+    pricing: (lang = "ro") => request(`/api/pricing?lang=${lang}`),
+
+    /** Ce s-a livrat și ce urmează. Nu cere cont. */
+    roadmap: (lang = "ro") => request(`/api/roadmap?lang=${lang}`),
+
+    abonament: {
+      stare: () => request("/api/stripe/plans"),
+      /** Întoarce URL-ul de Stripe Checkout; aplicația îl deschide în browserul ei. */
+      checkout: (data: unknown) =>
+        request("/api/stripe/checkout", { method: "POST", body: json(data) }),
+      /** Portalul Stripe: schimbare card, anulare, facturi. */
+      portal: () => request("/api/stripe/portal", { method: "POST" }),
+    },
+
     gamification: () => request("/api/gamification"),
 
     academy: {

@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
-  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -12,9 +11,10 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { ApiError, URL_API } from "../src/lib/api";
+import { ApiError } from "../src/lib/api";
 import { intreabaAsistentul, type MesajChat } from "../src/lib/asistent";
 import { Card } from "../src/ui/Card";
 import { Buton } from "../src/ui/Buton";
@@ -55,6 +55,7 @@ interface Rand {
 }
 
 export default function Asistent() {
+  const router = useRouter();
   const jos = useSafeAreaInsets().bottom;
   const [mesaje, setMesaje] = React.useState<Rand[]>([]);
   const [text, setText] = React.useState("");
@@ -186,9 +187,9 @@ export default function Asistent() {
                 <Buton
                   eticheta="Vezi planurile"
                   varianta="secundar"
-                  onPress={() => { Linking.openURL(`${URL_API}/pricing`).catch(() => {}); }}
+                  onPress={() => router.push("/abonament")}
                   style={{ marginTop: T.spacing.sm }}
-                  iconita={<Ionicons name="open-outline" size={15} color={T.ink.i1} />}
+                  iconita={<Ionicons name="arrow-forward" size={15} color={T.ink.i1} />}
                 />
               ) : null}
             </Card>

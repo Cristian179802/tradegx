@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Linking, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Card } from "./Card";
 import { Buton } from "./Buton";
-import { URL_API } from "../lib/api";
 import { T } from "../theme";
 
 // ── Ce se vede când funcția e în PRO ─────────────────────────────────────────
@@ -13,9 +13,9 @@ import { T } from "../theme";
 // erorii — „Această funcție necesită planul PRO" pe fundal roșu, ca o defecțiune.
 // Nu e defecțiune, e o ușă.
 //
-// BUTONUL DESCHIDE BROWSERUL, și e singura cale corectă: plata trece prin
-// Stripe Checkout. Un formular de card reconstruit în aplicație ar însemna date
-// de card prin codul nostru, plus regulile magazinelor de aplicații pe cap.
+// BUTONUL DUCE ÎN ECRANUL DE ABONAMENT, nu în browser. Acolo sunt planurile,
+// comparația completă și plata — totul în aplicație. Până acum arunca în
+// browser, adică exact lucrul pe care l-am scos din tot restul aplicației.
 //
 // Nu promite ce nu se vede: lista de mai jos spune EXACT ce face ecranul ăsta,
 // nu funcțiile întregului plan.
@@ -29,6 +29,8 @@ export function Paywall({
   descriere: string;
   puncte: string[];
 }) {
+  const router = useRouter();
+
   return (
     <Card style={{ marginTop: T.spacing.md }} culoareMuchie={T.accent.line}>
       <View style={st.sus}>
@@ -54,14 +56,12 @@ export function Paywall({
 
       <Buton
         eticheta="Vezi planurile"
-        onPress={() => {
-          Linking.openURL(`${URL_API}/pricing`).catch(() => {});
-        }}
+        onPress={() => router.push("/abonament")}
         plin
         style={{ marginTop: T.spacing.lg }}
-        iconita={<Ionicons name="open-outline" size={16} color="#ffffff" />}
+        iconita={<Ionicons name="arrow-forward" size={16} color="#ffffff" />}
       />
-      <Text style={st.nota}>Abonamentul se gestionează pe site, în browser.</Text>
+      <Text style={st.nota}>Poți anula oricând, dintr-o singură atingere.</Text>
     </Card>
   );
 }
