@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { pipSize, positionSize, riskReward, stopPips } from "@tradegx/core";
-import { api } from "../src/lib/api";
+import { api, ApiError } from "../src/lib/api";
 import { useCerere } from "../src/lib/useCerere";
 import { bani, numar } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
@@ -19,6 +19,7 @@ import {
   type Marcaj,
   type ModGrafic,
 } from "../src/ui/GraficInteractiv";
+import { Buton } from "../src/ui/Buton";
 import { Gol, Insigna, Rand, Sectiune, Segmente } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
 
@@ -61,6 +62,17 @@ const MODURI = [
 
 const RISCURI = [0.5, 1, 2];
 
+/** Forma pe care o întoarce ruta de analiză. Câmpurile lipsă sunt normale. */
+interface Analiza {
+  bias?: string;
+  confidence?: number;
+  summary?: string;
+  structure?: string;
+  keyLevels?: (string | number)[];
+  plan?: string;
+  personalNote?: string;
+}
+
 interface RaspunsLumanari {
   ok: boolean;
   symbol: string;
@@ -75,6 +87,39 @@ export default function Grafice() {
   const [interval, setInterval_] = React.useState<string>("60");
   const [mod, setMod] = React.useState<ModGrafic>("misca");
   const [risc, setRisc] = React.useState(1);
+
+  // Analiza AI a graficului. Nu se cere automat la deschidere: costă din cota
+  // lunară, iar cele mai multe deschideri ale ecranului sunt „arunc un ochi".
+  const [analiza, setAnaliza] = React.useState<Analiza | null>(null);
+  const [analizeaza, setAnalizeaza] = React.useState(false);
+  const [eroareAI, setEroareAI] = React.useState<string | null>(null);
+
+  // Alt simbol sau alt interval = altă analiză. A lăsa una veche pe ecran ar
+  // fi însemnat să citești despre EURUSD H1 uitându-te la aur pe zilnic.
+  React.useEffect(() => { setAnaliza(null); setEroareAI(null); }, [simbol, interval]);
+
+  const cereAnaliza = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    setAnalizeaza(true);
+    setEroareAI(null);
+    try {
+      const r = (await api.charts.analyze({ symbol: simbol, timeframe: interval })) as {
+        analysis: Analiza;
+      };
+      setAnaliza(r.analysis);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    } catch (e) {
+      setEroareAI(
+        e instanceof ApiError && e.status === 402
+          ? "Analiza graficului e în planul PRO."
+          : e instanceof ApiError && e.status === 429
+            ? e.message
+            : e instanceof ApiError ? e.message : "Analiza nu a pornit.",
+      );
+    } finally {
+      setAnalizeaza(false);
+    }
+  };
 
   const c = useCerere<{ lumanari: RaspunsLumanari; marcaje: Marcaj[] }>(
     async () => {
@@ -269,6 +314,71 @@ export default function Grafice() {
             ) : null}
           </View>
 
+          {/* ── Ce vede AI-ul ── */}
+          <Sectiune titlu="Analiza AI" nota="Citește structura de pe intervalul afișat." />
+          <Reveal>
+            <Card culoareMuchie={analiza ? T.accent.line : undefined}>
+              {analiza ? (
+                <>
+                  <View style={st.antetAnaliza}>
+                    {analiza.bias ? (
+                      <Insigna
+                        text={analiza.bias}
+                        culoare={
+                          analiza.bias === "BULLISH" ? T.pnl.gain
+                          : analiza.bias === "BEARISH" ? T.pnl.loss
+                          : T.ink.i3
+                        }
+                        fundal={
+                          analiza.bias === "BULLISH" ? "rgba(52,211,153,0.12)"
+                          : analiza.bias === "BEARISH" ? "rgba(251,113,133,0.12)"
+                          : T.surface.s4
+                        }
+                      />
+                    ) : null}
+                    {analiza.confidence != null ? (
+                      <Text style={[st.incredere, cifre]}>{analiza.confidence}% încredere</Text>
+                    ) : null}
+                  </View>
+
+                  {analiza.summary ? <Text style={st.textAnaliza}>{analiza.summary}</Text> : null}
+                  {analiza.structure ? (
+                    <BlocAnaliza titlu="Structura" text={analiza.structure} />
+                  ) : null}
+                  {analiza.plan ? <BlocAnaliza titlu="Plan" text={analiza.plan} /> : null}
+                  {analiza.personalNote ? (
+                    <BlocAnaliza titlu="Despre tine" text={analiza.personalNote} />
+                  ) : null}
+
+                  {analiza.keyLevels && analiza.keyLevels.length > 0 ? (
+                    <View style={st.niveluri}>
+                      {analiza.keyLevels.slice(0, 6).map((n, i) => (
+                        <Text key={i} style={[st.nivel, cifre]}>{String(n)}</Text>
+                      ))}
+                    </View>
+                  ) : null}
+                </>
+              ) : (
+                <Text style={st.faraAnaliza}>
+                  Analiza citește structura, nivelurile și lichiditatea de pe intervalul
+                  afișat, apoi o compară cu cum tranzacționezi TU.
+                </Text>
+              )}
+
+              {eroareAI ? <Text style={st.eroareAI}>{eroareAI}</Text> : null}
+
+              <Buton
+                eticheta={analiza ? "Reanalizează" : "Analizează graficul"}
+                varianta="secundar"
+                onPress={cereAnaliza}
+                incarca={analizeaza}
+                plin
+                style={{ marginTop: T.spacing.md }}
+                iconita={<Ionicons name="sparkles-outline" size={15} color={T.ink.i1} />}
+              />
+            </Card>
+          </Reveal>
+
           {/* ── Setup-ul, calculat ── */}
           {s ? (
             <Reveal>
@@ -421,6 +531,15 @@ export default function Grafice() {
   );
 }
 
+function BlocAnaliza({ titlu, text }: { titlu: string; text: string }) {
+  return (
+    <View style={{ marginTop: T.spacing.md }}>
+      <Text style={st.titluBloc}>{titlu.toUpperCase()}</Text>
+      <Text style={st.textAnaliza}>{text}</Text>
+    </View>
+  );
+}
+
 /** Câte zecimale are sens să arătăm pentru simbolul ăsta. */
 function zecimale(simbol: string): number {
   const s = simbol.toUpperCase();
@@ -559,5 +678,54 @@ const st = StyleSheet.create({
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
     fontFamily: "Inter_400Regular",
+  },
+  antetAnaliza: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: T.spacing.sm,
+  },
+  incredere: {
+    color: T.ink.i3,
+    fontSize: T.fontSize.xs,
+    fontWeight: "700",
+    fontFamily: "SpaceGrotesk_700Bold",
+  },
+  titluBloc: {
+    color: T.ink.i4,
+    fontSize: 9,
+    fontWeight: "800",
+    fontFamily: "Inter_800ExtraBold",
+    letterSpacing: T.tracking.wider,
+    marginBottom: 3,
+  },
+  textAnaliza: {
+    color: T.ink.i2,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 21,
+  },
+  faraAnaliza: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 20,
+  },
+  niveluri: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: T.spacing.md },
+  nivel: {
+    color: T.state.warn,
+    fontSize: T.fontSize.xs,
+    fontFamily: "SpaceGrotesk_500Medium",
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: T.radius.sm,
+    backgroundColor: "rgba(251,191,36,0.10)",
+  },
+  eroareAI: {
+    color: T.state.warn,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 17,
+    marginTop: T.spacing.md,
   },
 });

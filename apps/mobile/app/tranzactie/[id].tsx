@@ -15,7 +15,11 @@ import { riskReward, stopPips } from "@tradegx/core";
 import { api } from "../../src/lib/api";
 import { useCerere } from "../../src/lib/useCerere";
 import { bani, numar, dataScurta } from "../../src/lib/format";
+import { Image } from "react-native";
 import { Card } from "../../src/ui/Card";
+import { Buton } from "../../src/ui/Buton";
+import { alegeImagine } from "../../src/lib/fisiere";
+import { ApiError } from "../../src/lib/api";
 import { RollingNumber } from "../../src/ui/RollingNumber";
 import { Reveal } from "../../src/ui/Reveal";
 import { Schelet } from "../../src/ui/Schelet";
@@ -241,6 +245,10 @@ export default function DetaliuTranzactie() {
                   </Card>
                 </Reveal>
               ) : null}
+
+              <Reveal intarziere={280} style={st.spatiu}>
+                <Capturi tradeId={t.id} />
+              </Reveal>
             </>
           )}
         </ScrollView>
@@ -287,7 +295,135 @@ function eticheteSetup(v: string | null): string {
   return ETICHETE[v] ?? v;
 }
 
+/**
+ * Capturile unei tranzacții.
+ *
+ * SE ÎNCARCĂ SEPARAT de restul ecranului: sunt imagini, deci cea mai lentă
+ * parte a paginii. Dacă ar fi în aceeași cerere, detaliul tranzacției — cifrele
+ * pentru care ai deschis ecranul — ar aștepta după ele.
+ *
+ * Imaginea pleacă în base64, comprimată, fiindcă așa o cere ruta. Alegătorul de
+ * poze al Android-ului modern întoarce doar fișierul ales, deci aplicația NU
+ * cere permisiune de acces la galerie.
+ */
+function Capturi({ tradeId }: { tradeId: string }) {
+  const c = useCerere<{ id: string; url: string; type: string }[]>(
+    () => api.trades.capturi(tradeId) as Promise<{ id: string; url: string; type: string }[]>,
+    [tradeId],
+  );
+  const capturi = c.date ?? [];
+
+  const [urca, setUrca] = React.useState(false);
+  const [eroare, setEroare] = React.useState<string | null>(null);
+
+  const adauga = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    setEroare(null);
+    const r = await alegeImagine();
+    if (r.fel === "anulat") return;
+    if (r.fel === "eroare") { setEroare(r.mesaj); return; }
+
+    setUrca(true);
+    try {
+      await api.trades.adaugaCaptura(tradeId, {
+        base64: r.base64,
+        mimeType: r.mimeType,
+        type: "ENTRY",
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      c.reia();
+    } catch (e) {
+      setEroare(e instanceof ApiError ? e.message : "Nu am putut urca imaginea.");
+    } finally {
+      setUrca(false);
+    }
+  };
+
+  const sterge = async (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    try {
+      await api.trades.stergeCaptura(tradeId, id);
+      c.reia();
+    } catch {
+      setEroare("Nu am putut șterge captura.");
+    }
+  };
+
+  return (
+    <Card>
+      <Text style={st.eticheta}>Capturi de ecran</Text>
+
+      {capturi.length > 0 ? (
+        <View style={st.grilaCapturi}>
+          {capturi.map((x) => (
+            <Pressable
+              key={x.id}
+              onLongPress={() => sterge(x.id)}
+              accessibilityRole="button"
+              accessibilityLabel="Apasă lung ca să ștergi captura"
+            >
+              <Image source={{ uri: x.url }} style={st.captura} resizeMode="cover" />
+            </Pressable>
+          ))}
+        </View>
+      ) : (
+        <Text style={st.faraCapturi}>
+          Nicio captură. Un grafic salvat în momentul intrării valorează mai mult
+          decât orice notă scrisă după.
+        </Text>
+      )}
+
+      {eroare ? <Text style={st.eroareCaptura}>{eroare}</Text> : null}
+
+      {capturi.length < 5 ? (
+        <Buton
+          eticheta={capturi.length > 0 ? "Mai adaugă una" : "Adaugă o captură"}
+          varianta="secundar"
+          onPress={adauga}
+          incarca={urca}
+          plin
+          style={{ marginTop: T.spacing.md }}
+          iconita={<Ionicons name="image-outline" size={15} color={T.ink.i1} />}
+        />
+      ) : (
+        <Text style={st.faraCapturi}>Cinci capturi e maximul pe o tranzacție.</Text>
+      )}
+
+      {capturi.length > 0 ? (
+        <Text style={st.indiciuCaptura}>Apasă lung pe o captură ca s-o ștergi.</Text>
+      ) : null}
+    </Card>
+  );
+}
+
 const st = StyleSheet.create({
+  grilaCapturi: { flexDirection: "row", flexWrap: "wrap", gap: T.spacing.sm, marginTop: T.spacing.md },
+  captura: {
+    width: 96,
+    height: 96,
+    borderRadius: T.radius.md,
+    backgroundColor: T.surface.s4,
+  },
+  faraCapturi: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 18,
+    marginTop: T.spacing.sm,
+  },
+  eroareCaptura: {
+    color: T.pnl.loss,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    marginTop: T.spacing.sm,
+  },
+  indiciuCaptura: {
+    color: T.ink.i4,
+    fontSize: 10,
+    fontFamily: "Inter_400Regular",
+    marginTop: T.spacing.sm,
+    textAlign: "center",
+  },
   radacina: { flex: 1, backgroundColor: T.surface.s0 },
   bara: {
     flexDirection: "row", alignItems: "center",

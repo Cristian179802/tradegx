@@ -21,17 +21,6 @@ export interface MesajChat {
   content: string;
 }
 
-async function trimite(mesaje: MesajChat[], mod: string, token: string | null) {
-  return fetch(`${URL_API}/api/ai-assistant/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ messages: mesaje, mode: mod }),
-  });
-}
-
 /**
  * Întoarce răspunsul asistentului ca text.
  *
@@ -44,11 +33,39 @@ export async function intreabaAsistentul(
   mesaje: MesajChat[],
   mod = "general",
 ): Promise<string> {
-  let r = await trimite(mesaje, mod, await tokenCurent());
+  return textDeLa("/api/ai-assistant/chat", { messages: mesaje, mode: mod });
+}
+
+/**
+ * Tutorele din Academie. Aceeași cale ca asistentul — răspunde tot cu text în
+ * flux, nu cu JSON — dar cu alt context: serverul citește singur textul lecției
+ * din `moduleId` + `lessonId`, deci nu-l trimitem noi.
+ */
+export async function intreabaTutorele(p: {
+  moduleId: string;
+  lessonId: string;
+  question: string;
+}): Promise<string> {
+  return textDeLa("/api/academy/tutor", { ...p, lang: "ro" });
+}
+
+/** Cere o rută care întoarce TEXT, cu o singură reîncercare după 401. */
+async function textDeLa(cale: string, corp: unknown): Promise<string> {
+  const cere = async (token: string | null) =>
+    fetch(`${URL_API}${cale}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(corp),
+    });
+
+  let r = await cere(await tokenCurent());
 
   if (r.status === 401) {
     const nou = await reimprospateaza();
-    if (nou) r = await trimite(mesaje, mod, nou);
+    if (nou) r = await cere(nou);
   }
 
   if (!r.ok) {

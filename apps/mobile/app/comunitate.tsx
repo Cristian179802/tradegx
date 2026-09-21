@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api, ApiError } from "../src/lib/api";
@@ -114,6 +115,7 @@ function Postari({
   fila: "postari" | "echipe";
   setFila: (f: "postari" | "echipe") => void;
 }) {
+  const router = useRouter();
   const c = useCerere<{ posts: Postare[] }>(
     () => api.community.posts(1) as Promise<{ posts: Postare[] }>,
   );
@@ -204,6 +206,7 @@ function Postari({
                 p={item}
                 reactii={reactiiPentru(item)}
                 onReactie={(e) => reactioneaza(item, e)}
+                onDeschide={() => router.push(`/postare/${item.id}`)}
               />
             </Reveal>
           )}
@@ -222,11 +225,12 @@ function Postari({
 }
 
 function CardPostare({
-  p, reactii, onReactie,
+  p, reactii, onReactie, onDeschide,
 }: {
   p: Postare;
   reactii: Reactie[];
   onReactie: (emoji: string) => void;
+  onDeschide: () => void;
 }) {
   const [desfasurat, setDesfasurat] = React.useState(false);
   const initiala = (p.user.name ?? "?").trim().charAt(0).toUpperCase();
@@ -283,12 +287,22 @@ function CardPostare({
           })}
         </View>
 
-        {p._count.comments > 0 ? (
-          <View style={st.comentarii}>
-            <Ionicons name="chatbubble-outline" size={12} color={T.ink.i4} />
-            <Text style={st.numarComentarii}>{p._count.comments}</Text>
-          </View>
-        ) : null}
+        <Pressable
+          onPress={onDeschide}
+          style={st.comentarii}
+          accessibilityRole="button"
+          accessibilityLabel={
+            p._count.comments > 0
+              ? `Vezi cele ${p._count.comments} comentarii`
+              : "Comentează"
+          }
+          hitSlop={8}
+        >
+          <Ionicons name="chatbubble-outline" size={12} color={T.ink.i4} />
+          <Text style={st.numarComentarii}>
+            {p._count.comments > 0 ? p._count.comments : "comentează"}
+          </Text>
+        </Pressable>
       </View>
     </Card>
   );

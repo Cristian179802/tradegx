@@ -160,6 +160,8 @@ export const API_ERROR_EN: Record<string, string> = {
     "The owner can't leave the community. Delete it instead.",
   "Post negăsit": "Post not found",
   "Postare negăsită": "Post not found",
+  "Lipsește comentariul": "Comment is missing",
+  "Comentariu negăsit": "Comment not found",
 
   // Integrări
   "Notificările Telegram nu sunt configurate pe server. Contactează suportul.":

@@ -22,7 +22,10 @@ import { Reveal } from "../../../src/ui/Reveal";
 import { Ecran } from "../../../src/ui/Ecran";
 import { TextLectie } from "../../../src/ui/TextLectie";
 import { Diagrama, useLatime } from "../../../src/ui/grafice";
-import { Gol } from "../../../src/ui/parti";
+import { Gol, Insigna, Sectiune } from "../../../src/ui/parti";
+import { Camp } from "../../../src/ui/Camp";
+import { intreabaTutorele } from "../../../src/lib/asistent";
+import { ApiError } from "../../../src/lib/api";
 import { T } from "../../../src/theme";
 
 // ── O lecție ─────────────────────────────────────────────────────────────────
@@ -165,7 +168,7 @@ export default function Lectie() {
         <>
           {lectie.sections.map((s, i) => (
             <Reveal key={i} intarziere={Math.min(i, 6) * 50} style={{ marginBottom: T.spacing.lg }}>
-              <Sectiune
+              <SectiuneLectie
                 s={s}
                 continut={continut}
                 latime={latime}
@@ -174,6 +177,9 @@ export default function Lectie() {
               />
             </Reveal>
           ))}
+
+          <Sectiune titlu="N-ai înțeles ceva?" nota="Tutorele citește lecția asta și îți răspunde despre ea." />
+          <Tutore moduleId={modul!.id} lessonId={lectie.id} />
 
           {urmatoare ? (
             <Pressable
@@ -200,7 +206,80 @@ export default function Lectie() {
   );
 }
 
-function Sectiune({
+/**
+ * Tutorele lecției.
+ *
+ * SERVERUL CITEȘTE SINGUR TEXTUL LECȚIEI din `moduleId` + `lessonId` — noi
+ * trimitem doar întrebarea. Altfel ar fi trebuit să urcăm câteva mii de
+ * caractere de lecție la fiecare întrebare, dintr-un text pe care serverul îl
+ * are oricum.
+ *
+ * Conversația NU se păstrează între lecții: e o întrebare despre ce tocmai ai
+ * citit, nu un chat. Pentru discuții lungi există Asistentul.
+ */
+function Tutore({ moduleId, lessonId }: { moduleId: string; lessonId: string }) {
+  const [intrebare, setIntrebare] = React.useState("");
+  const [raspuns, setRaspuns] = React.useState<string | null>(null);
+  const [asteapta, setAsteapta] = React.useState(false);
+  const [eroare, setEroare] = React.useState<string | null>(null);
+
+  const trimite = async () => {
+    const q = intrebare.trim();
+    if (q.length < 3 || asteapta) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    setAsteapta(true);
+    setEroare(null);
+    setRaspuns(null);
+    try {
+      const r = await intreabaTutorele({ moduleId, lessonId, question: q });
+      setRaspuns(r);
+      Haptics.selectionAsync().catch(() => {});
+    } catch (e) {
+      setEroare(
+        e instanceof ApiError && e.status === 402
+          ? "Tutorele e inclus în planul PRO."
+          : e instanceof ApiError ? e.message : "Nu am primit răspuns.",
+      );
+    } finally {
+      setAsteapta(false);
+    }
+  };
+
+  return (
+    <Card culoareMuchie={raspuns ? T.accent.line : undefined}>
+      <Camp
+        eticheta="Întrebarea ta"
+        valoare={intrebare}
+        onChange={setIntrebare}
+        placeholder="Ce anume n-a fost clar?"
+        multilinie
+        randuri={2}
+        autoCapitalize="sentences"
+      />
+
+      {eroare ? <Text style={st.eroareTutore}>{eroare}</Text> : null}
+
+      {raspuns ? (
+        <View style={st.raspuns}>
+          <Insigna text="tutore" culoare={T.accent.base} fundal={T.accent.soft} />
+          <Text style={st.textRaspuns}>{raspuns}</Text>
+        </View>
+      ) : null}
+
+      <Buton
+        eticheta={asteapta ? "Se gândește…" : raspuns ? "Întreabă altceva" : "Întreabă"}
+        varianta="secundar"
+        onPress={trimite}
+        incarca={asteapta}
+        dezactivat={intrebare.trim().length < 3}
+        plin
+        iconita={<Ionicons name="school-outline" size={15} color={T.ink.i1} />}
+      />
+    </Card>
+  );
+}
+
+function SectiuneLectie({
   s, continut, latime, onTermen, onUnealta,
 }: {
   s: LessonSection;
@@ -486,6 +565,26 @@ const st = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     lineHeight: 18,
     marginTop: 6,
+  },
+  eroareTutore: {
+    color: T.state.warn,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 17,
+    marginBottom: T.spacing.md,
+  },
+  raspuns: {
+    marginBottom: T.spacing.md,
+    padding: T.spacing.md,
+    borderRadius: T.radius.md,
+    backgroundColor: T.surface.s3,
+    gap: T.spacing.sm,
+  },
+  textRaspuns: {
+    color: T.ink.i2,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 21,
   },
   randUrmatoare: { flexDirection: "row", alignItems: "center", gap: T.spacing.md },
   etichetaUrmatoare: {

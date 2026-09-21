@@ -76,6 +76,7 @@ export const DOMENII: Domeniu[] = [
           { eticheta: "Checklist", iconita: "checkbox-outline", tinta: "/checklist", nativ: true },
           { eticheta: "Conturi de trading", iconita: "wallet-outline", tinta: "/conturi", nativ: true },
           { eticheta: "Rapoarte", iconita: "document-text-outline", tinta: "/rapoarte", nativ: true },
+          { eticheta: "Import și export", iconita: "swap-vertical-outline", tinta: "/import-export", nativ: true },
         ],
       },
     ],
@@ -119,6 +120,7 @@ export const DOMENII: Domeniu[] = [
           { eticheta: "Semnale", iconita: "flash-outline", tinta: "/semnale", nativ: true },
           { eticheta: "Asistent AI", iconita: "sparkles-outline", tinta: "/asistent", nativ: true },
           { eticheta: "Alerte", iconita: "notifications-outline", tinta: "/alerte", nativ: true },
+          { eticheta: "Urmărite", iconita: "eye-outline", tinta: "/watchlist", nativ: true },
         ],
       },
       {

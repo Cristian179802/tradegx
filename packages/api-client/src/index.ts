@@ -81,6 +81,15 @@ export function createApiClient(config: ApiClientConfig = {}) {
       remove: (id: string) => request(`/api/trades/${id}`, { method: "DELETE" }),
       replay: (id: string) => request(`/api/trades/${id}/replay`),
       analyze: (id: string) => request(`/api/trades/${id}/analyze`, { method: "POST" }),
+      /** Capturile unei tranzacții. Imaginea pleacă în base64, așa o cere ruta. */
+      capturi: (id: string) => request(`/api/trades/${id}/screenshots`),
+      adaugaCaptura: (id: string, data: unknown) =>
+        request(`/api/trades/${id}/screenshots`, { method: "POST", body: json(data) }),
+      stergeCaptura: (id: string, idCaptura: string) =>
+        request(`/api/trades/${id}/screenshots/${idCaptura}`, { method: "DELETE" }),
+      /** Import din CSV sau raport HTML de broker. */
+      importa: (data: unknown) =>
+        request("/api/trades/import", { method: "POST", body: json(data) }),
     },
 
     signals: {
@@ -232,6 +241,16 @@ export function createApiClient(config: ApiClientConfig = {}) {
         request("/api/community/posts", { method: "POST", body: json(data) }),
       react: (id: string, data: unknown) =>
         request(`/api/community/posts/${id}/react`, { method: "POST", body: json(data) }),
+      /** Postarea cu tot firul de comentarii. */
+      postare: (id: string) => request(`/api/community/posts/${id}`),
+      comenteaza: (id: string, content: string) =>
+        request(`/api/community/posts/${id}/comments`, { method: "POST", body: json({ content }) }),
+      stergeComentariul: (idPostare: string, idComentariu: string) =>
+        request(
+          `/api/community/posts/${idPostare}/comments?comentariu=${idComentariu}`,
+          { method: "DELETE" },
+        ),
+      echipa: (id: string) => request(`/api/community/teams/${id}`),
       teams: () => request("/api/community/teams"),
       joinByCode: (data: unknown) =>
         request("/api/community/teams/join-by-code", { method: "POST", body: json(data) }),
