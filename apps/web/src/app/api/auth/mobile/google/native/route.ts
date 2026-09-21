@@ -16,11 +16,17 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 // clientul NOSTRU, altfel o aplicație străină ar putea folosi un token primit
 // de ea ca să intre în conturile noastre) și dacă adresa e confirmată.
 //
-// LEGAREA CONTURILOR urmează exact regula web-ului. NextAuth NU leagă automat
-// un cont Google de unul cu parolă pe aceeași adresă (n-am pornit
-// `allowDangerousEmailAccountLinking`), deci nici noi. Dacă am lega aici dar
-// nu și pe web, același om ar primi două răspunsuri diferite pe cele două
-// ecrane — iar cel permisiv ar fi exact cel pe care nu l-a ales nimeni.
+// LEGAREA CONTURILOR e aceeași ca pe web, unde am pornit acum
+// `allowDangerousEmailAccountLinking`: cine are cont cu parolă și apasă
+// „Continuă cu Google" pe aceeași adresă INTRĂ în contul lui.
+//
+// Prima variantă refuza legarea, ca să nu se poarte altfel decât web-ul. Dar
+// web-ul nu avea nicio cale de legare, deci refuzul trimitea omul într-un
+// ecran de setări care nu există. Un refuz care n-are alternativă nu e
+// prudență, e un zid.
+//
+// E sigur fiindcă adresa e verificată de Google (`email_verified` mai jos):
+// ca să ceri un token pe adresa cuiva, trebuie să ai chiar căsuța lui.
 
 interface Tokeninfo {
   iss?: string;
@@ -119,31 +125,34 @@ export async function POST(req: Request) {
     });
 
     if (dupaEmail) {
-      // Există un cont pe adresa asta, dar nelegat de Google. Aceeași regulă ca
-      // pe web: nu legăm singuri, fiindcă nici NextAuth n-o face.
-      return NextResponse.json(
-        {
-          error:
-            "Ai deja un cont pe adresa asta, făcut cu parolă. Intră cu parola, apoi leagă Google din setările de pe site.",
+      // Cont existent pe adresa asta, nelegat încă de Google. Îl legăm acum —
+      // Google ne-a confirmat că adresa e a lui.
+      //
+      // `createMany` cu `skipDuplicates` în loc de `create`: dacă omul apasă
+      // de două ori, a doua cerere ar lovi cheia unică pe
+      // (provider, providerAccountId) și ar arunca. Așa, a doua oară pur și
+      // simplu nu are ce adăuga.
+      await prisma.account.createMany({
+        data: [{ userId: dupaEmail.id, type: "oauth", provider: "google", providerAccountId: sub }],
+        skipDuplicates: true,
+      });
+      user = dupaEmail;
+    } else {
+      // Om nou: cont + legătura Google + abonamentul de probă, ca pe web.
+      const nou = await prisma.user.create({
+        data: {
+          email,
+          name: info.name ?? null,
+          emailVerified: new Date(), // Google ne-a spus deja că adresa e a lui.
+          accounts: {
+            create: { type: "oauth", provider: "google", providerAccountId: sub },
+          },
         },
-        { status: 409 },
-      );
+        select: { id: true, email: true, name: true, role: true },
+      });
+      await bootstrapNewUser(nou.id);
+      user = nou;
     }
-
-    // 2. Om nou: cont + legătura Google + abonamentul de probă, ca pe web.
-    const nou = await prisma.user.create({
-      data: {
-        email,
-        name: info.name ?? null,
-        emailVerified: new Date(), // Google ne-a spus deja că adresa e a lui.
-        accounts: {
-          create: { type: "oauth", provider: "google", providerAccountId: sub },
-        },
-      },
-      select: { id: true, email: true, name: true, role: true },
-    });
-    await bootstrapNewUser(nou.id);
-    user = nou;
   }
 
   if (user.role === "DEMO") {

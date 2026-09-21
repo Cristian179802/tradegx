@@ -297,14 +297,12 @@ const st = StyleSheet.create({
   simbol: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.tight,
   },
   directie: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
   },
@@ -320,7 +318,6 @@ const st = StyleSheet.create({
   textScor: {
     color: T.accent.base,
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
   meta: {
@@ -331,7 +328,6 @@ const st = StyleSheet.create({
   },
   pnl: {
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
   eroare: {

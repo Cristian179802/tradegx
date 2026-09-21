@@ -304,7 +304,6 @@ const st = StyleSheet.create({
   eticheta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -326,7 +325,6 @@ const st = StyleSheet.create({
   textPastila: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   prob: { marginBottom: T.spacing.lg },

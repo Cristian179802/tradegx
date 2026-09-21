@@ -418,7 +418,6 @@ const st = StyleSheet.create({
   eticheta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -442,7 +441,6 @@ const st = StyleSheet.create({
   textPastila: {
     color: T.ink.i3,
     fontSize: T.fontSize.sm,
-    fontWeight: "600",
     fontFamily: "Inter_600SemiBold",
   },
   scara: { flexDirection: "row", gap: 5 },
@@ -458,7 +456,6 @@ const st = StyleSheet.create({
   textTreapta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   textTreaptaActiv: { color: T.accent.base },
@@ -484,7 +481,6 @@ const st = StyleSheet.create({
   textLegatura: {
     color: T.accent.base,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
 });

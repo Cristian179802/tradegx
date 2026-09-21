@@ -1,19 +1,25 @@
 #!/usr/bin/env node
 // ── Poarta de fonturi ────────────────────────────────────────────────────────
 //
-// Pe Android, un stil de text FĂRĂ `fontFamily` moștenește fontul de SISTEM al
-// telefonului. Pe telefoanele unde omul și-a schimbat fontul global (Samsung,
-// Xiaomi, OnePlus lasă), ecranul apare scris cu altceva decât tot restul
-// aplicației — iar noi, care testăm pe telefoane cu fontul din fabrică, nu
-// vedem niciodată nimic.
+// Două capcane, amândouă invizibile pe un telefon cu fontul din fabrică.
 //
-// S-a întâmplat exact asta: ecranul de login avea cinci stiluri fără familie,
-// printre care titlul și subtitlul. Pe telefonul cu font caligrafic, prima
-// impresie despre produs era un ecran scris de mână.
+// 1. STIL DE TEXT FĂRĂ `fontFamily`. Moștenește fontul de SISTEM. Pe
+//    telefoanele unde omul și-a schimbat fontul global (Samsung, Xiaomi,
+//    OnePlus lasă), ecranul apare scris cu altceva decât tot restul aplicației.
 //
-// Scriptul caută fiecare obiect de stil care are `fontSize` sau `fontWeight`
-// dar n-are `fontFamily`, și pică. Emoji-urile sunt scutite: ele TREBUIE să
-// rămână pe fontul de sistem, fiindcă fonturile noastre n-au glife pentru ele.
+// 2. `fontFamily` ÎMPREUNĂ cu `fontWeight`. Asta e cea urâtă. Android caută
+//    atunci o familie „Inter_700Bold" AVÂND greutatea 700 — dar fontul încărcat
+//    e o familie de sine stătătoare, cu greutate normală. Nu găsește nimic și
+//    cade tot pe fontul de sistem. Greutatea e deja în fișier: `Inter_700Bold`
+//    E varianta îngroșată, n-are nevoie să i-o mai ceri o dată.
+//
+// A doua s-a văzut pentru prima oară pe telefonul lui Cristi, care are un font
+// de sistem caligrafic: toate titlurile și butoanele ieșeau caligrafice, iar
+// textele normale nu. Pe un telefon obișnuit, diferența ar fi fost atât de mică
+// încât n-ar fi observat-o nimeni — și ar fi rămas așa pentru totdeauna.
+//
+// Emoji-urile sunt scutite de prima regulă: ele TREBUIE să rămână pe fontul de
+// sistem, fiindcă fonturile noastre n-au glife pentru ele.
 
 import { readFileSync } from "node:fs";
 import { execSync } from "node:child_process";
@@ -34,39 +40,56 @@ const SCUTITE = new Set([
   "emoji",
 ]);
 
-const probleme = [];
+const faraFamilie = [];
+const cuGreutate = [];
 
 for (const cale of fisiere) {
   const sursa = readFileSync(cale, "utf8");
-  const linii = sursa.split("\n");
 
   // Obiecte de stil de forma `nume: { ... }`, fără acolade imbricate.
   const re = /(\w+):\s*\{([^{}]*)\}/g;
   let m;
   while ((m = re.exec(sursa))) {
-    const [intreg, nume, corp] = m;
+    const nume = m[1];
+    const corp = m[2];
+    const linie = sursa.slice(0, m.index).split("\n").length;
+
+    if (/fontFamily/.test(corp)) {
+      if (/fontWeight/.test(corp)) cuGreutate.push({ cale, nume, linie });
+      continue;
+    }
     if (SCUTITE.has(nume)) continue;
     if (!/fontSize|fontWeight/.test(corp)) continue;
-    if (/fontFamily/.test(corp)) continue;
 
-    const linie = sursa.slice(0, m.index).split("\n").length;
-    probleme.push({ cale, nume, linie, text: linii[linie - 1]?.trim() ?? "" });
-    void intreg;
+    faraFamilie.push({ cale, nume, linie });
   }
 }
 
-if (probleme.length > 0) {
-  console.error("\n✗ Stiluri de text fără `fontFamily` — vor folosi fontul telefonului:\n");
-  for (const p of probleme) {
-    console.error(`  ${p.cale}:${p.linie}  →  ${p.nume}`);
-  }
-  console.error(
-    `\n${probleme.length} ${probleme.length === 1 ? "stil" : "stiluri"}. ` +
-      "Pune `fontFamily` (vezi `FONT` din src/lib/fonturi.ts).\n" +
-      "Dacă un stil chiar trebuie să rămână pe fontul de sistem — cum sunt " +
-      "emoji-urile — adaugă-i numele în `SCUTITE`, în scriptul ăsta.\n",
-  );
-  process.exit(1);
+function raporteaza(lista, titlu, sfat) {
+  if (lista.length === 0) return false;
+  console.error(`\n✗ ${titlu}\n`);
+  for (const p of lista) console.error(`  ${p.cale}:${p.linie}  →  ${p.nume}`);
+  console.error(`\n${lista.length} ${lista.length === 1 ? "stil" : "stiluri"}. ${sfat}\n`);
+  return true;
 }
 
-console.log(`✓ fonturi: toate stilurile de text au familie (${fisiere.length} fișiere).`);
+const a = raporteaza(
+  cuGreutate,
+  "Stiluri cu `fontFamily` ȘI `fontWeight` — Android nu găsește familia și cade pe fontul telefonului:",
+  "Șterge `fontWeight`: greutatea e deja în fișierul fontului.",
+);
+
+const b = raporteaza(
+  faraFamilie,
+  "Stiluri de text fără `fontFamily` — vor folosi fontul telefonului:",
+  "Pune `fontFamily` (vezi `FONT` din src/lib/fonturi.ts). Dacă un stil chiar " +
+    "trebuie să rămână pe fontul de sistem — cum sunt emoji-urile — adaugă-i " +
+    "numele în `SCUTITE`, în scriptul ăsta.",
+);
+
+if (a || b) process.exit(1);
+
+console.log(
+  `✓ fonturi: toate stilurile de text au familie, niciunul cu fontWeight peste ea ` +
+    `(${fisiere.length} fișiere).`,
+);

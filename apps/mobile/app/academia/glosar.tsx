@@ -224,7 +224,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },

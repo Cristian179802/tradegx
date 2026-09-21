@@ -565,7 +565,6 @@ const st = StyleSheet.create({
   textSimbol: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   antetGrafic: {
@@ -578,7 +577,6 @@ const st = StyleSheet.create({
   pret: {
     color: T.ink.i1,
     fontSize: T.fontSize.xl,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   zonaGrafic: { paddingHorizontal: T.spacing.lg, paddingTop: T.spacing.md },
@@ -613,13 +611,11 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },
   rr: {
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   linie: {
@@ -630,7 +626,6 @@ const st = StyleSheet.create({
   etichetaRisc: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
     marginBottom: 6,
@@ -649,7 +644,6 @@ const st = StyleSheet.create({
   textRisc: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   faraSold: {
@@ -671,7 +665,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   distanta: {
@@ -688,13 +681,11 @@ const st = StyleSheet.create({
   incredere: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   titluBloc: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wider,
     marginBottom: 3,

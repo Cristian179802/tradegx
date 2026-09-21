@@ -235,7 +235,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   punct: { width: 6, height: 6, borderRadius: 3 },

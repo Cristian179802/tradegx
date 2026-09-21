@@ -166,7 +166,6 @@ const st = StyleSheet.create({
   },
   textImpact: {
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wide,
@@ -185,7 +184,6 @@ const st = StyleSheet.create({
   titlu: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     lineHeight: 20,
     marginTop: T.spacing.sm,
@@ -206,7 +204,6 @@ const st = StyleSheet.create({
   citeste: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   eroare: {

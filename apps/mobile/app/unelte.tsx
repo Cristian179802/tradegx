@@ -315,14 +315,12 @@ const st = StyleSheet.create({
     width: 36,
     color: T.ink.i2,
     fontSize: T.fontSize.xs,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
   valoarePutere: {
     width: 58,
     textAlign: "right",
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   notaPutere: {
@@ -340,14 +338,12 @@ const st = StyleSheet.create({
   etichetaRuina: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
     marginBottom: 6,
   },
   valoareRuina: {
     fontSize: T.fontSize["2xl"],
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   verdictRuina: {
@@ -361,7 +357,6 @@ const st = StyleSheet.create({
   etichetaAlegere: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -382,7 +377,6 @@ const st = StyleSheet.create({
   textOptiune: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   matrice: { padding: T.spacing.sm },
@@ -399,13 +393,11 @@ const st = StyleSheet.create({
   textCap: {
     color: T.ink.i4,
     fontSize: 8,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
   textCelula: {
     color: T.ink.i2,
     fontSize: 8,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   legenda: {

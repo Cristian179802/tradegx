@@ -88,7 +88,6 @@ const st = StyleSheet.create({
   text: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
 });

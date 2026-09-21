@@ -433,7 +433,6 @@ const st = StyleSheet.create({
   titluSectiune: {
     color: T.ink.i1,
     fontSize: T.fontSize.lg,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
     marginBottom: 2,
@@ -491,7 +490,6 @@ const st = StyleSheet.create({
   },
   capTabel: {
     color: T.ink.i4,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wide,
@@ -507,7 +505,6 @@ const st = StyleSheet.create({
   antetCaseta: { flexDirection: "row", alignItems: "center", gap: 5 },
   titluCaseta: {
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -524,7 +521,6 @@ const st = StyleSheet.create({
   titluRetine: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wider,
     marginBottom: 2,
@@ -549,7 +545,6 @@ const st = StyleSheet.create({
   titluLab: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   textLab: {
@@ -590,14 +585,12 @@ const st = StyleSheet.create({
   etichetaUrmatoare: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
   },
   titluUrmatoare: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     marginTop: 3,
     lineHeight: 19,

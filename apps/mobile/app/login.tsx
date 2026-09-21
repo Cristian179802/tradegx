@@ -297,7 +297,6 @@ const st = StyleSheet.create({
   numeMarca: {
     color: T.ink.i1,
     fontSize: T.fontSize.lg,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
     letterSpacing: T.tracking.tight,
   },
@@ -335,7 +334,6 @@ const st = StyleSheet.create({
   textInsigna: {
     color: T.accent.base,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wider,
   },
@@ -343,7 +341,6 @@ const st = StyleSheet.create({
   titlu: {
     color: T.ink.i1,
     fontSize: T.fontSize.xl,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
     marginTop: T.spacing.lg,
@@ -402,7 +399,6 @@ const st = StyleSheet.create({
   sau: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
   },
@@ -434,7 +430,6 @@ const st = StyleSheet.create({
   },
   accent: {
     color: T.accent.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   nota: {

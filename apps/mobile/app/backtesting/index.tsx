@@ -299,7 +299,6 @@ const st = StyleSheet.create({
   nume: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.tight,
   },
@@ -321,14 +320,12 @@ const st = StyleSheet.create({
   etichetaUltim: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wide,
   },
   randUltim: { flexDirection: "row", alignItems: "baseline", gap: T.spacing.sm, marginTop: 3 },
   pnlUltim: {
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   rataUltim: {
@@ -339,7 +336,6 @@ const st = StyleSheet.create({
   eticheta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,

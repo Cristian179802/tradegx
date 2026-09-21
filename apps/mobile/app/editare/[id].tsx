@@ -503,7 +503,6 @@ const st = StyleSheet.create({
   eticheta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -525,7 +524,6 @@ const st = StyleSheet.create({
   textPastilaMare: {
     color: T.ink.i3,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   rand2: { flexDirection: "row", gap: T.spacing.md },
@@ -545,7 +543,6 @@ const st = StyleSheet.create({
   textPastila: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "600",
     fontFamily: "Inter_600SemiBold",
   },
   rrCutie: {
@@ -560,13 +557,11 @@ const st = StyleSheet.create({
   rrEticheta: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
   },
   rrValoare: {
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   randSterg: { marginBottom: T.spacing.sm },

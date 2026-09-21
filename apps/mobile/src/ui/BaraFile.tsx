@@ -302,7 +302,6 @@ const st = StyleSheet.create({
   },
   eticheta: {
     fontSize: 10,
-    fontWeight: "700",
     color: T.ink.i4,
     letterSpacing: T.tracking.wide,
     fontFamily: "Inter_700Bold",
@@ -335,7 +334,6 @@ const st = StyleSheet.create({
     marginTop: T.spacing.sm,
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
     fontFamily: "Inter_800ExtraBold",
@@ -347,7 +345,6 @@ const st = StyleSheet.create({
   titluGrup: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
     paddingHorizontal: T.spacing.md,
@@ -393,7 +390,6 @@ const st = StyleSheet.create({
   textInsigna: {
     color: T.state.warn,
     fontSize: 9,
-    fontWeight: "800",
     letterSpacing: T.tracking.wide,
     fontFamily: "Inter_800ExtraBold",
   },

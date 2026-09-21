@@ -276,7 +276,6 @@ const st = StyleSheet.create({
   titluEsec: {
     color: T.pnl.loss,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   textEsec: {
@@ -313,7 +312,6 @@ const st = StyleSheet.create({
   },
   pnlTranz: {
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   faraTranzactii: { gap: T.spacing.sm },

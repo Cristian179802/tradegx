@@ -414,14 +414,12 @@ const st = StyleSheet.create({
   etichetaStare: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
   },
   numePlanCurent: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     marginTop: 3,
   },
@@ -464,13 +462,11 @@ const st = StyleSheet.create({
   textPerioada: {
     color: T.ink.i3,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   economie: {
     color: T.pnl.gain,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   antetPlan: { flexDirection: "row", alignItems: "flex-start", gap: T.spacing.sm },
@@ -478,7 +474,6 @@ const st = StyleSheet.create({
   numePlan: {
     color: T.ink.i1,
     fontSize: T.fontSize.lg,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },
@@ -493,13 +488,11 @@ const st = StyleSheet.create({
   pret: {
     color: T.ink.i1,
     fontSize: T.fontSize["3xl"],
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   simbol: {
     color: T.ink.i2,
     fontSize: T.fontSize.lg,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   peLuna: {
@@ -541,7 +534,6 @@ const st = StyleSheet.create({
   valoareComp: {
     color: T.ink.i1,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   randIntrebare: {
@@ -554,7 +546,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     lineHeight: 19,
   },

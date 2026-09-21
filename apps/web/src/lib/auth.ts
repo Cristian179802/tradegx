@@ -43,6 +43,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      // Cineva care și-a făcut cont cu parolă și apasă apoi „Continuă cu
+      // Google" pe aceeași adresă intră în contul lui, nu primește un refuz.
+      //
+      // Numele opțiunii sperie, dar „periculos" se referă la furnizorii care
+      // te lasă să declari orice adresă, nedovedită — acolo, cine inventează
+      // adresa altcuiva i-ar prelua contul. Google verifică proprietatea
+      // adresei, deci scenariul ăla nu există: ca să primești un token pe
+      // adresa cuiva, trebuie să ai chiar căsuța lui.
+      //
+      // Fără asta, singura ieșire ar fi fost un ecran de legare a conturilor
+      // în setări — care NU există. Adică refuzam omul și îl trimiteam
+      // într-un loc gol.
+      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "credentials",

@@ -253,7 +253,6 @@ const st = StyleSheet.create({
   titluStart: {
     color: T.ink.i1,
     fontSize: T.fontSize.lg,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },

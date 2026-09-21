@@ -312,7 +312,6 @@ const st = StyleSheet.create({
   eticheta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -336,7 +335,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   subCont: {
@@ -361,7 +359,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   erori: {
@@ -374,7 +371,6 @@ const st = StyleSheet.create({
   titluErori: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wider,
     marginBottom: 3,

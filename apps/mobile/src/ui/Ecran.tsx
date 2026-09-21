@@ -190,7 +190,6 @@ const st = StyleSheet.create({
   titlu: {
     color: T.ink.i1,
     fontSize: T.fontSize.xl,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },

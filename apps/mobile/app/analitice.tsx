@@ -359,7 +359,6 @@ const st = StyleSheet.create({
   numeDefalcare: {
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "600",
     fontFamily: "Inter_600SemiBold",
   },
   subDefalcare: {
@@ -370,7 +369,6 @@ const st = StyleSheet.create({
   },
   valoareDefalcare: {
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
 });

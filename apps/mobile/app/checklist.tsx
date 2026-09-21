@@ -283,7 +283,6 @@ const st = StyleSheet.create({
   stare: {
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   nota: {
@@ -333,7 +332,6 @@ const st = StyleSheet.create({
   adauga: {
     color: T.accent.base,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   restabilire: { alignItems: "center", paddingVertical: T.spacing.xl },

@@ -273,7 +273,6 @@ const st = StyleSheet.create({
   eticheta: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
     marginBottom: 6,
@@ -290,7 +289,6 @@ const st = StyleSheet.create({
   textZile: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   antetObiectiv: { flexDirection: "row", alignItems: "center", gap: T.spacing.sm },
@@ -306,12 +304,10 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   fractie: {
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   ramas: {

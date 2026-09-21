@@ -164,7 +164,7 @@ const st = StyleSheet.create({
   radacina: { flex: 1, backgroundColor: T.surface.s0 },
   continut: { padding: T.spacing.lg, paddingBottom: 130 },
   titlu: {
-    color: T.ink.i1, fontSize: T.fontSize.xl, fontWeight: "800",
+    color: T.ink.i1, fontSize: T.fontSize.xl,
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight, marginBottom: T.spacing.lg,
   },
@@ -175,11 +175,11 @@ const st = StyleSheet.create({
     backgroundColor: T.accent.soft,
     borderWidth: StyleSheet.hairlineWidth, borderColor: T.accent.line,
   },
-  initiale: { color: T.accent.base, fontSize: T.fontSize.base, fontWeight: "800" , fontFamily: "Inter_800ExtraBold" },
-  nume: { color: T.ink.i1, fontSize: T.fontSize.base, fontWeight: "700" , fontFamily: "Inter_700Bold" },
+  initiale: { color: T.accent.base, fontSize: T.fontSize.base, fontFamily: "Inter_800ExtraBold" },
+  nume: { color: T.ink.i1, fontSize: T.fontSize.base, fontFamily: "Inter_700Bold" },
   email: { color: T.ink.i4, fontSize: T.fontSize.xs, marginTop: 2 , fontFamily: "Inter_400Regular" },
   sectiune: {
-    color: T.ink.i4, fontSize: T.fontSize.xs, fontWeight: "800",
+    color: T.ink.i4, fontSize: T.fontSize.xs,
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase", letterSpacing: T.tracking.wider,
     marginTop: T.spacing.xl, marginBottom: T.spacing.sm,
@@ -202,7 +202,7 @@ const st = StyleSheet.create({
     borderRadius: T.radius.lg, borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(251,113,133,0.30)",
   },
-  textIesire: { color: T.pnl.loss, fontSize: T.fontSize.base, fontWeight: "700" , fontFamily: "Inter_700Bold" },
+  textIesire: { color: T.pnl.loss, fontSize: T.fontSize.base, fontFamily: "Inter_700Bold" },
   versiune: {
     color: T.ink.i4, fontSize: T.fontSize.xs,
     fontFamily: "Inter_400Regular",

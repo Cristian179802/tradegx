@@ -198,7 +198,6 @@ const st = StyleSheet.create({
   etichetaSerie: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
     marginBottom: 4,
@@ -207,7 +206,6 @@ const st = StyleSheet.create({
   zile: {
     color: T.ink.i3,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   recordSerie: {
@@ -225,14 +223,12 @@ const st = StyleSheet.create({
   etichetaTotal: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
   },
   valoareTotal: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   randProgres: {
@@ -249,7 +245,6 @@ const st = StyleSheet.create({
   valoareProgres: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   rand: { flexDirection: "row", gap: T.spacing.md, alignItems: "flex-start" },
@@ -268,7 +263,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   descriere: {

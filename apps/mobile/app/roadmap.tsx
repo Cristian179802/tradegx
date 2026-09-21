@@ -152,7 +152,6 @@ const st = StyleSheet.create({
   eticheta: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
     marginBottom: 5,
@@ -161,7 +160,6 @@ const st = StyleSheet.create({
   numar: {
     color: T.pnl.gain,
     fontSize: T.fontSize["2xl"],
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   dinTotal: {
@@ -200,7 +198,6 @@ const st = StyleSheet.create({
   titluSectiune: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   numarSectiune: {

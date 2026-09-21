@@ -415,7 +415,6 @@ const st = StyleSheet.create({
   simbol: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.tight,
   },
@@ -434,12 +433,10 @@ const st = StyleSheet.create({
   pret: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   variatie: {
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     marginTop: 2,
   },
@@ -469,7 +466,6 @@ const st = StyleSheet.create({
   titluFoaie: {
     color: T.ink.i1,
     fontSize: T.fontSize.lg,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },
@@ -499,7 +495,6 @@ const st = StyleSheet.create({
   textSugestie: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   notaCutie: {

@@ -264,7 +264,6 @@ const st = StyleSheet.create({
   textZi: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -274,7 +273,6 @@ const st = StyleSheet.create({
   textOra: {
     color: T.ink.i2,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   puncte: { flexDirection: "row", gap: 3, marginTop: 5 },
@@ -283,7 +281,6 @@ const st = StyleSheet.create({
   moneda: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
     marginTop: 2,
@@ -300,14 +297,12 @@ const st = StyleSheet.create({
   etichetaCifra: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wide,
   },
   valoareCifra: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
     marginTop: 2,
   },

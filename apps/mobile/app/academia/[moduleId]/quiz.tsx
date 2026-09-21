@@ -317,7 +317,6 @@ const st = StyleSheet.create({
   intrebare: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     lineHeight: 23,
   },
@@ -353,7 +352,6 @@ const st = StyleSheet.create({
   textLitera: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
   textVarianta: {
@@ -372,7 +370,6 @@ const st = StyleSheet.create({
   antetExplicatie: { flexDirection: "row", alignItems: "center", gap: 5 },
   titluExplicatie: {
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,

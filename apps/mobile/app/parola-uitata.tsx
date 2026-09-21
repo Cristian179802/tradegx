@@ -209,7 +209,6 @@ const st = StyleSheet.create({
   titlu: {
     color: T.ink.i1,
     fontSize: T.fontSize.xl,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
     marginTop: T.spacing.lg,
@@ -236,7 +235,6 @@ const st = StyleSheet.create({
   textNumar: {
     color: T.accent.base,
     fontSize: T.fontSize.xs,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   textPas: {
@@ -267,7 +265,6 @@ const st = StyleSheet.create({
   },
   accent: {
     color: T.accent.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
 });

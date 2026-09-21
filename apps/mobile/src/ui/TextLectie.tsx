@@ -185,7 +185,6 @@ const st = StyleSheet.create({
   bold: {
     color: T.ink.i1,
     fontFamily: "Inter_700Bold",
-    fontWeight: "700",
   },
   cod: {
     color: T.accent.base,
@@ -195,7 +194,6 @@ const st = StyleSheet.create({
   termen: {
     color: T.accent.base,
     fontFamily: "Inter_600SemiBold",
-    fontWeight: "600",
     textDecorationLine: "underline",
     textDecorationStyle: "dotted",
   },

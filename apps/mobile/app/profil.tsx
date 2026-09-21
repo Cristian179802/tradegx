@@ -77,6 +77,37 @@ interface Stare2FA {
   backupCount: number;
 }
 
+// Doar limbile TRADUSE COMPLET. Schema serverului acceptă și ES/DE/FR/IT, dar
+// dicționarele alea nu sunt gata — le-am arăta ca opțiuni și omul ar primi o
+// aplicație jumătate în română. Se adaugă aici pe măsură ce se termină.
+const LIMBI = [
+  { cod: "RO", nume: "Română" },
+  { cod: "EN", nume: "English" },
+];
+
+/** Aceleași fusuri ca pe site, în aceeași ordine. */
+const FUSURI = [
+  { cod: "Europe/Bucharest", nume: "București" },
+  { cod: "Europe/London", nume: "Londra" },
+  { cod: "Europe/Berlin", nume: "Berlin" },
+  { cod: "Europe/Paris", nume: "Paris" },
+  { cod: "America/New_York", nume: "New York" },
+  { cod: "America/Chicago", nume: "Chicago" },
+  { cod: "America/Los_Angeles", nume: "Los Angeles" },
+  { cod: "Asia/Tokyo", nume: "Tokyo" },
+  { cod: "Asia/Dubai", nume: "Dubai" },
+  { cod: "Australia/Sydney", nume: "Sydney" },
+];
+
+/** Fusul telefonului, dacă îl putem afla. */
+function fusulTelefonului(): string | null {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+  } catch {
+    return null;
+  }
+}
+
 export default function Profil() {
   const router = useRouter();
   const { utilizator, deconecteaza } = useAuth();
@@ -90,6 +121,8 @@ export default function Profil() {
 
   const [nume, setNume] = React.useState("");
   const [moneda, setMoneda] = React.useState("USD");
+  const [limba, setLimba] = React.useState("RO");
+  const [fus, setFus] = React.useState("Europe/Bucharest");
   const [gata, setGata] = React.useState(false);
   const [salveaza, setSalveaza] = React.useState(false);
   const [salvat, setSalvat] = React.useState(false);
@@ -103,6 +136,10 @@ export default function Profil() {
     if (gata || !setari.date) return;
     setNume(setari.date.name ?? "");
     setMoneda(setari.date.currency ?? "USD");
+    setLimba(setari.date.language ?? "RO");
+    // Dacă serverul n-are fus salvat, pornim de la cel al telefonului — e
+    // aproape sigur cel corect, și omul nu trebuie să caute nimic.
+    setFus(setari.date.timezone ?? fusulTelefonului() ?? "Europe/Bucharest");
     setGata(true);
   }, [setari.date, gata]);
 
@@ -129,7 +166,12 @@ export default function Profil() {
     setSalveaza(true);
     setMesaj(null);
     try {
-      await api.utilizator.salveazaSetari({ name: nume.trim(), currency: moneda });
+      await api.utilizator.salveazaSetari({
+        name: nume.trim(),
+        currency: moneda,
+        language: limba,
+        timezone: fus,
+      });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       setSalvat(true);
       setari.reia();
@@ -260,6 +302,79 @@ export default function Profil() {
               );
             })}
           </View>
+
+          <Text style={st.subEticheta}>LIMBA</Text>
+          <View style={st.pastile}>
+            {LIMBI.map((l) => {
+              const activ = l.cod === limba;
+              return (
+                <Pressable
+                  key={l.cod}
+                  onPress={() => {
+                    Haptics.selectionAsync().catch(() => {});
+                    setSalvat(false);
+                    setLimba(l.cod);
+                  }}
+                  style={[st.pastila, activ && st.pastilaActiva]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: activ }}
+                >
+                  <Text style={[st.textPastila, activ && { color: T.accent.base }]}>{l.nume}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Text style={st.subEticheta}>FUS ORAR</Text>
+          <Text style={st.ajutorSetare}>
+            După el se face ziua de tranzacționare: ce intră în „azi", când se
+            resetează checklistul și limita zilnică de pierdere.
+          </Text>
+
+          {(() => {
+            // Dacă telefonul stă pe un fus care nu e în listă, îl oferim
+            // separat — altfel cineva din Madrid sau Varșovia n-ar avea ce
+            // alege, deși știm exact unde e.
+            const alTelefonului = fusulTelefonului();
+            const inLista = FUSURI.some((x) => x.cod === alTelefonului);
+            const toate = alTelefonului && !inLista
+              ? [{ cod: alTelefonului, nume: alTelefonului.split("/").pop()?.replace(/_/g, " ") ?? alTelefonului }, ...FUSURI]
+              : FUSURI;
+
+            return (
+              <View style={st.pastile}>
+                {toate.map((z) => {
+                  const activ = z.cod === fus;
+                  const eAlTelefonului = z.cod === alTelefonului;
+                  return (
+                    <Pressable
+                      key={z.cod}
+                      onPress={() => {
+                        Haptics.selectionAsync().catch(() => {});
+                        setSalvat(false);
+                        setFus(z.cod);
+                      }}
+                      style={[st.pastila, activ && st.pastilaActiva]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: activ }}
+                      accessibilityLabel={`${z.nume}${eAlTelefonului ? ", fusul telefonului" : ""}`}
+                    >
+                      <Text style={[st.textPastila, activ && { color: T.accent.base }]}>
+                        {z.nume}
+                        {eAlTelefonului ? " ·" : ""}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            );
+          })()}
+
+          {fusulTelefonului() ? (
+            <Text style={st.ajutorSetare}>
+              Punctul arată fusul pe care e telefonul tău acum.
+            </Text>
+          ) : null}
 
           <Text style={st.nota}>
             Emailul nu se poate schimba: cu el intri în cont și pe el sunt emise
@@ -655,6 +770,21 @@ function DoiFactori({
 }
 
 const st = StyleSheet.create({
+  subEticheta: {
+    color: T.ink.i4,
+    fontSize: 9,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: T.tracking.wider,
+    marginTop: T.spacing.lg,
+    marginBottom: T.spacing.sm,
+  },
+  ajutorSetare: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 17,
+    marginBottom: T.spacing.sm,
+  },
   pasiTelegram: {
     marginTop: T.spacing.lg,
     paddingTop: T.spacing.lg,
@@ -675,7 +805,6 @@ const st = StyleSheet.create({
   textNumarPas: {
     color: T.accent.base,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   textPas: {
@@ -688,7 +817,6 @@ const st = StyleSheet.create({
   eticheta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -709,7 +837,6 @@ const st = StyleSheet.create({
   textPastila: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   nota: {
@@ -722,7 +849,6 @@ const st = StyleSheet.create({
   grup: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wider,
     paddingHorizontal: T.spacing.lg,
@@ -741,7 +867,6 @@ const st = StyleSheet.create({
   textComutator: {
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "600",
     fontFamily: "Inter_600SemiBold",
   },
   subComutator: {
@@ -763,7 +888,6 @@ const st = StyleSheet.create({
   textStare: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   subStare: {

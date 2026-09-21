@@ -194,13 +194,11 @@ const st = StyleSheet.create({
   textNumar: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   titluLectie: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     lineHeight: 19,
   },
@@ -222,7 +220,6 @@ const st = StyleSheet.create({
   titluQuiz: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   subQuiz: {

@@ -327,17 +327,14 @@ const st = StyleSheet.create({
   numeRaport: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   valoareRaport: {
     fontSize: T.fontSize.lg,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   citire: {
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     marginTop: 3,
   },
@@ -359,12 +356,10 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   randamentCont: {
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
 });

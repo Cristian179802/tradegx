@@ -83,6 +83,21 @@ export default function Acasa() {
 
   const ultimele = (lista.date?.trades ?? []).slice(0, 4);
 
+  // Ceasul din bula de lângă nume. Bate din secundă în secundă, ca pe site.
+  // E ora TELEFONULUI, nu a serverului: omul o compară din reflex cu ceasul din
+  // bara de sus, iar o diferență de câteva secunde ar părea o defecțiune.
+  const [acum, setAcum] = React.useState(() => new Date());
+  React.useEffect(() => {
+    const id = setInterval(() => setAcum(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const ora = acum.toLocaleTimeString("ro-RO", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
   // Cineva care tocmai a instalat aplicația n-are niciun cont. Serverul trimite
   // `sold: null` fix pentru cazul ăsta, deci îl putem deosebi de un sold zero.
   const faraCont = !seIncarca && sold == null;
@@ -105,8 +120,19 @@ export default function Acasa() {
         >
           {/* ── Salut ── */}
           <Reveal intarziere={0}>
-            <Text style={st.salut}>{salutDupaOra()}</Text>
-            <Text style={st.nume}>{utilizator?.name || utilizator?.email || "Trader"}</Text>
+            <View style={st.randSalut}>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={st.salut}>{salutDupaOra()}</Text>
+                <Text style={st.nume} numberOfLines={1}>
+                  {utilizator?.name || utilizator?.email || "Trader"}
+                </Text>
+              </View>
+
+              <View style={st.bulaOra}>
+                <Ionicons name="time-outline" size={12} color={T.ink.i3} />
+                <Text style={st.textOra}>{ora}</Text>
+              </View>
+            </View>
           </Reveal>
 
           {/* ── Soldul ── */}
@@ -339,6 +365,31 @@ function salutDupaOra(): string {
 }
 
 const st = StyleSheet.create({
+  randSalut: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: T.spacing.md,
+  },
+  bulaOra: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: T.spacing.md,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: T.surface.s2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: T.line.l1,
+  },
+  textOra: {
+    color: T.ink.i2,
+    fontSize: T.fontSize.xs,
+    // Cifre monospațiate: fără ele, secundele fac bula să tresară la fiecare
+    // tick, fiindcă „1" e mai îngust decât „8".
+    fontFamily: "SpaceGrotesk_500Medium",
+    fontVariant: ["tabular-nums"],
+  },
   radacina: { flex: 1, backgroundColor: T.surface.s0 },
   continut: {
     padding: T.spacing.lg,
@@ -348,7 +399,6 @@ const st = StyleSheet.create({
   nume: {
     color: T.ink.i1,
     fontSize: T.fontSize.xl,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
     marginTop: 2,
@@ -357,7 +407,6 @@ const st = StyleSheet.create({
   eticheta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -373,7 +422,6 @@ const st = StyleSheet.create({
   sectiune: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -388,7 +436,6 @@ const st = StyleSheet.create({
   vezi: {
     color: T.accent.base,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     marginTop: T.spacing.xl,
     marginBottom: T.spacing.sm,
@@ -406,12 +453,12 @@ const st = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
   simbol: {
-    color: T.ink.i1, fontSize: T.fontSize.base, fontWeight: "700",
+    color: T.ink.i1, fontSize: T.fontSize.base,
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.tight,
   },
   meta: { color: T.ink.i4, fontSize: T.fontSize.xs, marginTop: 2 , fontFamily: "Inter_400Regular" },
-  pnl: { fontSize: T.fontSize.base, fontWeight: "800" , fontFamily: "Inter_800ExtraBold" },
+  pnl: { fontSize: T.fontSize.base, fontFamily: "Inter_800ExtraBold" },
   insignaDeschisa: {
     paddingHorizontal: 8, paddingVertical: 3,
     borderRadius: T.radius.sm,
@@ -420,7 +467,7 @@ const st = StyleSheet.create({
     borderColor: T.accent.line,
   },
   textDeschisa: {
-    color: T.accent.base, fontSize: 10, fontWeight: "800",
+    color: T.accent.base, fontSize: 10,
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
   },

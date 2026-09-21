@@ -520,7 +520,6 @@ const st = StyleSheet.create({
   textCap: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wide,

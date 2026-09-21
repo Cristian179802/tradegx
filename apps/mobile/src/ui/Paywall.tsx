@@ -81,14 +81,12 @@ const st = StyleSheet.create({
   titlu: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },
   plan: {
     color: T.accent.base,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
     textTransform: "uppercase",

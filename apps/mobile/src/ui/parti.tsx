@@ -248,7 +248,6 @@ const st = StyleSheet.create({
   textPastila: {
     color: T.ink.i3,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   textPastilaActiv: { color: T.accent.base },
@@ -266,7 +265,6 @@ const st = StyleSheet.create({
   golTitlu: {
     color: T.ink.i2,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textAlign: "center",
   },
@@ -284,7 +282,6 @@ const st = StyleSheet.create({
   statEticheta: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -310,7 +307,6 @@ const st = StyleSheet.create({
   },
   textInsigna: {
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
     textTransform: "uppercase",
@@ -331,7 +327,6 @@ const st = StyleSheet.create({
   },
   randValoare: {
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
 
@@ -339,7 +334,6 @@ const st = StyleSheet.create({
   sectiuneTitlu: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,

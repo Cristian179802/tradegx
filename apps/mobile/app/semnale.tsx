@@ -254,7 +254,6 @@ const st = StyleSheet.create({
   simbol: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },
@@ -267,7 +266,6 @@ const st = StyleSheet.create({
   rr: {
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   incredere: { marginTop: T.spacing.lg },
@@ -275,14 +273,12 @@ const st = StyleSheet.create({
   etichetaIncredere: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
   },
   valoareIncredere: {
     color: T.ink.i2,
     fontSize: T.fontSize.xs,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   niveluri: {
@@ -295,13 +291,11 @@ const st = StyleSheet.create({
   etichetaNivel: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
   },
   valoareNivel: {
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
     marginTop: 3,
   },
@@ -315,7 +309,6 @@ const st = StyleSheet.create({
   titluBloc: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,

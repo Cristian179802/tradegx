@@ -321,7 +321,6 @@ const st = StyleSheet.create({
   etichetaLot: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
     marginBottom: 6,
@@ -330,7 +329,6 @@ const st = StyleSheet.create({
   unitate: {
     color: T.ink.i3,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   linie: {

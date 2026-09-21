@@ -557,7 +557,6 @@ const st = StyleSheet.create({
   subEticheta: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
     marginTop: T.spacing.lg,
@@ -578,7 +577,6 @@ const st = StyleSheet.create({
   },
   verdict: {
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },
@@ -598,7 +596,6 @@ const st = StyleSheet.create({
   etichetaMica: {
     color: T.ink.i4,
     fontSize: 9,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.wider,
     marginBottom: 5,
@@ -625,13 +622,11 @@ const st = StyleSheet.create({
   numaratorText: {
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   eticheta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     textTransform: "uppercase",
     letterSpacing: T.tracking.wider,
@@ -652,7 +647,6 @@ const st = StyleSheet.create({
   textOptiune: {
     color: T.ink.i3,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   echivalent: {
@@ -672,7 +666,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
 });

@@ -270,7 +270,6 @@ const st = StyleSheet.create({
   numeToate: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   notaToate: {
@@ -283,7 +282,6 @@ const st = StyleSheet.create({
   nume: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.tight,
   },
@@ -301,7 +299,6 @@ const st = StyleSheet.create({
   },
   randament: {
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
   detalii: {

@@ -247,13 +247,11 @@ const st = StyleSheet.create({
   initiala: {
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
   autor: {
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   cand: {
@@ -265,7 +263,6 @@ const st = StyleSheet.create({
   titlu: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     lineHeight: 21,
     marginTop: T.spacing.md,
@@ -287,7 +284,6 @@ const st = StyleSheet.create({
   textTitluFir: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wider,
   },
@@ -309,14 +305,12 @@ const st = StyleSheet.create({
   initialaMica: {
     color: T.ink.i3,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
   autorComentariu: {
     flex: 1,
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   candComentariu: {

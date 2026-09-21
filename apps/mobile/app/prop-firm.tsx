@@ -431,7 +431,6 @@ const st = StyleSheet.create({
   textPreset: {
     color: T.ink.i3,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   randCampuri: { flexDirection: "row", gap: T.spacing.md, marginTop: T.spacing.sm },
@@ -451,14 +450,12 @@ const st = StyleSheet.create({
   textEditare: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   antet: { flexDirection: "row", alignItems: "center", gap: T.spacing.sm },
   nume: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     letterSpacing: T.tracking.tight,
   },
@@ -478,7 +475,6 @@ const st = StyleSheet.create({
   },
   textStare: {
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
   },
@@ -491,7 +487,6 @@ const st = StyleSheet.create({
   },
   delta: {
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   bare: { marginTop: T.spacing.xs },
@@ -508,7 +503,6 @@ const st = StyleSheet.create({
   },
   valoareMasura: {
     fontSize: T.fontSize.xs,
-    fontWeight: "800",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   faraReguli: {

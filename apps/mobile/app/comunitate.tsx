@@ -730,13 +730,11 @@ const st = StyleSheet.create({
   initiala: {
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
   },
   autor: {
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   cand: {
@@ -748,7 +746,6 @@ const st = StyleSheet.create({
   titlu: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     lineHeight: 21,
     marginTop: T.spacing.md,
@@ -794,7 +791,6 @@ const st = StyleSheet.create({
   numarEmoji: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   comentarii: { flexDirection: "row", alignItems: "center", gap: 4 },
@@ -822,7 +818,6 @@ const st = StyleSheet.create({
   titluPrezentare: {
     color: T.ink.i1,
     fontSize: T.fontSize.base,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },
@@ -852,7 +847,6 @@ const st = StyleSheet.create({
   titluSugestii: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wider,
     marginTop: T.spacing.xl,
@@ -902,7 +896,6 @@ const st = StyleSheet.create({
   titluFoaie: {
     color: T.ink.i1,
     fontSize: T.fontSize.lg,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.tight,
   },
@@ -917,7 +910,6 @@ const st = StyleSheet.create({
   sectiune: {
     color: T.ink.i4,
     fontSize: 10,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wider,
     marginTop: T.spacing.xl,
@@ -956,7 +948,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i1,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   metaEchipa: {

@@ -129,7 +129,6 @@ export function Camp({
 const st = StyleSheet.create({
   eticheta: {
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     color: T.ink.i4,
     textTransform: "uppercase",
@@ -154,13 +153,11 @@ const st = StyleSheet.create({
   },
   numeric: {
     textAlign: "right",
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   sufix: {
     color: T.ink.i3,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     marginLeft: T.spacing.sm,
   },

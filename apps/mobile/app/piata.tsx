@@ -223,7 +223,6 @@ const st = StyleSheet.create({
     flex: 1,
     color: T.ink.i3,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   oreSesiune: {
@@ -240,7 +239,6 @@ const st = StyleSheet.create({
   textDeschis: {
     color: T.pnl.gain,
     fontSize: 9,
-    fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
   },
@@ -254,17 +252,14 @@ const st = StyleSheet.create({
   pereche: {
     color: T.ink.i2,
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
   pret: {
     fontSize: T.fontSize.sm,
-    fontWeight: "700",
     fontFamily: "SpaceGrotesk_700Bold",
   },
   variatie: {
     fontSize: T.fontSize.xs,
-    fontWeight: "700",
     fontFamily: "Inter_700Bold",
     marginTop: 2,
   },
