@@ -1,4 +1,5 @@
 import * as Crypto from "expo-crypto";
+import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { URL_API } from "./api";
 
@@ -63,14 +64,19 @@ export async function conecteazaCuGoogle(): Promise<Rezultat> {
   // Omul a închis fereastra, sau a apăsat înapoi.
   if (rezultat.type !== "success") return { fel: "anulat" };
 
-  const intors = new URL(rezultat.url);
-  const eroare = intors.searchParams.get("eroare");
+  const intors = Linking.parse(rezultat.url);
+  const param = (nume: string): string | null => {
+    const v = intors.queryParams?.[nume];
+    return typeof v === "string" ? v : null;
+  };
+
+  const eroare = param("eroare");
   if (eroare === "neautentificat") {
     return { fel: "eroare", mesaj: "Google n-a confirmat conectarea. Încearcă din nou." };
   }
   if (eroare) return { fel: "eroare", mesaj: "Conectarea cu Google n-a mers. Încearcă din nou." };
 
-  const cod = intors.searchParams.get("cod");
+  const cod = param("cod");
   if (!cod) return { fel: "eroare", mesaj: "Răspuns neașteptat de la server." };
 
   try {
