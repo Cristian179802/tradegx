@@ -8,6 +8,7 @@ import { ProvizorAuth, useAuth } from "../src/lib/auth";
 import { BaraFile } from "../src/ui/BaraFile";
 import { T } from "../src/theme";
 import { useFonturi } from "../src/lib/fonturi";
+import { ProvizorLimba, useLimba } from "../src/lib/i18n";
 
 // ── Rădăcina aplicației ──────────────────────────────────────────────────────
 //
@@ -44,6 +45,7 @@ function Poarta({ children }: { children: React.ReactNode }) {
   // Fonturile de brand se încarcă din pachet. Până sunt gata NU desenăm text:
   // altfel primul cadru apare cu fontul telefonului și sare vizibil la schimb.
   const fonturiGata = useFonturi();
+  const { gata: limbaGata } = useLimba();
   const segmente = useSegments();
   const router = useRouter();
 
@@ -58,7 +60,7 @@ function Poarta({ children }: { children: React.ReactNode }) {
 
   // Cât timp nu știm dacă e cineva conectat, nu arătăm NICIUN ecran. O clipire
   // de login pentru cineva conectat de trei săptămâni e o scăpare vizibilă.
-  if (!pornit || !fonturiGata) {
+  if (!pornit || !fonturiGata || !limbaGata) {
     return (
       <View style={{ flex: 1, backgroundColor: T.surface.s0, alignItems: "center", justifyContent: "center" }}>
         <ActivityIndicator color={T.accent.base} />
@@ -79,6 +81,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StatusBar style="light" />
+        <ProvizorLimba>
         <ProvizorAuth>
           <Poarta>
             <Stack
@@ -96,6 +99,7 @@ export default function RootLayout() {
             </Stack>
           </Poarta>
         </ProvizorAuth>
+        </ProvizorLimba>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

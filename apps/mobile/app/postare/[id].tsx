@@ -4,10 +4,10 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from "react-native";
+import { Text } from "../../src/ui/Text";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -19,6 +19,7 @@ import { Reveal } from "../../src/ui/Reveal";
 import { Ecran } from "../../src/ui/Ecran";
 import { Gol, Insigna } from "../../src/ui/parti";
 import { T, ATINGERE_MIN } from "../../src/theme";
+import { tr } from "../../src/lib/i18n";
 
 // ── Firul unei postări ───────────────────────────────────────────────────────
 //
@@ -141,7 +142,7 @@ export default function FirPostare() {
                 disabled={text.trim().length < 2 || trimite}
                 style={[st.trimite, (text.trim().length < 2 || trimite) && st.inert]}
                 accessibilityRole="button"
-                accessibilityLabel="Trimite comentariul"
+                accessibilityLabel={tr("Trimite comentariul")}
               >
                 <Ionicons name="arrow-up" size={18} color="#ffffff" />
               </Pressable>

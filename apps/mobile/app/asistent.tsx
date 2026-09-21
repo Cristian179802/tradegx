@@ -6,10 +6,10 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from "react-native";
+import { Text } from "../src/ui/Text";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,6 +21,7 @@ import { Buton } from "../src/ui/Buton";
 import { AntetEcran } from "../src/ui/Ecran";
 import { Insigna } from "../src/ui/parti";
 import { T, ATINGERE_MIN } from "../src/theme";
+import { tr } from "../src/lib/i18n";
 
 // ── Asistent AI ──────────────────────────────────────────────────────────────
 //
@@ -115,7 +116,7 @@ export default function Asistent() {
                 }}
                 style={st.sterge}
                 accessibilityRole="button"
-                accessibilityLabel="Golește conversația"
+                accessibilityLabel={tr("Golește conversația")}
                 hitSlop={8}
               >
                 <Ionicons name="trash-outline" size={15} color={T.ink.i3} />

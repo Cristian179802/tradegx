@@ -1,5 +1,7 @@
 import * as React from "react";
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { tr } from "../src/lib/i18n";
+import { Text } from "../src/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -105,7 +107,7 @@ export default function Alerte() {
                 onPress={citesteTot}
                 style={st.actiune}
                 accessibilityRole="button"
-                accessibilityLabel="Marchează toate ca citite"
+                accessibilityLabel={tr("Marchează toate ca citite")}
                 hitSlop={8}
               >
                 <Ionicons name="checkmark-done" size={17} color={T.ink.i3} />

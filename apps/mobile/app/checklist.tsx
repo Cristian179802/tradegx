@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { tr } from "../src/lib/i18n";
+import { Text } from "../src/ui/Text";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -138,7 +140,7 @@ export default function Checklist() {
             onPress={reseteaza}
             style={st.reset}
             accessibilityRole="button"
-            accessibilityLabel="Resetează bifele"
+            accessibilityLabel={tr("Resetează bifele")}
             hitSlop={8}
           >
             <Ionicons name="refresh" size={16} color={T.ink.i3} />

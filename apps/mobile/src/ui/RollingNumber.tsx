@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Animated, Easing, StyleSheet, Text, View, type TextStyle } from "react-native";
+import { Animated, Easing, StyleSheet, View, type TextStyle } from "react-native";
+import { Text } from "./Text";
 import { T, cifre } from "../theme";
 import { familieCifre } from "../lib/fonturi";
 

@@ -1,5 +1,6 @@
 import * as React from "react";
-import { InteractionManager, Pressable, StyleSheet, Text, View } from "react-native";
+import { InteractionManager, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "../src/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { riskOfRuin } from "@tradegx/core";

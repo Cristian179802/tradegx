@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Switch, View } from "react-native";
+import { tr } from "../src/lib/i18n";
+import { Text } from "../src/ui/Text";
 import { useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
@@ -616,11 +618,11 @@ export default function Profil() {
                     return;
                   }
                   Alert.alert(
-                    "Ultima confirmare",
-                    "Contul și tot ce conține dispar acum. Sigur?",
+                    tr("Ultima confirmare"),
+                    tr("Contul și tot ce conține dispar acum. Sigur?"),
                     [
-                      { text: "Renunț", style: "cancel" },
-                      { text: "Șterge", style: "destructive", onPress: () => void stergeContul() },
+                      { text: tr("Renunț"), style: "cancel" },
+                      { text: tr("Șterge"), style: "destructive", onPress: () => void stergeContul() },
                     ],
                   );
                 }}
@@ -743,7 +745,7 @@ function DoiFactori({
         }}
         style={st.cheie}
         accessibilityRole="button"
-        accessibilityLabel="Copiază cheia"
+        accessibilityLabel={tr("Copiază cheia")}
       >
         <Text style={st.textCheie} selectable>{secret}</Text>
         <Ionicons name="copy-outline" size={15} color={T.ink.i3} />

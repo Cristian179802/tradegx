@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { tr } from "../src/lib/i18n";
+import { Text } from "../src/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -321,7 +323,7 @@ function DialogPraguri({
                 <Text style={st.subFoaie}>acum {numar(pretCurent, 5)}</Text>
               ) : null}
             </View>
-            <Pressable onPress={onInchide} hitSlop={10} accessibilityRole="button" accessibilityLabel="Închide">
+            <Pressable onPress={onInchide} hitSlop={10} accessibilityRole="button" accessibilityLabel={tr("Închide")}>
               <Ionicons name="close" size={20} color={T.ink.i3} />
             </Pressable>
           </View>
@@ -350,7 +352,7 @@ function DialogPraguri({
                 onPress={() => sugereaza("peste")}
                 style={st.sugestie}
                 accessibilityRole="button"
-                accessibilityLabel="Sugerează prag peste"
+                accessibilityLabel={tr("Sugerează prag peste")}
               >
                 <Text style={st.textSugestie}>+0,5%</Text>
               </Pressable>
@@ -369,7 +371,7 @@ function DialogPraguri({
                 onPress={() => sugereaza("sub")}
                 style={st.sugestie}
                 accessibilityRole="button"
-                accessibilityLabel="Sugerează prag sub"
+                accessibilityLabel={tr("Sugerează prag sub")}
               >
                 <Text style={st.textSugestie}>−0,5%</Text>
               </Pressable>

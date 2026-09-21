@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { tr } from "../../src/lib/i18n";
+import { Text } from "../../src/ui/Text";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -191,10 +193,10 @@ export default function EditareTranzactie() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     Alert.alert(
       `Ștergi ${t.symbol}?`,
-      "Dispare din jurnal împreună cu nota scrisă la ea, și iese din toate statisticile. Nu se poate anula.",
+      tr("Dispare din jurnal împreună cu nota scrisă la ea, și iese din toate statisticile. Nu se poate anula."),
       [
-        { text: "Păstrează", style: "cancel" },
-        { text: "Șterge", style: "destructive", onPress: stergeAcum },
+        { text: tr("Păstrează"), style: "cancel" },
+        { text: tr("Șterge"), style: "destructive", onPress: stergeAcum },
       ],
     );
   }

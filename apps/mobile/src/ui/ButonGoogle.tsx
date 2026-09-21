@@ -1,5 +1,6 @@
 import * as React from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import Svg, { Path } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { T, ATINGERE_MIN } from "../theme";

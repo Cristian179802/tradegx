@@ -5,9 +5,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "../../src/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
@@ -18,6 +18,7 @@ import { URL_API } from "../../src/lib/api";
 import { Card } from "../../src/ui/Card";
 import { Reveal } from "../../src/ui/Reveal";
 import { T, ATINGERE_MIN } from "../../src/theme";
+import { tr } from "../../src/lib/i18n";
 
 // ── Setări ───────────────────────────────────────────────────────────────────
 //
@@ -48,11 +49,11 @@ export default function Setari() {
   const confirmaIesirea = React.useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     Alert.alert(
-      "Ieși din cont?",
-      "Va trebui să te autentifici din nou pe telefonul ăsta.",
+      tr("Ieși din cont?"),
+      tr("Va trebui să te autentifici din nou pe telefonul ăsta."),
       [
-        { text: "Rămân", style: "cancel" },
-        { text: "Ieși", style: "destructive", onPress: () => void deconecteaza() },
+        { text: tr("Rămân"), style: "cancel" },
+        { text: tr("Ieși"), style: "destructive", onPress: () => void deconecteaza() },
       ],
     );
   }, [deconecteaza]);

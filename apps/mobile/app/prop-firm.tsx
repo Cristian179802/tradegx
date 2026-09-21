@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { tr } from "../src/lib/i18n";
+import { Text } from "../src/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api, ApiError } from "../src/lib/api";
@@ -362,7 +364,7 @@ function CardChallenge({ cont, onSchimbat }: { cont: Cont; onSchimbat: () => voi
           onPress={() => { Haptics.selectionAsync().catch(() => {}); setEditeaza(true); }}
           style={st.randEditare}
           accessibilityRole="button"
-          accessibilityLabel="Schimbă regulile firmei"
+          accessibilityLabel={tr("Schimbă regulile firmei")}
           hitSlop={6}
         >
           <Ionicons name="create-outline" size={13} color={T.ink.i4} />

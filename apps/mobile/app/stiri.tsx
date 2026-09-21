@@ -1,5 +1,6 @@
 import * as React from "react";
-import { FlatList, Linking, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { FlatList, Linking, RefreshControl, StyleSheet, View } from "react-native";
+import { Text } from "../src/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";

@@ -1,5 +1,6 @@
 import * as React from "react";
-import { StyleSheet, Text, View, type TextStyle } from "react-native";
+import { StyleSheet, View, type TextStyle } from "react-native";
+import { Text } from "./Text";
 import { T } from "../theme";
 
 // ── Textul unei lecții ───────────────────────────────────────────────────────

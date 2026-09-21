@@ -1,11 +1,14 @@
 import * as React from "react";
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "../../src/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { api } from "../../src/lib/api";
 import { useCerere } from "../../src/lib/useCerere";
 import { useAuth } from "../../src/lib/auth";
+import { useLimba } from "../../src/lib/i18n";
 import { bani, baniScurt, procent, numar, candva } from "../../src/lib/format";
 import { Buton } from "../../src/ui/Buton";
 import { Card } from "../../src/ui/Card";
@@ -62,6 +65,21 @@ interface Tranzactie {
 export default function Acasa() {
   const router = useRouter();
   const { utilizator } = useAuth();
+  const { limba, seteaza } = useLimba();
+
+  // Comutatorul de limbă. Două limbi, deci o apăsare comută — un meniu pentru
+  // două opțiuni e un clic în plus degeaba.
+  //
+  // Salvăm ȘI pe server, în tăcere: site-ul și emailurile trebuie să fie în
+  // aceeași limbă ca aplicația. Dacă cererea eșuează, aplicația rămâne oricum
+  // schimbată — preferința e deja pe telefon, iar serverul se aliniază data
+  // viitoare când se salvează profilul.
+  const comutaLimba = () => {
+    const noua = limba === "RO" ? "EN" : "RO";
+    Haptics.selectionAsync().catch(() => {});
+    seteaza(noua);
+    api.utilizator.salveazaSetari({ language: noua }).catch(() => {});
+  };
 
   const spark = useCerere<Spark>(() => api.equitySpark() as Promise<Spark>);
   const analiza = useCerere<Analiza>(() => api.analytics.overview() as Promise<Analiza>);
@@ -128,9 +146,22 @@ export default function Acasa() {
                 </Text>
               </View>
 
-              <View style={st.bulaOra}>
-                <Ionicons name="time-outline" size={12} color={T.ink.i3} />
-                <Text style={st.textOra}>{ora}</Text>
+              <View style={st.bule}>
+                <Pressable
+                  onPress={comutaLimba}
+                  style={st.bulaLimba}
+                  accessibilityRole="button"
+                  accessibilityLabel={limba === "RO" ? "Schimbă în engleză" : "Switch to Romanian"}
+                  hitSlop={6}
+                >
+                  <Ionicons name="language-outline" size={12} color={T.ink.i3} />
+                  <Text style={st.textLimba}>{limba}</Text>
+                </Pressable>
+
+                <View style={st.bulaOra}>
+                  <Ionicons name="time-outline" size={12} color={T.ink.i3} />
+                  <Text style={st.textOra}>{ora}</Text>
+                </View>
               </View>
             </View>
           </Reveal>
@@ -370,6 +401,23 @@ const st = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: T.spacing.md,
+  },
+  bule: { flexDirection: "row", alignItems: "center", gap: 6 },
+  bulaLimba: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: T.spacing.sm,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: T.surface.s2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: T.line.l1,
+  },
+  textLimba: {
+    color: T.ink.i2,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_700Bold",
   },
   bulaOra: {
     flexDirection: "row",

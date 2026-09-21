@@ -70,6 +70,15 @@ async function cuSelectorNativ(): Promise<Rezultat | { fel: "neconfigurat" }> {
     GoogleSignin.configure({ webClientId: ID_CLIENT_WEB, offlineAccess: false });
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
 
+    // ÎNTOTDEAUNA întrebăm cu ce cont. Fără asta, Google ține minte ultima
+    // alegere și te bagă direct în ea — ceea ce pe un ECRAN DE LOGIN e greșit:
+    // acolo ajungi tocmai când vrei să alegi, iar cine are un cont personal și
+    // unul de firmă n-ar avea nicio cale să treacă de la unul la altul.
+    //
+    // `signOut` șterge doar sesiunea Google DIN APLICAȚIA NOASTRĂ. Contul rămâne
+    // pe telefon, în Google, neatins — nu deconectăm pe nimeni de nicăieri.
+    await GoogleSignin.signOut().catch(() => {});
+
     const raspuns = await GoogleSignin.signIn();
     const idToken =
       (raspuns as { data?: { idToken?: string | null } }).data?.idToken ??

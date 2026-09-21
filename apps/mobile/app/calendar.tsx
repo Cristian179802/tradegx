@@ -1,5 +1,6 @@
 import * as React from "react";
-import { SectionList, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { SectionList, RefreshControl, StyleSheet, View } from "react-native";
+import { Text } from "../src/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { api } from "../src/lib/api";
 import { useCerere } from "../src/lib/useCerere";

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Text } from "../src/ui/Text";
 import { api } from "../src/lib/api";
 import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";

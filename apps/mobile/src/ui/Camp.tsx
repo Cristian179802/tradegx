@@ -2,13 +2,14 @@ import * as React from "react";
 import {
   Animated,
   StyleSheet,
-  Text,
   TextInput,
   View,
   type KeyboardTypeOptions,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { Text } from "./Text";
+import { useT } from "../lib/i18n";
 import { T, ATINGERE_MIN, cifre } from "../theme";
 
 // ── Câmp de introducere ──────────────────────────────────────────────────────
@@ -61,6 +62,7 @@ export function Camp({
   multilinie = false,
   randuri = 4,
 }: CampProps) {
+  const t = useT();
   const [focalizat, setFocalizat] = React.useState(false);
   const p = React.useRef(new Animated.Value(0)).current;
 
@@ -95,7 +97,7 @@ export function Camp({
         <TextInput
           value={valoare}
           onChangeText={onChange}
-          placeholder={placeholder}
+          placeholder={placeholder ? t(placeholder) : undefined}
           placeholderTextColor={T.ink.i4}
           secureTextEntry={secret}
           keyboardType={tastatura ?? (numeric ? "decimal-pad" : "default")}

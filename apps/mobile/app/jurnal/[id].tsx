@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { tr } from "../../src/lib/i18n";
+import { Text } from "../../src/ui/Text";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -169,8 +171,8 @@ export default function EditorJurnal() {
     } catch (e) {
       if (e instanceof ApiError && e.status === 402) {
         Alert.alert(
-          "Analiza AI e în planul PRO",
-          "Abonamentul se gestionează pe site, din meniul „Mai mult”.",
+          tr("Analiza AI e în planul PRO"),
+          tr("Abonamentul se gestionează pe site, din meniul „Mai mult”."),
         );
       } else {
         setEroare(e instanceof ApiError ? e.message : "Analiza nu a pornit.");

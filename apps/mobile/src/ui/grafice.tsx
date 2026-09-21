@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import Svg, { Defs, LinearGradient, Line, Path, Rect, Stop } from "react-native-svg";
 import { T, tonPnl } from "../theme";
 import type { DiagramDef } from "../lib/academia";

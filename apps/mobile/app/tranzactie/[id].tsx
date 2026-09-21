@@ -4,9 +4,9 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "../../src/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,6 +16,7 @@ import { api } from "../../src/lib/api";
 import { useCerere } from "../../src/lib/useCerere";
 import { bani, numar, dataScurta } from "../../src/lib/format";
 import { Image } from "react-native";
+import { tr } from "../../src/lib/i18n";
 import { Card } from "../../src/ui/Card";
 import { Buton } from "../../src/ui/Buton";
 import { alegeImagine } from "../../src/lib/fisiere";
@@ -103,7 +104,7 @@ export default function DetaliuTranzactie() {
             onPress={() => { Haptics.selectionAsync().catch(() => {}); router.back(); }}
             style={st.inapoi}
             accessibilityRole="button"
-            accessibilityLabel="Înapoi"
+            accessibilityLabel={tr("Înapoi")}
           >
             <Ionicons name="chevron-back" size={24} color={T.ink.i1} />
           </Pressable>
@@ -118,7 +119,7 @@ export default function DetaliuTranzactie() {
               }}
               style={st.inapoi}
               accessibilityRole="button"
-              accessibilityLabel="Editează tranzacția"
+              accessibilityLabel={tr("Editează tranzacția")}
             >
               <Ionicons name="create-outline" size={21} color={T.accent.base} />
             </Pressable>
@@ -360,7 +361,7 @@ function Capturi({ tradeId }: { tradeId: string }) {
               key={x.id}
               onLongPress={() => sterge(x.id)}
               accessibilityRole="button"
-              accessibilityLabel="Apasă lung ca să ștergi captura"
+              accessibilityLabel={tr("Apasă lung ca să ștergi captura")}
             >
               <Image source={{ uri: x.url }} style={st.captura} resizeMode="cover" />
             </Pressable>

@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Animated, PanResponder, StyleSheet, Text, View } from "react-native";
+import { Animated, PanResponder, StyleSheet, View } from "react-native";
+import { Text } from "./Text";
 import Svg, { Line, Path, Rect, Text as SvgText } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { T } from "../theme";

@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { tr } from "../../src/lib/i18n";
+import { Text } from "../../src/ui/Text";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -115,11 +117,11 @@ export default function Backtesting() {
     } catch (e) {
       if (e instanceof ApiError && e.status === 402) {
         Alert.alert(
-          "Ai terminat backtestele lunii",
-          "Planul gratuit include trei backteste pe lună. Abonamentul se gestionează pe site.",
+          tr("Ai terminat backtestele lunii"),
+          tr("Planul gratuit include trei backteste pe lună. Abonamentul se gestionează pe site."),
           [
-            { text: "Mai târziu", style: "cancel" },
-            { text: "Vezi planurile", onPress: () => router.push("/abonament") },
+            { text: tr("Mai târziu"), style: "cancel" },
+            { text: tr("Vezi planurile"), onPress: () => router.push("/abonament") },
           ],
         );
       } else {
@@ -148,7 +150,7 @@ export default function Backtesting() {
             }}
             style={st.butonNou}
             accessibilityRole="button"
-            accessibilityLabel="Strategie nouă"
+            accessibilityLabel={tr("Strategie nouă")}
             hitSlop={8}
           >
             <Ionicons name="add" size={19} color={T.accent.base} />
@@ -264,7 +266,7 @@ function CardStrategie({
           onPress={() => onVeziUltimul(ultim.id)}
           style={st.ultim}
           accessibilityRole="button"
-          accessibilityLabel="Vezi ultimul rezultat"
+          accessibilityLabel={tr("Vezi ultimul rezultat")}
         >
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={st.etichetaUltim}>ULTIMA RULARE · {candva(ultim.createdAt)}</Text>

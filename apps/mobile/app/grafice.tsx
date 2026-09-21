@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { tr } from "../src/lib/i18n";
+import { Text } from "../src/ui/Text";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -304,10 +306,10 @@ export default function Grafice() {
             <Segmente valori={MODURI} valoare={mod} onSchimba={setMod} eticheta="Unealtă" style={st.segmenteUnelte} />
             {areDesene ? (
               <View style={st.butoaneSterg}>
-                <Pressable onPress={stergeUltimul} style={st.butonSterg} accessibilityRole="button" accessibilityLabel="Șterge ultimul desen">
+                <Pressable onPress={stergeUltimul} style={st.butonSterg} accessibilityRole="button" accessibilityLabel={tr("Șterge ultimul desen")}>
                   <Ionicons name="arrow-undo-outline" size={15} color={T.ink.i3} />
                 </Pressable>
-                <Pressable onPress={stergeTot} style={st.butonSterg} accessibilityRole="button" accessibilityLabel="Șterge toate desenele">
+                <Pressable onPress={stergeTot} style={st.butonSterg} accessibilityRole="button" accessibilityLabel={tr("Șterge toate desenele")}>
                   <Ionicons name="trash-outline" size={15} color={T.pnl.loss} />
                 </Pressable>
               </View>

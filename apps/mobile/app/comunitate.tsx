@@ -5,9 +5,9 @@ import {
   Pressable,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "../src/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,6 +23,7 @@ import { Schelet } from "../src/ui/Schelet";
 import { AntetEcran, SPATIU_BARA } from "../src/ui/Ecran";
 import { Insigna, Segmente } from "../src/ui/parti";
 import { T, ATINGERE_MIN } from "../src/theme";
+import { tr } from "../src/lib/i18n";
 
 // ── Comunitate ───────────────────────────────────────────────────────────────
 //
@@ -184,7 +185,7 @@ function Postari({
             }}
             style={st.actiune}
             accessibilityRole="button"
-            accessibilityLabel="Scrie o postare"
+            accessibilityLabel={tr("Scrie o postare")}
             hitSlop={8}
           >
             <Ionicons name="create-outline" size={17} color={T.accent.base} />
@@ -450,7 +451,7 @@ function DialogPostare({
 
           <View style={st.antetFoaie}>
             <Text style={st.titluFoaie}>Scrie o postare</Text>
-            <Pressable onPress={onInchide} hitSlop={10} accessibilityRole="button" accessibilityLabel="Închide">
+            <Pressable onPress={onInchide} hitSlop={10} accessibilityRole="button" accessibilityLabel={tr("Închide")}>
               <Ionicons name="close" size={20} color={T.ink.i3} />
             </Pressable>
           </View>

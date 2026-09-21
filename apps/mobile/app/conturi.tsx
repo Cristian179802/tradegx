@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { tr } from "../src/lib/i18n";
+import { Text } from "../src/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api, ApiError } from "../src/lib/api";
@@ -111,7 +113,7 @@ export default function Conturi() {
             onPress={sincronizeazaAcum}
             style={st.actiune}
             accessibilityRole="button"
-            accessibilityLabel="Sincronizează cu brokerul"
+            accessibilityLabel={tr("Sincronizează cu brokerul")}
             accessibilityState={{ busy: sincronizeaza }}
             hitSlop={8}
           >
