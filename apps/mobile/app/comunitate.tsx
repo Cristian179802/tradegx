@@ -30,14 +30,14 @@ import { T, ATINGERE_MIN } from "../src/theme";
 // șase secțiuni pe telefon e o comunitate pe care nimeni n-o citește.
 //
 // ECRANUL SE EXPLICĂ PE SINE. Prima versiune arăta o listă goală și o
-// propoziție („fii primul care scrie ceva"), ceea ce presupunea că omul știe
+// propoziție („fii primul care scrie ceva”), ceea ce presupunea că omul știe
 // deja unde a ajuns. Nu știa: ce e locul ăsta, cu cine vorbesc, ce sunt
 // echipele, de ce aș scrie. O comunitate goală care nu se prezintă arată ca o
 // funcție stricată.
 //
 // De aceea cardul de deschidere spune ce e, iar sugestiile de postare sunt
 // CONCRETE — se apasă și deschid compunerea cu titlul pus. Un câmp gol și
-// „scrie ceva" e cea mai sigură cale spre zero postări.
+// „scrie ceva” e cea mai sigură cale spre zero postări.
 //
 // REACȚIILE SE APLICĂ INSTANT, local, și abia apoi pleacă spre server. La o
 // atingere pe un emoji, o rotiță de o secundă ar face gestul să pară stricat.
@@ -329,7 +329,7 @@ function CardPostare({
  * Ce e locul ăsta.
  *
  * Apare când nu există nicio postare — adică exact când cineva are cea mai
- * mare nevoie să afle unde a ajuns. O stare goală care spune doar „fii primul"
+ * mare nevoie să afle unde a ajuns. O stare goală care spune doar „fii primul”
  * presupune că omul știe deja ce e comunitatea, cu cine vorbește și ce câștigă
  * dacă scrie.
  */

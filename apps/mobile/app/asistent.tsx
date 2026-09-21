@@ -26,15 +26,15 @@ import { T, ATINGERE_MIN } from "../src/theme";
 //
 // Asistentul are acces la statisticile contului, deci întrebările utile sunt
 // despre TINE, nu despre piață. De aceea sugestiile de start sunt formulate la
-// persoana întâi: cine deschide un chat gol scrie „salut" și închide.
+// persoana întâi: cine deschide un chat gol scrie „salut” și închide.
 //
 // LISTA E INVERSATĂ (`inverted`), nu derulată la final cu un truc. Cu
 // `inverted`, mesajul nou apare de jos fără niciun salt, iar derularea în sus
 // prin istoric e naturală. Alternativa — `scrollToEnd` după fiecare răspuns —
 // sare vizibil și se ceartă cu tastatura.
 //
-// LIMITELE SE EXPLICĂ, nu se ascund: 402 înseamnă „nu e în planul tău", 429
-// înseamnă „ai consumat cota". Două lucruri complet diferite, pe care un text
+// LIMITELE SE EXPLICĂ, nu se ascund: 402 înseamnă „nu e în planul tău”, 429
+// înseamnă „ai consumat cota”. Două lucruri complet diferite, pe care un text
 // generic de eroare le-ar amesteca.
 //
 // Conversația NU se salvează. E o alegere: sesiunea ține cât ecranul. Un

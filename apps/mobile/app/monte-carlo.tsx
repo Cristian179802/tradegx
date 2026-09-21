@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { monteCarlo, type RezultatMonteCarlo } from "@tradegx/core";
 import { api } from "../src/lib/api";
+import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
 import { numar, procent } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
@@ -22,7 +23,7 @@ import { T, cifre, tonPnl } from "../src/theme";
 // prezice nimic: arată câte dintre viețile alternative ale acelorași tranzacții
 // ajung la țintă și câte ard contul înainte.
 //
-// Bucla stă în `@tradegx/core`, aceeași ca pe web. Cifra „12% șanse de ruină"
+// Bucla stă în `@tradegx/core`, aceeași ca pe web. Cifra „12% șanse de ruină”
 // trebuie să fie identică pe telefon și pe desktop; două implementări s-ar fi
 // depărtat la prima corectură.
 //
@@ -58,6 +59,7 @@ const PIERDERI = [
 ] as const;
 
 export default function MonteCarlo() {
+  const router = useRouter();
   const [latime, laMasurare] = useLatime();
   const [tranzactii, setTranzactii] = React.useState<string>("40");
   const [tinta, setTinta] = React.useState<string>("10");
@@ -127,7 +129,14 @@ export default function MonteCarlo() {
         <Gol
           iconita="dice-outline"
           titlu="Prea puține tranzacții"
-          text="Simularea are nevoie de cel puțin zece tranzacții închise. Sub atât, rezultatul ar descrie mai mult norocul decât metoda."
+          text="Simularea reeșantionează randamentele TALE, deci are nevoie de cel puțin zece tranzacții închise. Sub atât, rezultatul ar descrie norocul, nu metoda."
+          actiune={
+            <Buton
+              eticheta="Adaugă o tranzacție"
+              onPress={() => router.push("/(tabs)/adauga")}
+              iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+            />
+          }
         />
       ) : (
         <>

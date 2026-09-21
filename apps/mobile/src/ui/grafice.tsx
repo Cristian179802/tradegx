@@ -15,7 +15,7 @@ const RectAnimat = Animated.createAnimatedComponent(Rect);
 // de configurare între mine și pixeli.
 //
 // REGULA DE CULOARE, aceeași ca pe web: verde și roșu NUMAI pentru P&L. Un
-// grafic de rată de câștig e pe accent, chiar dacă „ar merge" verde — altfel
+// grafic de rată de câștig e pe accent, chiar dacă „ar merge” verde — altfel
 // ochiul învață că verde înseamnă bine, apoi vede verde pe o pierdere și nu
 // mai crede niciuna.
 //
@@ -290,7 +290,7 @@ export function Con({
   return (
     <Animated.View style={{ opacity: p }}>
       <Svg width={latime} height={inaltime}>
-        {/* Două benzi, nu cinci linii: ochiul citește „cât de larg e viitorul",
+        {/* Două benzi, nu cinci linii: ochiul citește „cât de larg e viitorul”,
             nu cinci curbe pe care le-ar compara una cu alta. */}
         <Path d={forme.larga} fill={T.accent.base} opacity={0.1} />
         <Path d={forme.stramta} fill={T.accent.base} opacity={0.18} />

@@ -25,7 +25,7 @@ import { T, umbra } from "../theme";
 //   3. muchia de sus se aprinde
 //
 // Plus o bătaie haptică foarte scurtă. Detaliul ăsta e ce separă o aplicație
-// care „răspunde" de una care se simte moartă în mână.
+// care „răspunde” de una care se simte moartă în mână.
 //
 // Fără `onPress`, cardul e doar suprafață: nu se apasă, nu vibrează, nu
 // pretinde că e buton. Un card care arată apăsabil fără să facă nimic e o

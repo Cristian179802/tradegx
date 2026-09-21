@@ -24,8 +24,8 @@ import { T, ATINGERE_MIN } from "../../src/theme";
 // nu-l caută — închide aplicația. De aceea fiecare termen scris `[[așa]]` în
 // lecții se poate apăsa și ajunge AICI, deschis.
 //
-// CĂUTAREA PRINDE ȘI SINONIMELE. Cineva care caută „SL" trebuie să găsească
-// „Stop Loss"; un glosar care cere termenul exact e un dicționar pentru cine
+// CĂUTAREA PRINDE ȘI SINONIMELE. Cineva care caută „SL” trebuie să găsească
+// „Stop Loss”; un glosar care cere termenul exact e un dicționar pentru cine
 // știe deja cuvântul.
 //
 // Termenul venit din lecție sare în capul listei și rămâne evidențiat, ca ochiul

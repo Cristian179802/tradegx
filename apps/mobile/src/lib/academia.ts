@@ -8,7 +8,7 @@ import { api } from "./api";
 // descarcă de fiecare dată când deschizi aplicația în metrou, iar o lecție
 // citită ieri trebuie să se deschidă și fără semnal.
 //
-// STRATEGIA E „ARATĂ ÎNTÂI CE AI". La deschidere se afișează imediat versiunea
+// STRATEGIA E „ARATĂ ÎNTÂI CE AI”. La deschidere se afișează imediat versiunea
 // salvată, iar în fundal se întreabă serverul dacă are alta. Când are, se
 // înlocuiește. Alternativa — schelet până vine răspunsul — ar fi însemnat două
 // secunde de ecran gol pentru conținut pe care îl aveam deja pe disc.

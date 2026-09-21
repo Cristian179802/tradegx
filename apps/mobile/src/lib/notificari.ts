@@ -79,7 +79,7 @@ export async function inregistreazaNotificari(): Promise<string | null> {
     await api.push.register(token, Platform.OS);
     return token;
   } catch {
-    // Orice eșec aici înseamnă doar „fără notificări", niciodată „aplicație
+    // Orice eșec aici înseamnă doar „fără notificări”, niciodată „aplicație
     // stricată".
     return null;
   }

@@ -26,7 +26,7 @@ import { T } from "../src/theme";
 // graficele și sursele lui.
 //
 // Titlurile rămân în engleză, cum vin din flux. Traducerea automată a unui
-// titlu financiar strică exact termenii după care se recunoaște: „hawkish" nu
+// titlu financiar strică exact termenii după care se recunoaște: „hawkish” nu
 // are un echivalent scurt care să însemne același lucru.
 
 interface Stire {

@@ -22,7 +22,7 @@ import { T } from "../src/theme";
 // tipuri diferite, dar ochiul are nevoie de un singur lucru: cât de urgent e.
 //
 // CITIREA E UN GEST, nu un buton. Apeși alerta, se marchează citită. Un buton
-// „marchează citit" pe fiecare rând ar fi însemnat două ținte de atingere pe
+// „marchează citit” pe fiecare rând ar fi însemnat două ținte de atingere pe
 // un rând de patru centimetri.
 //
 // Ștergerea cere apăsare LUNGĂ. Pe o listă în care degetul derulează repede, o

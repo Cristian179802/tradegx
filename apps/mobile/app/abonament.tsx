@@ -16,7 +16,7 @@ import { T, cifre } from "../src/theme";
 // ── Abonament ────────────────────────────────────────────────────────────────
 //
 // Ecranul ăsta e scris pentru cineva care a instalat aplicația și N-A VĂZUT
-// NICIODATĂ site-ul. Deci nu începe cu „alege un plan", ci cu ce e TradeGX și
+// NICIODATĂ site-ul. Deci nu începe cu „alege un plan”, ci cu ce e TradeGX și
 // ce primești — abia apoi prețurile, comparația completă și întrebările.
 //
 // TOT TEXTUL VINE DE LA SERVER (`/api/pricing`), din același dicționar ca

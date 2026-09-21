@@ -8,9 +8,9 @@ import { familieCifre } from "../lib/fonturi";
 // Portarea lui `<RollingNumber/>` din web: fiecare cifră e o coloană verticală
 // cu 0–9 care se rotește până la valoarea ei. Nu se interpolează VALOAREA
 // (1 → 2 → … → 186), se rotesc CIFRELE — diferența dintre „un număr apare pe
-// ecran" și „un aparat afișează o măsurătoare".
+// ecran" și „un aparat afișează o măsurătoare”.
 //
-// Primește un string DEJA formatat („+380.31 USD", „35.9%"), fiindcă
+// Primește un string DEJA formatat („+380.31 USD”, „35.9%”), fiindcă
 // formatarea ține de locale și de monedă, nu de animație. Se animă doar
 // caracterele 0–9; separatorii, moneda și semnele stau pe loc.
 //

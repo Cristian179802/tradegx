@@ -35,7 +35,7 @@ import { T, tonPnl } from "../src/theme";
 // CÂND NU SE POATE ȘTI, NU SE INVENTEAZĂ. `pipValue` întoarce `null` dacă îi
 // lipsește un curs (ex. EURGBP pe un cont în RON). Atunci ecranul CERE cursul —
 // și îl aduce singur de la aceeași rută de cotații pe care o folosește graficul.
-// Un „3.41 loturi" scos din burtă e mai periculos decât un câmp gol: omul îl
+// Un „3.41 loturi” scos din burtă e mai periculos decât un câmp gol: omul îl
 // trimite la broker.
 //
 // Prețul de intrare se prefilează cu cotația curentă, dar rămâne editabil: cine
@@ -236,7 +236,7 @@ export default function Calculator() {
                 Nu pot afla valoarea pipului pentru {s} într-un cont în {moneda}
                 {rezultat?.nevoie ? `, fiindcă îmi lipsește cursul ${rezultat.nevoie}` : ""}.
                 {"\n\n"}
-                Apasă „Preț" — îl aduc automat. Prefer să nu afișez nimic decât o
+                Apasă „Preț” — îl aduc automat. Prefer să nu afișez nimic decât o
                 cifră inventată pe care ai trimite-o la broker.
               </Text>
             </View>

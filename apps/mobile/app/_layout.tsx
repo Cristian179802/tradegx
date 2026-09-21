@@ -24,17 +24,17 @@ import { useFonturi } from "../src/lib/fonturi";
 // ecranele lasă loc dedesubt prin `SPATIU_BARA`.
 //
 // POARTA E INTERZISĂ IMPLICIT. Varianta veche enumera rutele DIN aplicație
-// („(tabs)" sau „tranzactie"); fiecare ecran nou uitat pe listă era o scurgere:
+// („(tabs)” sau „tranzactie”); fiecare ecran nou uitat pe listă era o scurgere:
 // conținut desenat înainte să se decidă dacă are voie. Acum se enumeră doar
 // ecranele publice — un ecran nou e protejat fără să facă nimeni nimic.
 //
 // TRANZIȚIILE. `animation: "slide_from_right"` pe stivă, ca pe Android nativ;
-// ecranul de login intră cu estompare, fiindcă nu vine „de undeva" — e o
+// ecranul de login intră cu estompare, fiindcă nu vine „de undeva” — e o
 // schimbare de stare, nu o navigare.
 
 /**
  * Rutele vizibile fără sesiune. Toate trei sunt lucruri pe care le face cineva
- * care N-ARE încă un cont — dacă poarta le-ar trimite la login, „Creează cont"
+ * care N-ARE încă un cont — dacă poarta le-ar trimite la login, „Creează cont”
  * ar duce înapoi la login, adică nicăieri.
  */
 const PUBLICE = ["login", "inregistrare", "parola-uitata"];

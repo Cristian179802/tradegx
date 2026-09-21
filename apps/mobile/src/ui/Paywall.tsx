@@ -10,7 +10,7 @@ import { T } from "../theme";
 //
 // Trei ecrane primesc 402 de la server (Edge Finder, Monte Carlo,
 // Instituțional). Fără un răspuns propriu, `useCerere` ar arăta textul crud al
-// erorii — „Această funcție necesită planul PRO" pe fundal roșu, ca o defecțiune.
+// erorii — „Această funcție necesită planul PRO” pe fundal roșu, ca o defecțiune.
 // Nu e defecțiune, e o ușă.
 //
 // BUTONUL DUCE ÎN ECRANUL DE ABONAMENT, nu în browser. Acolo sunt planurile,

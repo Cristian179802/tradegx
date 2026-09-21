@@ -297,6 +297,12 @@ export function createApiClient(config: ApiClientConfig = {}) {
 
     accounts: {
       list: () => request("/api/accounts"),
+      creeaza: (data: unknown) =>
+        request("/api/accounts", { method: "POST", body: json(data) }),
+      /** Acceptă orice câmp din `tradingAccountSchema`, parțial — inclusiv
+       *  `maxDailyLossPct` și `maxDrawdownPct`, limitele de risc pe cont. */
+      actualizeaza: (id: string, data: unknown) =>
+        request(`/api/accounts/${id}`, { method: "PATCH", body: json(data) }),
       active: () => request("/api/accounts/active"),
       /** `null` = vederea agregată pe toate conturile. */
       setActive: (accountId: string | null) =>

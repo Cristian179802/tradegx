@@ -7,6 +7,7 @@ import { api } from "../../src/lib/api";
 import { useCerere } from "../../src/lib/useCerere";
 import { useAuth } from "../../src/lib/auth";
 import { bani, baniScurt, procent, numar, candva } from "../../src/lib/format";
+import { Buton } from "../../src/ui/Buton";
 import { Card } from "../../src/ui/Card";
 import { RollingNumber } from "../../src/ui/RollingNumber";
 import { Sparkline } from "../../src/ui/Sparkline";
@@ -22,7 +23,7 @@ import { T, tonPnl, cifre } from "../../src/theme";
 //   2. cum a mers azi?    → P&L-ul zilei
 //   3. merge strategia?   → win rate, profit factor, câte tranzacții
 //
-// Sub ele, ultimele tranzacții — fiindcă „ce am făcut ultima dată" e
+// Sub ele, ultimele tranzacții — fiindcă „ce am făcut ultima dată” e
 // întrebarea a patra, și mereu aceeași.
 //
 // DOUĂ CERERI, nu șase. `equitySpark` dă sold + curbă + rezultatul zilei
@@ -82,6 +83,10 @@ export default function Acasa() {
 
   const ultimele = (lista.date?.trades ?? []).slice(0, 4);
 
+  // Cineva care tocmai a instalat aplicația n-are niciun cont. Serverul trimite
+  // `sold: null` fix pentru cazul ăsta, deci îl putem deosebi de un sold zero.
+  const faraCont = !seIncarca && sold == null;
+
   return (
     <View style={st.radacina}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
@@ -120,6 +125,22 @@ export default function Acasa() {
                 </View>
               )}
 
+              {faraCont ? (
+                <>
+                  <Text style={st.explicatie}>
+                    Nu ai încă niciun cont de tranzacționare. Contul e locul unde
+                    stau banii și de unde se calculează riscul pe fiecare intrare —
+                    fără el, aplicația n-are de la ce să pornească.
+                  </Text>
+                  <Buton
+                    eticheta="Adaugă primul cont"
+                    onPress={() => router.push("/cont-nou")}
+                    plin
+                    iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+                    style={{ marginTop: T.spacing.lg }}
+                  />
+                </>
+              ) : (
               <View style={st.randAzi}>
                 <View style={{ flex: 1 }}>
                   <Text style={st.eticheta}>Azi</Text>
@@ -149,6 +170,7 @@ export default function Acasa() {
                   />
                 )}
               </View>
+              )}
             </Card>
           </Reveal>
 
@@ -203,8 +225,19 @@ export default function Acasa() {
           ) : ultimele.length === 0 ? (
             <Card>
               <Text style={st.gol}>
-                Nicio tranzacție încă. Apasă „Adaugă" ca să notezi prima.
+                {faraCont
+                  ? "Aici vor apărea ultimele tranzacții, după ce adaugi un cont și notezi prima."
+                  : "Nicio tranzacție încă. Notează-ți intrările pe măsură ce le faci — din ele se calculează tot restul: rata de câștig, tiparele care merg și cele care te costă."}
               </Text>
+              {faraCont ? null : (
+                <Buton
+                  eticheta="Notează prima tranzacție"
+                  onPress={() => router.push("/(tabs)/adauga")}
+                  plin
+                  iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+                  style={{ marginTop: T.spacing.lg }}
+                />
+              )}
             </Card>
           ) : (
             ultimele.map((t, i) => (
@@ -390,6 +423,13 @@ const st = StyleSheet.create({
     color: T.accent.base, fontSize: 10, fontWeight: "800",
     fontFamily: "Inter_800ExtraBold",
     letterSpacing: T.tracking.wide,
+  },
+  explicatie: {
+    color: T.ink.i3,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 21,
+    marginTop: T.spacing.md,
   },
   gol: { color: T.ink.i3, fontSize: T.fontSize.sm, lineHeight: 20 , fontFamily: "Inter_400Regular" },
   eroare: {

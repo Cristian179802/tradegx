@@ -22,7 +22,7 @@ import { T } from "../src/theme";
 // ── Autentificare ────────────────────────────────────────────────────────────
 //
 // 2FA APARE DOAR CÂND E CERUT. Backend-ul răspunde cu `twoFARequired` la primul
-// pas; până atunci câmpul nu există. Un câmp „cod 2FA (opțional)" arătat tuturor
+// pas; până atunci câmpul nu există. Un câmp „cod 2FA (opțional)” arătat tuturor
 // îi face pe cei fără 2FA să creadă că au uitat ceva.
 //
 // Eroarea stă sub formular, nu într-un dialog: dialogul te scoate din context
@@ -53,7 +53,7 @@ export default function Login() {
       if (e instanceof EroareAuth) {
         if (e.cere2FA) {
           setCere2FA(true);
-          // Dacă abia acum cerem codul, mesajul „Cod 2FA necesar" nu e o eroare
+          // Dacă abia acum cerem codul, mesajul „Cod 2FA necesar” nu e o eroare
           // a omului — e următorul pas. Îl arătăm ca eroare doar dacă a încercat
           // deja un cod.
           setEroare(cod.trim() ? e.message : null);

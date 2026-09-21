@@ -17,7 +17,7 @@ import { T } from "../src/theme";
 // minte e mai rău decât niciunul.
 //
 // LIVRATE STAU PRIMELE și au numărul lor mare, sus. Cine deschide ecranul ăsta
-// întreabă de fapt „merită să am încredere în produsul ăsta" — iar răspunsul
+// întreabă de fapt „merită să am încredere în produsul ăsta” — iar răspunsul
 // nu e lista de promisiuni, e lista de lucruri deja făcute.
 //
 // Secțiunile se pot strânge. Douăzeci și șase de rânduri livrate sunt o dovadă

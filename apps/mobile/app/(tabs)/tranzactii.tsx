@@ -14,6 +14,7 @@ import * as Haptics from "expo-haptics";
 import { api } from "../../src/lib/api";
 import { useCerere } from "../../src/lib/useCerere";
 import { bani, candva } from "../../src/lib/format";
+import { Buton } from "../../src/ui/Buton";
 import { Card } from "../../src/ui/Card";
 import { Reveal } from "../../src/ui/Reveal";
 import { Schelet } from "../../src/ui/Schelet";
@@ -119,11 +120,20 @@ export default function Tranzactii() {
               <Card style={{ marginTop: T.spacing.lg }}>
                 <Text style={st.gol}>
                   {filtru === "deschise"
-                    ? "Nicio poziție deschisă acum."
+                    ? "Nicio poziție deschisă acum. Aici apar tranzacțiile cât timp sunt în piață, cu profitul care se mișcă."
                     : filtru === "inchise"
-                      ? "Nicio tranzacție închisă încă."
-                      : "Nicio tranzacție. Apasă „Adaugă” ca să notezi prima."}
+                      ? "Nicio tranzacție închisă încă. Aici ajung după ce le închizi, cu rezultatul final și nota ta."
+                      : "Jurnalul tău de tranzacții. Notezi fiecare intrare — simbol, direcție, stop, rezultat — și din ele se calculează statisticile, tiparele și raportul lunar. Fără intrări notate, restul aplicației n-are ce analiza."}
                 </Text>
+                {toate.length === 0 ? (
+                  <Buton
+                    eticheta="Notează prima tranzacție"
+                    onPress={() => router.push("/(tabs)/adauga")}
+                    plin
+                    iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+                    style={{ marginTop: T.spacing.lg }}
+                  />
+                ) : null}
               </Card>
             }
             renderItem={({ item, index }) => (

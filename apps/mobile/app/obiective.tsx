@@ -23,12 +23,12 @@ import { T, tonPnl } from "../src/theme";
 // vrea să știe unde e, nu să-și reciteasca obiectivele — pe acelea le-a scris o
 // dată.
 //
-// O ȚINTĂ GOALĂ ÎNSEAMNĂ „nu mă interesează", nu zero. De aceea câmpul gol se
+// O ȚINTĂ GOALĂ ÎNSEAMNĂ „nu mă interesează”, nu zero. De aceea câmpul gol se
 // trimite ca `null`, iar cardul dispare din progres. Un obiectiv de 0% rată de
 // câștig, atins mereu, ar fi o batjocură.
 //
-// Zilele rămase din lună sunt afișate lângă profit: „mai ai 1.200 de făcut" nu
-// înseamnă nimic fără „în patru zile".
+// Zilele rămase din lună sunt afișate lângă profit: „mai ai 1.200 de făcut” nu
+// înseamnă nimic fără „în patru zile”.
 
 interface Obiective {
   targets: {

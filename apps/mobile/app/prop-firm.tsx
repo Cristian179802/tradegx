@@ -1,10 +1,14 @@
 import * as React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { api } from "../src/lib/api";
+import * as Haptics from "expo-haptics";
+import { api, ApiError } from "../src/lib/api";
+import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
 import { bani, numar, procent } from "../src/lib/format";
+import { Camp } from "../src/ui/Camp";
 import { Card } from "../src/ui/Card";
+import { Buton } from "../src/ui/Buton";
 import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
@@ -15,16 +19,18 @@ import { T, tonPnl } from "../src/theme";
 //
 // Un challenge se pierde din două motive, nu din unul: pierderea zilei și
 // drawdown-ul total. De aceea ecranul are TREI bare, nu una — ținta de profit
-// plus cele două limite. O singură bară de progres ar fi spus „ești la 60%"
+// plus cele două limite. O singură bară de progres ar fi spus „ești la 60%”
 // exact în ziua în care contul e la un pas de a fi pierdut.
 //
 // LIMITELE SE DESENEAZĂ CA UMPLERE, nu ca distanță rămasă. „Ai consumat 78%
-// din pierderea zilnică permisă" se citește ca pericol; „mai ai 22%" se
+// din pierderea zilnică permisă" se citește ca pericol; „mai ai 22%” se
 // citește ca permisiune.
 //
-// Regulile se setează de pe site, pe fiecare cont. Aici se citesc — un
-// formular de reguli pe telefon ar fi fost o a doua sursă de adevăr pentru
-// cifre pe care le dă firma, nu utilizatorul.
+// REGULILE SE PUN TOT DE AICI. Cifrele vin de la firmă, dar cineva trebuie să
+// le scrie undeva, iar `PATCH /api/propfirm` le acceptă de oriunde. Înainte,
+// un cont fără reguli spunea „se completează pe site" — adică ecranul care
+// există ca să te avertizeze că pierzi challenge-ul te trimitea în browser
+// exact când voia să te ajute.
 
 interface Cont {
   id: string;
@@ -58,6 +64,7 @@ const STARE: Record<Cont["status"], { text: string; culoare: string; iconita: Re
 };
 
 export default function PropFirm() {
+  const router = useRouter();
   const c = useCerere<{ accounts: Cont[] }>(
     () => api.propfirm.list() as Promise<{ accounts: Cont[] }>,
   );
@@ -77,12 +84,19 @@ export default function PropFirm() {
         <Gol
           iconita="ribbon-outline"
           titlu="Niciun cont de challenge"
-          text="Se urmăresc conturile de tip challenge și cele reale. Se adaugă de pe site, împreună cu regulile firmei."
+          text="Ecranul urmărește cele două limite care te pot elimina — pierderea zilei și drawdown-ul — plus ținta de profit. Are nevoie de un cont cu regulile firmei puse pe el."
+          actiune={
+            <Buton
+              eticheta="Adaugă un cont de challenge"
+              onPress={() => router.push("/cont-nou")}
+              iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+            />
+          }
         />
       ) : (
         conturi.map((x, i) => (
           <Reveal key={x.id} intarziere={i * 70} style={{ marginBottom: T.spacing.md }}>
-            <CardChallenge cont={x} />
+            <CardChallenge cont={x} onSchimbat={c.reia} />
           </Reveal>
         ))
       )}
@@ -90,10 +104,70 @@ export default function PropFirm() {
   );
 }
 
-function CardChallenge({ cont }: { cont: Cont }) {
+/** Aceleași cifre ca la crearea contului. O singură listă, ca să nu apară
+ *  două seturi de presetări care se contrazic. */
+const FIRME = [
+  { nume: "FTMO", tinta: 10, zi: 5, dd: 10, zile: 4 },
+  { nume: "The5ers", tinta: 8, zi: 4, dd: 6, zile: 3 },
+  { nume: "FundedNext", tinta: 8, zi: 5, dd: 10, zile: 5 },
+  { nume: "MyForexFunds", tinta: 8, zi: 5, dd: 12, zile: 5 },
+];
+
+function CardChallenge({ cont, onSchimbat }: { cont: Cont; onSchimbat: () => void }) {
   const s = STARE[cont.status];
   const r = cont.rules;
   const p = cont.progress;
+
+  const [editeaza, setEditeaza] = React.useState(false);
+  const [firma, setFirma] = React.useState(r.propFirm ?? "");
+  const [tinta, setTinta] = React.useState(r.profitTarget != null ? String(r.profitTarget) : "");
+  const [zi, setZi] = React.useState(r.maxDailyLossPct != null ? String(r.maxDailyLossPct) : "");
+  const [dd, setDd] = React.useState(r.maxDrawdownPct != null ? String(r.maxDrawdownPct) : "");
+  const [zileMin, setZileMin] = React.useState(r.minTradingDays != null ? String(r.minTradingDays) : "");
+  const [salveaza, setSalveaza] = React.useState(false);
+  const [eroare, setEroare] = React.useState<string | null>(null);
+
+  const aplicaPreset = (p_: (typeof FIRME)[number]) => {
+    Haptics.selectionAsync().catch(() => {});
+    setFirma(p_.nume);
+    setTinta(String(p_.tinta));
+    setZi(String(p_.zi));
+    setDd(String(p_.dd));
+    setZileMin(String(p_.zile));
+  };
+
+  const salveazaReguli = async () => {
+    // Un câmp gol înseamnă „nu am regula asta", nu zero: ruta acceptă `null`,
+    // deci se poate și șterge un prag pus greșit.
+    const nr = (v: string) => {
+      const t = v.trim().replace(",", ".");
+      if (t === "") return null;
+      const n = Number(t);
+      return Number.isFinite(n) ? n : NaN;
+    };
+    const valori = { profitTarget: nr(tinta), maxDailyLossPct: nr(zi), maxDrawdownPct: nr(dd), minTradingDays: nr(zileMin) };
+    if (Object.values(valori).some((v) => Number.isNaN(v))) {
+      setEroare("Toate pragurile se scriu în cifre.");
+      return;
+    }
+    setSalveaza(true);
+    setEroare(null);
+    try {
+      await api.propfirm.update({
+        accountId: cont.id,
+        propFirm: firma.trim() === "" ? null : firma.trim(),
+        ...valori,
+        minTradingDays: valori.minTradingDays == null ? null : Math.round(valori.minTradingDays),
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      setEditeaza(false);
+      onSchimbat();
+    } catch (e) {
+      setEroare(e instanceof ApiError ? e.message : "Nu am putut salva regulile.");
+    } finally {
+      setSalveaza(false);
+    }
+  };
 
   const consumatZi = r.maxDailyLossPct ? p.dailyLossPct / r.maxDailyLossPct : 0;
   const consumatDd = r.maxDrawdownPct ? p.maxDrawdownPct / r.maxDrawdownPct : 0;
@@ -133,12 +207,22 @@ function CardChallenge({ cont }: { cont: Cont }) {
         </Text>
       </View>
 
-      {cont.status === "NO_RULES" ? (
-        <Text style={st.faraReguli}>
-          Contul n-are regulile firmei setate. Se completează pe site, la cont —
-          fără ele nu pot spune dacă challenge-ul e pe drumul bun.
-        </Text>
-      ) : (
+      {cont.status === "NO_RULES" && !editeaza ? (
+        <>
+          <Text style={st.faraReguli}>
+            Contul n-are regulile firmei puse. Fără ele nu pot spune dacă
+            challenge-ul e pe drumul bun — sunt trei cifre din contractul firmei:
+            ținta de profit, pierderea zilnică maximă și drawdown-ul.
+          </Text>
+          <Buton
+            eticheta="Pune regulile firmei"
+            onPress={() => { Haptics.selectionAsync().catch(() => {}); setEditeaza(true); }}
+            plin
+            style={{ marginTop: T.spacing.lg }}
+            iconita={<Ionicons name="options-outline" size={16} color="#ffffff" />}
+          />
+        </>
+      ) : editeaza ? null : (
         <View style={st.bare}>
           {r.profitTarget != null ? (
             <Masura
@@ -180,7 +264,113 @@ function CardChallenge({ cont }: { cont: Cont }) {
         </View>
       )}
 
-      {cont.status === "IN_PROGRESS" && r.maxDrawdownPct != null ? (
+      {editeaza ? (
+        <View style={st.formular}>
+          <Text style={st.ajutorFormular}>
+            Cifrele sunt în contractul firmei. Alege firma dacă e în listă, sau
+            scrie-le tu. Lasă gol ce firma ta nu cere.
+          </Text>
+
+          <View style={st.presetari}>
+            {FIRME.map((x) => (
+              <Pressable
+                key={x.nume}
+                onPress={() => aplicaPreset(x)}
+                style={[st.preset, firma === x.nume && st.presetActiv]}
+                accessibilityRole="button"
+              >
+                <Text style={[st.textPreset, firma === x.nume && { color: T.accent.base }]}>
+                  {x.nume}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Camp
+            eticheta="Firma"
+            valoare={firma}
+            onChange={setFirma}
+            placeholder="FTMO"
+            style={{ marginTop: T.spacing.sm }}
+          />
+
+          <View style={st.randCampuri}>
+            <Camp
+              eticheta="Ținta de profit"
+              valoare={tinta}
+              onChange={setTinta}
+              placeholder="10"
+              tastatura="decimal-pad"
+              numeric
+              sufix="%"
+              style={{ flex: 1 }}
+            />
+            <Camp
+              eticheta="Zile minime"
+              valoare={zileMin}
+              onChange={setZileMin}
+              placeholder="4"
+              tastatura="number-pad"
+              numeric
+              style={{ flex: 1 }}
+            />
+          </View>
+
+          <View style={st.randCampuri}>
+            <Camp
+              eticheta="Pierdere/zi"
+              valoare={zi}
+              onChange={setZi}
+              placeholder="5"
+              tastatura="decimal-pad"
+              numeric
+              sufix="%"
+              style={{ flex: 1 }}
+            />
+            <Camp
+              eticheta="Drawdown maxim"
+              valoare={dd}
+              onChange={setDd}
+              placeholder="10"
+              tastatura="decimal-pad"
+              numeric
+              sufix="%"
+              style={{ flex: 1 }}
+            />
+          </View>
+
+          {eroare ? <Text style={st.eroareFormular}>{eroare}</Text> : null}
+
+          <Buton
+            eticheta="Salvează regulile"
+            onPress={() => { void salveazaReguli(); }}
+            incarca={salveaza}
+            plin
+            style={{ marginTop: T.spacing.md }}
+            iconita={<Ionicons name="save-outline" size={16} color="#ffffff" />}
+          />
+          <Buton
+            eticheta="Renunță"
+            varianta="secundar"
+            onPress={() => { setEditeaza(false); setEroare(null); }}
+            plin
+            style={{ marginTop: T.spacing.sm }}
+          />
+        </View>
+      ) : cont.status !== "NO_RULES" ? (
+        <Pressable
+          onPress={() => { Haptics.selectionAsync().catch(() => {}); setEditeaza(true); }}
+          style={st.randEditare}
+          accessibilityRole="button"
+          accessibilityLabel="Schimbă regulile firmei"
+          hitSlop={6}
+        >
+          <Ionicons name="create-outline" size={13} color={T.ink.i4} />
+          <Text style={st.textEditare}>Schimbă regulile</Text>
+        </Pressable>
+      ) : null}
+
+      {!editeaza && cont.status === "IN_PROGRESS" && r.maxDrawdownPct != null ? (
         <View style={st.margine}>
           <Ionicons name="information-circle-outline" size={13} color={T.ink.i4} />
           <Text style={st.textMargine}>
@@ -216,6 +406,54 @@ function Masura({
 }
 
 const st = StyleSheet.create({
+  formular: {
+    marginTop: T.spacing.lg,
+    paddingTop: T.spacing.lg,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: T.line.l1,
+  },
+  ajutorFormular: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 18,
+  },
+  presetari: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: T.spacing.md },
+  preset: {
+    paddingHorizontal: T.spacing.md,
+    paddingVertical: 7,
+    borderRadius: T.radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: T.line.l2,
+    backgroundColor: T.surface.s3,
+  },
+  presetActiv: { backgroundColor: T.accent.soft, borderColor: T.accent.line },
+  textPreset: {
+    color: T.ink.i3,
+    fontSize: T.fontSize.xs,
+    fontWeight: "700",
+    fontFamily: "Inter_700Bold",
+  },
+  randCampuri: { flexDirection: "row", gap: T.spacing.md, marginTop: T.spacing.sm },
+  eroareFormular: {
+    color: T.pnl.loss,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    marginTop: T.spacing.sm,
+  },
+  randEditare: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginTop: T.spacing.md,
+    alignSelf: "flex-start",
+  },
+  textEditare: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontWeight: "700",
+    fontFamily: "Inter_700Bold",
+  },
   antet: { flexDirection: "row", alignItems: "center", gap: T.spacing.sm },
   nume: {
     color: T.ink.i1,

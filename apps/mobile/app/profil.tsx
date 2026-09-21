@@ -28,7 +28,7 @@ import { T, ATINGERE_MIN } from "../src/theme";
 // producție cu degetul mare.
 //
 // NOTIFICĂRILE SE SALVEAZĂ LA FIECARE COMUTARE, fără buton. Zece comutatoare
-// și un „Salvează" jos înseamnă că jumătate din oameni ies fără să apese.
+// și un „Salvează” jos înseamnă că jumătate din oameni ies fără să apese.
 // Restul ecranului are buton, fiindcă acolo se scrie text.
 //
 // ȘTERGEREA CONTULUI CERE SĂ SCRII CUVÂNTUL. O confirmare cu două butoane se
@@ -192,6 +192,31 @@ export default function Profil() {
   };
 
   const conectat = Boolean(tg.date?.connected ?? tg.date?.isActive);
+  const [chatId, setChatId] = React.useState("");
+  const [conecteaza, setConecteaza] = React.useState(false);
+
+  // Conectarea nu are nevoie de site: botul dă un Chat ID, iar ruta îl salvează.
+  // Trimiterea omului în browser pentru un câmp de text era doar o piesă care
+  // lipsea din aplicație, nu o restricție reală.
+  const conecteazaTelegram = async () => {
+    const id = chatId.trim();
+    if (!/^-?d{5,}$/.test(id)) {
+      setMesaj("Chat ID-ul e un număr, de obicei din nouă cifre.");
+      return;
+    }
+    setConecteaza(true);
+    setMesaj(null);
+    try {
+      await api.utilizator.conecteazaTelegram({ chatId: id });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      setChatId("");
+      tg.reia();
+    } catch (e) {
+      setMesaj(e instanceof ApiError ? e.message : "Nu am putut conecta Telegram.");
+    } finally {
+      setConecteaza(false);
+    }
+  };
 
   return (
     <Ecran
@@ -237,7 +262,8 @@ export default function Profil() {
           </View>
 
           <Text style={st.nota}>
-            Emailul se schimbă de pe site — e legat de autentificare și de facturi.
+            Emailul nu se poate schimba: cu el intri în cont și pe el sunt emise
+            facturile. Dacă ai nevoie de altul, scrie-ne și îl mutăm noi.
           </Text>
 
           <Buton
@@ -296,11 +322,48 @@ export default function Profil() {
               <Text style={st.subStare}>
                 {conectat
                   ? "Primești alertele și pe Telegram."
-                  : "Conectarea se face de pe site, printr-un cod dat de bot."}
+                  : "Trei pași, mai jos. Durează un minut."}
               </Text>
             </View>
             {conectat ? <Insigna text="activ" culoare={T.pnl.gain} fundal="rgba(52,211,153,0.12)" /> : null}
           </View>
+
+          {conectat ? null : (
+            <View style={st.pasiTelegram}>
+              {[
+                "Deschide Telegram și caută @userinfobot — îți trimite Chat ID-ul tău.",
+                "Caută botul TradeGx și apasă Start.",
+                "Scrie Chat ID-ul aici și conectează.",
+              ].map((p, i) => (
+                <View key={p} style={st.randPas}>
+                  <View style={st.numarPas}>
+                    <Text style={st.textNumarPas}>{i + 1}</Text>
+                  </View>
+                  <Text style={st.textPas}>{p}</Text>
+                </View>
+              ))}
+
+              <Camp
+                eticheta="Chat ID"
+                valoare={chatId}
+                onChange={setChatId}
+                placeholder="123456789"
+                tastatura="number-pad"
+                numeric
+                style={{ marginTop: T.spacing.md }}
+              />
+
+              <Buton
+                eticheta="Conectează Telegram"
+                onPress={conecteazaTelegram}
+                incarca={conecteaza}
+                dezactivat={chatId.trim() === "" || conecteaza}
+                plin
+                style={{ marginTop: T.spacing.md }}
+                iconita={<Ionicons name="paper-plane-outline" size={16} color="#ffffff" />}
+              />
+            </View>
+          )}
 
           {conectat ? (
             <Buton
@@ -592,6 +655,36 @@ function DoiFactori({
 }
 
 const st = StyleSheet.create({
+  pasiTelegram: {
+    marginTop: T.spacing.lg,
+    paddingTop: T.spacing.lg,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: T.line.l1,
+    gap: T.spacing.sm,
+  },
+  randPas: { flexDirection: "row", alignItems: "flex-start", gap: T.spacing.sm },
+  numarPas: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: T.accent.soft,
+    marginTop: 1,
+  },
+  textNumarPas: {
+    color: T.accent.base,
+    fontSize: 10,
+    fontWeight: "800",
+    fontFamily: "SpaceGrotesk_700Bold",
+  },
+  textPas: {
+    flex: 1,
+    color: T.ink.i3,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 20,
+  },
   eticheta: {
     color: T.ink.i4,
     fontSize: T.fontSize.xs,

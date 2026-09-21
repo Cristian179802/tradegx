@@ -5,7 +5,7 @@ import { T } from "../theme";
 // ── Textul unei lecții ───────────────────────────────────────────────────────
 //
 // Lecțiile sunt scrise cu un mini-markdown: paragrafe separate de linie goală,
-// `**îngroșat**`, `` `cod` ``, liste cu „- " și „1. ", și termeni de glosar
+// `**îngroșat**`, `` `cod` ``, liste cu „- ” și „1. ”, și termeni de glosar
 // scriși `[[slug]]` sau `[[slug|text afișat]]`.
 //
 // DE CE NU O BIBLIOTECĂ DE MARKDOWN: ar fi adus un parser întreg pentru patru
@@ -15,7 +15,7 @@ import { T } from "../theme";
 //
 // Termenii de glosar se desenează colorat și SUBLINIAT PUNCTAT, nu ca linkuri
 // albastre: pe telefon nu există tooltip, deci apăsarea deschide definiția în
-// glosar. Sublinierea punctată spune „e explicabil", nu „te duce altundeva".
+// glosar. Sublinierea punctată spune „e explicabil”, nu „te duce altundeva”.
 
 export interface TextLectieProps {
   text: string;

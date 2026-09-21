@@ -6,7 +6,7 @@ import { tokenCurent, reimprospateaza } from "./auth";
 //
 // De ce NU trece prin clientul de API: ruta întoarce `text/plain` în flux, nu
 // JSON. Clientul comun parsează mereu JSON, deci metoda ar fi aruncat la prima
-// folosire — o eroare care ar fi arătat ca „AI-ul nu merge".
+// folosire — o eroare care ar fi arătat ca „AI-ul nu merge”.
 //
 // NU SE CITEȘTE ÎN FLUX, se așteaptă răspunsul întreg. `fetch`-ul din React
 // Native merge peste XHR și nu expune `response.body`, deci fluxul n-ar avea ce

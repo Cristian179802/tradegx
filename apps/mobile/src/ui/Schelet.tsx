@@ -6,8 +6,8 @@ import { T } from "../theme";
 //
 // Ca pe web: nu pulsează, e MĂTURAT de o linie de lumină.
 //
-// Pulsul spune „mai așteaptă" — un semnal pasiv care după două secunde începe
-// să semene cu ceva blocat. Linia care mătură spune „se măsoară": are direcție,
+// Pulsul spune „mai așteaptă” — un semnal pasiv care după două secunde începe
+// să semene cu ceva blocat. Linia care mătură spune „se măsoară”: are direcție,
 // deci are progres.
 
 export function Schelet({

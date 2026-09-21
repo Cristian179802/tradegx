@@ -3,9 +3,11 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api, ApiError } from "../src/lib/api";
+import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
 import { bani, candva, numar } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
+import { Buton } from "../src/ui/Buton";
 import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
@@ -19,13 +21,13 @@ import { T, tonPnl } from "../src/theme";
 // (`isActive`), nu pe telefon — deci schimbi contul aici și dashboard-ul de pe
 // desktop arată același lucru.
 //
-// „Toate conturile" e o opțiune explicită, nu lipsa unei alegeri. Media peste
+// „Toate conturile” e o opțiune explicită, nu lipsa unei alegeri. Media peste
 // un cont finanțat de 100.000 și unul de crypto de 500 nu descrie niciun cont
 // real; cine o vrea, o cere.
 //
 // SOLDUL nu se recalculează local. Pe conturile sincronizate cu brokerul,
 // cifra vine de la broker și include pozițiile deschise; formula
-// „sold inițial + P&L realizat" ar înlocui adevărul cu o deducție. Ruta face
+// „sold inițial + P&L realizat” ar înlocui adevărul cu o deducție. Ruta face
 // deja distincția — aici doar o afișăm.
 
 interface Cont {
@@ -53,6 +55,7 @@ const TIPURI: Record<string, string> = {
 };
 
 export default function Conturi() {
+  const router = useRouter();
   const c = useCerere<Cont[]>(() => api.accounts.list() as Promise<Cont[]>);
   const conturi = c.date ?? [];
 
@@ -125,7 +128,14 @@ export default function Conturi() {
         <Gol
           iconita="wallet-outline"
           titlu="Niciun cont de trading"
-          text="Conturile se adaugă de pe site, o dată — apoi rămân aici."
+          text="Aplicația măsoară ce se întâmplă într-un cont: sold, rezultate, limite. Fără unul, n-are ce urmări."
+          actiune={
+            <Buton
+              eticheta="Adaugă primul cont"
+              onPress={() => router.push("/cont-nou")}
+              iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+            />
+          }
         />
       ) : (
         <>

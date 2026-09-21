@@ -2,9 +2,11 @@ import * as React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../src/lib/api";
+import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
 import { bani, numar, procent } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
+import { Buton } from "../src/ui/Buton";
 import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { Paywall } from "../src/ui/Paywall";
@@ -52,6 +54,7 @@ const PERIOADE = [
 ] as const;
 
 export default function EdgeFinder() {
+  const router = useRouter();
   const [zile, setZile] = React.useState<(typeof PERIOADE)[number]["v"]>("365");
   const [dimensiune, setDimensiune] = React.useState<string | null>(null);
 
@@ -114,7 +117,14 @@ export default function EdgeFinder() {
         <Gol
           iconita="locate-outline"
           titlu="Prea puține date"
-          text="Fiecare tipar are nevoie de cel puțin cinci tranzacții ca să însemne ceva. Mai notează câteva."
+          text="Ca să spun „pierzi constant pe EURUSD dimineața”, am nevoie de cel puțin cinci tranzacții pe fiecare tipar. Sub atât aș descrie norocul, nu metoda."
+          actiune={
+            <Buton
+              eticheta="Adaugă o tranzacție"
+              onPress={() => router.push("/(tabs)/adauga")}
+              iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+            />
+          }
         />
       ) : null}
 

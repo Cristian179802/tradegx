@@ -24,18 +24,18 @@ import { T, ATINGERE_MIN, umbra } from "../theme";
 // ── Bara de jos, cu bule ─────────────────────────────────────────────────────
 //
 // Cinci butoane care oglindesc domeniile din șina de comandă a site-ului. Patru
-// deschid o BULĂ cu subcategoriile; „Acasă" duce direct acolo, fiindcă e o
+// deschid o BULĂ cu subcategoriile; „Acasă” duce direct acolo, fiindcă e o
 // destinație, nu o categorie — un meniu care se deschide când vrei doar să te
 // întorci acasă e o atingere în plus de fiecare dată.
 //
-// Butonul „+" din mijloc a dispărut. Ocupa locul cel mai bun din bară pentru o
-// singură acțiune, iar „Adaugă tranzacție" stă acum primul în bula Jurnal —
+// Butonul „+” din mijloc a dispărut. Ocupa locul cel mai bun din bară pentru o
+// singură acțiune, iar „Adaugă tranzacție” stă acum primul în bula Jurnal —
 // tot la două atingeri, dar fără să fure un slot întreg.
 //
 // BULA se deschide de deasupra butonului apăsat, nu din centru: ochiul trebuie
 // să vadă DE UNDE vine, altfel pare că a apărut un ecran nou.
 //
-// Butonul fizic „înapoi" al Android-ului închide bula înainte să iasă din
+// Butonul fizic „înapoi” al Android-ului închide bula înainte să iasă din
 // ecran. Fără asta, un meniu deschis ar înghiți gestul și omul ar ieși din
 // aplicație crezând că închide meniul.
 
@@ -72,7 +72,7 @@ export function BaraFile() {
     [p],
   );
 
-  // Android: „înapoi" închide bula, nu ecranul.
+  // Android: „înapoi” închide bula, nu ecranul.
   React.useEffect(() => {
     if (Platform.OS !== "android" || !deschis) return;
     const sub = BackHandler.addEventListener("hardwareBackPress", () => {
@@ -111,7 +111,7 @@ export function BaraFile() {
   );
 
   // Ce buton e aprins se DEDUCE din meniu, nu se scrie a doua oară. Varianta
-  // veche compara bucăți de cale („cale.includes('setari')"); cu douăzeci de
+  // veche compara bucăți de cale („cale.includes('setari')”); cu douăzeci de
   // ecrane, fiecare ecran nou ar fi cerut încă o linie aici — și lipsa ei nu
   // dă eroare, doar o bară care nu arată unde ești.
   const activ = (d: Domeniu): boolean => {
@@ -250,8 +250,8 @@ function Rand({ element, onPress }: { element: ElementMeniu; onPress: () => void
 /**
  * Calea curentă corespunde țintei din meniu?
  *
- * `usePathname()` nu include grupurile de rute, deci „/(tabs)/tranzactii" din
- * meniu ajunge pe ecran ca „/tranzactii", iar „/(tabs)" ca „/".
+ * `usePathname()` nu include grupurile de rute, deci „/(tabs)/tranzactii” din
+ * meniu ajunge pe ecran ca „/tranzactii”, iar „/(tabs)” ca „/”.
  */
 function potrivit(cale: string, tinta: string): boolean {
   const curata = (s: string) => {

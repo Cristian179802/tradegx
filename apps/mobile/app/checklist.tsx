@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { Buton } from "../src/ui/Buton";
 import { Card } from "../src/ui/Card";
 import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
@@ -110,6 +111,11 @@ export default function Checklist() {
     setText("");
   };
 
+  const readuImplicite = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    setElemente(proaspete());
+  };
+
   const reseteaza = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     setElemente((p) => p.map((e) => ({ ...e, bifat: false })));
@@ -140,6 +146,32 @@ export default function Checklist() {
         ) : undefined
       }
     >
+      {total === 0 ? (
+        <Reveal>
+          <Card culoareMuchie={T.accent.line}>
+            <View style={st.sus}>
+              <Ionicons name="shield-outline" size={18} color={T.accent.base} />
+              <Text style={st.stare}>Lista e goală</Text>
+            </View>
+            <Text style={st.explicatie}>
+              Checklistul e ultima oprire înainte de o intrare: zece întrebări pe care
+              ți le pui de fiecare dată, ca să nu intri din plictiseală sau din
+              răzbunare. Bifele se șterg singure la zi nouă; regulile rămân.
+            </Text>
+            <Text style={st.explicatie}>
+              Le-ai șters pe toate. Poți aduce lista implicită înapoi, sau poți
+              scrie mai jos doar regulile tale.
+            </Text>
+            <Buton
+              eticheta="Adu lista implicită"
+              onPress={readuImplicite}
+              plin
+              iconita={<Ionicons name="refresh" size={16} color="#ffffff" />}
+              style={{ marginTop: T.spacing.lg }}
+            />
+          </Card>
+        </Reveal>
+      ) : (
       <Reveal>
         <Card culoareMuchie={toate ? "rgba(52,211,153,0.40)" : undefined}>
           <View style={st.sus}>
@@ -164,6 +196,7 @@ export default function Checklist() {
           </Text>
         </Card>
       </Reveal>
+      )}
 
       <Reveal intarziere={70} style={{ marginTop: T.spacing.md }}>
         <Card faraPadding>
@@ -281,6 +314,13 @@ const st = StyleSheet.create({
   textBifat: {
     color: T.ink.i4,
     textDecorationLine: "line-through",
+  },
+  explicatie: {
+    color: T.ink.i3,
+    fontSize: T.fontSize.sm,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 21,
+    marginTop: T.spacing.md,
   },
   sterge: { width: 26, alignItems: "center", justifyContent: "center" },
   camp: {

@@ -19,7 +19,7 @@ import { T, cifre } from "../src/theme";
 // invalidarea ca intrarea: un semnal fără condiția care-l anulează e o
 // încurajare, nu o analiză.
 //
-// ÎNCREDEREA E O BARĂ, nu o culoare. Verde pentru „85% încredere" ar folosi
+// ÎNCREDEREA E O BARĂ, nu o culoare. Verde pentru „85% încredere” ar folosi
 // exact culoarea pe care tot restul aplicației o rezervă profitului realizat.
 // Bara spune la fel de mult, fără să promită bani.
 //

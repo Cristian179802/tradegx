@@ -43,7 +43,7 @@ import { T } from "../../../src/theme";
 //
 // BIFA DE TERMINAT E MANUALĂ. Am fi putut marca lecția citită la derularea
 // până jos, dar cineva care derulează repede ca să vadă diagrama n-a citit-o.
-// Bifa înseamnă „am înțeles", nu „am trecut pe aici".
+// Bifa înseamnă „am înțeles”, nu „am trecut pe aici”.
 
 const CATRE_UNEALTA: Record<string, { ruta: string; buton: string; text: string }> = {
   "risk-lab": {

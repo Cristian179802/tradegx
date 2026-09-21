@@ -17,7 +17,7 @@ import { T } from "../src/theme";
 // cu jurnal completat, tranzacții cu stop, backteste rulate. Lucruri care se
 // fac, nu bani care se câștigă.
 //
-// CELE BLOCATE ARATĂ PROGRESUL, nu un lacăt. „7 din 10" spune ce mai ai de
+// CELE BLOCATE ARATĂ PROGRESUL, nu un lacăt. „7 din 10” spune ce mai ai de
 // făcut; un lacăt spune doar că n-ai. Prima e o instrucțiune, a doua o notă.
 //
 // SERIA E PRIMA ȘI E MARE, fiindcă e singura cifră din ecran care se poate

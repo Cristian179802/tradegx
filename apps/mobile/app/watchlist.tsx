@@ -20,8 +20,8 @@ import { T, tonPnl, cifre } from "../src/theme";
 // Până acum puteai VEDEA alertele primite, dar nu puteai crea niciuna — ceea ce
 // e ca un ceas deșteptător care sună doar dacă îl potrivește altcineva.
 //
-// ALERTA E O PERECHE DE PRAGURI, nu o notificare cu text. Pui „peste" sau
-// „sub", iar cronul de la server compară la fiecare zece minute. De aceea nu se
+// ALERTA E O PERECHE DE PRAGURI, nu o notificare cu text. Pui „peste” sau
+// „sub”, iar cronul de la server compară la fiecare zece minute. De aceea nu se
 // declanșează instant când prețul atinge nivelul — și ecranul o spune, în loc
 // să lase pe cineva să creadă că a ratat o alertă.
 //

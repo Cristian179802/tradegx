@@ -30,7 +30,7 @@ import { T, ATINGERE_MIN } from "../../src/theme";
 // Am adăugat ruta, deci comentariile merg acum și pe site.
 //
 // COMENTARIUL APARE INSTANT, înainte de răspunsul serverului. Pe o conexiune
-// mobilă, o secundă între „Trimite" și textul tău pe ecran e suficient cât să
+// mobilă, o secundă între „Trimite” și textul tău pe ecran e suficient cât să
 // apeși a doua oară. Dacă cererea eșuează, rândul dispare și textul se întoarce
 // în câmp — nimic nu se pierde.
 
@@ -200,7 +200,7 @@ export default function FirPostare() {
             {comentarii.length === 0 ? (
               <Text style={st.gol}>
                 Fii primul care răspunde. O întrebare bună ajută mai mult decât un
-                „de acord".
+                „de acord”.
               </Text>
             ) : (
               comentarii.map((x, i) => {

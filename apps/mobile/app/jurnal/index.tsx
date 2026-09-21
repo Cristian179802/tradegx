@@ -17,7 +17,7 @@ import { T, tonPnl, cifre } from "../../src/theme";
 //
 // Pagina web arată tranzacțiile într-un tabel cu note lângă fiecare. Pe telefon
 // tabelul nu încape, deci întrebarea se schimbă: nu „ce s-a întâmplat la toate
-// deodată", ci „care tranzacție n-am notat-o încă".
+// deodată", ci „care tranzacție n-am notat-o încă”.
 //
 // De aceea filtrul implicit e TOATE, dar acoperirea (câte au notă) stă sus, ca
 // cifră, cu bară. Un jurnal pe jumătate completat nu e un jurnal — iar cifra

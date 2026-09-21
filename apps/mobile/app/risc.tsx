@@ -3,8 +3,10 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api, ApiError } from "../src/lib/api";
+import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
 import { bani, procent } from "../src/lib/format";
+import { Camp } from "../src/ui/Camp";
 import { Card } from "../src/ui/Card";
 import { Buton } from "../src/ui/Buton";
 import { Reveal } from "../src/ui/Reveal";
@@ -25,9 +27,14 @@ import { T, tonPnl } from "../src/theme";
 // PRAGURILE SE CITESC DE PE CONT, nu din cap: `maxDailyLossPct` e al contului,
 // pentru că o firmă de prop are limita ei, iar un cont personal alta.
 //
-// SALVAREA TRIMITE ȘI ORELE FĂRĂ TRANZACȚII, chiar dacă ecranul nu le
-// editează: ruta le rescrie cu `null` când lipsesc din corp. Fără asta, o
-// salvare de pe telefon ar șterge o setare făcută pe desktop.
+// SALVAREA TRIMITE ȘI ORELE FĂRĂ TRANZACȚII: ruta le rescrie cu `null` când
+// lipsesc din corp. Fără asta, o salvare de pe telefon ar șterge o setare
+// făcută pe desktop.
+//
+// LIMITELE SE PUN TOT DE AICI. Până acum scria „se pune de pe site" — pe un
+// ecran care are ca singur scop să te oprească la timp, trimiterea aia era
+// exact în momentul în care omul voia să-și pună frâna. `PATCH` pe cont
+// acceptă ambele praguri, deci nu lipsea decât formularul.
 
 interface Cont {
   id: string;
@@ -60,12 +67,19 @@ const RISCURI = [0.25, 0.5, 1, 1.5, 2, 3];
 const LIMITE = [3, 5, 8, 10, 15];
 
 export default function ManagerRisc() {
+  const router = useRouter();
   const c = useCerere<Date_>(() => api.riskManager() as Promise<Date_>);
   const d = c.date;
 
   const [risc, setRisc] = React.useState<number | null>(null);
   const [maxPeZi, setMaxPeZi] = React.useState<number | null>(null);
   const [zileOprite, setZileOprite] = React.useState<number[] | null>(null);
+  const [oraStart, setOraStart] = React.useState("");
+  const [oraStop, setOraStop] = React.useState("");
+  const [contEditat, setContEditat] = React.useState<string | null>(null);
+  const [pierdereZi, setPierdereZi] = React.useState("");
+  const [drawdown, setDrawdown] = React.useState("");
+  const [salveazaCont, setSalveazaCont] = React.useState(false);
   const [salveaza, setSalveaza] = React.useState(false);
   const [salvat, setSalvat] = React.useState(false);
   const [eroare, setEroare] = React.useState<string | null>(null);
@@ -76,7 +90,21 @@ export default function ManagerRisc() {
     setRisc(Number(d.user.defaultRiskPct));
     setMaxPeZi(d.user.maxTradesPerDay);
     setZileOprite(d.user.noTradeDays);
+    setOraStart(d.user.noTradeHoursStart ?? "");
+    setOraStop(d.user.noTradeHoursEnd ?? "");
   }, [d, risc]);
+
+  // Ceasul se scrie cu două puncte, deci le punem noi. Cineva care tastează
+  // „2200" vrea 22:00, iar pe o tastatură numerică de telefon două puncte sunt
+  // trei atingeri în plus, de fiecare dată.
+  const scrieOra = (brut: string, pune_: (v: string) => void) => {
+    const cifre_ = brut.replace(/D/g, "").slice(0, 4);
+    pune_(cifre_.length <= 2 ? cifre_ : `${cifre_.slice(0, 2)}:${cifre_.slice(2)}`);
+  };
+
+  const oraValida = (v: string) => v === "" || /^([01]d|2[0-3]):[0-5]d$/.test(v);
+  const oreOk = oraValida(oraStart) && oraValida(oraStop)
+    && (oraStart === "") === (oraStop === "");
 
   const activ = d?.accounts.find((a) => a.isActive) ?? d?.accounts[0] ?? null;
   const moneda = activ?.currency ?? "USD";
@@ -103,8 +131,8 @@ export default function ManagerRisc() {
         defaultRiskPct: risc,
         maxTradesPerDay: maxPeZi,
         noTradeDays: zileOprite,
-        noTradeHoursStart: d.user.noTradeHoursStart,
-        noTradeHoursEnd: d.user.noTradeHoursEnd,
+        noTradeHoursStart: oraStart === "" ? null : oraStart,
+        noTradeHoursEnd: oraStop === "" ? null : oraStop,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       setSalvat(true);
@@ -112,6 +140,53 @@ export default function ManagerRisc() {
       setEroare(e instanceof ApiError ? e.message : "Nu am putut salva regulile.");
     } finally {
       setSalveaza(false);
+    }
+  };
+
+  const deschideCont = (a: Cont) => {
+    Haptics.selectionAsync().catch(() => {});
+    if (contEditat === a.id) { setContEditat(null); return; }
+    setContEditat(a.id);
+    setPierdereZi(a.maxDailyLossPct ? String(Number(a.maxDailyLossPct)) : "");
+    setDrawdown(a.maxDrawdownPct ? String(Number(a.maxDrawdownPct)) : "");
+    setEroare(null);
+  };
+
+  // Schema acceptă 0.1–100 și câmpuri opționale, deci un câmp lăsat gol pur și
+  // simplu nu se trimite — pragul rămâne cum era. Ștergerea unui prag deja pus
+  // se face tot de la contul respectiv, pe web; aici nu promitem că se poate.
+  const salveazaCont_ = async (a: Cont) => {
+    const numar_ = (v: string) => {
+      const n = Number(v.replace(",", "."));
+      return v.trim() !== "" && Number.isFinite(n) && n >= 0.1 && n <= 100 ? n : null;
+    };
+    const zi = numar_(pierdereZi);
+    const dd = numar_(drawdown);
+
+    if (pierdereZi.trim() !== "" && zi == null) {
+      setEroare("Pierderea zilnică se scrie în procente, între 0,1 și 100.");
+      return;
+    }
+    if (drawdown.trim() !== "" && dd == null) {
+      setEroare("Drawdown-ul se scrie în procente, între 0,1 și 100.");
+      return;
+    }
+    if (zi == null && dd == null) { setContEditat(null); return; }
+
+    setSalveazaCont(true);
+    setEroare(null);
+    try {
+      await api.accounts.actualizeaza(a.id, {
+        ...(zi != null ? { maxDailyLossPct: zi } : {}),
+        ...(dd != null ? { maxDrawdownPct: dd } : {}),
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      setContEditat(null);
+      c.reia();
+    } catch (e) {
+      setEroare(e instanceof ApiError ? e.message : "Nu am putut salva limitele contului.");
+    } finally {
+      setSalveazaCont(false);
     }
   };
 
@@ -131,7 +206,14 @@ export default function ManagerRisc() {
         <Gol
           iconita="shield-checkmark-outline"
           titlu="Niciun cont"
-          text="Limitele se măsoară pe soldul unui cont. Adaugă unul de pe site."
+          text="„Mai am voie azi?” se măsoară pe soldul unui cont — cât ai pierdut din el și cât îți permiți. Fără cont, nu există limită de calculat."
+          actiune={
+            <Buton
+              eticheta="Adaugă un cont"
+              onPress={() => router.push("/cont-nou")}
+              iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+            />
+          }
         />
       ) : (
         <>
@@ -224,7 +306,8 @@ export default function ManagerRisc() {
                 </>
               ) : (
                 <Text style={st.faraLimita}>
-                  Contul n-are limită zilnică setată. Se pune de pe site, la cont.
+                  Contul n-are limită zilnică setată, deci nu te poate opri nimic.
+                  Pune-i un prag mai jos, la „Limitele conturilor”.
                 </Text>
               )}
 
@@ -292,9 +375,36 @@ export default function ManagerRisc() {
                 ))}
               </View>
 
-              {d.user.noTradeHoursStart && d.user.noTradeHoursEnd ? (
-                <Text style={st.echivalent}>
-                  Ore fără tranzacții: {d.user.noTradeHoursStart}–{d.user.noTradeHoursEnd}. Se schimbă de pe site.
+              <Text style={st.subEticheta}>ORE FĂRĂ TRANZACȚII</Text>
+              <Text style={st.ajutor}>
+                Fereastra în care nu intri deloc — de obicei noaptea, sau ora dinaintea
+                unei știri. Lasă ambele goale dacă nu vrei regula asta.
+              </Text>
+              <View style={st.randOre}>
+                <Camp
+                  eticheta="De la"
+                  valoare={oraStart}
+                  onChange={(v) => { setSalvat(false); scrieOra(v, setOraStart); }}
+                  placeholder="22:00"
+                  tastatura="number-pad"
+                  numeric
+                  style={{ flex: 1 }}
+                  eroare={oraValida(oraStart) ? null : "Format HH:MM"}
+                />
+                <Camp
+                  eticheta="Până la"
+                  valoare={oraStop}
+                  onChange={(v) => { setSalvat(false); scrieOra(v, setOraStop); }}
+                  placeholder="08:00"
+                  tastatura="number-pad"
+                  numeric
+                  style={{ flex: 1 }}
+                  eroare={oraValida(oraStop) ? null : "Format HH:MM"}
+                />
+              </View>
+              {!oreOk && oraValida(oraStart) && oraValida(oraStop) ? (
+                <Text style={st.avertisment}>
+                  Completează-le pe amândouă, sau lasă-le pe amândouă goale.
                 </Text>
               ) : null}
 
@@ -302,6 +412,7 @@ export default function ManagerRisc() {
                 eticheta={salvat ? "Salvat" : "Salvează regulile"}
                 onPress={salveazaReguli}
                 incarca={salveaza}
+                dezactivat={!oreOk || salveaza}
                 plin
                 style={{ marginTop: T.spacing.lg }}
                 iconita={
@@ -311,14 +422,27 @@ export default function ManagerRisc() {
             </Card>
           </Reveal>
 
-          <Sectiune titlu="Limitele conturilor" nota="Se pun pe fiecare cont, de pe site." />
+          <Sectiune
+            titlu="Limitele conturilor"
+            nota="Apasă pe un cont ca să-i pui pragurile. Se aplică doar contului ăluia."
+          />
 
           {d.accounts.map((a, i) => (
             <Reveal key={a.id} intarziere={90 + i * 50} style={{ marginBottom: T.spacing.md }}>
-              <Card nivel={1} culoareMuchie={a.isActive ? T.accent.line : "rgba(255,255,255,0.04)"}>
+              <Card
+                nivel={1}
+                culoareMuchie={a.isActive ? T.accent.line : "rgba(255,255,255,0.04)"}
+                onPress={() => deschideCont(a)}
+                accesibilEticheta={`${a.name}. Apasă ca să editezi limitele.`}
+              >
                 <View style={st.antetCont}>
                   <Text style={st.numeCont} numberOfLines={1}>{a.name}</Text>
                   {a.isActive ? <Insigna text="Selectat" /> : null}
+                  <Ionicons
+                    name={contEditat === a.id ? "chevron-up" : "create-outline"}
+                    size={15}
+                    color={T.ink.i4}
+                  />
                 </View>
                 <Rand cheie="Sold" valoare={bani(Number(a.balance), a.currency, false)} />
                 <Rand
@@ -331,6 +455,51 @@ export default function ManagerRisc() {
                   valoare={a.maxDrawdownPct ? procent(Number(a.maxDrawdownPct), 1) : "nesetat"}
                   culoare={a.maxDrawdownPct ? T.ink.i1 : T.ink.i4}
                 />
+
+                {contEditat === a.id ? (
+                  <View style={st.formularCont}>
+                    <Text style={st.ajutor}>
+                      Pierderea zilnică e frâna: când o atingi, ecranul ăsta îți spune
+                      stop. Drawdown-ul e cât poți pierde din vârf înainte ca un cont
+                      de prop să fie pierdut. Amândouă în procente din sold.
+                    </Text>
+                    <View style={st.randOre}>
+                      <Camp
+                        eticheta="Pierdere/zi"
+                        valoare={pierdereZi}
+                        onChange={setPierdereZi}
+                        placeholder="3"
+                        tastatura="decimal-pad"
+                        numeric
+                        sufix="%"
+                        style={{ flex: 1 }}
+                      />
+                      <Camp
+                        eticheta="Drawdown"
+                        valoare={drawdown}
+                        onChange={setDrawdown}
+                        placeholder="10"
+                        tastatura="decimal-pad"
+                        numeric
+                        sufix="%"
+                        style={{ flex: 1 }}
+                      />
+                    </View>
+                    {Number(a.balance) > 0 && Number(pierdereZi.replace(",", ".")) > 0 ? (
+                      <Text style={st.echivalent}>
+                        Adică {bani((Number(a.balance) * Number(pierdereZi.replace(",", "."))) / 100, a.currency, false)} pe zi.
+                      </Text>
+                    ) : null}
+                    <Buton
+                      eticheta="Salvează limitele"
+                      onPress={() => { void salveazaCont_(a); }}
+                      incarca={salveazaCont}
+                      plin
+                      style={{ marginTop: T.spacing.md }}
+                      iconita={<Ionicons name="save-outline" size={16} color="#ffffff" />}
+                    />
+                  </View>
+                ) : null}
               </Card>
             </Reveal>
           ))}
@@ -371,6 +540,34 @@ function Optiune({
 }
 
 const st = StyleSheet.create({
+  randOre: { flexDirection: "row", gap: T.spacing.md, marginTop: T.spacing.sm },
+  formularCont: {
+    marginTop: T.spacing.md,
+    paddingTop: T.spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: T.line.l1,
+  },
+  ajutor: {
+    color: T.ink.i4,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  subEticheta: {
+    color: T.ink.i4,
+    fontSize: 9,
+    fontWeight: "700",
+    fontFamily: "Inter_700Bold",
+    letterSpacing: T.tracking.wider,
+    marginTop: T.spacing.lg,
+  },
+  avertisment: {
+    color: T.state.warn,
+    fontSize: T.fontSize.xs,
+    fontFamily: "Inter_400Regular",
+    marginTop: T.spacing.sm,
+  },
   verdictRand: { flexDirection: "row", alignItems: "center", gap: T.spacing.md },
   verdictIcon: {
     width: 42,

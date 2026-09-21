@@ -3,7 +3,7 @@ import type { Ionicons } from "@expo/vector-icons";
 // ── Meniul ───────────────────────────────────────────────────────────────────
 //
 // Oglindește domeniile din șina de comandă a site-ului (`command-rail.tsx`),
-// comprimate de la șase la cinci: educația și comunitatea intră la „Mai mult",
+// comprimate de la șase la cinci: educația și comunitatea intră la „Mai mult”,
 // unde stă oricum contul. Ordinea din fiecare bulă e a site-ului, ca cineva
 // care folosește ambele să nu caute de două ori.
 //
@@ -26,7 +26,7 @@ export type NumeIconita = React.ComponentProps<typeof Ionicons>["name"];
 export interface ElementMeniu {
   eticheta: string;
   iconita: NumeIconita;
-  /** Rută internă (începe cu „/") sau cale web. */
+  /** Rută internă (începe cu „/”) sau cale web. */
   tinta: string;
   /** Ecran în aplicație; altfel se deschide browserul. */
   nativ?: boolean;

@@ -15,7 +15,7 @@ import { T, tonPnl, cifre } from "../../src/theme";
 // ── Rezultatul unui backtest ─────────────────────────────────────────────────
 //
 // Cifrele sunt aceleași ca pe site, dar ordinea e alta: pe telefon, prima
-// întrebare e „a mers sau nu", nu „câte bare a parcurs".
+// întrebare e „a mers sau nu”, nu „câte bare a parcurs”.
 //
 // TRANZACȚIILE SE ARATĂ ULTIMELE și doar primele cincizeci. Un backtest de doi
 // ani are sute; derulate toate, ar îngropa rezumatul. Cine vrea lista completă

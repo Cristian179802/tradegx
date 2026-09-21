@@ -22,10 +22,10 @@ import { T } from "../src/theme";
 // ── Parolă uitată ────────────────────────────────────────────────────────────
 //
 // RĂSPUNSUL E ACELAȘI indiferent dacă adresa există sau nu — așa răspunde și
-// serverul, deliberat. Un mesaj care ar spune „adresa asta nu există" ar
+// serverul, deliberat. Un mesaj care ar spune „adresa asta nu există” ar
 // transforma formularul într-un instrument de verificat cine are cont aici.
 //
-// De aceea ecranul nu pretinde că a trimis ceva: spune „dacă adresa există".
+// De aceea ecranul nu pretinde că a trimis ceva: spune „dacă adresa există”.
 // Formularea pare fricoasă, dar e singura onestă — noi chiar nu știm, și nici
 // n-ar trebui să afle cineva de aici.
 //

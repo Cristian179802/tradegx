@@ -89,7 +89,7 @@ export default function Grafice() {
   const [risc, setRisc] = React.useState(1);
 
   // Analiza AI a graficului. Nu se cere automat la deschidere: costă din cota
-  // lunară, iar cele mai multe deschideri ale ecranului sunt „arunc un ochi".
+  // lunară, iar cele mai multe deschideri ale ecranului sunt „arunc un ochi”.
   const [analiza, setAnaliza] = React.useState<Analiza | null>(null);
   const [analizeaza, setAnalizeaza] = React.useState(false);
   const [eroareAI, setEroareAI] = React.useState<string | null>(null);

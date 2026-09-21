@@ -1,9 +1,12 @@
 import * as React from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 import { api } from "../src/lib/api";
+import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
 import { bani, baniScurt, numar, procent } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
+import { Buton } from "../src/ui/Buton";
 import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { Bare, Curba, useLatime } from "../src/ui/grafice";
@@ -57,6 +60,7 @@ interface PeOra {
 const LUNI = ["ian.", "feb.", "mar.", "apr.", "mai", "iun.", "iul.", "aug.", "sept.", "oct.", "nov.", "dec."];
 
 export default function Analitice() {
+  const router = useRouter();
   const [latime, laMasurare] = useLatime();
 
   const c = useCerere<{ a: Analitice; ore: PeOra | null }>(async () => {
@@ -131,7 +135,14 @@ export default function Analitice() {
         <Gol
           iconita="bar-chart-outline"
           titlu="Încă nu e ce analiza"
-          text="Statisticile apar după prima tranzacție închisă."
+          text="Rată de câștig, profit factor, drawdown, curba contului — toate se calculează din tranzacții închise. Notează prima și ecranul prinde viață."
+          actiune={
+            <Buton
+              eticheta="Adaugă o tranzacție"
+              onPress={() => router.push("/(tabs)/adauga")}
+              iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+            />
+          }
         />
       ) : (
         <>

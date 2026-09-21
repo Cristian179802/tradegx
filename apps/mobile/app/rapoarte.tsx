@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api } from "../src/lib/api";
+import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
 import { bani, numar, procent } from "../src/lib/format";
 import { faPdf, type Foaie } from "../src/lib/foaie";
@@ -72,6 +73,7 @@ interface Fiscal {
 }
 
 export default function Rapoarte() {
+  const router = useRouter();
   const [fel, setFel] = React.useState<"performanta" | "fiscal">("performanta");
   const [an, setAn] = React.useState<string | undefined>(undefined);
   const [lucreaza, setLucreaza] = React.useState(false);
@@ -278,7 +280,14 @@ export default function Rapoarte() {
           <Gol
             iconita="document-text-outline"
             titlu="Nimic de raportat încă"
-            text="Raportul se face din tranzacții închise. Notează câteva și revino."
+            text="Raportul adună ce s-a întâmplat: rezultat, rată de câștig, defalcare pe luni, instrumente și setup-uri. Are nevoie de tranzacții închise."
+            actiune={
+              <Buton
+                eticheta="Adaugă o tranzacție"
+                onPress={() => router.push("/(tabs)/adauga")}
+                iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+              />
+            }
           />
         ) : (
           <>

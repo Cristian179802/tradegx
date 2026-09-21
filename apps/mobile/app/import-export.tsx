@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api, ApiError } from "../src/lib/api";
+import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
 import { dataScurta, numar } from "../src/lib/format";
 import { alegeFisierText, faCsv, trimiteText } from "../src/lib/fisiere";
@@ -25,7 +26,7 @@ import { T } from "../src/theme";
 // vizibil tot timpul, iar butonul nu se apasă fără el.
 //
 // REZULTATUL SPUNE ȘI CE N-A MERS. Ruta întoarce primele zece erori — le
-// arătăm pe toate zece. Un „importate: 43" fără numărul celor sărite lasă omul
+// arătăm pe toate zece. Un „importate: 43” fără numărul celor sărite lasă omul
 // să creadă că are tot.
 //
 // EXPORTUL SE FACE ÎN APLICAȚIE, din lista pe care o are deja. Nu există rută
@@ -68,6 +69,7 @@ interface Rezultat {
 }
 
 export default function ImportExport() {
+  const router = useRouter();
   const conturi = useCerere<Cont[]>(() => api.accounts.list() as Promise<Cont[]>);
   const lista = useCerere<{ trades: Tranzactie[] }>(
     () => api.trades.list() as Promise<{ trades: Tranzactie[] }>,
@@ -180,7 +182,14 @@ export default function ImportExport() {
         <Gol
           iconita="wallet-outline"
           titlu="Niciun cont"
-          text="Tranzacțiile se importă într-un cont. Adaugă unul întâi."
+          text="Tranzacțiile importate intră într-un cont, ca să se știe pe ce sold s-au întâmplat."
+          actiune={
+            <Buton
+              eticheta="Adaugă un cont"
+              onPress={() => router.push("/cont-nou")}
+              iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+            />
+          }
         />
       ) : (
         <>

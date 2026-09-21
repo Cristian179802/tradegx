@@ -23,7 +23,7 @@ import { T, tonPnl } from "../../src/theme";
 // creadă, nu ce a crezut.
 //
 // Emoțiile și greșelile sunt LISTE ÎNCHISE, nu text liber. Un câmp liber dă
-// „nervos", „nervoasa", „stresat" — trei etichete pentru același lucru, deci
+// „nervos”, „nervoasa”, „stresat” — trei etichete pentru același lucru, deci
 // nicio statistică. Listele sunt exact cele din `journalEntrySchema`.
 //
 // SALVAREA E EXPLICITĂ. Am fi putut salva la fiecare tastă, dar aici omul

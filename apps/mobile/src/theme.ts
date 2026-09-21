@@ -53,7 +53,7 @@ export const umbra = (nivel: 1 | 2 | 3) => {
 /**
  * Familia de fonturi pentru cifre. Pe web e Space Grotesk; pe telefon folosim
  * fontul de sistem cu cifre TABULARE, ca o coloană de sume să rămână aliniată.
- * Fără asta, „1" e mai îngust decât „8" și tot tabelul tremură la fiecare
+ * Fără asta, „1” e mai îngust decât „8” și tot tabelul tremură la fiecare
  * reîmprospătare.
  */
 export const cifre = {

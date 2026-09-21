@@ -8,7 +8,7 @@ import * as Sharing from "expo-sharing";
 // Trei drumuri, toate prin foile de sistem — niciunul nu cere permisiuni
 // declarate în manifest. Alegătorul de poze de pe Android modern (Photo Picker)
 // întoarce exact fișierul ales, fără acces la galerie; alegătorul de documente
-// la fel. Asta înseamnă că aplicația nu trebuie să ceară „acces la fotografii",
+// la fel. Asta înseamnă că aplicația nu trebuie să ceară „acces la fotografii”,
 // iar cine instalează nu vede un dialog care îl sperie.
 //
 // IMAGINILE PLEACĂ CA base64, nu ca multipart. Ruta serverului așa le așteaptă,

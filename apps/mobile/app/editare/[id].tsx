@@ -31,7 +31,7 @@ import { T, tonPnl } from "../../src/theme";
 // comun — clasificarea simbolului, parsarea numerelor — stă deja în
 // `@tradegx/core`.
 //
-// ȘTERGEREA CERE O CONFIRMARE CARE SPUNE CE SE PIERDE, nu „ești sigur?".
+// ȘTERGEREA CERE O CONFIRMARE CARE SPUNE CE SE PIERDE, nu „ești sigur?”.
 // Împreună cu tranzacția pleacă și nota din jurnal, iar asta merită scris.
 
 const SETUPURI = [

@@ -15,6 +15,7 @@ import {
   cheieLectie,
   type AcademyLevel,
 } from "../../src/lib/academia";
+import { Buton } from "../../src/ui/Buton";
 import { Card } from "../../src/ui/Card";
 import { Reveal } from "../../src/ui/Reveal";
 import { Ecran } from "../../src/ui/Ecran";
@@ -24,7 +25,7 @@ import { T } from "../../src/theme";
 
 // ── Academia ─────────────────────────────────────────────────────────────────
 //
-// Nouă module, de la „ce e un pip" până la sisteme de trading. Ordinea din
+// Nouă module, de la „ce e un pip” până la sisteme de trading. Ordinea din
 // listă e curriculumul recomandat, nu ordinea alfabetică — cine începe de la
 // modulul 6 nu înțelege modulul 6.
 //
@@ -33,7 +34,7 @@ import { T } from "../../src/theme";
 // schelet pentru un curs pe care îl ai pe disc ar fi fost o alegere proastă.
 //
 // PROGRESUL E PRIMUL LUCRU DE PE ECRAN, fiindcă la un curs de nouă module
-// întrebarea nu e „ce module există", ci „unde rămăsesem".
+// întrebarea nu e „ce module există”, ci „unde rămăsesem”.
 
 const CULOARE_NIVEL: Record<AcademyLevel, string> = {
   BEGINNER: T.pnl.gain,
@@ -133,7 +134,14 @@ export default function Academia() {
           <Gol
             iconita="school-outline"
             titlu="Lecțiile nu s-au încărcat"
-            text="Prima deschidere are nevoie de semnal. După aceea, cursul rămâne pe telefon."
+            text="Academia are nouă module, de la ce e un pip până la managementul riscului, cu laboratoare pe datele tale reale. Prima deschidere are nevoie de internet; după aceea cursul rămâne pe telefon."
+            actiune={
+              <Buton
+                eticheta="Încearcă din nou"
+                onPress={() => { void incarcaTot(true); }}
+                iconita={<Ionicons name="refresh" size={15} color="#ffffff" />}
+              />
+            }
           />
         ) : null
       ) : (

@@ -1,9 +1,12 @@
 import * as React from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 import { api } from "../src/lib/api";
+import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
 import { bani, baniScurt, numar, procent } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
+import { Buton } from "../src/ui/Buton";
 import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { Paywall } from "../src/ui/Paywall";
@@ -14,14 +17,14 @@ import { T, tonPnl, cifre } from "../src/theme";
 // ── Vedere instituțională ────────────────────────────────────────────────────
 //
 // Aceleași cifre pe care le-ar cere cineva care alocă bani altcuiva: Sharpe,
-// Sortino, Calmar, CAGR, drawdown maxim. Nu „cât ai făcut", ci „cât ai riscat
+// Sortino, Calmar, CAGR, drawdown maxim. Nu „cât ai făcut”, ci „cât ai riscat
 // ca să faci atât".
 //
 // FIECARE RAPORT ARE O PROPOZIȚIE SUB EL. Sharpe 1.4 nu înseamnă nimic pentru
 // cineva care nu lucrează în domeniu, iar un tablou de cifre fără explicații e
 // decor scump. Explicația e scurtă și spune pragul, nu definiția.
 //
-// `null` se afișează ca „—", nu ca 0. Un Sortino care nu se poate calcula
+// `null` se afișează ca „—”, nu ca 0. Un Sortino care nu se poate calcula
 // (nicio zi în pierdere) e o informație; un 0 în locul lui ar fi o minciună.
 
 interface Edge {
@@ -84,6 +87,7 @@ const CITIRE = {
 };
 
 export default function Institutional() {
+  const router = useRouter();
   const [latime, laMasurare] = useLatime();
   const c = useCerere<Institutional>(() => api.institutional() as Promise<Institutional>);
   const d = c.date;
@@ -131,7 +135,14 @@ export default function Institutional() {
           <Gol
             iconita="business-outline"
             titlu="Fără date suficiente"
-            text="Raporturile de risc au nevoie de o curbă de echitate. Apar după câteva zile cu tranzacții închise."
+            text="Sharpe, Sortino și Calmar se calculează pe o curbă de echitate — adică pe mai multe zile cu tranzacții închise, nu pe una singură."
+            actiune={
+              <Buton
+                eticheta="Adaugă o tranzacție"
+                onPress={() => router.push("/(tabs)/adauga")}
+                iconita={<Ionicons name="add" size={16} color="#ffffff" />}
+              />
+            }
           />
         ) : null
       ) : (

@@ -17,11 +17,11 @@ import { T, tonPnl, cifre } from "../src/theme";
 // contului) și unde e piața (cotațiile zilei).
 //
 // SESIUNILE SE CALCULEAZĂ LOCAL, din ceasul telefonului. O rută care ar
-// întoarce „Londra e deschisă" ar fi o cerere de rețea pentru ceva ce se știe
+// întoarce „Londra e deschisă” ar fi o cerere de rețea pentru ceva ce se știe
 // din oră — și ar fi greșită pentru cineva aflat în alt fus.
 //
 // Cotațiile vin de la aceeași rută ca uneltele de pe site. Când furnizorul
-// tace, rândul rămâne gol cu „—", nu cu ultima valoare știută: un preț vechi
+// tace, rândul rămâne gol cu „—”, nu cu ultima valoare știută: un preț vechi
 // afișat ca actual e mai rău decât niciun preț.
 
 const PERECHI = ["EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "USD/CAD", "XAU/USD", "BTC/USD"];

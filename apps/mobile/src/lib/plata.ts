@@ -10,13 +10,13 @@ import { api, ApiError, URL_API } from "./api";
 // AZI: Stripe Checkout, deschis în browserul APLICAȚIEI (Custom Tab pe Android),
 // nu în Chrome. Diferența e mare pentru cine folosește: pagina de plată apare
 // PESTE aplicație, cu un X în colț, iar la închidere ești înapoi exact unde
-// erai. Nu ieși din aplicație și nu te întorci prin butonul de „recente".
+// erai. Nu ieși din aplicație și nu te întorci prin butonul de „recente”.
 //
 // ⚠️ CE TREBUIE ȘTIUT ÎNAINTE DE PUBLICAREA ÎN GOOGLE PLAY.
 //
 // Google cere ca abonamentele digitale consumate în aplicație să treacă prin
 // Google Play Billing. Un buton care duce la Stripe — chiar și într-un Custom
-// Tab — e „anti-steering", cel mai frecvent motiv pentru care o aplicație e
+// Tab — e „anti-steering”, cel mai frecvent motiv pentru care o aplicație e
 // scoasă din magazin. Regula s-a slăbit după procesul Epic (SUA) și DMA (UE),
 // dar la review tot acolo se uită primul.
 //
@@ -38,7 +38,7 @@ export type RezultatPlata =
 /**
  * Deschide plata pentru treapta și perioada cerute.
  *
- * NU întoarce „a plătit / n-a plătit", și nu poate: browserul se închide la fel
+ * NU întoarce „a plătit / n-a plătit”, și nu poate: browserul se închide la fel
  * în ambele cazuri. Adevărul îl știe doar serverul, după ce Stripe îi trimite
  * evenimentul. De aceea ecranul reîmprospătează starea abonamentului la
  * întoarcere, în loc să presupună ceva.

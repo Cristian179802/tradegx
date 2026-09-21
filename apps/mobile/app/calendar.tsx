@@ -12,7 +12,7 @@ import { T, cifre } from "../src/theme";
 
 // ── Calendar economic ────────────────────────────────────────────────────────
 //
-// Întrebarea de dimineață e „ce mă poate lovi azi", nu „ce s-a anunțat
+// Întrebarea de dimineață e „ce mă poate lovi azi”, nu „ce s-a anunțat
 // săptămâna asta". De aceea lista e grupată pe ZILE, cu ziua de azi lipită sus
 // cât derulezi — altfel, pe o săptămână cu optzeci de evenimente, nu mai știi
 // unde ești.

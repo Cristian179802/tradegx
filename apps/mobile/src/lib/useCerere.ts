@@ -24,7 +24,7 @@ export interface StareCerere<T> {
   eroare: string | null;
   /**
    * Codul HTTP al ultimei erori. Ecranele au nevoie de el ca să deosebească
-   * „a picat rețeaua" de 402 — a doua nu e o defecțiune, e o ușă spre PRO, iar
+   * „a picat rețeaua” de 402 — a doua nu e o defecțiune, e o ușă spre PRO, iar
    * textul crud al erorii pe fundal roșu ar arăta ca prima.
    */
   stare: number | null;
@@ -67,7 +67,7 @@ export function useCerere<T>(
         if (anulat) return;
         if (e instanceof ApiError) {
           // 401 după reîmprospătare înseamnă sesiune moartă; poarta din layout
-          // se ocupă de ieșire. Aici nu arătăm „Neautorizat" peste ecran.
+          // se ocupă de ieșire. Aici nu arătăm „Neautorizat” peste ecran.
           setStare(e.status);
           setEroare(e.status === 401 || e.status === 402 ? null : e.message);
         } else {
