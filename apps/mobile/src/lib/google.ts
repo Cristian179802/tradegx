@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import * as Crypto from "expo-crypto";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
@@ -5,14 +6,20 @@ import { URL_API } from "./api";
 
 // ── Conectare cu Google ──────────────────────────────────────────────────────
 //
-// DE CE TRECE PRINTR-O FEREASTRĂ DE BROWSER. Sesiunea Google trăiește pe
-// tradegx.com, la NextAuth. Un selector nativ de conturi ar fi cerut un client
-// OAuth Android separat în Google Cloud Console, legat de amprenta cheii cu
-// care semnăm aplicația. Fereastra folosește clientul pe care site-ul îl are
-// deja, deci merge fără nicio configurare în plus.
+// DOUĂ DRUMURI, în ordinea asta:
 //
-// Fereastra e un Custom Tab PESTE aplicație, nu Chrome: rămâi în aplicație, iar
-// la final se închide singură. E același mecanism ca la plată.
+// 1. NATIV — selectorul de conturi al telefonului, fără browser. Ăsta e cel
+//    bun: nu te scoate din aplicație nicio clipă. Cere un client OAuth Android
+//    în Google Cloud Console, legat de amprenta cheii cu care semnăm.
+//
+// 2. FEREASTRĂ — rezerva, folosită DOAR dacă Google refuză nativul fiindcă
+//    amprenta sau pachetul nu sunt înregistrate (eroarea lor, DEVELOPER_ERROR).
+//    Fără rezerva asta, o aplicație livrată înaintea configurării din Console
+//    ar avea un buton care nu face nimic.
+//
+// Rezerva NU se folosește când omul a anulat sau când n-are internet: alea nu
+// sunt probleme de configurare, iar a-l plimba prin browser după ce tocmai a
+// închis fereastra nativă ar fi enervant.
 //
 // DE CE NU VINE TOKENUL DIRECT PRIN LINK. Drumul înapoi e `tradegx://`, iar pe
 // Android orice aplicație poate înregistra aceeași schemă. Deci prin link trece
@@ -39,7 +46,74 @@ function base64url(octeti: Uint8Array): string {
     .replace(/=+$/, "");
 }
 
+const ID_CLIENT_WEB =
+  (Constants.expoConfig?.extra?.googleWebClientId as string | undefined) ?? "";
+
+/** Intrarea folosită de ecrane. Nativ întâi, fereastră doar ca rezervă. */
 export async function conecteazaCuGoogle(): Promise<Rezultat> {
+  const nativ = await cuSelectorNativ();
+  if (nativ.fel !== "neconfigurat") return nativ;
+  return cuFereastra();
+}
+
+/**
+ * Selectorul de conturi al telefonului. `neconfigurat` înseamnă că Google n-a
+ * recunoscut aplicația — lipsește clientul Android din Console, sau amprenta
+ * nu se potrivește. Doar atunci merită încercată fereastra.
+ */
+async function cuSelectorNativ(): Promise<Rezultat | { fel: "neconfigurat" }> {
+  if (!ID_CLIENT_WEB) return { fel: "neconfigurat" };
+
+  try {
+    const { GoogleSignin } = await import("@react-native-google-signin/google-signin");
+
+    GoogleSignin.configure({ webClientId: ID_CLIENT_WEB, offlineAccess: false });
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+    const raspuns = await GoogleSignin.signIn();
+    const idToken =
+      (raspuns as { data?: { idToken?: string | null } }).data?.idToken ??
+      (raspuns as { idToken?: string | null }).idToken ??
+      null;
+
+    if (!idToken) {
+      // Selectorul s-a închis fără să aleagă nimeni.
+      return { fel: "anulat" };
+    }
+
+    const r = await fetch(`${URL_API}/api/auth/mobile/google/native`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+    const d = await r.json().catch(() => null);
+
+    // Serverul n-are cheile Google puse; fereastra n-ar merge nici ea, dar
+    // mesajul de acolo e la fel de limpede.
+    if (r.status === 503) return { fel: "neconfigurat" };
+    if (!r.ok) return { fel: "eroare", mesaj: d?.error ?? "Nu am putut termina conectarea." };
+
+    return { fel: "gata", accessToken: d.accessToken, refreshToken: d.refreshToken, user: d.user };
+  } catch (e) {
+    const cod = (e as { code?: string })?.code;
+    const { statusCodes } = await import("@react-native-google-signin/google-signin");
+
+    if (cod === statusCodes.SIGN_IN_CANCELLED) return { fel: "anulat" };
+    if (cod === statusCodes.IN_PROGRESS) return { fel: "anulat" };
+    if (cod === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) return { fel: "neconfigurat" };
+
+    // DEVELOPER_ERROR = Google nu recunoaște aplicația: lipsește clientul
+    // Android din Console, sau amprenta de semnare nu se potrivește. Biblioteca
+    // nu-l mai ține în `statusCodes` de la versiunea 13, dar Android tot cu el
+    // răspunde — ca text, sau ca 10, codul lui din Play Services.
+    if (cod === "DEVELOPER_ERROR" || String(cod) === "10") return { fel: "neconfigurat" };
+    // Orice altceva (rețea, Google căzut) — nu e de configurare, deci n-are rost
+    // să-l plimbăm prin browser după același lucru.
+    return { fel: "eroare", mesaj: "Conectarea cu Google n-a mers. Încearcă din nou." };
+  }
+}
+
+async function cuFereastra(): Promise<Rezultat> {
   // Secretul rămâne în memoria aplicației, atât. Nu-l salvăm nicăieri: dacă
   // fluxul nu se termină în două minute, oricum nu mai e bun de nimic.
   const secret = base64url(await Crypto.getRandomBytesAsync(32));

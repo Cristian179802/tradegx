@@ -44,6 +44,10 @@ export const API_ERROR_EN: Record<string, string> = {
     "If the address exists and isn't verified, we've sent a new email.",
   "Prea multe încercări. Încearcă din nou mai târziu.": "Too many attempts. Try again later.",
   "Conectare expirată. Încearcă din nou.": "Sign-in expired. Please try again.",
+  "Conectarea cu Google nu e pornită pe server.": "Google sign-in is not enabled on the server.",
+  "Nu am putut verifica la Google. Încearcă din nou.": "Could not verify with Google. Please try again.",
+  "Adresa ta Google nu e confirmată.": "Your Google address is not verified.",
+  "Ai deja un cont pe adresa asta, făcut cu parolă. Intră cu parola, apoi leagă Google din setările de pe site.": "You already have a password account on this address. Sign in with your password, then link Google from the settings on the website.",
 
   // Cereri invalide
   "Cerere invalidă": "Invalid request",

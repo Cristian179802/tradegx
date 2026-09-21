@@ -158,7 +158,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-async function bootstrapNewUser(userId: string): Promise<void> {
+/**
+ * Abonamentul de probă + contul demo pentru un utilizator nou. Exportat ca
+ * să-l poată folosi și conectarea nativă cu Google din aplicație: un cont
+ * făcut de pe telefon trebuie să arate exact ca unul făcut de pe web.
+ */
+export async function bootstrapNewUser(userId: string): Promise<void> {
   if (!userId) return;
 
   const existingSub = await prisma.subscription.findUnique({

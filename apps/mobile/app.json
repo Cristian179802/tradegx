@@ -58,7 +58,8 @@
           "color": "#6d75f6"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": false
