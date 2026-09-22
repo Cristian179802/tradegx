@@ -5,7 +5,6 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api } from "../src/lib/api";
 import { useCerere } from "../src/lib/useCerere";
-import { cumpara, deschidePortalul, type Perioada, type Treapta } from "../src/lib/plata";
 import { dataScurta } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
 import { Buton } from "../src/ui/Buton";
@@ -31,9 +30,21 @@ import { umple } from "../src/lib/i18n";
 // vezi ce include EL, cu o bifă sau o linie pe fiecare rând — aceleași rânduri,
 // în aceeași ordine ca pe site.
 //
-// PLATA se deschide în browserul aplicației, nu în Chrome: fereastra apare
-// peste aplicație și la închidere ești înapoi unde erai. Vezi `lib/plata.ts`
-// pentru ce înseamnă asta față de regulile Google Play.
+// NU SE CUMPĂRĂ NIMIC DE AICI, și e o decizie, nu o scăpare.
+//
+// Google Play cere ca orice conținut digital cumpărat DIN aplicație să treacă
+// prin Play Billing, și interzice explicit trimiterea omului în altă parte ca
+// să plătească — „anti-steering". Un buton care deschidea Stripe într-o
+// fereastră era primul lucru la care s-ar fi uitat la review, și motiv sigur
+// de respingere.
+//
+// Deci ecranul spune ce e TradeGX, pe ce plan ești și ce include fiecare
+// treaptă — fără prețuri, fără butoane de cumpărare, fără îndrumări spre
+// site. Cine are PRO cumpărat în altă parte îl are și aici, fiindcă planul
+// vine de la server odată cu contul.
+//
+// `lib/plata.ts` rămâne în cod, nefolosit: dacă într-o zi punem Play Billing,
+// se schimbă funcția `cumpara()` și butoanele se întorc aici.
 
 interface Plan {
   id: "free" | "pro" | "premium";
@@ -89,9 +100,7 @@ export default function Abonament() {
   const preturi = useCerere<Preturi>(() => api.pricing() as Promise<Preturi>);
   const stare = useCerere<Stare>(() => api.abonament.stare() as Promise<Stare>);
 
-  const [perioada, setPerioada] = React.useState<Perioada>("annual");
   const [ales, setAles] = React.useState<"free" | "pro" | "premium">("pro");
-  const [lucreaza, setLucreaza] = React.useState(false);
   const [mesaj, setMesaj] = React.useState<string | null>(null);
 
   const p = preturi.date;
@@ -106,40 +115,6 @@ export default function Abonament() {
   }, [s?.trialEnd]);
 
   const planAles = p?.planuri.find((x) => x.id === ales) ?? null;
-
-  const cumparaAcum = async (treapta: Treapta) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    setLucreaza(true);
-    setMesaj(null);
-    const r = await cumpara(treapta, perioada);
-    setLucreaza(false);
-
-    if (r.fel === "neconfigurat") {
-      setMesaj("Plățile nu sunt pornite momentan pe server. Revino în curând.");
-      return;
-    }
-    if (r.fel === "eroare") {
-      setMesaj(r.mesaj);
-      return;
-    }
-    // Fereastra s-a închis. Nu știm dacă a plătit — serverul știe, după ce
-    // primește evenimentul de la Stripe. Deci întrebăm, în loc să presupunem.
-    setMesaj("Verific starea abonamentului…");
-    setTimeout(() => {
-      stare.reia();
-      setMesaj(null);
-    }, 1500);
-  };
-
-  const administreaza = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    setLucreaza(true);
-    setMesaj(null);
-    const r = await deschidePortalul();
-    setLucreaza(false);
-    if (r.fel === "eroare") setMesaj(r.mesaj);
-    else if (r.fel === "inchis") setTimeout(() => stare.reia(), 1200);
-  };
 
   return (
     <Ecran
@@ -193,17 +168,6 @@ export default function Abonament() {
                 </Text>
               ) : null}
 
-              {areAbonament ? (
-                <Buton
-                  eticheta="Administrează abonamentul"
-                  varianta="secundar"
-                  onPress={administreaza}
-                  incarca={lucreaza}
-                  plin
-                  style={{ marginTop: T.spacing.lg }}
-                  iconita={<Ionicons name="card-outline" size={15} color={T.ink.i1} />}
-                />
-              ) : null}
             </Card>
           </Reveal>
 
@@ -233,37 +197,9 @@ export default function Abonament() {
             </Card>
           </Reveal>
 
-          {/* ── Perioada ── */}
-          <Sectiune titlu="Planuri" nota={p.titlu} />
-          <View style={st.perioade}>
-            {(["monthly", "annual"] as const).map((x) => {
-              const activ = x === perioada;
-              return (
-                <Pressable
-                  key={x}
-                  onPress={() => {
-                    Haptics.selectionAsync().catch(() => {});
-                    setPerioada(x);
-                  }}
-                  style={[st.pastilaPerioada, activ && st.pastilaActiva]}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: activ }}
-                >
-                  <Text style={[st.textPerioada, activ && { color: T.accent.base }]}>
-                    {x === "monthly" ? p.etichetaLunar : p.etichetaAnual}
-                  </Text>
-                  {x === "annual" ? (
-                    <Text style={st.economie}>−{p.economiePct}%</Text>
-                  ) : null}
-                </Pressable>
-              );
-            })}
-          </View>
-
           {/* ── Cardurile de plan ── */}
           {p.planuri.map((plan, i) => {
             const esteCurent = plan.id === planCurent;
-            const pret = perioada === "annual" ? plan.anualPeLuna : plan.lunar;
             return (
               <Reveal key={plan.id} intarziere={i * 60} style={{ marginBottom: T.spacing.md }}>
                 <Card
@@ -274,7 +210,7 @@ export default function Abonament() {
                   culoareMuchie={
                     plan.id === ales ? T.accent.line : "rgba(255,255,255,0.04)"
                   }
-                  accesibilEticheta={`${plan.nume}, ${pret === 0 ? "gratuit" : `${pret.toFixed(2)} ${p.simbol} pe lună`}`}
+                  accesibilEticheta={plan.nume}
                 >
                   <View style={st.antetPlan}>
                     <View style={{ flex: 1, minWidth: 0 }}>
@@ -297,21 +233,6 @@ export default function Abonament() {
                     ) : null}
                   </View>
 
-                  <View style={st.randPret}>
-                    <Text style={[st.pret, cifre]}>
-                      {pret === 0 ? "0" : pret.toFixed(pret % 1 === 0 ? 0 : 2)}
-                    </Text>
-                    <Text style={st.simbol}>{p.simbol}</Text>
-                    <Text style={st.peLuna}>/ lună</Text>
-                  </View>
-                  <Text style={st.notaPret}>
-                    {plan.lunar === 0
-                      ? plan.nota
-                      : perioada === "annual"
-                        ? umple("{p1} {p2} pe an, o singură plată", { p1: plan.anual, p2: p.simbol })
-                        : "facturat lunar"}
-                  </Text>
-
                   <View style={st.punctePlan}>
                     {plan.puncte.map((x) => (
                       <View key={x} style={st.randPunct}>
@@ -321,22 +242,6 @@ export default function Abonament() {
                     ))}
                   </View>
 
-                  {plan.id !== "free" && !esteCurent ? (
-                    <Buton
-                      eticheta={
-                        areAbonament
-                          ? umple("Treci pe {p1}", { p1: plan.nume })
-                          : zileTrial != null && zileTrial > 0
-                            ? umple("Continuă cu {p1}", { p1: plan.nume })
-                            : plan.buton
-                      }
-                      onPress={() => cumparaAcum(plan.id as Treapta)}
-                      incarca={lucreaza}
-                      plin
-                      style={{ marginTop: T.spacing.lg }}
-                      iconita={<Ionicons name="lock-closed" size={14} color="#ffffff" />}
-                    />
-                  ) : null}
                 </Card>
               </Reveal>
             );
@@ -367,15 +272,9 @@ export default function Abonament() {
             })}
           </Card>
 
-          {/* ── Întrebări ── */}
-          <Sectiune titlu={p.intrebari.titlu} />
-          {p.intrebari.lista.map((q, i) => (
-            <Intrebare key={i} q={q.intrebare} a={q.raspuns} />
-          ))}
-
           <Text style={st.subsol}>
-            Plata se face prin Stripe, într-o fereastră securizată. TradeGX nu vede și nu
-            stochează datele cardului tău.
+            Planul tău se vede aici imediat ce se schimbă. Funcțiile din PRO se
+            deblochează singure, fără să reinstalezi nimic.
           </Text>
         </>
       )}
