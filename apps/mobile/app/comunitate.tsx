@@ -24,6 +24,7 @@ import { AntetEcran, SPATIU_BARA } from "../src/ui/Ecran";
 import { Insigna, Segmente } from "../src/ui/parti";
 import { T, ATINGERE_MIN } from "../src/theme";
 import { tr } from "../src/lib/i18n";
+import { umple } from "../src/lib/i18n";
 
 // ── Comunitate ───────────────────────────────────────────────────────────────
 //
@@ -175,7 +176,7 @@ function Postari({
       <Antet
         fila={fila}
         setFila={setFila}
-        subtitlu={postari.length > 0 ? `${postari.length} postări recente` : "Ce discută ceilalți"}
+        subtitlu={postari.length > 0 ? umple("{p1} postări recente", { p1: postari.length }) : "Ce discută ceilalți"}
         actiune={
           <Pressable
             onPress={() => {
@@ -293,7 +294,7 @@ function CardPostare({
                 onPress={() => onReactie(e)}
                 style={[st.emoji, activ && st.emojiActiv]}
                 accessibilityRole="button"
-                accessibilityLabel={`Reacționează cu ${e}`}
+                accessibilityLabel={umple("Reacționează cu {p1}", { p1: e })}
                 accessibilityState={{ selected: activ }}
               >
                 <Text style={st.textEmoji}>{e}</Text>
@@ -530,7 +531,7 @@ function Echipe({
       setNumeEchipa("");
       c.reia();
       if (e.inviteCode) {
-        setEroare(`Echipa e gata. Codul de invitație: ${e.inviteCode}`);
+        setEroare(umple("Echipa e gata. Codul de invitație: {p1}", { p1: e.inviteCode }));
       }
     } catch (e) {
       setEroare(e instanceof ApiError ? e.message : "Nu am putut crea echipa.");
@@ -565,7 +566,7 @@ function Echipe({
       <Antet
         fila={fila}
         setFila={setFila}
-        subtitlu={aleMele.length > 0 ? `Ești în ${aleMele.length} ${aleMele.length === 1 ? "echipă" : "echipe"}` : "Grupuri de trading"}
+        subtitlu={aleMele.length > 0 ? umple(aleMele.length === 1 ? "Ești în {n} echipă" : "Ești în {n} echipe", { n: aleMele.length }) : "Grupuri de trading"}
       />
 
       <FlatList

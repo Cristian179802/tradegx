@@ -23,6 +23,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
 import { Insigna, Rand, Sectiune } from "../src/ui/parti";
 import { T, tonPnl } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Calculator de lot ────────────────────────────────────────────────────────
 //
@@ -95,7 +96,7 @@ export default function Calculator() {
           const k = (await api.charts.quote(nevoie)) as Cotatie;
           setCursuri((p) => ({ ...p, [nevoie]: k.price }));
         } catch {
-          setNotita(`Nu am găsit cursul ${nevoie}. Fără el nu pot calcula lotul corect.`);
+          setNotita(umple("Nu am găsit cursul {p1}. Fără el nu pot calcula lotul corect.", { p1: nevoie }));
         }
       }
     } catch (e) {
@@ -145,7 +146,7 @@ export default function Calculator() {
   const lipsesteCurs = rezultat != null && rezultat.vp == null;
 
   return (
-    <Ecran titlu="Calculator lot" subtitlu={`Risc în ${moneda}, pe ${s || "—"}`}>
+    <Ecran titlu="Calculator lot" subtitlu={umple("Risc în {moneda}, pe {simbol}", { moneda, simbol: s || "—" })}>
       <Reveal>
         <Card>
           <View style={st.randSimbol}>
@@ -235,7 +236,7 @@ export default function Calculator() {
               <Ionicons name="warning-outline" size={18} color={T.state.warn} />
               <Text style={st.textAvertisment}>
                 Nu pot afla valoarea pipului pentru {s} într-un cont în {moneda}
-                {rezultat?.nevoie ? `, fiindcă îmi lipsește cursul ${rezultat.nevoie}` : ""}.
+                {rezultat?.nevoie ? umple(", fiindcă îmi lipsește cursul {p1}", { p1: rezultat.nevoie }) : ""}.
                 {"\n\n"}
                 Apasă „Preț” — îl aduc automat. Prefer să nu afișez nimic decât o
                 cifră inventată pe care ai trimite-o la broker.

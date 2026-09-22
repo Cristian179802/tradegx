@@ -13,6 +13,7 @@ import { Schelet } from "../../src/ui/Schelet";
 import { AntetEcran, SPATIU_BARA } from "../../src/ui/Ecran";
 import { BaraProgres, Gol, Segmente, Statistica } from "../../src/ui/parti";
 import { T, tonPnl, cifre } from "../../src/theme";
+import { umple } from "../../src/lib/i18n";
 
 // ── Jurnal detaliat ──────────────────────────────────────────────────────────
 //
@@ -101,7 +102,7 @@ export default function JurnalDetaliat() {
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <AntetEcran
           titlu="Jurnal"
-          subtitlu={s ? `${s.journaled} din ${s.totalTrades} tranzacții notate` : null}
+          subtitlu={s ? umple("{p1} din {p2} tranzacții notate", { p1: s.journaled, p2: s.totalTrades }) : null}
         />
 
         {c.incarca && toate.length === 0 ? (

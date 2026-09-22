@@ -5,7 +5,7 @@ import { Text } from "../src/ui/Text";
 import { api } from "../src/lib/api";
 import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
-import { bani, baniScurt, numar, procent } from "../src/lib/format";
+import { bani, baniScurt, numar, procent , lunaScurta} from "../src/lib/format";
 import { Card } from "../src/ui/Card";
 import { Buton } from "../src/ui/Buton";
 import { Reveal } from "../src/ui/Reveal";
@@ -13,6 +13,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { Bare, Curba, useLatime } from "../src/ui/grafice";
 import { Gol, GrilaStatistici, Rand, Sectiune, Statistica } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Analytics ────────────────────────────────────────────────────────────────
 //
@@ -58,7 +59,6 @@ interface PeOra {
   trades: { time: string; pnl: number }[];
 }
 
-const LUNI = ["ian.", "feb.", "mar.", "apr.", "mai", "iun.", "iul.", "aug.", "sept.", "oct.", "nov.", "dec."];
 
 export default function Analitice() {
   const router = useRouter();
@@ -88,7 +88,7 @@ export default function Analitice() {
       (a?.monthlyPnl ?? []).slice(-8).map((x) => {
         const [an, luna] = x.month.split("-");
         const i = Number(luna) - 1;
-        return { eticheta: `${LUNI[i] ?? luna}`, valoare: x.pnl, an };
+        return { eticheta: lunaScurta(i), valoare: x.pnl, an };
       }),
     [a?.monthlyPnl],
   );
@@ -123,7 +123,7 @@ export default function Analitice() {
   return (
     <Ecran
       titlu="Analytics"
-      subtitlu={s ? `${s.totalTrades} tranzacții închise` : null}
+      subtitlu={s ? umple("{p1} tranzacții închise", { p1: s.totalTrades }) : null}
       incarca={c.incarca && !a}
       scheletRanduri={4}
       reimprospateaza={c.reimprospateaza}
@@ -251,7 +251,7 @@ export default function Analitice() {
                       const cea = [...peOra].sort((x, y) => y.valoare - x.valoare)[0];
                       const rea = [...peOra].sort((x, y) => x.valoare - y.valoare)[0];
                       if (!cea || !rea) return "";
-                      return `Cel mai bine la ora ${cea.eticheta}, cel mai prost la ${rea.eticheta}.`;
+                      return umple("Cel mai bine la ora {p1}, cel mai prost la {p2}.", { p1: cea.eticheta, p2: rea.eticheta });
                     })()}
                   </Text>
                 </Card>

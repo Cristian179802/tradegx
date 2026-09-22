@@ -14,6 +14,7 @@ import { Paywall } from "../src/ui/Paywall";
 import { Curba, useLatime } from "../src/ui/grafice";
 import { Gol, GrilaStatistici, Rand, Sectiune, Statistica } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Vedere instituțională ────────────────────────────────────────────────────
 //
@@ -122,7 +123,7 @@ export default function Institutional() {
   return (
     <Ecran
       titlu="Instituțional"
-      subtitlu={p ? `${p.tradingDays} zile de tranzacționare` : "Cifrele pe care le cere un alocator"}
+      subtitlu={p ? umple("{n} zile de tranzacționare", { n: p.tradingDays }) : "Cifrele pe care le cere un alocator"}
       incarca={c.incarca && !d}
       scheletRanduri={4}
       reimprospateaza={c.reimprospateaza}

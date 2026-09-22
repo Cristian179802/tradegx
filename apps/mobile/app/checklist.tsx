@@ -11,6 +11,7 @@ import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { BaraProgres } from "../src/ui/parti";
 import { T, ATINGERE_MIN } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Checklist înainte de intrare ─────────────────────────────────────────────
 //
@@ -183,7 +184,7 @@ export default function Checklist() {
               color={toate ? T.pnl.gain : T.ink.i3}
             />
             <Text style={[st.stare, toate && { color: T.pnl.gain }]}>
-              {toate ? "Ești pregătit să tranzacționezi" : `${bifate} din ${total} verificate`}
+              {toate ? "Ești pregătit să tranzacționezi" : umple("{p1} din {p2} verificate", { p1: bifate, p2: total })}
             </Text>
           </View>
           <BaraProgres
@@ -227,7 +228,7 @@ export default function Checklist() {
                 onPress={() => sterge(e.id)}
                 style={st.sterge}
                 accessibilityRole="button"
-                accessibilityLabel={`Șterge regula: ${afisat(e)}`}
+                accessibilityLabel={umple("Șterge regula: {p1}", { p1: afisat(e) })}
                 hitSlop={6}
               >
                 <Ionicons name="close" size={15} color={T.ink.i4} />

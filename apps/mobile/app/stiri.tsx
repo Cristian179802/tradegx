@@ -13,6 +13,8 @@ import { Schelet } from "../src/ui/Schelet";
 import { AntetEcran, SPATIU_BARA } from "../src/ui/Ecran";
 import { Gol, Segmente } from "../src/ui/parti";
 import { T } from "../src/theme";
+import { umple } from "../src/lib/i18n";
+import { tr } from "../src/lib/i18n";
 
 // ── Știri ────────────────────────────────────────────────────────────────────
 //
@@ -77,7 +79,7 @@ export default function Stiri() {
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <AntetEcran
           titlu="Știri"
-          subtitlu={toate.length > 0 ? `${toate.length} titluri · ${mari} cu impact mare` : "Ce se scrie acum"}
+          subtitlu={toate.length > 0 ? umple("{n} titluri · {mari} cu impact mare", { n: toate.length, mari }) : "Ce se scrie acum"}
         />
 
         <View style={st.filtre}>
@@ -121,7 +123,7 @@ export default function Stiri() {
                 <Card
                   onPress={() => deschide(item.link)}
                   culoareMuchie={item.impact === "HIGH" ? "rgba(251,113,133,0.30)" : "rgba(255,255,255,0.04)"}
-                  accesibilEticheta={`${item.title}. ${ETICHETA[item.impact] ?? ""}. Se deschide în browser.`}
+                  accesibilEticheta={umple("{titlu}. {impact}. Se deschide în browser.", { titlu: item.title, impact: tr(ETICHETA[item.impact] ?? "") })}
                 >
                   <View style={st.antet}>
                     <View style={[st.pastilaImpact, { backgroundColor: `${CULOARE[item.impact] ?? T.ink.i4}1F` }]}>

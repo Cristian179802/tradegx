@@ -11,6 +11,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
 import { Gol, GrilaStatistici, Sectiune, Statistica } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Piața azi ────────────────────────────────────────────────────────────────
 //
@@ -94,7 +95,7 @@ export default function Piata() {
                 valoare={bani(puls.pnlToday, "")}
                 culoare={tonPnl(puls.pnlToday)}
                 marime={T.fontSize.xl}
-                nota={`${puls.tradesToday} ${puls.tradesToday === 1 ? "tranzacție" : "tranzacții"}`}
+                nota={umple(puls.tradesToday === 1 ? "{n} tranzacție" : "{n} tranzacții", { n: puls.tradesToday })}
                 style={st.celula}
               />
               <Statistica

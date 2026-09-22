@@ -10,6 +10,7 @@ import { Schelet } from "../src/ui/Schelet";
 import { AntetEcran, SPATIU_BARA } from "../src/ui/Ecran";
 import { Gol, Segmente } from "../src/ui/parti";
 import { T, cifre } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Calendar economic ────────────────────────────────────────────────────────
 //
@@ -110,7 +111,7 @@ export default function Calendar() {
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <AntetEcran
           titlu="Calendar"
-          subtitlu={c.date ? `${c.date.count} evenimente · ${c.date.high} cu impact mare` : "Ce mișcă piața"}
+          subtitlu={c.date ? umple("{p1} evenimente · {p2} cu impact mare", { p1: c.date.count, p2: c.date.high }) : "Ce mișcă piața"}
         />
 
         <View style={st.filtre}>
@@ -154,7 +155,7 @@ export default function Calendar() {
             renderSectionHeader={({ section }) => (
               <View style={st.antetZi}>
                 <Text style={[st.textZi, section.esteAzi && { color: T.accent.base }]}>
-                  {section.esteAzi ? `Azi · ${section.titlu}` : section.titlu}
+                  {section.esteAzi ? umple("Azi · {zi}", { zi: section.titlu }) : section.titlu}
                 </Text>
               </View>
             )}

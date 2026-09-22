@@ -6,7 +6,7 @@ import * as Haptics from "expo-haptics";
 import { api } from "../src/lib/api";
 import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
-import { bani, numar, procent } from "../src/lib/format";
+import { bani, numar, procent , lunaScurta} from "../src/lib/format";
 import { faPdf, type Foaie } from "../src/lib/foaie";
 import { Card } from "../src/ui/Card";
 import { Buton } from "../src/ui/Buton";
@@ -15,6 +15,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { Paywall } from "../src/ui/Paywall";
 import { Gol, GrilaStatistici, Rand, Sectiune, Segmente, Statistica } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Rapoarte ─────────────────────────────────────────────────────────────────
 //
@@ -33,10 +34,6 @@ import { T, tonPnl, cifre } from "../src/theme";
 // SE VEDE ÎNAINTE SĂ SE TRIMITĂ. Un buton care scoate direct un PDF pe care
 // nu l-ai văzut e un buton pe care îl apeși de trei ori ca să verifici.
 
-const LUNI = [
-  "ianuarie", "februarie", "martie", "aprilie", "mai", "iunie",
-  "iulie", "august", "septembrie", "octombrie", "noiembrie", "decembrie",
-];
 
 const FELURI = [
   { v: "performanta" as const, e: "Performanță" },
@@ -89,7 +86,7 @@ export default function Rapoarte() {
 
   const luna = (m: string) => {
     const [a, l] = m.split("-");
-    return `${LUNI[Number(l) - 1] ?? l} ${a}`;
+    return umple("{luna} {an}", { luna: lunaScurta(Number(l) - 1), an: a });
   };
 
   /* ── Foile, construite din aceleași cifre care se văd pe ecran ─────────── */
@@ -168,7 +165,7 @@ export default function Rapoarte() {
     const s = f.summary;
     return {
       titlu: `Raport fiscal ${f.year}`,
-      subtitlu: `${s.totalTrades} tranzacții închise · toate conturile`,
+      subtitlu: umple("{n} tranzacții închise · toate conturile", { n: s.totalTrades }),
       sectiuni: [
         {
           titlu: "Rezumat fiscal",
@@ -187,7 +184,7 @@ export default function Rapoarte() {
               titlu: "Pe luni",
               capete: ["Luna", "Tranzacții", "Rezultat"],
               randuri: f.monthly.map((x) => ({
-                eticheta: LUNI[x.month - 1] ?? String(x.month),
+                eticheta: lunaScurta(x.month - 1),
                 valori: [String(x.trades), bani(x.pnl, m)],
                 ton: (x.pnl >= 0 ? "castig" : "pierdere") as "castig" | "pierdere",
               })),
@@ -251,7 +248,7 @@ export default function Rapoarte() {
       subtitlu={
         fel === "performanta"
           ? p
-            ? `${p.summary.totalTrades} tranzacții`
+            ? umple("{p1} tranzacții", { p1: p.summary.totalTrades })
             : "Cum a mers, pe hârtie"
           : f
             ? `Anul ${f.year}`
@@ -379,7 +376,7 @@ export default function Rapoarte() {
           {f.empty ? (
             <Gol
               iconita="receipt-outline"
-              titlu={`Nimic în ${f.year}`}
+              titlu={umple("Nimic în {p1}", { p1: f.year })}
               text="Nicio tranzacție închisă în anul ăsta."
             />
           ) : (
@@ -424,7 +421,7 @@ export default function Rapoarte() {
                 titlu="Pe luni"
                 capete={["Luna", "Tranz.", "Rezultat"]}
                 randuri={f.monthly.map((x) => ({
-                  eticheta: LUNI[x.month - 1] ?? String(x.month),
+                  eticheta: lunaScurta(x.month - 1),
                   valori: [String(x.trades), bani(x.pnl, "")],
                   pnl: x.pnl,
                 }))}

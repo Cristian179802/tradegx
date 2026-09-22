@@ -14,6 +14,7 @@ import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { Gol, Insigna, Rand, Sectiune } from "../src/ui/parti";
 import { T } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Import și export ─────────────────────────────────────────────────────────
 //
@@ -160,7 +161,7 @@ export default function ImportExport() {
     );
     setLucreaza(false);
     if (r.fel === "eroare") setMesaj(r.mesaj);
-    else if (r.fel === "salvat") setMesaj(`Fișier salvat: ${r.cale}`);
+    else if (r.fel === "salvat") setMesaj(umple("Fișier salvat: {p1}", { p1: r.cale }));
   };
 
   const cont = conturi.date?.find((c) => c.id === contAles) ?? null;
@@ -252,7 +253,7 @@ export default function ImportExport() {
                   />
                   <Text style={st.titluRezultat}>
                     {rezultat.imported > 0
-                      ? `${rezultat.imported} ${rezultat.imported === 1 ? "tranzacție importată" : "tranzacții importate"}`
+                      ? umple(rezultat.imported === 1 ? "{n} tranzacție importată" : "{n} tranzacții importate", { n: rezultat.imported })
                       : "Nicio tranzacție importată"}
                   </Text>
                   {numeFisier ? <Insigna text={numeFisier} culoare={T.ink.i4} /> : null}

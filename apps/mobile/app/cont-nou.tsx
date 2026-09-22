@@ -13,6 +13,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { Paywall } from "../src/ui/Paywall";
 import { Insigna, Rand, Sectiune } from "../src/ui/parti";
 import { T } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Cont de trading nou ──────────────────────────────────────────────────────
 //
@@ -318,7 +319,7 @@ export default function ContNou() {
           </View>
 
           <Camp
-            eticheta={`Sold inițial (${moneda})`}
+            eticheta={umple("Sold inițial ({p1})", { p1: moneda })}
             valoare={sold}
             onChange={setSold}
             numeric

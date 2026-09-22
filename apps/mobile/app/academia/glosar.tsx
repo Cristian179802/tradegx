@@ -18,6 +18,7 @@ import { Schelet } from "../../src/ui/Schelet";
 import { AntetEcran, SPATIU_BARA } from "../../src/ui/Ecran";
 import { Gol, Insigna } from "../../src/ui/parti";
 import { T, ATINGERE_MIN } from "../../src/theme";
+import { umple } from "../../src/lib/i18n";
 
 // ── Glosar ───────────────────────────────────────────────────────────────────
 //
@@ -93,7 +94,7 @@ export default function Glosar() {
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <AntetEcran
           titlu="Glosar"
-          subtitlu={toate.length > 0 ? `${toate.length} termeni` : "Cuvintele din lecții"}
+          subtitlu={toate.length > 0 ? umple("{n} termeni", { n: toate.length }) : "Cuvintele din lecții"}
         />
 
         <View style={st.cautare}>

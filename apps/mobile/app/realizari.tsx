@@ -11,6 +11,8 @@ import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
 import { BaraProgres, Sectiune } from "../src/ui/parti";
 import { T } from "../src/theme";
+import { umple } from "../src/lib/i18n";
+import { tr } from "../src/lib/i18n";
 
 // ── Realizări ────────────────────────────────────────────────────────────────
 //
@@ -51,7 +53,7 @@ export default function Realizari() {
   return (
     <Ecran
       titlu="Realizări"
-      subtitlu={total > 0 ? `${deblocate.length} din ${total} deblocate` : "Obiceiurile tale, măsurate"}
+      subtitlu={total > 0 ? umple("{p1} din {p2} deblocate", { p1: deblocate.length, p2: total }) : "Obiceiurile tale, măsurate"}
       incarca={c.incarca && !d}
       scheletRanduri={4}
       reimprospateaza={c.reimprospateaza}
@@ -85,7 +87,7 @@ export default function Realizari() {
                   <Text style={st.recordSerie}>
                     {d.streak.current >= d.streak.best && d.streak.current > 0
                       ? "E cel mai lung șir al tău. Nu-l rupe azi."
-                      : `Recordul tău: ${d.streak.best} ${d.streak.best === 1 ? "zi" : "zile"}.`}
+                      : umple(d.streak.best === 1 ? "Recordul tău: {n} zi." : "Recordul tău: {n} zile.", { n: d.streak.best })}
                   </Text>
                 </View>
               </View>
@@ -149,7 +151,7 @@ function CardRealizare({ a }: { a: Realizare }) {
     <Card
       nivel={1}
       culoareMuchie={a.unlocked ? "rgba(52,211,153,0.30)" : "rgba(255,255,255,0.04)"}
-      accesibilEticheta={`${a.title}. ${a.unlocked ? "Deblocată" : `${a.progress} din ${a.target}`}`}
+      accesibilEticheta={umple("{titlu}. {stare}", { titlu: a.title, stare: a.unlocked ? tr("Deblocată") : umple("{facut} din {total}", { facut: a.progress, total: a.target }) })}
     >
       <View style={st.rand}>
         <View style={[st.emoji, !a.unlocked && st.emojiBlocat]}>

@@ -40,6 +40,29 @@ export function limba(): Limba {
   return limbaCurenta;
 }
 
+/**
+ * Texte cu valori în ele: `umple("acum {n} min", { n: 3 })`.
+ *
+ * DE CE NU UN ȘABLON OBIȘNUIT. Un template literal nu poate fi cheie de
+ * dicționar — cheia s-ar schimba la fiecare valoare. Aici cheia e tiparul
+ * întreg, cu găurile în el, deci are o singură traducere: "{n} min ago".
+ *
+ * Asta rezolvă și ORDINEA CUVINTELOR, care diferă între limbi: româna spune
+ * „acum 3 minute", engleza „3 minutes ago". Traduse bucată cu bucată, ar fi
+ * ieșit „ago 3 minutes".
+ *
+ * PLURALUL rămâne o alegere între două tipare, nu o regulă automată: limbile
+ * n-au toate aceleași forme, iar două chei sunt mai ieftine decât o bibliotecă
+ * de reguli. Scrie `umple(n === 1 ? "{n} zi" : "{n} zile", { n })`.
+ */
+export function umple(sablon: string, valori: Record<string, string | number>): string {
+  let text = tr(sablon);
+  for (const [cheie, val] of Object.entries(valori)) {
+    text = text.split("{" + cheie + "}").join(String(val));
+  }
+  return text;
+}
+
 interface Context {
   limba: Limba;
   seteaza(l: Limba): void;

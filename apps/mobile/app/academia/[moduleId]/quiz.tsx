@@ -22,6 +22,7 @@ import { Ecran } from "../../../src/ui/Ecran";
 import { RollingNumber } from "../../../src/ui/RollingNumber";
 import { BaraProgres, Gol } from "../../../src/ui/parti";
 import { T } from "../../../src/theme";
+import { umple } from "../../../src/lib/i18n";
 
 // ── Quiz ─────────────────────────────────────────────────────────────────────
 //
@@ -131,7 +132,7 @@ export default function Quiz() {
           ? null
           : gata
             ? "Rezultat"
-            : `Întrebarea ${index + 1} din ${intrebari.length}`
+            : umple("Întrebarea {p1} din {p2}", { p1: index + 1, p2: intrebari.length })
       }
       incarca={incarca && !continut}
       scheletRanduri={3}

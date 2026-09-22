@@ -24,6 +24,7 @@ import {
 import { Buton } from "../src/ui/Buton";
 import { Gol, Insigna, Rand, Sectiune, Segmente } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Grafice ──────────────────────────────────────────────────────────────────
 //
@@ -265,7 +266,7 @@ export default function Grafice() {
                 <Text style={[st.pret, cifre]}>{numar(ultima!.close, zec)}</Text>
                 {marcaje.length > 0 ? (
                   <Insigna
-                    text={`${marcaje.length} ${marcaje.length === 1 ? "tranzacție" : "tranzacții"}`}
+                    text={umple(marcaje.length === 1 ? "{n} tranzacție" : "{n} tranzacții", { n: marcaje.length })}
                     culoare={T.accent.base}
                     fundal={T.accent.soft}
                   />
@@ -509,7 +510,7 @@ export default function Grafice() {
                         }}
                         hitSlop={8}
                         accessibilityRole="button"
-                        accessibilityLabel={`Șterge nivelul ${numar(p, zec)}`}
+                        accessibilityLabel={umple("Șterge nivelul {p1}", { p1: numar(p, zec) })}
                       >
                         <Ionicons name="close" size={15} color={T.ink.i4} />
                       </Pressable>

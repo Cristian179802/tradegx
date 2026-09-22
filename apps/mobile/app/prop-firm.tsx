@@ -16,6 +16,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
 import { BaraProgres, Gol, Insigna } from "../src/ui/parti";
 import { T, tonPnl } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Prop firm ────────────────────────────────────────────────────────────────
 //
@@ -229,7 +230,7 @@ function CardChallenge({ cont, onSchimbat }: { cont: Cont; onSchimbat: () => voi
           {r.profitTarget != null ? (
             <Masura
               eticheta="Ținta de profit"
-              valoare={`${procent(p.profitPct, 2)} din ${procent(r.profitTarget, 0)}`}
+              valoare={umple("{p1} din {p2}", { p1: procent(p.profitPct, 2), p2: procent(r.profitTarget, 0) })}
               fractiune={spreTinta}
               culoare={spreTinta >= 1 ? T.pnl.gain : T.accent.base}
             />
@@ -238,7 +239,7 @@ function CardChallenge({ cont, onSchimbat }: { cont: Cont; onSchimbat: () => voi
           {r.maxDailyLossPct != null ? (
             <Masura
               eticheta="Pierderea zilei, consumată"
-              valoare={`${procent(p.dailyLossPct, 2)} din ${procent(r.maxDailyLossPct, 0)}`}
+              valoare={umple("{p1} din {p2}", { p1: procent(p.dailyLossPct, 2), p2: procent(r.maxDailyLossPct, 0) })}
               fractiune={consumatZi}
               culoare={consumatZi >= 1 ? T.pnl.loss : consumatZi >= 0.7 ? T.state.warn : T.ink.i3}
               pericol
@@ -248,7 +249,7 @@ function CardChallenge({ cont, onSchimbat }: { cont: Cont; onSchimbat: () => voi
           {r.maxDrawdownPct != null ? (
             <Masura
               eticheta="Drawdown, consumat"
-              valoare={`${procent(p.maxDrawdownPct, 2)} din ${procent(r.maxDrawdownPct, 0)}`}
+              valoare={umple("{p1} din {p2}", { p1: procent(p.maxDrawdownPct, 2), p2: procent(r.maxDrawdownPct, 0) })}
               fractiune={consumatDd}
               culoare={consumatDd >= 1 ? T.pnl.loss : consumatDd >= 0.7 ? T.state.warn : T.ink.i3}
               pericol
@@ -258,7 +259,7 @@ function CardChallenge({ cont, onSchimbat }: { cont: Cont; onSchimbat: () => voi
           {r.minTradingDays != null ? (
             <Masura
               eticheta="Zile de tranzacționare"
-              valoare={`${numar(p.tradingDays, 0)} din ${numar(r.minTradingDays, 0)}`}
+              valoare={umple("{p1} din {p2}", { p1: numar(p.tradingDays, 0), p2: numar(r.minTradingDays, 0) })}
               fractiune={p.tradingDays / r.minTradingDays}
               culoare={p.tradingDays >= r.minTradingDays ? T.pnl.gain : T.accent.base}
             />
@@ -378,7 +379,7 @@ function CardChallenge({ cont, onSchimbat }: { cont: Cont; onSchimbat: () => voi
           <Text style={st.textMargine}>
             Mai ai {procent(Math.max(0, r.maxDrawdownPct - p.maxDrawdownPct), 2)} de drawdown
             până la eliminare{r.maxDailyLossPct != null
-              ? `, și ${procent(Math.max(0, r.maxDailyLossPct - p.dailyLossPct), 2)} azi`
+              ? umple(", și {p1} azi", { p1: procent(Math.max(0, r.maxDailyLossPct - p.dailyLossPct), 2) })
               : ""}.
           </Text>
         </View>

@@ -17,6 +17,7 @@ import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { Insigna, Sectiune } from "../src/ui/parti";
 import { T, ATINGERE_MIN } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Toate setările ───────────────────────────────────────────────────────────
 //
@@ -197,7 +198,7 @@ export default function Profil() {
       const r = await faPdf(
         {
           titlu: "Export de date",
-          subtitlu: `Toate datele contului ${utilizator?.email ?? ""}`,
+          subtitlu: umple("Toate datele contului {email}", { email: utilizator?.email ?? "" }),
           sectiuni: [
             {
               titlu: "Conținut",
@@ -518,7 +519,7 @@ export default function Profil() {
               <Text style={st.textStare}>Autentificare în doi pași</Text>
               <Text style={st.subStare}>
                 {df.date?.enabled
-                  ? `Pornită. ${df.date.backupCount} coduri de rezervă rămase.`
+                  ? umple("Pornită. {p1} coduri de rezervă rămase.", { p1: df.date.backupCount })
                   : "Oprită. Cu ea, parola singură nu mai e de ajuns."}
               </Text>
             </View>

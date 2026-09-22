@@ -14,6 +14,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
 import { BaraProgres, Sectiune } from "../src/ui/parti";
 import { T, tonPnl } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Obiective lunare ─────────────────────────────────────────────────────────
 //
@@ -126,7 +127,7 @@ export default function Obiective() {
                 <View style={st.zile}>
                   <Ionicons name="calendar-outline" size={13} color={T.ink.i4} />
                   <Text style={st.textZile}>
-                    {ramase === 0 ? "ultima zi" : `${ramase} ${ramase === 1 ? "zi" : "zile"}`}
+                    {ramase === 0 ? "ultima zi" : umple(ramase === 1 ? "{n} zi" : "{n} zile", { n: ramase })}
                   </Text>
                 </View>
               </View>
@@ -146,7 +147,9 @@ export default function Obiective() {
                 ramas={
                   p.pnl >= t.monthlyProfitTarget
                     ? "Atins."
-                    : `Mai ai ${bani(t.monthlyProfitTarget - p.pnl, moneda, false)}${ramase > 0 ? ` în ${ramase} zile` : ""}.`
+                    : ramase > 0
+                      ? umple("Mai ai {suma} în {n} zile.", { suma: bani(t.monthlyProfitTarget - p.pnl, moneda, false), n: ramase })
+                      : umple("Mai ai {suma}.", { suma: bani(t.monthlyProfitTarget - p.pnl, moneda, false) })
                 }
               />
             </Reveal>
@@ -180,7 +183,7 @@ export default function Obiective() {
                 ramas={
                   p.winRate >= t.monthlyWinRateTarget
                     ? "Peste țintă."
-                    : `${numar(t.monthlyWinRateTarget - p.winRate, 1)} puncte sub țintă.`
+                    : umple("{p1} puncte sub țintă.", { p1: numar(t.monthlyWinRateTarget - p.winRate, 1) })
                 }
               />
             </Reveal>

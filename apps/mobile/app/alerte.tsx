@@ -14,6 +14,7 @@ import { Schelet } from "../src/ui/Schelet";
 import { AntetEcran, SPATIU_BARA } from "../src/ui/Ecran";
 import { Gol, Segmente } from "../src/ui/parti";
 import { T } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Alerte ───────────────────────────────────────────────────────────────────
 //
@@ -189,7 +190,7 @@ function RandAlerta({
       onPress={onPress}
       onLongPress={onLongPress}
       culoareMuchie={citita ? "rgba(255,255,255,0.04)" : `${s.culoare}59`}
-      accesibilEticheta={`${a.title}. ${citita ? "Citită" : "Necitită"}. Apasă lung ca să ștergi.`}
+      accesibilEticheta={umple("{titlu}. {stare}. Apasă lung ca să ștergi.", { titlu: a.title, stare: tr(citita ? "Citită" : "Necitită") })}
     >
       <View style={[st.rand, citita && st.citita]}>
         <View style={[st.iconita, { backgroundColor: `${s.culoare}1F` }]}>

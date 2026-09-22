@@ -28,6 +28,7 @@ import { Camp } from "../../../src/ui/Camp";
 import { intreabaTutorele } from "../../../src/lib/asistent";
 import { ApiError } from "../../../src/lib/api";
 import { T } from "../../../src/theme";
+import { umple } from "../../../src/lib/i18n";
 
 // ── O lecție ─────────────────────────────────────────────────────────────────
 //
@@ -134,7 +135,7 @@ export default function Lectie() {
   return (
     <Ecran
       titlu={lectie ? textul(lectie.title) : "Lecție"}
-      subtitlu={modul && lectie ? `${textul(modul.title)} · ${lectie.minutes} min` : null}
+      subtitlu={modul && lectie ? umple("{titlu} · {min} min", { titlu: textul(modul.title), min: lectie.minutes }) : null}
       incarca={incarca && !continut}
       scheletRanduri={5}
       subsol={

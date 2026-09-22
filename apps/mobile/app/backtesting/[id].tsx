@@ -12,6 +12,7 @@ import { Ecran } from "../../src/ui/Ecran";
 import { Bare, Curba, useLatime } from "../../src/ui/grafice";
 import { GrilaStatistici, Insigna, Rand, Sectiune, Statistica } from "../../src/ui/parti";
 import { T, tonPnl, cifre } from "../../src/theme";
+import { umple } from "../../src/lib/i18n";
 
 // ── Rezultatul unui backtest ─────────────────────────────────────────────────
 //
@@ -147,7 +148,7 @@ export default function RezultatBacktest() {
                   valoare={b.winRate == null ? "—" : procent(Number(b.winRate))}
                   marime={T.fontSize.xl}
                   intarziere={70}
-                  nota={b.totalTrades != null ? `${b.totalTrades} tranzacții` : null}
+                  nota={b.totalTrades != null ? umple("{p1} tranzacții", { p1: b.totalTrades }) : null}
                   style={st.celula}
                 />
                 <Statistica
@@ -224,7 +225,7 @@ export default function RezultatBacktest() {
                 titlu="Tranzacții"
                 nota={
                   b.trades.length > MAX_TRANZACTII
-                    ? `Primele ${MAX_TRANZACTII} din ${b.trades.length}. Lista completă e pe site.`
+                    ? umple("Primele {p1} din {p2}. Lista completă e pe site.", { p1: MAX_TRANZACTII, p2: b.trades.length })
                     : undefined
                 }
               />

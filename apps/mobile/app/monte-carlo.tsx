@@ -17,6 +17,7 @@ import { Con, Histograma, useLatime } from "../src/ui/grafice";
 import { BaraProgres, Gol, Rand, Sectiune } from "../src/ui/parti";
 import { RollingNumber } from "../src/ui/RollingNumber";
 import { T, cifre, tonPnl } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Monte Carlo ──────────────────────────────────────────────────────────────
 //
@@ -117,7 +118,7 @@ export default function MonteCarlo() {
   return (
     <Ecran
       titlu="Monte Carlo"
-      subtitlu={destule ? `Pe ${randamente.length} randamente reale` : "Mii de vieți alternative"}
+      subtitlu={destule ? umple("Pe {p1} randamente reale", { p1: randamente.length }) : "Mii de vieți alternative"}
       incarca={c.incarca && !c.date}
       scheletRanduri={3}
       reimprospateaza={c.reimprospateaza}
@@ -153,7 +154,7 @@ export default function MonteCarlo() {
               <Segment valori={PIERDERI} valoare={pierdere} onSchimba={setPierdere} />
 
               <Buton
-                eticheta={rezultat ? "Rulează din nou" : `Rulează ${SIMULARI.toLocaleString("ro-RO")} simulări`}
+                eticheta={rezultat ? "Rulează din nou" : umple("Rulează {n} simulări", { n: numar(SIMULARI, 0) })}
                 onPress={ruleazaAcum}
                 incarca={ruleaza}
                 plin
@@ -165,7 +166,7 @@ export default function MonteCarlo() {
 
           {rezultat ? (
             <>
-              <Sectiune titlu="Rezultatul" nota={`Din ${SIMULARI.toLocaleString("ro-RO")} vieți alternative ale acelorași tranzacții.`} />
+              <Sectiune titlu="Rezultatul" nota={umple("Din {n} vieți alternative ale acelorași tranzacții.", { n: numar(SIMULARI, 0) })} />
 
               <Reveal>
                 <Card>

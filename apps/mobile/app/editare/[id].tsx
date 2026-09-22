@@ -16,6 +16,7 @@ import { Reveal } from "../../src/ui/Reveal";
 import { Ecran } from "../../src/ui/Ecran";
 import { Gol, Insigna, Rand, Sectiune } from "../../src/ui/parti";
 import { T, tonPnl } from "../../src/theme";
+import { umple } from "../../src/lib/i18n";
 
 // ── Corectarea unei tranzacții ───────────────────────────────────────────────
 //
@@ -192,7 +193,7 @@ export default function EditareTranzactie() {
     if (!t) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     Alert.alert(
-      `Ștergi ${t.symbol}?`,
+      umple("Ștergi {p1}?", { p1: t.symbol }),
       tr("Dispare din jurnal împreună cu nota scrisă la ea, și iese din toate statisticile. Nu se poate anula."),
       [
         { text: tr("Păstrează"), style: "cancel" },
@@ -219,8 +220,8 @@ export default function EditareTranzactie() {
 
   return (
     <Ecran
-      titlu={t ? `Editează ${t.symbol}` : "Editează"}
-      subtitlu={t ? `Deschisă ${dataScurta(t.entryTime)}` : null}
+      titlu={t ? umple("Editează {p1}", { p1: t.symbol }) : "Editează"}
+      subtitlu={t ? umple("Deschisă {p1}", { p1: dataScurta(t.entryTime) }) : null}
       incarca={c.incarca && !t}
       scheletRanduri={5}
       eroare={eroare ?? c.eroare}

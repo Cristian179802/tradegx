@@ -16,6 +16,7 @@ import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { Gol, Insigna, Sectiune } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Lista de urmărire ────────────────────────────────────────────────────────
 //
@@ -128,7 +129,7 @@ export default function Watchlist() {
       titlu="Urmărite"
       subtitlu={
         elemente.length > 0
-          ? `${elemente.length} simboluri · ${cuAlerta} cu alertă`
+          ? umple("{p1} simboluri · {p2} cu alertă", { p1: elemente.length, p2: cuAlerta })
           : "Simbolurile tale și pragurile lor"
       }
       incarca={lista.incarca && elemente.length === 0}
@@ -190,7 +191,7 @@ export default function Watchlist() {
                   }}
                   onLongPress={() => scoate(e)}
                   culoareMuchie={peste != null || sub != null ? T.accent.line : "rgba(255,255,255,0.04)"}
-                  accesibilEticheta={`${e.symbol}. Apasă pentru praguri, apasă lung ca să scoți din listă.`}
+                  accesibilEticheta={umple("{p1}. Apasă pentru praguri, apasă lung ca să scoți din listă.", { p1: e.symbol })}
                 >
                   <View style={st.rand}>
                     <View style={{ flex: 1, minWidth: 0 }}>

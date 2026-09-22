@@ -23,6 +23,7 @@ import { Ecran } from "../../src/ui/Ecran";
 import { RollingNumber } from "../../src/ui/RollingNumber";
 import { BaraProgres, Gol, Insigna, Sectiune } from "../../src/ui/parti";
 import { T } from "../../src/theme";
+import { umple } from "../../src/lib/i18n";
 
 // ── Academia ─────────────────────────────────────────────────────────────────
 //
@@ -107,7 +108,7 @@ export default function Academia() {
   return (
     <Ecran
       titlu="Academia"
-      subtitlu={total > 0 ? `${terminate} din ${total} lecții` : "Nouă module, de la zero"}
+      subtitlu={total > 0 ? umple("{p1} din {p2} lecții", { p1: terminate, p2: total }) : "Nouă module, de la zero"}
       incarca={incarca && module_.length === 0}
       scheletRanduri={4}
       reimprospateaza={reimprospateaza}
@@ -182,7 +183,7 @@ export default function Academia() {
               <Card
                 onPress={() => router.push(`/academia/${urmatorul.modul.id}/${urmatorul.lectie.id}`)}
                 culoareMuchie={T.accent.line}
-                accesibilEticheta={`Continuă cu ${textul(urmatorul.lectie.title)}`}
+                accesibilEticheta={umple("Continuă cu {p1}", { p1: textul(urmatorul.lectie.title) })}
               >
                 <View style={st.randContinua}>
                   <View style={st.playIcon}>
@@ -219,7 +220,7 @@ export default function Academia() {
                 <Card
                   onPress={() => router.push(`/academia/${m.id}`)}
                   culoareMuchie={gata ? "rgba(52,211,153,0.30)" : "rgba(255,255,255,0.04)"}
-                  accesibilEticheta={`${textul(m.title)}, ${facute} din ${m.lessons.length} lecții`}
+                  accesibilEticheta={umple("{p1}, {p2} din {p3} lecții", { p1: textul(m.title), p2: facute, p3: m.lessons.length })}
                 >
                   <View style={st.randModul}>
                     <View

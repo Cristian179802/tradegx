@@ -13,6 +13,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { Paywall } from "../src/ui/Paywall";
 import { BaraProgres, Gol, Insigna, Rand } from "../src/ui/parti";
 import { T, cifre } from "../src/theme";
+import { umple, tr } from "../src/lib/i18n";
 
 // ── Semnale AI ───────────────────────────────────────────────────────────────
 //
@@ -101,7 +102,7 @@ export default function Semnale() {
   return (
     <Ecran
       titlu="Semnale"
-      subtitlu={d ? `${semnale.length} ${semnale.length === 1 ? "idee" : "idei"} pentru ${d.date}` : "Ideile zilei"}
+      subtitlu={d ? umple(semnale.length === 1 ? "{n} idee pentru {data}" : "{n} idei pentru {data}", { n: semnale.length, data: d.date }) : "Ideile zilei"}
       incarca={c.incarca && !d}
       scheletRanduri={3}
       reimprospateaza={c.reimprospateaza}
@@ -158,7 +159,7 @@ function CardSemnal({ s }: { s: Semnal }) {
         setDesfasurat((p) => !p);
       }}
       culoareMuchie={cumparare ? "rgba(52,211,153,0.30)" : "rgba(251,113,133,0.30)"}
-      accesibilEticheta={`${s.symbol}, ${cumparare ? "cumpărare" : "vânzare"}, încredere ${s.confidence}%`}
+      accesibilEticheta={umple("{simbol}, {directie}, încredere {n}%", { simbol: s.symbol, directie: tr(cumparare ? "cumpărare" : "vânzare"), n: s.confidence })}
     >
       <View style={st.antet}>
         <View style={[st.directie, { backgroundColor: `${culoare}1F` }]}>

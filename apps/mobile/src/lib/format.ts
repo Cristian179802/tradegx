@@ -4,16 +4,20 @@
 // Ecranele nu formatează singure: altfel apar trei variante de „+380.31 USD”
 // pe trei ecrane, iar ochiul le citește ca trei produse.
 //
-// Locale FIX „ro-RO”. Aplicația e în română; a lua locale-ul telefonului ar
-// însemna că separatorul de mii se schimbă după setările fiecăruia, iar o
-// captură de ecran trimisă la suport n-ar mai semăna cu ce vede altcineva.
+// locale() URMEAZĂ LIMBA APLICAȚIEI, nu setările telefonului. Dacă am lua
+// locale-ul telefonului, separatorul de mii s-ar schimba după setările
+// fiecăruia, iar o captură trimisă la suport n-ar mai semăna cu ce vede
+// altcineva. Legat de limba aleasă, în schimb, „19 sept." devine „19 Sep" —
+// altfel aplicația ar fi în engleză, dar lunile ar rămâne românești.
 
-const LOCALE = "ro-RO";
+import { limba, tr, umple } from "./i18n";
+
+const locale = () => (limba() === "EN" ? "en-GB" : "ro-RO");
 
 /** „+380,31 USD” — semnul e mereu explicit pe P&L. */
 export function bani(valoare: number, moneda = "USD", cuSemn = true): string {
   const semn = cuSemn ? (valoare > 0 ? "+" : valoare < 0 ? "−" : "") : "";
-  const n = Math.abs(valoare).toLocaleString(LOCALE, {
+  const n = Math.abs(valoare).toLocaleString(locale(), {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -38,7 +42,7 @@ export function procent(valoare: number | null, zecimale = 1): string {
 
 export function numar(valoare: number | null, zecimale = 2): string {
   if (valoare == null) return "—";
-  return valoare.toLocaleString(LOCALE, {
+  return valoare.toLocaleString(locale(), {
     minimumFractionDigits: zecimale,
     maximumFractionDigits: zecimale,
   });
@@ -49,7 +53,7 @@ export function dataScurta(iso: string | Date | null | undefined): string {
   if (!iso) return "—";
   const d = typeof iso === "string" ? new Date(iso) : iso;
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString(LOCALE, {
+  return d.toLocaleString(locale(), {
     day: "numeric",
     month: "short",
     hour: "2-digit",
@@ -62,13 +66,26 @@ export function candva(iso: string | Date | null | undefined): string {
   if (!iso) return "—";
   const d = typeof iso === "string" ? new Date(iso) : iso;
   if (Number.isNaN(d.getTime())) return "—";
+  // Tiparele întregi sunt chei de dicționar, cu gaura în ele — altfel engleza
+  // ar fi ieșit „ago 3 min", fiindcă acolo cuvântul stă la coadă, nu în față.
   const min = Math.round((Date.now() - d.getTime()) / 60000);
-  if (min < 1) return "acum";
-  if (min < 60) return `acum ${min} min`;
+  if (min < 1) return tr("acum");
+  if (min < 60) return umple("acum {n} min", { n: min });
   const ore = Math.round(min / 60);
-  if (ore < 24) return `acum ${ore} h`;
+  if (ore < 24) return umple("acum {n} h", { n: ore });
   const zile = Math.round(ore / 24);
-  if (zile === 1) return "ieri";
-  if (zile < 30) return `acum ${zile} zile`;
+  if (zile === 1) return tr("ieri");
+  if (zile < 30) return umple("acum {n} zile", { n: zile });
   return dataScurta(d);
+}
+
+/**
+ * „sept." / „Sep” — numele scurt al lunii, după limba aplicației.
+ *
+ * Derivat din `Intl`, nu dintr-o listă scrisă de mână: o listă ar fi trebuit
+ * ținută în două limbi și ar fi rămas în urmă la a treia. `index` e 0–11.
+ */
+export function lunaScurta(index: number): string {
+  const d = new Date(2000, index, 1);
+  return d.toLocaleDateString(locale(), { month: "short" });
 }

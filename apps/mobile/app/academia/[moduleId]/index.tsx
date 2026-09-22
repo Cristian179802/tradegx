@@ -19,6 +19,7 @@ import { Reveal } from "../../../src/ui/Reveal";
 import { Ecran } from "../../../src/ui/Ecran";
 import { BaraProgres, Gol, Insigna, Sectiune } from "../../../src/ui/parti";
 import { T } from "../../../src/theme";
+import { umple } from "../../../src/lib/i18n";
 
 // ── Un modul ─────────────────────────────────────────────────────────────────
 //
@@ -66,7 +67,7 @@ export default function Modul() {
   return (
     <Ecran
       titlu={modul ? textul(modul.title) : "Modul"}
-      subtitlu={modul ? `${facute} din ${modul.lessons.length} lecții · ${ETICHETA_NIVEL[modul.level]}` : null}
+      subtitlu={modul ? umple("{p1} din {p2} lecții · {p3}", { p1: facute, p2: modul.lessons.length, p3: ETICHETA_NIVEL[modul.level] }) : null}
       incarca={incarca && !continut}
       scheletRanduri={4}
     >
@@ -151,11 +152,11 @@ export default function Modul() {
                       <Text style={st.subQuiz}>
                         {scor == null
                           ? facute < modul.lessons.length
-                            ? `Mai ai ${modul.lessons.length - facute} lecții, dar poți încerca oricând.`
+                            ? umple("Mai ai {p1} lecții, dar poți încerca oricând.", { p1: modul.lessons.length - facute })
                             : "Nu l-ai dat încă."
                           : scor >= prag
-                            ? `Promovat cu ${Math.round(scor)}%. Poți relua oricând.`
-                            : `Cel mai bun scor: ${Math.round(scor)}%. Sub prag.`}
+                            ? umple("Promovat cu {p1}%. Poți relua oricând.", { p1: Math.round(scor) })
+                            : umple("Cel mai bun scor: {scor}%. Sub prag.", { scor: Math.round(scor) })}
                       </Text>
                     </View>
                     {scor != null ? (

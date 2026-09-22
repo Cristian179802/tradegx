@@ -13,6 +13,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
 import { BaraProgres, Gol, Sectiune } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Unelte ───────────────────────────────────────────────────────────────────
 //
@@ -132,7 +133,7 @@ export default function Unelte() {
         <RiscDeRuina />
       </Reveal>
 
-      <Sectiune titlu="Corelații" nota={corelatii?.days ? `Pe ultimele ${corelatii.days} zile de tranzacționare.` : undefined} />
+      <Sectiune titlu="Corelații" nota={corelatii?.days ? umple("Pe ultimele {n} zile de tranzacționare.", { n: corelatii.days }) : undefined} />
       {corelatii?.matrix ? (
         <Reveal intarziere={120}>
           <Card faraPadding>

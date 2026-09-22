@@ -13,6 +13,7 @@ import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { Insigna, Sectiune } from "../src/ui/parti";
 import { T, cifre } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Abonament ────────────────────────────────────────────────────────────────
 //
@@ -172,7 +173,7 @@ export default function Abonament() {
                 </View>
                 {zileTrial != null && zileTrial > 0 ? (
                   <Insigna
-                    text={`${zileTrial} ${zileTrial === 1 ? "zi" : "zile"} probă`}
+                    text={umple(zileTrial === 1 ? "{n} zi probă" : "{n} zile probă", { n: zileTrial })}
                     culoare={T.state.warn}
                     fundal="rgba(251,191,36,0.14)"
                   />
@@ -182,8 +183,8 @@ export default function Abonament() {
               {s?.currentPeriodEnd ? (
                 <Text style={st.notaStare}>
                   {s.cancelAtPeriodEnd
-                    ? `Se oprește pe ${dataScurta(s.currentPeriodEnd)}. Până atunci ai tot.`
-                    : `Se reînnoiește pe ${dataScurta(s.currentPeriodEnd)}.`}
+                    ? umple("Se oprește pe {p1}. Până atunci ai tot.", { p1: dataScurta(s.currentPeriodEnd) })
+                    : umple("Se reînnoiește pe {p1}.", { p1: dataScurta(s.currentPeriodEnd) })}
                 </Text>
               ) : zileTrial != null && zileTrial > 0 ? (
                 <Text style={st.notaStare}>
@@ -307,7 +308,7 @@ export default function Abonament() {
                     {plan.lunar === 0
                       ? plan.nota
                       : perioada === "annual"
-                        ? `${plan.anual} ${p.simbol} pe an, o singură plată`
+                        ? umple("{p1} {p2} pe an, o singură plată", { p1: plan.anual, p2: p.simbol })
                         : "facturat lunar"}
                   </Text>
 
@@ -324,9 +325,9 @@ export default function Abonament() {
                     <Buton
                       eticheta={
                         areAbonament
-                          ? `Treci pe ${plan.nume}`
+                          ? umple("Treci pe {p1}", { p1: plan.nume })
                           : zileTrial != null && zileTrial > 0
-                            ? `Continuă cu ${plan.nume}`
+                            ? umple("Continuă cu {p1}", { p1: plan.nume })
                             : plan.buton
                       }
                       onPress={() => cumparaAcum(plan.id as Treapta)}
@@ -344,7 +345,7 @@ export default function Abonament() {
           {/* ── Comparația ── */}
           <Sectiune
             titlu={p.comparatie.titlu}
-            nota={`Ce include ${planAles?.nume ?? ""}. Atinge un plan de mai sus ca să schimbi coloana.`}
+            nota={umple("Ce include {plan}. Atinge un plan de mai sus ca să schimbi coloana.", { plan: planAles?.nume ?? "" })}
           />
           <Card faraPadding>
             {p.comparatie.randuri.map((r, i) => {

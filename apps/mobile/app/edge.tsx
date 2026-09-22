@@ -13,6 +13,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { Paywall } from "../src/ui/Paywall";
 import { BaraProgres, Gol, Insigna, Segmente, Sectiune } from "../src/ui/parti";
 import { T, cifre, tonPnl } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Edge Finder ──────────────────────────────────────────────────────────────
 //
@@ -105,7 +106,7 @@ export default function EdgeFinder() {
   return (
     <Ecran
       titlu="Edge Finder"
-      subtitlu={r ? `${r.totalTrades} tranzacții analizate` : "Unde ai avantaj, unde pierzi"}
+      subtitlu={r ? umple("{p1} tranzacții analizate", { p1: r.totalTrades }) : "Unde ai avantaj, unde pierzi"}
       incarca={c.incarca && !r}
       scheletRanduri={4}
       reimprospateaza={c.reimprospateaza}

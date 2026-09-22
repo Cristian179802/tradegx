@@ -16,6 +16,7 @@ import { Reveal } from "../../src/ui/Reveal";
 import { Ecran } from "../../src/ui/Ecran";
 import { Insigna, Rand, Sectiune } from "../../src/ui/parti";
 import { T, tonPnl } from "../../src/theme";
+import { umple } from "../../src/lib/i18n";
 
 // ── Nota unei tranzacții ─────────────────────────────────────────────────────
 //
@@ -260,7 +261,7 @@ export default function EditorJurnal() {
                       }}
                       style={[st.treapta, activ && st.treaptaActiva]}
                       accessibilityRole="button"
-                      accessibilityLabel={`Încredere ${n} din 10`}
+                      accessibilityLabel={umple("Încredere {p1} din 10", { p1: n })}
                       accessibilityState={{ selected: activ }}
                     >
                       <Text style={[st.textTreapta, activ && st.textTreaptaActiv]}>{n}</Text>

@@ -15,6 +15,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
 import { BaraProgres, Gol, Insigna, Rand, Sectiune } from "../src/ui/parti";
 import { T, tonPnl } from "../src/theme";
+import { umple } from "../src/lib/i18n";
 
 // ── Manager de risc ──────────────────────────────────────────────────────────
 //
@@ -266,7 +267,7 @@ export default function ManagerRisc() {
                       : ziOprita
                         ? "E o zi pe care tu ai marcat-o ca liberă."
                         : preaMulte
-                          ? `${d.todayTradeCount} din ${maxPeZi} tranzacții azi.`
+                          ? umple("{facut} din {total} tranzacții azi.", { facut: d.todayTradeCount, total: maxPeZi })
                           : "Regulile tale sunt respectate."}
                   </Text>
                 </View>
@@ -434,7 +435,7 @@ export default function ManagerRisc() {
                 nivel={1}
                 culoareMuchie={a.isActive ? T.accent.line : "rgba(255,255,255,0.04)"}
                 onPress={() => deschideCont(a)}
-                accesibilEticheta={`${a.name}. Apasă ca să editezi limitele.`}
+                accesibilEticheta={umple("{p1}. Apasă ca să editezi limitele.", { p1: a.name })}
               >
                 <View style={st.antetCont}>
                   <Text style={st.numeCont} numberOfLines={1}>{a.name}</Text>
