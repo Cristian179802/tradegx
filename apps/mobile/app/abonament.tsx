@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { api } from "../src/lib/api";
 import { useCerere } from "../src/lib/useCerere";
+import { tr, useLimba } from "../src/lib/i18n";
 import { dataScurta } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
 import { Buton } from "../src/ui/Buton";
@@ -97,7 +98,14 @@ const NUME_STARE: Record<string, string> = {
 };
 
 export default function Abonament() {
-  const preturi = useCerere<Preturi>(() => api.pricing() as Promise<Preturi>);
+  // Planurile și comparația vin de la server, în limba aplicației. Limba e
+  // dependință: la comutare, ecranul își cere din nou conținutul tradus, în
+  // loc să rămână cu cel vechi până la următoarea deschidere.
+  const { limba } = useLimba();
+  const preturi = useCerere<Preturi>(
+    () => api.pricing(limba === "EN" ? "en" : "ro") as Promise<Preturi>,
+    [limba],
+  );
   const stare = useCerere<Stare>(() => api.abonament.stare() as Promise<Stare>);
 
   const [ales, setAles] = React.useState<"free" | "pro" | "premium">("pro");
@@ -119,7 +127,7 @@ export default function Abonament() {
   return (
     <Ecran
       titlu="Abonament"
-      subtitlu={p?.subtitlu ?? "Ce primești și cât costă"}
+      subtitlu="Ce include fiecare plan"
       incarca={preturi.incarca && !p}
       scheletRanduri={4}
       reimprospateaza={preturi.reimprospateaza || stare.reimprospateaza}
@@ -143,7 +151,7 @@ export default function Abonament() {
                   <Text style={st.etichetaStare}>PLANUL TĂU</Text>
                   <Text style={st.numePlanCurent}>
                     {planCurent === "premium" ? "Premium" : planCurent === "pro" ? "PRO" : "Gratuit"}
-                    {s?.status && NUME_STARE[s.status] ? ` · ${NUME_STARE[s.status]}` : ""}
+                    {s?.status && NUME_STARE[s.status] ? ` · ${tr(NUME_STARE[s.status]!)}` : ""}
                   </Text>
                 </View>
                 {zileTrial != null && zileTrial > 0 ? (

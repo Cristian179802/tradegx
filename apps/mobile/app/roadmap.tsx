@@ -4,6 +4,7 @@ import { Text } from "../src/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../src/lib/api";
 import { useCerere } from "../src/lib/useCerere";
+import { useLimba } from "../src/lib/i18n";
 import { Card } from "../src/ui/Card";
 import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
@@ -50,7 +51,12 @@ const INFATISARE: Record<
 };
 
 export default function RoadmapEcran() {
-  const c = useCerere<Roadmap>(() => api.roadmap() as Promise<Roadmap>);
+  // Listele vin de la server, în limba aplicației, și se cer din nou la comutare.
+  const { limba } = useLimba();
+  const c = useCerere<Roadmap>(
+    () => api.roadmap(limba === "EN" ? "en" : "ro") as Promise<Roadmap>,
+    [limba],
+  );
   const d = c.date;
 
   // Prima secțiune (livrate) e deschisă; restul se desfac la atingere.

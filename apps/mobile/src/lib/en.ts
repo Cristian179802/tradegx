@@ -1063,4 +1063,5 @@ export const EN: Record<string, string> = {
   "Unelte": "Tools",
   "Produs": "Product",
   "tu@exemplu.com": "you@example.com",
+  "Ce include fiecare plan": "What each plan includes",
 };
