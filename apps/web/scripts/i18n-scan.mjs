@@ -161,11 +161,17 @@ for (const file of walk(ROOT)) {
 // utilizator pe engleza primea romana exact pe drumurile care conteaza,
 // inregistrare si plata inclusiv.
 //
-// Traducerea se face la afisare, din `lib/api-error-dict.ts`. Un dictionar copiat
+// Traducerea se face la afisare, din `packages/core/src/api-errors.ts` (comun cu
+// aplicatia de telefon). Un dictionar copiat
 // de mana s-ar invechi la primul mesaj nou, asa ca de aici incolo build-ul pica
 // daca cineva adauga un mesaj romanesc fara traducere.
 {
-  const dictSrc = fs.readFileSync(path.join(ROOT, "lib", "api-error-dict.ts"), "utf8");
+  // Dicționarul stă în pachetul comun, ca să-l citească și aplicația de telefon
+  // din aceeași sursă. ROOT e `apps/web/src`, deci urcăm trei niveluri.
+  const dictSrc = fs.readFileSync(
+    path.join(ROOT, "..", "..", "..", "packages", "core", "src", "api-errors.ts"),
+    "utf8",
+  );
   const chei = new Set();
   for (const m of dictSrc.matchAll(/^\s*"((?:[^"\\]|\\.)*)"\s*:/gm)) chei.add(m[1]);
 
@@ -204,12 +210,12 @@ for (const file of walk(ROOT)) {
   }
 
   if (netraduse.length > 0) {
-    console.error(`✗ i18n: ${netraduse.length} mesaj(e) de eroare din API fără traducere în lib/api-error-dict.ts:\n`);
+    console.error(`✗ i18n: ${netraduse.length} mesaj(e) de eroare din API fără traducere în packages/core/src/api-errors.ts:\n`);
     for (const n of netraduse) {
       const rel = path.relative(process.cwd(), n.file).replace(/\\/g, "/");
       console.error(`  ${rel}:${n.line}  →  "${n.text}"`);
     }
-    console.error("\n  Adaugă-le în API_ERROR_EN, cu traducerea în engleză.");
+    console.error("\n  Adaugă-le în API_ERROR_EN din packages/core/src/api-errors.ts, cu traducerea în engleză.");
     process.exit(1);
   }
 }

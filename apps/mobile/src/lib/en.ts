@@ -11,7 +11,13 @@
 // ca cineva care trece de pe site pe telefon să citească aceleași cuvinte:
 // „Rată de câștig" → „Win rate", nu „Winning rate".
 
+import { API_ERROR_EN } from "@tradegx/core/api-errors";
+
 export const EN: Record<string, string> = {
+  // Erorile API vin din sursa comună cu site-ul, nu copiate: o eroare nouă
+  // adăugată acolo (poarta site-ului o cere) ajunge tradusă și aici, singură.
+  // Stau PRIMELE, ca un text al aplicației cu aceeași cheie să le poată suprascrie.
+  ...API_ERROR_EN,
   "Acasă": "Home",
   "Adaugă": "Add",
   "Adaugă primul cont": "Add your first account",
