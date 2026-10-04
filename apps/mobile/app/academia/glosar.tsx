@@ -19,6 +19,7 @@ import { AntetEcran, SPATIU_BARA } from "../../src/ui/Ecran";
 import { Gol, Insigna } from "../../src/ui/parti";
 import { T, ATINGERE_MIN } from "../../src/theme";
 import { umple } from "../../src/lib/i18n";
+import { useLimba } from "../../src/lib/i18n";
 
 // ── Glosar ───────────────────────────────────────────────────────────────────
 //
@@ -38,6 +39,9 @@ interface Rand extends GlossaryEntry {
 }
 
 export default function Glosar() {
+  // Redesenează ecranul la comutarea limbii: lecțiile vin în ambele limbi,
+  // iar `textul()` alege, dar doar la randare.
+  const { limba } = useLimba();
   const { termen } = useLocalSearchParams<{ termen?: string }>();
   const router = useRouter();
 
@@ -65,8 +69,10 @@ export default function Glosar() {
     const g = continut?.glossary ?? {};
     return Object.entries(g)
       .map(([slug, e]) => ({ slug, ...e }))
-      .sort((a, b) => textul(a.term).localeCompare(textul(b.term), "ro"));
-  }, [continut?.glossary]);
+      // Ordinea alfabetică ține de limbă: în română „ș" vine după „s", în
+      // engleză termenul e oricum altul.
+      .sort((a, b) => textul(a.term).localeCompare(textul(b.term), limba === "EN" ? "en" : "ro"));
+  }, [continut?.glossary, limba]);
 
   const cautat = String(termen ?? "");
 
@@ -87,7 +93,7 @@ export default function Glosar() {
     const i = filtrate.findIndex((r) => r.slug === cautat);
     if (i <= 0) return filtrate;
     return [filtrate[i]!, ...filtrate.slice(0, i), ...filtrate.slice(i + 1)];
-  }, [toate, cautare, cautat]);
+  }, [toate, cautare, cautat, limba]);
 
   return (
     <View style={st.radacina}>

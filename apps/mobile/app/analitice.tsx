@@ -5,7 +5,7 @@ import { Text } from "../src/ui/Text";
 import { api } from "../src/lib/api";
 import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
-import { bani, baniScurt, numar, procent , lunaScurta} from "../src/lib/format";
+import { bani, baniScurt, numar, procent , lunaScurta, ziScurta } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
 import { Buton } from "../src/ui/Buton";
 import { Reveal } from "../src/ui/Reveal";
@@ -14,6 +14,7 @@ import { Bare, Curba, useLatime } from "../src/ui/grafice";
 import { Gol, GrilaStatistici, Rand, Sectiune, Statistica } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
 import { umple } from "../src/lib/i18n";
+import { useLimba } from "../src/lib/i18n";
 
 // ── Analytics ────────────────────────────────────────────────────────────────
 //
@@ -61,6 +62,7 @@ interface PeOra {
 
 
 export default function Analitice() {
+  const { limba } = useLimba();
   const router = useRouter();
   const [latime, laMasurare] = useLatime();
 
@@ -90,15 +92,15 @@ export default function Analitice() {
         const i = Number(luna) - 1;
         return { eticheta: lunaScurta(i), valoare: x.pnl, an };
       }),
-    [a?.monthlyPnl],
+    [a?.monthlyPnl, limba],
   );
 
   const peZi = React.useMemo(
     () =>
       (a?.winRateByDay ?? [])
         .filter((x) => x.total > 0)
-        .map((x) => ({ eticheta: x.day, valoare: x.winRate })),
-    [a?.winRateByDay],
+        .map((x) => ({ eticheta: ziScurta(x.day), valoare: x.winRate })),
+    [a?.winRateByDay, limba],
   );
 
   // Orele se grupează aici, nu pe server: ruta întoarce tranzacțiile brute, iar

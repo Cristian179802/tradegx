@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { api } from "./api";
+import { limba as limbaAplicatiei } from "./i18n";
 
 // ── Academia pe telefon ──────────────────────────────────────────────────────
 //
@@ -226,9 +227,28 @@ export async function scrieProgres(p: Progres): Promise<void> {
 
 export const cheieLectie = (moduleId: string, lessonId: string) => `${moduleId}/${lessonId}`;
 
-export function textul(t: I18nText | undefined, limba: Lang = "ro"): string {
+/**
+ * Textul unei lecții, în limba aplicației.
+ *
+ * Conținutul vine de la server în AMBELE limbi deodată (`{ ro, en }`), iar
+ * alegerea se face aici. Prima versiune avea limba implicită fixată pe „ro" —
+ * și niciunul dintre cele 34 de apeluri n-o trimitea. Rezultatul: toată
+ * Academia rămânea în română cu aplicația pusă pe engleză, deși textul englez
+ * era deja descărcat pe telefon. S-a văzut abia parcurgând aplicația în
+ * engleză, ecran cu ecran.
+ *
+ * Acum implicitul e limba curentă. Ecranele care folosesc funcția trebuie să
+ * cheme și `useLimba()`, ca să se redeseneze la comutare — altfel ar rămâne cu
+ * textul calculat înainte.
+ */
+export function textul(t: I18nText | undefined, limba: Lang = limbaAcademiei()): string {
   if (!t) return "";
   return t[limba] || t.ro || t.en || "";
+}
+
+/** Limba aplicației, în forma pe care o folosește conținutul Academiei. */
+export function limbaAcademiei(): Lang {
+  return limbaAplicatiei() === "EN" ? "en" : "ro";
 }
 
 export const ETICHETA_NIVEL: Record<AcademyLevel, string> = {

@@ -24,6 +24,7 @@ import { RollingNumber } from "../../src/ui/RollingNumber";
 import { BaraProgres, Gol, Insigna, Sectiune } from "../../src/ui/parti";
 import { T } from "../../src/theme";
 import { umple } from "../../src/lib/i18n";
+import { useLimba } from "../../src/lib/i18n";
 
 // ── Academia ─────────────────────────────────────────────────────────────────
 //
@@ -58,6 +59,9 @@ const ICONITE: Record<string, React.ComponentProps<typeof Ionicons>["name"]> = {
 };
 
 export default function Academia() {
+  // Redesenează ecranul la comutarea limbii: lecțiile vin în ambele limbi,
+  // iar `textul()` alege, dar doar la randare.
+  useLimba();
   const router = useRouter();
   const [continut, setContinut] = React.useState<ContinutAcademie | null>(null);
   const [progres, setProgres] = React.useState<Progres>(PROGRES_GOL);

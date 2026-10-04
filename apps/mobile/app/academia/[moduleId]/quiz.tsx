@@ -23,6 +23,7 @@ import { RollingNumber } from "../../../src/ui/RollingNumber";
 import { BaraProgres, Gol } from "../../../src/ui/parti";
 import { T } from "../../../src/theme";
 import { umple } from "../../../src/lib/i18n";
+import { useLimba } from "../../../src/lib/i18n";
 
 // ── Quiz ─────────────────────────────────────────────────────────────────────
 //
@@ -41,6 +42,9 @@ import { umple } from "../../../src/lib/i18n";
 // recitească explicațiile n-are de ce să-și strice rezultatul.
 
 export default function Quiz() {
+  // Redesenează ecranul la comutarea limbii: lecțiile vin în ambele limbi,
+  // iar `textul()` alege, dar doar la randare.
+  useLimba();
   const { moduleId } = useLocalSearchParams<{ moduleId: string }>();
   const router = useRouter();
 

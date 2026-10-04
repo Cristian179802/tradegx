@@ -29,6 +29,7 @@ import { intreabaTutorele } from "../../../src/lib/asistent";
 import { ApiError } from "../../../src/lib/api";
 import { T } from "../../../src/theme";
 import { umple } from "../../../src/lib/i18n";
+import { useLimba } from "../../../src/lib/i18n";
 
 // ── O lecție ─────────────────────────────────────────────────────────────────
 //
@@ -81,6 +82,9 @@ const CATRE_UNEALTA: Record<string, { ruta: string; buton: string; text: string 
 };
 
 export default function Lectie() {
+  // Redesenează ecranul la comutarea limbii: lecțiile vin în ambele limbi,
+  // iar `textul()` alege, dar doar la randare.
+  useLimba();
   const { moduleId, lessonId } = useLocalSearchParams<{ moduleId: string; lessonId: string }>();
   const router = useRouter();
   const [latime, laMasurare] = useLatime();

@@ -20,6 +20,8 @@ import { Ecran } from "../../../src/ui/Ecran";
 import { BaraProgres, Gol, Insigna, Sectiune } from "../../../src/ui/parti";
 import { T } from "../../../src/theme";
 import { umple } from "../../../src/lib/i18n";
+import { useLimba } from "../../../src/lib/i18n";
+import { tr } from "../../../src/lib/i18n";
 
 // ── Un modul ─────────────────────────────────────────────────────────────────
 //
@@ -31,6 +33,9 @@ import { umple } from "../../../src/lib/i18n";
 // pedagogie. Cardul spune totuși câte lecții mai ai.
 
 export default function Modul() {
+  // Redesenează ecranul la comutarea limbii: lecțiile vin în ambele limbi,
+  // iar `textul()` alege, dar doar la randare.
+  useLimba();
   const { moduleId } = useLocalSearchParams<{ moduleId: string }>();
   const router = useRouter();
 
@@ -67,7 +72,7 @@ export default function Modul() {
   return (
     <Ecran
       titlu={modul ? textul(modul.title) : "Modul"}
-      subtitlu={modul ? umple("{p1} din {p2} lecții · {p3}", { p1: facute, p2: modul.lessons.length, p3: ETICHETA_NIVEL[modul.level] }) : null}
+      subtitlu={modul ? umple("{p1} din {p2} lecții · {p3}", { p1: facute, p2: modul.lessons.length, p3: tr(ETICHETA_NIVEL[modul.level]) }) : null}
       incarca={incarca && !continut}
       scheletRanduri={4}
     >

@@ -210,7 +210,7 @@ export default function Checklist() {
                 style={st.bifa}
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: e.bifat }}
-                accessibilityLabel={afisat(e)}
+                accessibilityLabel={tr(afisat(e))}
                 hitSlop={6}
               >
                 <Ionicons
@@ -228,7 +228,7 @@ export default function Checklist() {
                 onPress={() => sterge(e.id)}
                 style={st.sterge}
                 accessibilityRole="button"
-                accessibilityLabel={umple("Șterge regula: {p1}", { p1: afisat(e) })}
+                accessibilityLabel={umple("Șterge regula: {p1}", { p1: tr(afisat(e)) })}
                 hitSlop={6}
               >
                 <Ionicons name="close" size={15} color={T.ink.i4} />
