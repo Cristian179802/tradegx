@@ -340,7 +340,7 @@ export default function Grafice() {
                       />
                     ) : null}
                     {analiza.confidence != null ? (
-                      <Text style={[st.incredere, cifre]}>{analiza.confidence}% încredere</Text>
+                      <Text style={[st.incredere, cifre]}>{umple("{n}% încredere", { n: analiza.confidence })}</Text>
                     ) : null}
                   </View>
 
@@ -453,15 +453,16 @@ export default function Grafice() {
                       </Text>
                     ) : loturi == null ? (
                       <Text style={st.faraSold}>
-                        Nu pot afla valoarea pipului pentru {simbol} într-un cont în {moneda}.
-                        Prefer să nu arăt o cifră inventată — deschide Calculatorul, acolo
-                        aduce singur cursul lipsă.
+                        {umple(
+                          "Nu pot afla valoarea pipului pentru {simbol} într-un cont în {moneda}. Prefer să nu arăt o cifră inventată — deschide Calculatorul, acolo aduce singur cursul lipsă.",
+                          { simbol, moneda },
+                        )}
                       </Text>
                     ) : (
                       <>
                         <Rand
                           cheie="Mărimea poziției"
-                          valoare={`${numar(loturi, 2)} loturi`}
+                          valoare={umple("{n} loturi", { n: numar(loturi, 2) })}
                           culoare={T.ink.i1}
                         />
                         <Rand

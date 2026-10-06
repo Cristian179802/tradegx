@@ -17,6 +17,7 @@ import { useCerere } from "../../src/lib/useCerere";
 import { bani, numar, dataScurta } from "../../src/lib/format";
 import { Image } from "react-native";
 import { tr } from "../../src/lib/i18n";
+import { etichetaSetup } from "../../src/lib/setup";
 import { Card } from "../../src/ui/Card";
 import { Buton } from "../../src/ui/Buton";
 import { alegeImagine } from "../../src/lib/fisiere";
@@ -228,12 +229,12 @@ export default function DetaliuTranzactie() {
               <Reveal intarziere={140} style={st.spatiu}>
                 <Card>
                   <Text style={st.eticheta}>Context</Text>
-                  <Rand nume="Setup" valoare={eticheteSetup(t.setupType)} />
+                  <Rand nume="Setup" valoare={etichetaSetup(t.setupType)} />
                   <Rand nume="Sesiune" valoare={t.sessionType ?? "—"} />
                   <Rand nume="Interval" valoare={t.timeframe ?? "—"} />
                   <Rand nume="Deschisă" valoare={dataScurta(t.entryTime)} />
                   {t.exitTime ? <Rand nume="Închisă" valoare={dataScurta(t.exitTime)} /> : null}
-                  {t.account?.name ? <Rand nume="Cont" valoare={t.account.name} /> : null}
+                  {t.account?.name ? <Rand nume="Cont" valoare={t.account.name} netradus /> : null}
                 </Card>
               </Reveal>
 
@@ -242,7 +243,7 @@ export default function DetaliuTranzactie() {
                 <Reveal intarziere={210} style={st.spatiu}>
                   <Card>
                     <Text style={st.eticheta}>Notițe</Text>
-                    <Text style={st.note}>{t.notes}</Text>
+                    <Text netradus style={st.note}>{t.notes}</Text>
                   </Card>
                 </Reveal>
               ) : null}
@@ -259,41 +260,24 @@ export default function DetaliuTranzactie() {
 }
 
 function Rand({
-  nume, valoare, ton, sub,
+  nume, valoare, ton, sub, netradus = false,
 }: {
   nume: string;
   valoare: string;
   ton?: string;
   sub?: string;
+  /** Valoarea e scrisă de om (numele contului) — vezi `netradus` din <Text>. */
+  netradus?: boolean;
 }) {
   return (
     <View style={st.randDate}>
       <Text style={st.numeRand}>{nume}</Text>
       <View style={{ alignItems: "flex-end" }}>
-        <Text style={[st.valoareRand, cifre, ton ? { color: ton } : null]}>{valoare}</Text>
+        <Text netradus={netradus} style={[st.valoareRand, cifre, ton ? { color: ton } : null]}>{valoare}</Text>
         {sub ? <Text style={st.subRand}>{sub}</Text> : null}
       </View>
     </View>
   );
-}
-
-const ETICHETE: Record<string, string> = {
-  ORDER_BLOCK: "Order Block",
-  FAIR_VALUE_GAP: "Fair Value Gap",
-  LIQUIDITY_SWEEP: "Liquidity Sweep",
-  BOS: "Break of Structure",
-  CHOCH: "Change of Character",
-  BREAKER: "Breaker",
-  MITIGATION: "Mitigation",
-  REJECTION: "Rejection",
-  TREND_FOLLOW: "Trend follow",
-  SCALP: "Scalp",
-  OTHER: "Altul",
-};
-
-function eticheteSetup(v: string | null): string {
-  if (!v) return "—";
-  return ETICHETE[v] ?? v;
 }
 
 /**

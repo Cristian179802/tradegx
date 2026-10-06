@@ -4,6 +4,7 @@ import { Text } from "./Text";
 import Svg, { Path } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { T, ATINGERE_MIN } from "../theme";
+import { useT } from "../lib/i18n";
 
 // ── Butonul „Continuă cu Google" ─────────────────────────────────────────────
 //
@@ -49,6 +50,7 @@ export function ButonGoogle({
   dezactivat?: boolean;
   eticheta?: string;
 }) {
+  const t = useT();
   const inactiv = dezactivat || incarca;
 
   return (
@@ -61,7 +63,7 @@ export function ButonGoogle({
       disabled={inactiv}
       style={({ pressed }) => [st.buton, pressed && st.apasat, inactiv && st.inactiv]}
       accessibilityRole="button"
-      accessibilityLabel={eticheta}
+      accessibilityLabel={t(eticheta)}
       accessibilityState={{ disabled: inactiv, busy: incarca }}
     >
       <View style={st.continut}>

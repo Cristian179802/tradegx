@@ -7,6 +7,8 @@ import {
   Pressable,
 } from "react-native";
 import { Text } from "../../src/ui/Text";
+import { tr, umple } from "../../src/lib/i18n";
+import { etichetaSetup } from "../../src/lib/setup";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -44,7 +46,7 @@ interface Tranzactie {
   entryTime: string;
   exitTime: string | null;
   status: string;
-  setup?: string | null;
+  setupType?: string | null;
 }
 
 type Filtru = "toate" | "deschise" | "inchise";
@@ -172,7 +174,7 @@ function Rand({
     <Card
       onPress={onPress}
       culoareMuchie={deschisa ? T.accent.line : pnl != null && pnl < 0 ? "rgba(251,113,133,0.30)" : "rgba(52,211,153,0.30)"}
-      accesibilEticheta={`${t.symbol}, ${cumparare ? "cumpărare" : "vânzare"}, ${pnl == null ? "în desfășurare" : bani(pnl, moneda)}`}
+      accesibilEticheta={`${t.symbol}, ${tr(cumparare ? "cumpărare" : "vânzare")}, ${pnl == null ? tr("în desfășurare") : bani(pnl, moneda)}`}
     >
       <View style={st.rand}>
         <View
@@ -190,11 +192,14 @@ function Rand({
 
         <View style={{ flex: 1, minWidth: 0 }}>
           <View style={st.randSimbol}>
-            <Text style={st.simbol} numberOfLines={1}>{t.symbol}</Text>
-            {t.setup ? <Text style={st.setup} numberOfLines={1}>{t.setup}</Text> : null}
+            <Text netradus style={st.simbol} numberOfLines={1}>{t.symbol}</Text>
+            {t.setupType ? <Text style={st.setup} numberOfLines={1}>{etichetaSetup(t.setupType)}</Text> : null}
           </View>
           <Text style={st.meta}>
-            {Number(t.lotSize).toFixed(2)} loturi · {deschisa ? "deschisă" : candva(t.exitTime ?? t.entryTime)}
+            {umple("{lot} loturi · {cand}", {
+              lot: Number(t.lotSize).toFixed(2),
+              cand: deschisa ? tr("deschisă") : candva(t.exitTime ?? t.entryTime),
+            })}
           </Text>
         </View>
 

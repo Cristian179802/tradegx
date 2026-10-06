@@ -15,6 +15,7 @@ import { Gol, GrilaStatistici, Rand, Sectiune, Statistica } from "../src/ui/part
 import { T, tonPnl, cifre } from "../src/theme";
 import { umple } from "../src/lib/i18n";
 import { useLimba } from "../src/lib/i18n";
+import { etichetaSetup } from "../src/lib/setup";
 
 // ── Analytics ────────────────────────────────────────────────────────────────
 //
@@ -269,8 +270,8 @@ export default function Analitice() {
                   {(a!.setupPerformance ?? []).slice(0, 8).map((x, i) => (
                     <RandDefalcare
                       key={x.setup}
-                      nume={x.setup}
-                      sub={`${x.total} tranz. · ${procent(x.winRate)}`}
+                      nume={etichetaSetup(x.setup)}
+                      sub={umple("{n} tranz. · {rata}", { n: x.total, rata: procent(x.winRate) })}
                       valoare={bani(x.pnl, moneda)}
                       primul={i === 0}
                     />
@@ -289,7 +290,7 @@ export default function Analitice() {
                     <RandDefalcare
                       key={x.instrument}
                       nume={x.instrument}
-                      sub={`${x.total} tranz. · ${procent(x.winRate)}`}
+                      sub={umple("{n} tranz. · {rata}", { n: x.total, rata: procent(x.winRate) })}
                       valoare={bani(x.pnl, moneda)}
                       primul={i === 0}
                     />

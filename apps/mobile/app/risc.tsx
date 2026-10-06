@@ -6,7 +6,7 @@ import * as Haptics from "expo-haptics";
 import { api, ApiError } from "../src/lib/api";
 import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
-import { bani, procent } from "../src/lib/format";
+import { bani, procent, ziScurta } from "../src/lib/format";
 import { Camp } from "../src/ui/Camp";
 import { Card } from "../src/ui/Card";
 import { Buton } from "../src/ui/Buton";
@@ -64,7 +64,8 @@ interface Date_ {
   weekPnl: number;
 }
 
-const ZILE = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
+// Indicele e ziua (0 = duminică), în forma serverului; se afișează prin `ziScurta`.
+const ZILE = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"]; // i18n-tehnic
 const RISCURI = [0.25, 0.5, 1, 1.5, 2, 3];
 const LIMITE = [3, 5, 8, 10, 15];
 
@@ -303,7 +304,11 @@ export default function ManagerRisc() {
                     style={{ marginTop: T.spacing.lg }}
                   />
                   <Text style={st.subBara}>
-                    {bani(pierdereAzi, moneda, false)} din {bani(limitaBani, moneda, false)} ({procent(limitaPct, 1)} din sold)
+                    {umple("{pierdut} din {limita} ({pct} din sold)", {
+                      pierdut: bani(pierdereAzi, moneda, false),
+                      limita: bani(limitaBani, moneda, false),
+                      pct: procent(limitaPct, 1),
+                    })}
                   </Text>
                 </>
               ) : (
@@ -339,7 +344,7 @@ export default function ManagerRisc() {
               </View>
               {riscBani != null ? (
                 <Text style={st.echivalent}>
-                  ≈ {bani(riscBani, moneda, false)} pe tranzacție, la soldul de acum.
+                  {umple("≈ {suma} pe tranzacție, la soldul de acum.", { suma: bani(riscBani, moneda, false) })}
                 </Text>
               ) : null}
 
@@ -364,7 +369,7 @@ export default function ManagerRisc() {
                 {ZILE.map((z, i) => (
                   <Optiune
                     key={z}
-                    text={z}
+                    text={ziScurta(z)}
                     activ={zileOprite?.includes(i) ?? false}
                     rosu
                     onPress={() => {
@@ -438,7 +443,7 @@ export default function ManagerRisc() {
                 accesibilEticheta={umple("{p1}. Apasă ca să editezi limitele.", { p1: a.name })}
               >
                 <View style={st.antetCont}>
-                  <Text style={st.numeCont} numberOfLines={1}>{a.name}</Text>
+                  <Text netradus style={st.numeCont} numberOfLines={1}>{a.name}</Text>
                   {a.isActive ? <Insigna text="Selectat" /> : null}
                   <Ionicons
                     name={contEditat === a.id ? "chevron-up" : "create-outline"}
@@ -489,7 +494,9 @@ export default function ManagerRisc() {
                     </View>
                     {Number(a.balance) > 0 && Number(pierdereZi.replace(",", ".")) > 0 ? (
                       <Text style={st.echivalent}>
-                        Adică {bani((Number(a.balance) * Number(pierdereZi.replace(",", "."))) / 100, a.currency, false)} pe zi.
+                        {umple("Adică {suma} pe zi.", {
+                          suma: bani((Number(a.balance) * Number(pierdereZi.replace(",", "."))) / 100, a.currency, false),
+                        })}
                       </Text>
                     ) : null}
                     <Buton

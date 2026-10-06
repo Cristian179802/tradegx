@@ -11,7 +11,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { RollingNumber } from "../src/ui/RollingNumber";
 import { Gol, GrilaStatistici, Sectiune, Statistica } from "../src/ui/parti";
 import { T, tonPnl, cifre } from "../src/theme";
-import { umple } from "../src/lib/i18n";
+import { tr, umple } from "../src/lib/i18n";
 
 // ── Piața azi ────────────────────────────────────────────────────────────────
 //
@@ -77,7 +77,7 @@ export default function Piata() {
       titlu="Piața azi"
       subtitlu={
         active.length > 0
-          ? `Deschis: ${active.map((s) => s.nume).join(", ")}`
+          ? umple("Deschis: {sesiuni}", { sesiuni: active.map((s) => tr(s.nume)).join(", ") })
           : "Toate sesiunile sunt închise"
       }
       incarca={c.incarca && !c.date}

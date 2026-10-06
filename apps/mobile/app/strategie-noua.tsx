@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Text } from "../src/ui/Text";
+import { tr } from "../src/lib/i18n";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -115,7 +116,9 @@ export default function StrategieNoua() {
 
   // Numele se completează singur din tipul ales, dar rămâne editabil: cine are
   // trei variante ale aceleiași strategii vrea să le deosebească.
-  const numeFolosit = nume.trim() || tip.nume;
+  // Ca la conturi: numele și descrierea implicite SE SALVEAZĂ, deci în limba
+  // aplicației — un englez nu trebuie să primească o strategie numită în română.
+  const numeFolosit = nume.trim() || tr(tip.nume);
 
   const creeaza = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
@@ -124,7 +127,7 @@ export default function StrategieNoua() {
     try {
       const r = (await api.backtesting.creeazaStrategie({
         name: numeFolosit.slice(0, 80),
-        description: tip.descriere,
+        description: tr(tip.descriere),
         type: tip.id,
         color: tip.culoare,
         // Valorile implicite, cu cele două pe care le-a atins omul peste ele.
@@ -172,7 +175,7 @@ export default function StrategieNoua() {
                 setRaport(Number(x.reguli.rrRatio ?? 2));
               }}
               culoareMuchie={ales ? `${x.culoare}59` : "rgba(255,255,255,0.04)"}
-              accesibilEticheta={`${x.nume}. ${x.descriere}`}
+              accesibilEticheta={`${tr(x.nume)}. ${tr(x.descriere)}`}
             >
               <View style={st.antet}>
                 <View style={[st.iconita, { backgroundColor: `${x.culoare}1A` }]}>
@@ -248,7 +251,7 @@ export default function StrategieNoua() {
             placeholder={tip.nume}
             autoCapitalize="sentences"
           />
-          <Rand cheie="Se va salva ca" valoare={numeFolosit} numeric={false} />
+          <Rand cheie="Se va salva ca" valoare={numeFolosit} numeric={false} netradus />
         </Card>
       </Reveal>
 

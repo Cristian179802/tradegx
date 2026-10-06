@@ -1,5 +1,6 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import { limba, tr } from "./i18n";
 
 // ── Foaia de tipar ───────────────────────────────────────────────────────────
 //
@@ -18,6 +19,12 @@ import * as Sharing from "expo-sharing";
 //
 // Stilul e alb pe hârtie, nu tema întunecată a aplicației. Un PDF cu fundal
 // negru costă un cartuș de toner și nu se poate citi tipărit.
+//
+// TEXTELE SE TRADUC AICI, nu la fiecare raport. Foaia nu trece prin <Text>,
+// deci nimic nu le-ar traduce singur — iar un englez ar fi primit un PDF
+// întreg în română. Ecranele dau titlurile, cheile și antetele ca text
+// românesc, exact ca în <Text>; cele cu valori în ele vin deja traduse, din
+// `umple()`, și trec neatinse. Cifrele nu se traduc: vin formatate.
 
 /** Culorile foii. Separate de tema aplicației, fiindcă hârtia e albă. */
 const H = {
@@ -75,7 +82,7 @@ export function construiesteHtml(f: Foaie): string {
         ? `<div class="grila">${s.perechi
             .map(
               (p) =>
-                `<div class="pereche"><span class="cheie">${esc(p.cheie)}</span><span class="valoare" style="color:${culoare(p.ton)}">${esc(p.valoare)}</span></div>`,
+                `<div class="pereche"><span class="cheie">${esc(tr(p.cheie))}</span><span class="valoare" style="color:${culoare(p.ton)}">${esc(p.valoare)}</span></div>`,
             )
             .join("")}</div>`
         : "";
@@ -83,11 +90,11 @@ export function construiesteHtml(f: Foaie): string {
       const tabel =
         s.capete && s.randuri?.length
           ? `<table>
-              <thead><tr>${s.capete.map((c, i) => `<th${i > 0 ? ' class="dr"' : ""}>${esc(c)}</th>`).join("")}</tr></thead>
+              <thead><tr>${s.capete.map((c, i) => `<th${i > 0 ? ' class="dr"' : ""}>${esc(tr(c))}</th>`).join("")}</tr></thead>
               <tbody>${s.randuri
                 .map(
                   (r) =>
-                    `<tr><td>${esc(r.eticheta)}</td>${r.valori
+                    `<tr><td>${esc(tr(r.eticheta))}</td>${r.valori
                       .map(
                         (v, i) =>
                           `<td class="dr"${i === r.valori.length - 1 && r.ton ? ` style="color:${culoare(r.ton)}"` : ""}>${esc(v)}</td>`,
@@ -98,13 +105,13 @@ export function construiesteHtml(f: Foaie): string {
             </table>`
           : "";
 
-      const nota = s.nota ? `<p class="nota">${esc(s.nota)}</p>` : "";
-      return `<section><h2>${esc(s.titlu)}</h2>${perechi}${tabel}${nota}</section>`;
+      const nota = s.nota ? `<p class="nota">${esc(tr(s.nota))}</p>` : "";
+      return `<section><h2>${esc(tr(s.titlu))}</h2>${perechi}${tabel}${nota}</section>`;
     })
     .join("");
 
   return `<!DOCTYPE html>
-<html lang="ro"><head><meta charset="utf-8" />
+<html lang="${limba() === "EN" ? "en" : "ro"}"><head><meta charset="utf-8" />
 <style>
   * { box-sizing: border-box; }
   body {
@@ -131,11 +138,11 @@ export function construiesteHtml(f: Foaie): string {
 <body>
   <header>
     <p class="marca">TradeGx</p>
-    <h1>${esc(f.titlu)}</h1>
-    <p class="sub">${esc(f.subtitlu)}</p>
+    <h1>${esc(tr(f.titlu))}</h1>
+    <p class="sub">${esc(tr(f.subtitlu))}</p>
   </header>
   ${sectiuni}
-  ${f.subsol ? `<footer>${esc(f.subsol)}</footer>` : ""}
+  ${f.subsol ? `<footer>${esc(tr(f.subsol))}</footer>` : ""}
 </body></html>`;
 }
 

@@ -182,7 +182,7 @@ export default function Quiz() {
                 color={promovat ? T.pnl.gain : T.state.warn}
               />
               <Text style={st.dinTotal}>
-                {corecte} din {intrebari.length} corecte · prag {prag}%
+                {umple("{corecte} din {total} corecte · prag {prag}%", { corecte, total: intrebari.length, prag })}
               </Text>
 
               <Text style={st.verdict}>

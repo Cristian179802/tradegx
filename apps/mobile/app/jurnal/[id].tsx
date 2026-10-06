@@ -188,7 +188,7 @@ export default function EditorJurnal() {
   return (
     <Ecran
       titlu={t?.symbol ?? "Jurnal"}
-      subtitlu={t ? `${t.direction === "BUY" ? "Cumpărare" : "Vânzare"} · ${dataScurta(t.exitTime ?? t.entryTime)}` : null}
+      subtitlu={t ? `${tr(t.direction === "BUY" ? "Cumpărare" : "Vânzare")} · ${dataScurta(t.exitTime ?? t.entryTime)}` : null}
       incarca={c.incarca && !t}
       scheletRanduri={5}
       reimprospateaza={c.reimprospateaza}
@@ -348,12 +348,12 @@ export default function EditorJurnal() {
                 <>
                   {analiza.scor != null ? (
                     <Insigna
-                      text={`Scor ${analiza.scor.toFixed(0)}/100`}
+                      text={umple("Scor {n}/100", { n: analiza.scor.toFixed(0) })}
                       culoare={analiza.scor >= 70 ? T.pnl.gain : analiza.scor >= 40 ? T.state.warn : T.pnl.loss}
                       style={{ marginBottom: T.spacing.md }}
                     />
                   ) : null}
-                  <Text style={st.analiza}>{analiza.text}</Text>
+                  <Text netradus style={st.analiza}>{analiza.text}</Text>
                 </>
               ) : (
                 <Text style={st.faraAnaliza}>

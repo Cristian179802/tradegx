@@ -4,7 +4,7 @@ import { Text } from "../src/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../src/lib/api";
 import { useCerere } from "../src/lib/useCerere";
-import { useLimba } from "../src/lib/i18n";
+import { umple, useLimba } from "../src/lib/i18n";
 import { Card } from "../src/ui/Card";
 import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
@@ -84,7 +84,7 @@ export default function RoadmapEcran() {
                   <Text style={st.eticheta}>LIVRATE PÂNĂ ACUM</Text>
                   <View style={st.randNumar}>
                     <Text style={st.numar}>{livrate}</Text>
-                    <Text style={st.dinTotal}>din {total} pe listă</Text>
+                    <Text style={st.dinTotal}>{umple("din {total} pe listă", { total })}</Text>
                   </View>
                 </View>
                 <View style={st.bifa}>
@@ -108,7 +108,10 @@ export default function RoadmapEcran() {
                 <Card
                   faraPadding
                   onPress={() => setDeschise((p) => ({ ...p, [s.id]: !desfasurat }))}
-                  accesibilEticheta={`${s.titlu}, ${s.elemente.length} elemente`}
+                  accesibilEticheta={umple(
+                    s.elemente.length === 1 ? "{titlu}, {n} element" : "{titlu}, {n} elemente",
+                    { titlu: s.titlu, n: s.elemente.length },
+                  )}
                 >
                   <View style={st.antetSectiune}>
                     <View style={[st.iconSectiune, { backgroundColor: `${inf.culoare}1A` }]}>
@@ -117,7 +120,7 @@ export default function RoadmapEcran() {
                     <View style={{ flex: 1, minWidth: 0 }}>
                       <Text style={st.titluSectiune} numberOfLines={1}>{s.titlu}</Text>
                       <Text style={st.numarSectiune}>
-                        {s.elemente.length} {s.elemente.length === 1 ? "element" : "elemente"}
+                        {umple(s.elemente.length === 1 ? "{n} element" : "{n} elemente", { n: s.elemente.length })}
                       </Text>
                     </View>
                     <Insigna text={inf.eticheta} culoare={inf.culoare} fundal={`${inf.culoare}1A`} />

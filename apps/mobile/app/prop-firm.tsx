@@ -188,8 +188,8 @@ function CardChallenge({ cont, onSchimbat }: { cont: Cont; onSchimbat: () => voi
     >
       <View style={st.antet}>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={st.nume} numberOfLines={1}>{cont.name}</Text>
-          <Text style={st.sub} numberOfLines={1}>
+          <Text netradus style={st.nume} numberOfLines={1}>{cont.name}</Text>
+          <Text netradus style={st.sub} numberOfLines={1}>
             {[r.propFirm, bani(cont.initialBalance, cont.currency, false)].filter(Boolean).join(" · ")}
           </Text>
         </View>
@@ -377,8 +377,10 @@ function CardChallenge({ cont, onSchimbat }: { cont: Cont; onSchimbat: () => voi
         <View style={st.margine}>
           <Ionicons name="information-circle-outline" size={13} color={T.ink.i4} />
           <Text style={st.textMargine}>
-            Mai ai {procent(Math.max(0, r.maxDrawdownPct - p.maxDrawdownPct), 2)} de drawdown
-            până la eliminare{r.maxDailyLossPct != null
+            {umple("Mai ai {p1} de drawdown până la eliminare", {
+              p1: procent(Math.max(0, r.maxDrawdownPct - p.maxDrawdownPct), 2),
+            })}
+            {r.maxDailyLossPct != null
               ? umple(", și {p1} azi", { p1: procent(Math.max(0, r.maxDailyLossPct - p.dailyLossPct), 2) })
               : ""}.
           </Text>

@@ -8,7 +8,7 @@ import * as Haptics from "expo-haptics";
 import { api } from "../../src/lib/api";
 import { useCerere } from "../../src/lib/useCerere";
 import { useAuth } from "../../src/lib/auth";
-import { useLimba } from "../../src/lib/i18n";
+import { tr, useLimba } from "../../src/lib/i18n";
 import { bani, baniScurt, procent, numar, candva } from "../../src/lib/format";
 import { Buton } from "../../src/ui/Buton";
 import { Card } from "../../src/ui/Card";
@@ -141,7 +141,7 @@ export default function Acasa() {
             <View style={st.randSalut}>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={st.salut}>{salutDupaOra()}</Text>
-                <Text style={st.nume} numberOfLines={1}>
+                <Text netradus style={st.nume} numberOfLines={1}>
                   {utilizator?.name || utilizator?.email || "Trader"}
                 </Text>
               </View>
@@ -356,7 +356,7 @@ function RandTranzactie({
   const cumparare = tranzactie.direction === "BUY";
 
   return (
-    <Card onPress={onPress} accesibilEticheta={`${tranzactie.symbol}, ${cumparare ? "cumpărare" : "vânzare"}`}>
+    <Card onPress={onPress} accesibilEticheta={`${tranzactie.symbol}, ${tr(cumparare ? "cumpărare" : "vânzare")}`}>
       <View style={st.randTranz}>
         <View style={[st.directie, { backgroundColor: cumparare ? "rgba(52,211,153,0.12)" : "rgba(251,113,133,0.12)" }]}>
           <Ionicons
@@ -367,7 +367,7 @@ function RandTranzactie({
         </View>
 
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={st.simbol} numberOfLines={1}>{tranzactie.symbol}</Text>
+          <Text netradus style={st.simbol} numberOfLines={1}>{tranzactie.symbol}</Text>
           <Text style={st.meta}>
             {deschisa ? "Deschisă" : candva(tranzactie.exitTime ?? tranzactie.entryTime)}
           </Text>

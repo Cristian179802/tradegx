@@ -190,7 +190,7 @@ function RiscDeRuina() {
     <Card culoareMuchie={periculos ? "rgba(251,113,133,0.40)" : undefined}>
       <View style={st.rezultatRuina}>
         <View>
-          <Text style={st.etichetaRuina}>ȘANSA SĂ PIERZI {drawdown}% DIN CONT</Text>
+          <Text style={st.etichetaRuina}>{umple("ȘANSA SĂ PIERZI {p}% DIN CONT", { p: drawdown })}</Text>
           {rezultat == null || calculeaza ? (
             <Text style={[st.valoareRuina, cifre, { color: T.ink.i4 }]}>…</Text>
           ) : (

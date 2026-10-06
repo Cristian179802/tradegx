@@ -207,7 +207,7 @@ export default function Calculator() {
           </View>
 
           <Camp
-            eticheta={`Sold cont (${moneda})`}
+            eticheta={umple("Sold cont ({moneda})", { moneda })}
             valoare={sold}
             onChange={setSold}
             numeric
@@ -235,7 +235,7 @@ export default function Calculator() {
             <View style={st.avertisment}>
               <Ionicons name="warning-outline" size={18} color={T.state.warn} />
               <Text style={st.textAvertisment}>
-                Nu pot afla valoarea pipului pentru {s} într-un cont în {moneda}
+                {umple("Nu pot afla valoarea pipului pentru {simbol} într-un cont în {moneda}", { simbol: s, moneda })}
                 {rezultat?.nevoie ? umple(", fiindcă îmi lipsește cursul {p1}", { p1: rezultat.nevoie }) : ""}.
                 {"\n\n"}
                 Apasă „Preț” — îl aduc automat. Prefer să nu afișez nimic decât o
@@ -261,7 +261,7 @@ export default function Calculator() {
               <Rand cheie="Risc" valoare={bani(-rezultat!.bani, moneda)} culoare={T.pnl.loss} />
               <Rand cheie="Distanța până la stop" valoare={`${numar(rezultat!.pips, 1)} pips`} />
               <Rand
-                cheie={`Valoare pip / lot (${moneda})`}
+                cheie={umple("Valoare pip / lot ({moneda})", { moneda })}
                 valoare={rezultat!.vp == null ? "—" : numar(rezultat!.vp, 2)}
               />
               {rezultat!.rr != null ? (

@@ -6,7 +6,7 @@ import * as Haptics from "expo-haptics";
 import { api } from "../src/lib/api";
 import { useRouter } from "expo-router";
 import { useCerere } from "../src/lib/useCerere";
-import { bani, numar, procent , lunaScurta} from "../src/lib/format";
+import { bani, dataLunga, numar, procent, lunaScurta } from "../src/lib/format";
 import { faPdf, type Foaie } from "../src/lib/foaie";
 import { Card } from "../src/ui/Card";
 import { Buton } from "../src/ui/Buton";
@@ -97,9 +97,7 @@ export default function Rapoarte() {
     const s = p.summary;
     return {
       titlu: "Raport de performanță",
-      subtitlu: `Generat pe ${new Date(p.generatedAt).toLocaleDateString("ro-RO", {
-        day: "numeric", month: "long", year: "numeric",
-      })} · ${s.totalTrades} tranzacții`,
+      subtitlu: umple("Generat pe {data} · {n} tranzacții", { data: dataLunga(p.generatedAt), n: s.totalTrades }),
       sectiuni: [
         {
           titlu: "Rezumat",
@@ -164,7 +162,7 @@ export default function Rapoarte() {
     const m = f.currency;
     const s = f.summary;
     return {
-      titlu: `Raport fiscal ${f.year}`,
+      titlu: umple("Raport fiscal {an}", { an: f.year }),
       subtitlu: umple("{n} tranzacții închise · toate conturile", { n: s.totalTrades }),
       sectiuni: [
         {
@@ -215,12 +213,12 @@ export default function Rapoarte() {
     setMesaj(null);
     const nume =
       fel === "performanta"
-        ? `TradeGx-Performanta-${new Date().toISOString().slice(0, 10)}.pdf`
-        : `TradeGx-Fiscal-${f?.year ?? ""}.pdf`;
+        ? umple("TradeGx-Performanta-{data}.pdf", { data: new Date().toISOString().slice(0, 10) })
+        : umple("TradeGx-Fiscal-{an}.pdf", { an: f?.year ?? "" });
     const r = await faPdf(foaie, nume);
     setLucreaza(false);
     if (r.fel === "eroare") setMesaj(r.mesaj);
-    else if (r.fel === "salvat") setMesaj(`PDF salvat: ${r.cale}`);
+    else if (r.fel === "salvat") setMesaj(umple("PDF salvat: {cale}", { cale: r.cale }));
     else Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
   };
 
@@ -251,7 +249,7 @@ export default function Rapoarte() {
             ? umple("{p1} tranzacții", { p1: p.summary.totalTrades })
             : "Cum a mers, pe hârtie"
           : f
-            ? `Anul ${f.year}`
+            ? umple("Anul {an}", { an: f.year })
             : "Pentru contabil"
       }
       incarca={c.incarca && !c.date}

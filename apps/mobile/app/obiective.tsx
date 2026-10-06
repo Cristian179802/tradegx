@@ -166,7 +166,7 @@ export default function Obiective() {
                 ramas={
                   p.trades >= t.monthlyTradeTarget
                     ? "Atins. Nu forța peste — numărul nu e scopul."
-                    : `Mai ai ${t.monthlyTradeTarget - p.trades} de notat.`
+                    : umple("Mai ai {n} de notat.", { n: t.monthlyTradeTarget - p.trades })
                 }
               />
             </Reveal>
@@ -204,7 +204,7 @@ export default function Obiective() {
           <Reveal intarziere={200}>
             <Card>
               <Camp
-                eticheta={`Profit lunar (${moneda})`}
+                eticheta={umple("Profit lunar ({moneda})", { moneda })}
                 valoare={profit ?? ""}
                 onChange={(v) => { setSalvat(false); setProfit(v); }}
                 numeric

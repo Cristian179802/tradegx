@@ -13,6 +13,7 @@ import { Text } from "./Text";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { T, ATINGERE_MIN, umbra } from "../theme";
+import { useT } from "../lib/i18n";
 
 // ── Buton ────────────────────────────────────────────────────────────────────
 //
@@ -60,6 +61,7 @@ export function Buton({
   iconitaLaDreapta = false,
   degrade = false,
 }: ButonProps) {
+  const t = useT();
   const p = React.useRef(new Animated.Value(0)).current;
   const inert = dezactivat || incarca;
 
@@ -83,7 +85,9 @@ export function Buton({
       onPressOut={() => catre(0)}
       onPress={inert ? undefined : onPress}
       accessibilityRole="button"
-      accessibilityLabel={eticheta}
+      // Textul de pe buton se traduce singur în <Text>; cititorul de ecran
+      // primește eticheta separat, așa că o traducem și aici.
+      accessibilityLabel={t(eticheta)}
       accessibilityState={{ disabled: inert, busy: incarca }}
       style={plin ? { width: "100%" } : undefined}
     >

@@ -207,7 +207,7 @@ function RandEveniment({ e }: { e: Eveniment }) {
 
           {e.actual || e.forecast || e.previous ? (
             <View style={st.cifre}>
-              <Cifra eticheta="Real" valoare={e.actual} evidentiat culoareForte={
+              <Cifra eticheta="Actual" valoare={e.actual} evidentiat culoareForte={
                 e.isBetter ? T.pnl.gain : e.isWorse ? T.pnl.loss : undefined
               } />
               <Cifra eticheta="Estimat" valoare={e.forecast} />

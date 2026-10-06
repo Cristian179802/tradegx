@@ -4,6 +4,7 @@ import { Text } from "../src/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../src/lib/api";
 import { useCerere } from "../src/lib/useCerere";
+import { useLimba } from "../src/lib/i18n";
 import { numar } from "../src/lib/format";
 import { Card } from "../src/ui/Card";
 import { Reveal } from "../src/ui/Reveal";
@@ -43,7 +44,12 @@ interface Date_ {
 }
 
 export default function Realizari() {
-  const c = useCerere<Date_>(() => api.gamification() as Promise<Date_>);
+  // Titlurile vin de la server, traduse acolo din aceleași chei ca pe site.
+  const { limba } = useLimba();
+  const c = useCerere<Date_>(
+    () => api.gamification(limba === "EN" ? "en" : "ro") as Promise<Date_>,
+    [limba],
+  );
   const d = c.date;
 
   const deblocate = (d?.achievements ?? []).filter((a) => a.unlocked);
@@ -178,7 +184,7 @@ function CardRealizare({ a }: { a: Realizare }) {
                 style={{ marginTop: T.spacing.sm }}
               />
               <Text style={st.progres}>
-                {numar(a.progress, 0)} din {numar(a.target, 0)}
+                {umple("{facut} din {total}", { facut: numar(a.progress, 0), total: numar(a.target, 0) })}
               </Text>
             </>
           ) : null}

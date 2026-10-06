@@ -20,6 +20,7 @@ import { usePathname, useRouter } from "expo-router";
 import { DOMENII, type Domeniu, type ElementMeniu } from "../lib/meniu";
 import { URL_API } from "../lib/api";
 import { T, ATINGERE_MIN, umbra } from "../theme";
+import { useT } from "../lib/i18n";
 
 // ── Bara de jos, cu bule ─────────────────────────────────────────────────────
 //
@@ -43,6 +44,7 @@ const LATIME = Dimensions.get("window").width;
 
 export function BaraFile() {
   const router = useRouter();
+  const t = useT();
   const cale = usePathname();
   const jos = useSafeAreaInsets().bottom;
 
@@ -132,7 +134,7 @@ export function BaraFile() {
             style={StyleSheet.absoluteFill}
             onPress={inchide}
             accessibilityRole="button"
-            accessibilityLabel="Închide meniul"
+            accessibilityLabel={t("Închide meniul")}
           >
             <Animated.View style={[StyleSheet.absoluteFill, st.voal, { opacity: p }]} />
           </Pressable>
@@ -201,7 +203,7 @@ export function BaraFile() {
               style={st.buton}
               accessibilityRole="button"
               accessibilityState={{ selected: a, expanded: deschis?.id === d.id }}
-              accessibilityLabel={d.eticheta}
+              accessibilityLabel={t(d.eticheta)}
             >
               <Ionicons
                 name={a ? d.iconitaPlina : d.iconita}
@@ -220,12 +222,13 @@ export function BaraFile() {
 }
 
 function Rand({ element, onPress }: { element: ElementMeniu; onPress: () => void }) {
+  const t = useT();
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [st.rand, pressed && st.randApasat]}
       accessibilityRole={element.nativ ? "button" : "link"}
-      accessibilityLabel={element.eticheta}
+      accessibilityLabel={t(element.eticheta)}
     >
       <View style={[st.cutieIconita, element.nativ && st.cutieNativa]}>
         <Ionicons

@@ -14,6 +14,7 @@ import { Text } from "./Text";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { T, cifre } from "../theme";
+import { useT } from "../lib/i18n";
 import { RollingNumber } from "./RollingNumber";
 import { Card } from "./Card";
 
@@ -37,12 +38,13 @@ export function Segmente<V extends string>({
   eticheta?: string;
   style?: StyleProp<ViewStyle>;
 }) {
+  const t = useT();
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={[st.segmente, style]}
-      accessibilityLabel={eticheta}
+      accessibilityLabel={eticheta ? t(eticheta) : undefined}
     >
       {valori.map((o) => {
         const activ = o.v === valoare;
@@ -197,18 +199,22 @@ export function Rand({
   valoare,
   culoare = T.ink.i1,
   numeric = true,
+  netradus = false,
   style,
 }: {
   cheie: string;
   valoare: string;
   culoare?: string;
   numeric?: boolean;
+  /** Valoarea e scrisă de om (numele unui cont) — vezi `netradus` din <Text>. */
+  netradus?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   return (
     <View style={[st.rand, style]}>
       <Text style={st.randCheie} numberOfLines={1}>{cheie}</Text>
       <Text
+        netradus={netradus}
         style={[st.randValoare, numeric ? cifre : null, { color: culoare } as TextStyle]}
         numberOfLines={1}
       >

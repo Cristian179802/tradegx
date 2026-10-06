@@ -211,7 +211,7 @@ export default function Profil() {
           ],
           subsol: "Export generat de TradeGx la cererea ta, conform dreptului la portabilitatea datelor.",
         },
-        "TradeGx-date.pdf",
+        tr("TradeGx-date.pdf"),
       );
       if (r.fel === "eroare") setMesaj(r.mesaj);
     } catch (e) {
@@ -360,7 +360,7 @@ export default function Profil() {
                       style={[st.pastila, activ && st.pastilaActiva]}
                       accessibilityRole="button"
                       accessibilityState={{ selected: activ }}
-                      accessibilityLabel={`${z.nume}${eAlTelefonului ? ", fusul telefonului" : ""}`}
+                      accessibilityLabel={`${tr(z.nume)}${eAlTelefonului ? tr(", fusul telefonului") : ""}`}
                     >
                       <Text style={[st.textPastila, activ && { color: T.accent.base }]}>
                         {z.nume}

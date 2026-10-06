@@ -142,7 +142,7 @@ export default function Stiri() {
                   ) : null}
 
                   <View style={st.jos}>
-                    <Text style={st.citeste}>Citește pe {item.source}</Text>
+                    <Text style={st.citeste}>{umple("Citește pe {sursa}", { sursa: item.source })}</Text>
                     <Ionicons name="open-outline" size={13} color={T.ink.i4} />
                   </View>
                 </Card>

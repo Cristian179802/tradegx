@@ -14,7 +14,7 @@ import { Reveal } from "../src/ui/Reveal";
 import { Ecran } from "../src/ui/Ecran";
 import { Gol, Insigna, Rand, Sectiune } from "../src/ui/parti";
 import { T } from "../src/theme";
-import { umple } from "../src/lib/i18n";
+import { tr, umple } from "../src/lib/i18n";
 
 // ── Import și export ─────────────────────────────────────────────────────────
 //
@@ -129,12 +129,15 @@ export default function ImportExport() {
     setLucreaza(true);
     setMesaj(null);
 
+    // Antetele, în limba aplicației: fișierul e al omului, îl deschide în Excel.
+    // În engleză au în plus un avantaj — importul site-ului recunoaște
+    // „Symbol”, deci fișierul se poate reîncărca.
     const csv = faCsv(
       [
         "Simbol", "Directie", "Stare", "Lot", "Intrare", "Iesire",
         "Stop loss", "Take profit", "Deschisa", "Inchisa",
         "Rezultat", "Comision", "Swap", "Setup", "Interval", "Nota",
-      ],
+      ].map(tr),
       t.map((x) => [
         x.symbol,
         x.direction,
@@ -157,7 +160,7 @@ export default function ImportExport() {
 
     const r = await trimiteText(
       csv,
-      `TradeGx-tranzactii-${new Date().toISOString().slice(0, 10)}.csv`,
+      umple("TradeGx-tranzactii-{data}.csv", { data: new Date().toISOString().slice(0, 10) }),
     );
     setLucreaza(false);
     if (r.fel === "eroare") setMesaj(r.mesaj);
@@ -212,10 +215,10 @@ export default function ImportExport() {
                       accessibilityRole="button"
                       accessibilityState={{ selected: activ }}
                     >
-                      <Text style={[st.textCont, activ && { color: T.accent.base }]} numberOfLines={1}>
+                      <Text netradus style={[st.textCont, activ && { color: T.accent.base }]} numberOfLines={1}>
                         {c.name}
                       </Text>
-                      <Text style={st.subCont}>{c._count?.trades ?? 0} tranz.</Text>
+                      <Text style={st.subCont}>{umple("{n} tranz.", { n: c._count?.trades ?? 0 })}</Text>
                     </Pressable>
                   );
                 })}

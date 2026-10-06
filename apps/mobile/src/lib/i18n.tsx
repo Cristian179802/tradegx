@@ -115,3 +115,50 @@ export function useT(): (ro: string) => string {
   const { limba: l } = useLimba();
   return React.useCallback((ro: string) => (l === "RO" ? ro : EN[ro] ?? ro), [l]);
 }
+
+// ── Ecranele ascunse, la schimbarea limbii ───────────────────────────────────
+//
+// `<Text>` se traduce singur, dar nu tot ce scrie pe ecran ajunge la el ca text
+// de tradus: subtitlurile din `umple()`, „acum 3 min" din `candva()`, sumele din
+// `bani()` (1.234,56 față de 1,234.56) sunt calculate de ecran, la randare. Un
+// ecran care nu se randează din nou rămâne cu ele în limba veche.
+//
+// Ecranul VIZIBIL se randează din nou: comutatorul de limbă e pe Acasă, care
+// ascultă de limbă. Problema sunt ecranele ASCUNSE, dar montate — filele deja
+// vizitate și ce a rămas în stivă dedesubt. Pe acelea le reconstruim: își cer
+// datele din nou, în fundal, înainte să le mai vadă cineva.
+//
+// DE CE NU `useLimba()` în fiecare componentă. Ar fi trebuit pus în vreo
+// cincizeci de componente și ținut minte la fiecare componentă nouă — o regulă
+// care se uită ușor și nu dă nicio eroare, doar text în limba greșită. Așa e o
+// singură regulă, pusă pe navigatoare, valabilă și pentru ecranele de mâine.
+//
+// EXCEPȚIE: `adauga`, formularul de tranzacție. Reconstruit, ar pierde ce a
+// scris omul și n-a salvat încă. Ascultă singur de limbă, deci nu are nevoie.
+
+const NU_SE_RECONSTRUIESC = new Set(["adauga"]);
+
+/** Pentru `screenLayout` pe navigatoare. Vezi explicația de mai sus. */
+export function ReconstruiesteLaLimba({
+  children,
+  navigation,
+  route,
+}: {
+  children: React.ReactElement;
+  navigation: { isFocused(): boolean };
+  route: { name: string };
+}) {
+  const { limba: l } = useLimba();
+  const [generatie, setGeneratie] = React.useState(0);
+  const anterioara = React.useRef(l);
+
+  React.useEffect(() => {
+    if (anterioara.current === l) return;
+    anterioara.current = l;
+    if (!navigation.isFocused() && !NU_SE_RECONSTRUIESC.has(route.name)) {
+      setGeneratie((g) => g + 1);
+    }
+  }, [l, navigation, route.name]);
+
+  return <React.Fragment key={generatie}>{children}</React.Fragment>;
+}

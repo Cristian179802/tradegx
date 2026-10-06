@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { T, ATINGERE_MIN } from "../theme";
+import { useT } from "../lib/i18n";
 import { Schelet } from "./Schelet";
 
 // ── Carcasa unui ecran ───────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ export function AntetEcran({
   fara_inapoi?: boolean;
 }) {
   const router = useRouter();
+  const t = useT();
   const poateInapoi = !fara_inapoi && router.canGoBack();
 
   return (
@@ -68,7 +70,7 @@ export function AntetEcran({
           }}
           style={st.inapoi}
           accessibilityRole="button"
-          accessibilityLabel="Înapoi"
+          accessibilityLabel={t("Înapoi")}
           hitSlop={8}
         >
           <Ionicons name="chevron-back" size={22} color={T.ink.i2} />

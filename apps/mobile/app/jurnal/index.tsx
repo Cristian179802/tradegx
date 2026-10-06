@@ -13,7 +13,7 @@ import { Schelet } from "../../src/ui/Schelet";
 import { AntetEcran, SPATIU_BARA } from "../../src/ui/Ecran";
 import { BaraProgres, Gol, Segmente, Statistica } from "../../src/ui/parti";
 import { T, tonPnl, cifre } from "../../src/theme";
-import { umple } from "../../src/lib/i18n";
+import { tr, umple } from "../../src/lib/i18n";
 
 // ── Jurnal detaliat ──────────────────────────────────────────────────────────
 //
@@ -173,7 +173,7 @@ export default function JurnalDetaliat() {
                       <Text style={st.notaAcoperire}>
                         {acoperire >= 0.999
                           ? "Toate tranzacțiile au notă. Asta e jurnalul complet."
-                          : `Mai ai ${s.totalTrades - s.journaled} de notat.`}
+                          : umple("Mai ai {n} de notat.", { n: s.totalTrades - s.journaled })}
                       </Text>
                     </Card>
                   </Reveal>
@@ -235,7 +235,7 @@ function RandJurnal({
     <Card
       onPress={onPress}
       culoareMuchie={notat ? T.accent.line : "rgba(255,255,255,0.05)"}
-      accesibilEticheta={`${t.symbol}, ${notat ? "notată" : "fără notă"}, ${pnl == null ? "fără rezultat" : bani(pnl, moneda)}`}
+      accesibilEticheta={`${t.symbol}, ${tr(notat ? "notată" : "fără notă")}, ${pnl == null ? tr("fără rezultat") : bani(pnl, moneda)}`}
     >
       <View style={st.rand}>
         <View style={[st.bifa, notat && st.bifaPlina]}>
@@ -248,7 +248,7 @@ function RandJurnal({
 
         <View style={{ flex: 1, minWidth: 0 }}>
           <View style={st.randSus}>
-            <Text style={st.simbol} numberOfLines={1}>{t.symbol}</Text>
+            <Text netradus style={st.simbol} numberOfLines={1}>{t.symbol}</Text>
             <Text style={st.directie}>{t.direction === "BUY" ? "CUMPĂRARE" : "VÂNZARE"}</Text>
             {t.journal?.aiScore != null ? (
               <View style={st.scor}>
@@ -257,8 +257,8 @@ function RandJurnal({
               </View>
             ) : null}
           </View>
-          <Text style={st.meta} numberOfLines={1}>
-            {nota ?? `${candva(t.exitTime ?? t.entryTime)} · ${t.lotSize.toFixed(2)} loturi`}
+          <Text netradus style={st.meta} numberOfLines={1}>
+            {nota ?? umple("{cand} · {lot} loturi", { cand: candva(t.exitTime ?? t.entryTime), lot: t.lotSize.toFixed(2) })}
           </Text>
         </View>
 

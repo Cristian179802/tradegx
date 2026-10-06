@@ -79,8 +79,8 @@ export default function Setari() {
                   <Text style={st.initiale}>{initiale}</Text>
                 </View>
                 <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={st.nume} numberOfLines={1}>
-                    {utilizator?.name || "Contul meu"}
+                  <Text netradus style={st.nume} numberOfLines={1}>
+                    {utilizator?.name || tr("Contul meu")}
                   </Text>
                   <Text style={st.email} numberOfLines={1}>{utilizator?.email}</Text>
                 </View>
@@ -144,7 +144,7 @@ function Linie({
       onPress={onPress}
       style={({ pressed }) => [st.linie, pressed && st.linieApasata]}
       accessibilityRole={nativ ? "button" : "link"}
-      accessibilityLabel={text}
+      accessibilityLabel={tr(text)}
     >
       <Ionicons name={iconita} size={19} color={nativ ? T.accent.base : T.ink.i3} />
       <Text style={st.textLinie}>{text}</Text>

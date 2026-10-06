@@ -23,7 +23,7 @@ import { Ecran } from "../../src/ui/Ecran";
 import { RollingNumber } from "../../src/ui/RollingNumber";
 import { BaraProgres, Gol, Insigna, Sectiune } from "../../src/ui/parti";
 import { T } from "../../src/theme";
-import { umple } from "../../src/lib/i18n";
+import { tr, umple } from "../../src/lib/i18n";
 import { useLimba } from "../../src/lib/i18n";
 
 // ── Academia ─────────────────────────────────────────────────────────────────
@@ -127,7 +127,7 @@ export default function Academia() {
             }}
             style={st.actiune}
             accessibilityRole="button"
-            accessibilityLabel="Glosar"
+            accessibilityLabel={tr("Glosar")}
             hitSlop={8}
           >
             <Ionicons name="search" size={16} color={T.ink.i3} />
@@ -163,7 +163,7 @@ export default function Academia() {
                       size={T.fontSize["2xl"]}
                       color={fractiune >= 1 ? T.pnl.gain : T.ink.i1}
                     />
-                    <Text style={st.dinTotal}>{terminate}/{total} lecții</Text>
+                    <Text style={st.dinTotal}>{umple("{facute}/{total} lecții", { facute: terminate, total })}</Text>
                   </View>
                 </View>
                 <View style={st.capTerminat}>

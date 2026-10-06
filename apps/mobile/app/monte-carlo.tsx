@@ -171,12 +171,12 @@ export default function MonteCarlo() {
               <Reveal>
                 <Card>
                   <Probabilitate
-                    eticheta={`Atinge +${tinta}%`}
+                    eticheta={umple("Atinge +{p}%", { p: tinta })}
                     valoare={rezultat.pTinta}
                     culoare={T.pnl.gain}
                   />
                   <Probabilitate
-                    eticheta={`Arde −${pierdere}%`}
+                    eticheta={umple("Arde −{p}%", { p: pierdere })}
                     valoare={rezultat.pRuina}
                     culoare={T.pnl.loss}
                     intarziere={90}
@@ -204,7 +204,7 @@ export default function MonteCarlo() {
                   <View style={st.capete}>
                     <Text style={[st.capat, cifre]}>start 100</Text>
                     <Text style={[st.capat, cifre]}>
-                      după {tranzactii} tranz.
+                      {umple("după {n} tranz.", { n: tranzactii })}
                     </Text>
                   </View>
                 </Card>

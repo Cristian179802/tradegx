@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Tabs } from "expo-router";
 import { useAuth } from "../../src/lib/auth";
+import { ReconstruiesteLaLimba } from "../../src/lib/i18n";
 import { useInregistrareNotificari } from "../../src/lib/notificari";
 import { T } from "../../src/theme";
 
@@ -28,6 +29,7 @@ export default function TabsLayout() {
         headerShown: false,
         sceneStyle: { backgroundColor: T.surface.s0 },
       }}
+      screenLayout={(p) => <ReconstruiesteLaLimba {...p} />}
     >
       <Tabs.Screen name="index" />
       <Tabs.Screen name="tranzactii" />

@@ -167,8 +167,11 @@ export default function EdgeFinder() {
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={st.valoare} numberOfLines={1}>{x.value}</Text>
                   <Text style={st.meta}>
-                    {x.n} tranz. · {procent(x.winRate)} · PF{" "}
-                    {x.profitFactor == null ? "∞" : numar(x.profitFactor, 2)}
+                    {umple("{n} tranz. · {rata} · PF {pf}", {
+                      n: x.n,
+                      rata: procent(x.winRate),
+                      pf: x.profitFactor == null ? "∞" : numar(x.profitFactor, 2),
+                    })}
                   </Text>
                 </View>
                 <Text style={[st.pnl, cifre, { color: tonPnl(x.netPnl) }]}>

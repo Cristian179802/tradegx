@@ -8,7 +8,7 @@ import { ProvizorAuth, useAuth } from "../src/lib/auth";
 import { BaraFile } from "../src/ui/BaraFile";
 import { T } from "../src/theme";
 import { useFonturi } from "../src/lib/fonturi";
-import { ProvizorLimba, useLimba } from "../src/lib/i18n";
+import { ProvizorLimba, ReconstruiesteLaLimba, useLimba } from "../src/lib/i18n";
 
 // ── Rădăcina aplicației ──────────────────────────────────────────────────────
 //
@@ -91,6 +91,7 @@ export default function RootLayout() {
                 animation: "slide_from_right",
                 animationDuration: 260,
               }}
+              screenLayout={(p) => <ReconstruiesteLaLimba {...p} />}
             >
               <Stack.Screen name="login" options={{ animation: "fade" }} />
               <Stack.Screen name="inregistrare" options={{ animation: "fade" }} />

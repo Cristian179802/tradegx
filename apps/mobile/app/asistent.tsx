@@ -145,7 +145,11 @@ export default function Asistent() {
                 {SUGESTII.map((s) => (
                   <Pressable
                     key={s}
-                    onPress={() => trimite(s)}
+                    // Se trimite textul TRADUS — cel pe care omul l-a văzut pe
+                    // buton. Cu cheia românească, modelul ar fi primit o
+                    // întrebare în română și ar fi răspuns în română, chiar cu
+                    // aplicația pusă pe engleză.
+                    onPress={() => trimite(tr(s))}
                     style={({ pressed }) => [st.sugestie, pressed && { backgroundColor: T.surface.s4 }]}
                     accessibilityRole="button"
                   >
@@ -173,7 +177,7 @@ export default function Asistent() {
               }
               renderItem={({ item }) => (
                 <View style={[st.bula, item.rol === "user" ? st.bulaMea : st.bulaAsistent]}>
-                  <Text style={[st.textBula, item.rol === "user" && { color: "#ffffff" }]}>
+                  <Text netradus style={[st.textBula, item.rol === "user" && { color: "#ffffff" }]}>
                     {item.text}
                   </Text>
                 </View>
@@ -212,7 +216,7 @@ export default function Asistent() {
               disabled={!text.trim() || asteapta}
               style={[st.trimite, (!text.trim() || asteapta) && st.trimiteInert]}
               accessibilityRole="button"
-              accessibilityLabel="Trimite"
+              accessibilityLabel={tr("Trimite")}
               accessibilityState={{ disabled: !text.trim() || asteapta }}
             >
               <Ionicons name="arrow-up" size={19} color="#ffffff" />

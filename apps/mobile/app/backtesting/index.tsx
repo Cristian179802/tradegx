@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
-import { tr } from "../../src/lib/i18n";
+import { tr, umple } from "../../src/lib/i18n";
 import { Text } from "../../src/ui/Text";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -253,7 +253,7 @@ function CardStrategie({
       <View style={st.antet}>
         <View style={[st.bulina, { backgroundColor: s.color ?? T.accent.base }]} />
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={st.nume} numberOfLines={1}>{s.name}</Text>
+          <Text netradus style={st.nume} numberOfLines={1}>{s.name}</Text>
           <Text style={st.tip} numberOfLines={1}>
             {s.type} · {s._count?.backtests ?? 0} {(s._count?.backtests ?? 0) === 1 ? "rulare" : "rulări"}
           </Text>
@@ -269,7 +269,7 @@ function CardStrategie({
           accessibilityLabel={tr("Vezi ultimul rezultat")}
         >
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={st.etichetaUltim}>ULTIMA RULARE · {candva(ultim.createdAt)}</Text>
+            <Text style={st.etichetaUltim}>{umple("ULTIMA RULARE · {cand}", { cand: candva(ultim.createdAt) })}</Text>
             <View style={st.randUltim}>
               {ultim.status === "COMPLETED" ? (
                 <>

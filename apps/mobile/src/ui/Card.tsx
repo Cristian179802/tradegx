@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { T, umbra } from "../theme";
+import { useT } from "../lib/i18n";
 
 // ── Cardul ───────────────────────────────────────────────────────────────────
 //
@@ -62,6 +63,7 @@ export function Card({
   // Alternativa — patru valori separate — ar însemna patru animații care pot
   // ieși din pas.
   const apasat = React.useRef(new Animated.Value(0)).current;
+  const t = useT();
 
   const catre = React.useCallback(
     (valoare: number, durata: number) => {
@@ -125,7 +127,10 @@ export function Card({
       onPress={onPress}
       onLongPress={onLongPress}
       accessibilityRole="button"
-      accessibilityLabel={accesibilEticheta}
+      // Eticheta pentru cititorul de ecran nu trece prin <Text>, deci n-ar fi
+      // tradusă. O cheie simplă se traduce aici; una compusă vine deja
+      // tradusă, din `umple()`, și rămâne neatinsă (nu e cheie în dicționar).
+      accessibilityLabel={accesibilEticheta ? t(accesibilEticheta) : undefined}
     >
       {continut}
     </Pressable>

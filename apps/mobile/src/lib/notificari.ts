@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 import { api } from "./api";
+import { tr } from "./i18n";
 
 // ── Notificări ───────────────────────────────────────────────────────────────
 //
@@ -40,7 +41,8 @@ const CANAL = "tradegx-alerte";
 async function pregatesteCanalul() {
   if (Platform.OS !== "android") return;
   await Notifications.setNotificationChannelAsync(CANAL, {
-    name: "Alerte TradeGx",
+    // Numele canalului apare în setările de notificări ale telefonului.
+    name: tr("Alerte TradeGx"),
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 200, 100, 200],
     lightColor: "#6d75f6",

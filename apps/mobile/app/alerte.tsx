@@ -101,7 +101,7 @@ export default function Alerte() {
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <AntetEcran
           titlu="Alerte"
-          subtitlu={necitite > 0 ? `${necitite} necitite` : "Toate citite"}
+          subtitlu={necitite > 0 ? umple(necitite === 1 ? "{n} necitită" : "{n} necitite", { n: necitite }) : "Toate citite"}
           actiune={
             necitite > 0 ? (
               <Pressable

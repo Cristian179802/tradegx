@@ -22,6 +22,7 @@ import { Reveal } from "../../src/ui/Reveal";
 import { RollingNumber } from "../../src/ui/RollingNumber";
 import { T, cifre } from "../../src/theme";
 import { numar } from "../../src/lib/format";
+import { useLimba } from "../../src/lib/i18n";
 
 // ── Adaugă tranzacție ────────────────────────────────────────────────────────
 //
@@ -50,6 +51,10 @@ interface Cont {
 
 export default function Adauga() {
   const router = useRouter();
+  // Ecranul ăsta NU se reconstruiește la schimbarea limbii (ar pierde
+  // tranzacția nescrisă încă — vezi `ReconstruiesteLaLimba`), deci se
+  // randează singur din nou, ca `numar()` să formateze în limba nouă.
+  useLimba();
 
   const conturi = useCerere<Cont[] | { accounts: Cont[] }>(
     () => api.accounts.list() as Promise<Cont[] | { accounts: Cont[] }>,
@@ -181,7 +186,7 @@ export default function Adauga() {
                         onPress={() => { Haptics.selectionAsync().catch(() => {}); setContId(c.id); }}
                         style={[st.pastila, contAles?.id === c.id && st.pastilaActiva]}
                       >
-                        <Text style={[st.textPastila, contAles?.id === c.id && st.textPastilaActiv]}>
+                        <Text netradus style={[st.textPastila, contAles?.id === c.id && st.textPastilaActiv]}>
                           {c.name}
                         </Text>
                       </Pressable>

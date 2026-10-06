@@ -13,7 +13,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { Paywall } from "../src/ui/Paywall";
 import { Insigna, Rand, Sectiune } from "../src/ui/parti";
 import { T } from "../src/theme";
-import { umple } from "../src/lib/i18n";
+import { tr, umple } from "../src/lib/i18n";
 
 // ── Cont de trading nou ──────────────────────────────────────────────────────
 //
@@ -82,7 +82,11 @@ export default function ContNou() {
 
   const numeFolosit =
     nume.trim() ||
-    (esteChallenge && firma ? `${firma} ${moneda}` : `Cont ${TIPURI.find((t) => t.v === tip)?.e ?? ""}`);
+    // Numele implicit SE SALVEAZĂ în cont, deci se scrie în limba aplicației:
+    // un englez nu trebuie să rămână cu un „Cont Demo” pe care nu l-a ales.
+    (esteChallenge && firma
+      ? `${tr(firma)} ${moneda}`
+      : umple("Cont {tip}", { tip: tr(TIPURI.find((t) => t.v === tip)?.e ?? "") }));
 
   const valid = nr(sold) != null && numeFolosit.length >= 1;
 
@@ -124,7 +128,7 @@ export default function ContNou() {
         try {
           await api.propfirm.update({
             accountId: cont.id,
-            propFirm: firma,
+            propFirm: firma ? tr(firma) : firma,
             profitTarget: nr(tinta),
             maxDailyLossPct: nr(pierdereZi),
             maxDrawdownPct: nr(drawdown),
@@ -196,7 +200,7 @@ export default function ContNou() {
                 setTip(x.v);
               }}
               culoareMuchie={ales ? T.accent.line : "rgba(255,255,255,0.04)"}
-              accesibilEticheta={`${x.e}. ${x.sub}`}
+              accesibilEticheta={`${tr(x.e)}. ${tr(x.sub)}`}
             >
               <View style={st.rand}>
                 <View style={[st.iconita, ales && { backgroundColor: T.accent.soft }]}>
@@ -350,7 +354,7 @@ export default function ContNou() {
 
       <Reveal style={{ marginTop: T.spacing.md }}>
         <Card nivel={1}>
-          <Rand cheie="Se va crea" valoare={numeFolosit} numeric={false} />
+          <Rand cheie="Se va crea" valoare={numeFolosit} numeric={false} netradus />
           <Rand cheie="Sold" valoare={`${sold} ${moneda}`} numeric={false} />
           {esteChallenge && firma ? <Rand cheie="Firmă" valoare={firma} numeric={false} /> : null}
         </Card>

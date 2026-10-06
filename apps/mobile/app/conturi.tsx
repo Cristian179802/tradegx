@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import { tr } from "../src/lib/i18n";
+import { tr, umple } from "../src/lib/i18n";
 import { Text } from "../src/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -101,7 +101,7 @@ export default function Conturi() {
   return (
     <Ecran
       titlu="Conturi"
-      subtitlu={activ ? `Vezi: ${activ.name}` : "Vezi: toate conturile"}
+      subtitlu={activ ? umple("Vezi: {nume}", { nume: activ.name }) : "Vezi: toate conturile"}
       incarca={c.incarca && conturi.length === 0}
       scheletRanduri={4}
       reimprospateaza={c.reimprospateaza}
@@ -200,7 +200,10 @@ function CardCont({
     <Card
       onPress={onAlege}
       culoareMuchie={cont.isActive ? T.accent.line : "rgba(255,255,255,0.04)"}
-      accesibilEticheta={`${cont.name}, sold ${bani(sold, cont.currency, false)}${cont.isActive ? ", cont selectat" : ""}`}
+      accesibilEticheta={umple(
+        cont.isActive ? "{nume}, sold {sold}, cont selectat" : "{nume}, sold {sold}",
+        { nume: cont.name, sold: bani(sold, cont.currency, false) },
+      )}
     >
       <View style={st.antetCont}>
         <View style={[st.cerc, cont.isActive && st.cercPlin]}>
@@ -208,9 +211,9 @@ function CardCont({
         </View>
 
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={st.nume} numberOfLines={1}>{cont.name}</Text>
-          <Text style={st.subnume} numberOfLines={1}>
-            {[cont.propFirm ?? cont.broker, TIPURI[cont.type] ?? cont.type, `1:${cont.leverage}`]
+          <Text netradus style={st.nume} numberOfLines={1}>{cont.name}</Text>
+          <Text netradus style={st.subnume} numberOfLines={1}>
+            {[cont.propFirm ?? cont.broker, tr(TIPURI[cont.type] ?? cont.type), `1:${cont.leverage}`]
               .filter(Boolean)
               .join(" · ")}
           </Text>

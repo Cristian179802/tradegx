@@ -267,7 +267,7 @@ export default function Institutional() {
                 <Reveal key={a.id} intarziere={150 + i * 50} style={{ marginBottom: T.spacing.md }}>
                   <Card nivel={1}>
                     <View style={st.antetCont}>
-                      <Text style={st.numeCont} numberOfLines={1}>{a.name}</Text>
+                      <Text netradus style={st.numeCont} numberOfLines={1}>{a.name}</Text>
                       <Text style={[st.randamentCont, { color: tonPnl(a.returnPct) }]}>
                         {procent(a.returnPct, 2)}
                       </Text>
@@ -275,7 +275,7 @@ export default function Institutional() {
                     <Rand cheie="Rezultat net" valoare={bani(a.netPnl, a.currency)} culoare={tonPnl(a.netPnl)} />
                     <Rand cheie="Sharpe" valoare={a.sharpe == null ? "—" : numar(a.sharpe, 2)} />
                     <Rand cheie="Drawdown maxim" valoare={procent(a.maxDrawdownPct, 2)} />
-                    <Rand cheie="Rată de câștig" valoare={`${procent(a.winRatePct)} · ${a.totalTrades} tranz.`} />
+                    <Rand cheie="Rată de câștig" valoare={umple("{rata} · {n} tranz.", { rata: procent(a.winRatePct), n: a.totalTrades })} />
                   </Card>
                 </Reveal>
               ))}

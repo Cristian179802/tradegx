@@ -106,7 +106,7 @@ export default function Modul() {
                 <Card
                   onPress={() => router.push(`/academia/${modul.id}/${l.id}`)}
                   culoareMuchie={gata ? "rgba(52,211,153,0.30)" : "rgba(255,255,255,0.04)"}
-                  accesibilEticheta={`${textul(l.title)}${gata ? ", terminată" : ""}`}
+                  accesibilEticheta={`${textul(l.title)}${gata ? tr(", terminată") : ""}`}
                 >
                   <View style={st.randLectie}>
                     <View style={[st.numar, gata && st.numarGata]}>
@@ -131,7 +131,7 @@ export default function Modul() {
 
           {intrebari.length > 0 ? (
             <>
-              <Sectiune titlu="Verificare" nota={`Prag de promovare: ${prag}%.`} />
+              <Sectiune titlu="Verificare" nota={umple("Prag de promovare: {p1}%.", { p1: prag })} />
               <Reveal>
                 <Card
                   onPress={() => router.push(`/academia/${modul.id}/quiz`)}
@@ -153,7 +153,7 @@ export default function Modul() {
                       />
                     </View>
                     <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text style={st.titluQuiz}>Quiz — {intrebari.length} întrebări</Text>
+                      <Text style={st.titluQuiz}>{umple("Quiz — {n} întrebări", { n: intrebari.length })}</Text>
                       <Text style={st.subQuiz}>
                         {scor == null
                           ? facute < modul.lessons.length

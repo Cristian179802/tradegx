@@ -5,7 +5,7 @@ import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../src/lib/api";
 import { useCerere } from "../../src/lib/useCerere";
-import { bani, baniScurt, dataScurta, numar, procent } from "../../src/lib/format";
+import { bani, baniScurt, dataScurta, lunaScurta, numar, procent } from "../../src/lib/format";
 import { Card } from "../../src/ui/Card";
 import { Reveal } from "../../src/ui/Reveal";
 import { Ecran } from "../../src/ui/Ecran";
@@ -68,7 +68,6 @@ interface Backtest {
   trades: TranzactieBt[];
 }
 
-const LUNI = ["ian.", "feb.", "mar.", "apr.", "mai", "iun.", "iul.", "aug.", "sept.", "oct.", "nov.", "dec."];
 const MAX_TRANZACTII = 50;
 
 export default function RezultatBacktest() {
@@ -93,7 +92,9 @@ export default function RezultatBacktest() {
     () =>
       (b?.monthlyPnl ?? []).map((x) => {
         const luna = Number(x.month.split("-")[1]) - 1;
-        return { eticheta: LUNI[luna] ?? x.month, valoare: x.pnl };
+        // Prin `Intl`, ca restul aplicației: în română dă exact „ian.”, „sept.”.
+        const eticheta = luna >= 0 && luna < 12 ? lunaScurta(luna) : x.month;
+        return { eticheta, valoare: x.pnl };
       }),
     [b?.monthlyPnl],
   );
@@ -121,7 +122,7 @@ export default function RezultatBacktest() {
             <Ionicons name="alert-circle-outline" size={20} color={T.pnl.loss} />
             <View style={{ flex: 1 }}>
               <Text style={st.titluEsec}>
-                {b.status === "FAILED" ? "Rularea a eșuat" : `Stare: ${b.status.toLowerCase()}`}
+                {b.status === "FAILED" ? "Rularea a eșuat" : umple("Stare: {stare}", { stare: b.status.toLowerCase() })}
               </Text>
               <Text style={st.textEsec}>
                 {b.errorMessage ??

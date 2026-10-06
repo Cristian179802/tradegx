@@ -261,16 +261,16 @@ function CardPostare({
           <Text style={st.initiala}>{initiala}</Text>
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={st.autor} numberOfLines={1}>{p.user.name ?? "Anonim"}</Text>
+          <Text netradus style={st.autor} numberOfLines={1}>{p.user.name ?? tr("Anonim")}</Text>
           <Text style={st.cand}>{candva(p.createdAt)}</Text>
         </View>
         {p.symbol ? <Insigna text={p.symbol} culoare={T.accent.base} fundal={T.accent.soft} /> : null}
       </View>
 
-      {p.title ? <Text style={st.titlu}>{p.title}</Text> : null}
+      {p.title ? <Text netradus style={st.titlu}>{p.title}</Text> : null}
 
       <Pressable onPress={() => setDesfasurat((x) => !x)}>
-        <Text style={st.continutPostare} numberOfLines={desfasurat ? undefined : 5}>
+        <Text netradus style={st.continutPostare} numberOfLines={desfasurat ? undefined : 5}>
           {p.content}
         </Text>
       </Pressable>
@@ -311,9 +311,11 @@ function CardPostare({
           style={st.comentarii}
           accessibilityRole="button"
           accessibilityLabel={
-            p._count.comments > 0
-              ? `Vezi cele ${p._count.comments} comentarii`
-              : "Comentează"
+            p._count.comments === 0
+              ? tr("Comentează")
+              : p._count.comments === 1
+                ? tr("Vezi comentariul")
+                : umple("Vezi cele {n} comentarii", { n: p._count.comments })
           }
           hitSlop={8}
         >
@@ -375,8 +377,10 @@ function Prezentare({ onScrie }: { onScrie: (titlu: string) => void }) {
         <Reveal key={x.titlu} intarziere={i * 45} style={{ marginBottom: T.spacing.sm }}>
           <Card
             nivel={1}
-            onPress={() => onScrie(x.titlu)}
-            accesibilEticheta={`Scrie o postare: ${x.titlu}`}
+            // Titlul ajunge într-un câmp de text, nu într-un <Text>, deci nu se
+            // traduce singur: fără `tr`, un englez ar primi titlul în română.
+            onPress={() => onScrie(tr(x.titlu))}
+            accesibilEticheta={umple("Scrie o postare: {p1}", { p1: tr(x.titlu) })}
           >
             <View style={st.randSugestie}>
               <View style={st.iconSugestie}>
@@ -691,11 +695,13 @@ function CardEchipa({ e }: { e: Echipa }) {
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <View style={st.randNumeEchipa}>
-            <Text style={st.numeEchipa} numberOfLines={1}>{e.name}</Text>
+            <Text netradus style={st.numeEchipa} numberOfLines={1}>{e.name}</Text>
             {e.isOwner ? <Insigna text="Proprietar" culoare={T.state.warn} /> : null}
           </View>
           <Text style={st.metaEchipa}>
-            {e.memberCount} {e.memberCount === 1 ? "membru" : "membri"} · {e.postCount} postări
+            {umple(e.memberCount === 1 ? "{n} membru" : "{n} membri", { n: e.memberCount })}
+            {" · "}
+            {umple(e.postCount === 1 ? "{n} postare" : "{n} postări", { n: e.postCount })}
           </Text>
         </View>
       </View>

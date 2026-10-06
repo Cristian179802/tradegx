@@ -195,7 +195,7 @@ export default function Watchlist() {
                 >
                   <View style={st.rand}>
                     <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text style={st.simbol}>{e.symbol}</Text>
+                      <Text netradus style={st.simbol}>{e.symbol}</Text>
                       <View style={st.praguri}>
                         {peste != null ? (
                           <View style={st.prag}>
@@ -319,9 +319,10 @@ function DialogPraguri({
 
           <View style={st.antetFoaie}>
             <View style={{ flex: 1 }}>
-              <Text style={st.titluFoaie}>{element?.symbol}</Text>
+              <Text netradus style={st.titluFoaie}>{element?.symbol}</Text>
               {pretCurent != null ? (
-                <Text style={st.subFoaie}>acum {numar(pretCurent, 5)}</Text>
+                // Tipar întreg: „acum" singur e cheia lui „just now" din `candva()`.
+                <Text style={st.subFoaie}>{umple("acum {pret}", { pret: numar(pretCurent, 5) })}</Text>
               ) : null}
             </View>
             <Pressable onPress={onInchide} hitSlop={10} accessibilityRole="button" accessibilityLabel={tr("Închide")}>

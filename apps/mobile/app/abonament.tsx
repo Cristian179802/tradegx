@@ -171,8 +171,10 @@ export default function Abonament() {
                 </Text>
               ) : zileTrial != null && zileTrial > 0 ? (
                 <Text style={st.notaStare}>
-                  Proba se termină pe {dataScurta(s?.trialEnd)}. După aceea treci pe Gratuit,
-                  fără să-ți ceară nimeni cardul.
+                  {umple(
+                    "Proba se termină pe {data}. După aceea treci pe Gratuit, fără să-ți ceară nimeni cardul.",
+                    { data: dataScurta(s?.trialEnd) },
+                  )}
                 </Text>
               ) : null}
 

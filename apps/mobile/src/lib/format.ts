@@ -91,7 +91,7 @@ export function lunaScurta(index: number): string {
 }
 
 /** Abrevierile pe care le trimite `/api/analytics`, de duminică încolo. */
-const ZILE_SERVER = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
+const ZILE_SERVER = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"]; // i18n-tehnic: comparate, nu afișate
 
 /**
  * „Lun" / „Mon" — numele scurt al zilei, după limba aplicației.
@@ -110,4 +110,12 @@ export function ziScurta(abreviereServer: string): string {
   if (i < 0) return abreviereServer;
   // 1 ianuarie 2023 a fost duminică (verificat), deci ziua `i` e la `1 + i`.
   return new Date(2023, 0, 1 + i).toLocaleDateString("en-GB", { weekday: "short" });
+}
+
+/** „19 septembrie 2026" / „19 September 2026" — pentru antetul unui raport. */
+export function dataLunga(iso: string | Date | null | undefined): string {
+  if (!iso) return "—";
+  const d = typeof iso === "string" ? new Date(iso) : iso;
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString(locale(), { day: "numeric", month: "long", year: "numeric" });
 }

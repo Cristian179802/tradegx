@@ -89,7 +89,7 @@ export default function FirPostare() {
       id: `local-${Date.now()}`,
       content: t,
       createdAt: new Date().toISOString(),
-      user: { id: "eu", name: "Tu" },
+      user: { id: "eu", name: tr("Tu") },
     };
     setLocale((x) => [...x, provizoriu]);
     setText("");
@@ -119,7 +119,7 @@ export default function FirPostare() {
     >
       <Ecran
         titlu={p?.title ?? "Postare"}
-        subtitlu={p ? `${p.user.name ?? "Anonim"} · ${candva(p.createdAt)}` : null}
+        subtitlu={p ? `${p.user.name ?? tr("Anonim")} · ${candva(p.createdAt)}` : null}
         incarca={c.incarca && !p}
         scheletRanduri={3}
         reimprospateaza={c.reimprospateaza}
@@ -169,7 +169,7 @@ export default function FirPostare() {
                     </Text>
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={st.autor} numberOfLines={1}>{p.user.name ?? "Anonim"}</Text>
+                    <Text netradus style={st.autor} numberOfLines={1}>{p.user.name ?? tr("Anonim")}</Text>
                     <Text style={st.cand}>{candva(p.createdAt)}</Text>
                   </View>
                   {p.symbol ? (
@@ -177,8 +177,8 @@ export default function FirPostare() {
                   ) : null}
                 </View>
 
-                {p.title ? <Text style={st.titlu}>{p.title}</Text> : null}
-                <Text style={st.continut}>{p.content}</Text>
+                {p.title ? <Text netradus style={st.titlu}>{p.title}</Text> : null}
+                <Text netradus style={st.continut}>{p.content}</Text>
 
                 {p.tags.length > 0 ? (
                   <View style={st.etichete}>
@@ -215,14 +215,14 @@ export default function FirPostare() {
                             {(x.user.name ?? "?").trim().charAt(0).toUpperCase()}
                           </Text>
                         </View>
-                        <Text style={st.autorComentariu} numberOfLines={1}>
-                          {x.user.name ?? "Anonim"}
+                        <Text netradus style={st.autorComentariu} numberOfLines={1}>
+                          {x.user.name ?? tr("Anonim")}
                         </Text>
                         <Text style={st.candComentariu}>
                           {provizoriu ? "se trimite…" : candva(x.createdAt)}
                         </Text>
                       </View>
-                      <Text style={st.textComentariu}>{x.content}</Text>
+                      <Text netradus style={st.textComentariu}>{x.content}</Text>
                     </Card>
                   </Reveal>
                 );
