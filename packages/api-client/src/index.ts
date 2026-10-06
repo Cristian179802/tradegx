@@ -223,7 +223,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
       coduriRezerva: () => request("/api/2fa/backup", { method: "POST" }),
     },
 
-    gamification: () => request("/api/gamification"),
+    gamification: (lang = "ro") => request(`/api/gamification?lang=${lang}`),
 
     academy: {
       /** Lecțiile, diagramele, quiz-urile și glosarul. Mare; se ține în cache local. */
