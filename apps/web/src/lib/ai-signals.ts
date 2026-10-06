@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
 import { broadcastTelegram, sendToBroadcastChats, escapeHtml } from "@/lib/telegram";
 import { sendPushToAll } from "@/lib/push";
+import type { Limba } from "@/lib/limba-utilizator";
 
 // ── Generator zilnic de semnale AI (HPS — High Probability Setups) ───────────
 // Maxim 3 semnale pe zi, generate o singură dată (lazy), pe baza prețurilor reale.
@@ -108,6 +109,9 @@ interface RawSignal {
   rationale: string;
   confirmation: string;
   invalidation?: string;
+  rationaleEn?: string;
+  confirmationEn?: string;
+  invalidationEn?: string;
 }
 
 const VALID_TF = ["M5", "M15", "M30", "H1", "H4", "D1"];
@@ -140,20 +144,11 @@ export type SignalOutcome =
 
 export type SignalRun = { count: number; outcome: SignalOutcome };
 
-export async function generateDailySignals(date: string): Promise<SignalRun> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("[signals] ANTHROPIC_API_KEY lipsește din mediu");
-    return { count: 0, outcome: "no-key" };
-  }
-
-  const snapshot = await fetchMarketSnapshot();
-  if (snapshot.length === 0) {
-    console.error("[signals] fetchMarketSnapshot a întors zero instrumente");
-    return { count: 0, outcome: "no-market-data" };
-  }
-
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
+/**
+ * Promptul generatorului. Separat de apel ca să poată fi rulat și în afara
+ * producției (o probă care nu scrie în bază), cu EXACT același text.
+ */
+export function promptSemnale(snapshot: MarketSnapshot[], date: string): { system: string; user: string } {
   const marketTable = snapshot
     .map((s) => `${s.symbol} (${s.instrument}): preț=${s.price}, high24h=${s.high24}, low24h=${s.low24}, variație24h=${s.changePct.toFixed(2)}%`)
     .join("\n");
@@ -170,9 +165,10 @@ REGULI STRICTE pentru fiecare semnal:
 - rationale: 3-5 propoziții în română, explicând structura, lichiditatea vizată, confluența și DE CE setup-ul are probabilitate ridicată
 - confirmation: ce confirmare concretă să aștepte traderul ÎNAINTE de intrare (ex: "Așteaptă un CHoCH pe M15 + retest al order block-ului H1")
 - invalidation: ce invalidează ideea
+- rationaleEn, confirmationEn, invalidationEn: ACELEAȘI trei texte, în engleză — același conținut și aceleași niveluri, scrise natural pentru un trader vorbitor de engleză (nu traducere cuvânt cu cuvânt). Termenii SMC rămân la fel în ambele limbi (order block, FVG, CHoCH, BOS, liquidity sweep).
 
 Răspunzi DOAR cu JSON valid, fără text suplimentar, în formatul:
-{"signals":[{"symbol":"EUR/USD","instrumentType":"FOREX","direction":"BUY","timeframe":"H4","entryPrice":1.0850,"stopLoss":1.0820,"takeProfit":1.0920,"takeProfit2":1.0960,"confidence":78,"setupType":"ORDER_BLOCK","bias":"Bullish","session":"LONDON","rationale":"...","confirmation":"...","invalidation":"..."}]}
+{"signals":[{"symbol":"EUR/USD","instrumentType":"FOREX","direction":"BUY","timeframe":"H4","entryPrice":1.0850,"stopLoss":1.0820,"takeProfit":1.0920,"takeProfit2":1.0960,"confidence":78,"setupType":"ORDER_BLOCK","bias":"Bullish","session":"LONDON","rationale":"...","confirmation":"...","invalidation":"...","rationaleEn":"...","confirmationEn":"...","invalidationEn":"..."}]}
 
 Valori permise:
 - timeframe: ${VALID_TF.join(", ")}
@@ -181,6 +177,28 @@ Valori permise:
 - instrumentType: ${VALID_INSTR.join(", ")}`;
 
   const user = `Date de piață live (${date}):\n${marketTable}\n\nGenerează maxim 3 HPS pentru ziua de azi. Returnează DOAR JSON.`;
+  return { system, user };
+}
+
+/** Modelul și plafonul de răspuns — aceleași pentru producție și pentru probă. */
+export const MODEL_SEMNALE = "claude-opus-4-5";
+export const MAX_TOKENS_SEMNALE = 6000;
+
+export async function generateDailySignals(date: string): Promise<SignalRun> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error("[signals] ANTHROPIC_API_KEY lipsește din mediu");
+    return { count: 0, outcome: "no-key" };
+  }
+
+  const snapshot = await fetchMarketSnapshot();
+  if (snapshot.length === 0) {
+    console.error("[signals] fetchMarketSnapshot a întors zero instrumente");
+    return { count: 0, outcome: "no-market-data" };
+  }
+
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  const { system, user } = promptSemnale(snapshot, date);
 
   // Apelul propriu-zis: esecul lui (credit epuizat, retea, limita de rata) e
   // altceva decat un raspuns pe care nu-l putem folosi, si altceva decat un
@@ -188,8 +206,9 @@ Valori permise:
   let resp;
   try {
     resp = await anthropic.messages.create({
-      model: "claude-opus-4-5",
-      max_tokens: 3000,
+      model: MODEL_SEMNALE,
+      // Textele vin în două limbi, deci aproape dublu față de varianta doar română.
+      max_tokens: MAX_TOKENS_SEMNALE,
       system,
       messages: [{ role: "user", content: user }],
     });
@@ -264,6 +283,9 @@ Valori permise:
         rationale: s.rationale ?? "",
         confirmation: s.confirmation ?? "",
         invalidation: s.invalidation ?? null,
+        rationaleEn: s.rationaleEn?.trim() || null,
+        confirmationEn: s.confirmationEn?.trim() || null,
+        invalidationEn: s.invalidationEn?.trim() || null,
       };
     }),
   });
@@ -278,24 +300,57 @@ Valori permise:
   return { count: valid.length, outcome: "ok" };
 }
 
-// Formatează și difuzează semnalele zilei pe Telegram
+/**
+ * Textele unui semnal în limba cerută. Semnalele generate înainte de varianta
+ * bilingvă n-au engleză — atunci rămâne româna, care e oricum completă.
+ */
+export function textSemnal(
+  s: {
+    rationale: string;
+    confirmation: string;
+    invalidation: string | null;
+    rationaleEn: string | null;
+    confirmationEn: string | null;
+    invalidationEn: string | null;
+  },
+  limba: Limba,
+): { rationale: string; confirmation: string; invalidation: string | null } {
+  if (limba === "en" && s.rationaleEn) {
+    return {
+      rationale: s.rationaleEn,
+      confirmation: s.confirmationEn ?? s.confirmation,
+      invalidation: s.invalidationEn ?? s.invalidation,
+    };
+  }
+  return { rationale: s.rationale, confirmation: s.confirmation, invalidation: s.invalidation };
+}
+
+// Formatează și difuzează semnalele zilei pe Telegram — fiecare om în limba lui.
 async function broadcastSignalsToTelegram(signals: RawSignal[]): Promise<void> {
   if (signals.length === 0) return;
-  const lines = signals.map((s, i) => {
-    const arrow = s.direction === "BUY" ? "🟢" : "🔴";
-    return `${arrow} <b>${escapeHtml(s.symbol)}</b> ${s.direction} (${s.timeframe})\n` +
-      `   🎯 Entry: <code>${s.entryPrice}</code>\n` +
-      `   🛡️ SL: <code>${s.stopLoss}</code>  ✅ TP: <code>${s.takeProfit}</code>\n` +
-      `   📊 Încredere: ${s.confidence}%${i < signals.length - 1 ? "\n" : ""}`;
-  });
-  const text =
-    `📡 <b>Semnalele AI ale zilei — TradeGx</b>\n` +
-    `<i>Maxim ${signals.length} setup-uri de înaltă probabilitate</i>\n\n` +
-    lines.join("\n") +
-    `\n\n⚠️ <i>Nu sunt sfaturi financiare. Vezi analiza completă în aplicație și tranzacționează responsabil.</i>`;
-  // Difuzare către utilizatorii individuali + canalele/grupurile comunității
-  await broadcastTelegram(text);
-  await sendToBroadcastChats(text);
+  const mesaj = (limba: Limba) => {
+    const en = limba === "en";
+    const lines = signals.map((s, i) => {
+      const arrow = s.direction === "BUY" ? "🟢" : "🔴";
+      return `${arrow} <b>${escapeHtml(s.symbol)}</b> ${s.direction} (${s.timeframe})\n` +
+        `   🎯 Entry: <code>${s.entryPrice}</code>\n` +
+        `   🛡️ SL: <code>${s.stopLoss}</code>  ✅ TP: <code>${s.takeProfit}</code>\n` +
+        `   📊 ${en ? "Confidence" : "Încredere"}: ${s.confidence}%${i < signals.length - 1 ? "\n" : ""}`;
+    });
+    const antet = en
+      ? `📡 <b>Today's AI signals — TradeGx</b>\n` +
+        `<i>Up to ${signals.length} high-probability setups</i>\n\n`
+      : `📡 <b>Semnalele AI ale zilei — TradeGx</b>\n` +
+        `<i>Maxim ${signals.length} setup-uri de înaltă probabilitate</i>\n\n`;
+    const avertisment = en
+      ? `\n\n⚠️ <i>Not financial advice. See the full analysis in the app and trade responsibly.</i>`
+      : `\n\n⚠️ <i>Nu sunt sfaturi financiare. Vezi analiza completă în aplicație și tranzacționează responsabil.</i>`;
+    return antet + lines.join("\n") + avertisment;
+  };
+  // Utilizatorii individuali, fiecare în limba din cont.
+  await broadcastTelegram({ ro: mesaj("ro"), en: mesaj("en") });
+  // Canalele comunității sunt un singur public, cel românesc.
+  await sendToBroadcastChats(mesaj("ro"));
 }
 
 // ── Lock in-memory per instanță pentru a evita generarea concurentă ───────────
@@ -326,10 +381,19 @@ export async function getOrCreateTodaySignals() {
     const fresh = await prisma.aiSignal.findMany({ where: { date }, orderBy: { confidence: "desc" } });
     if (fresh.length > 0) {
       const top = fresh[0];
+      const directie = top.direction === "BUY" ? "LONG" : "SHORT";
+      // `route` e o rută a aplicației: atingerea notificării deschide ecranul.
       void sendPushToAll({
-        title: "Semnale HPS noi 📊",
-        body: `${fresh.length} setup-uri azi · Top: ${top.symbol} ${top.direction === "BUY" ? "LONG" : "SHORT"} (${top.confidence}%)`,
-        data: { route: "/(tabs)/signals" },
+        ro: {
+          title: "Semnale HPS noi 📊",
+          body: `${fresh.length} setup-uri azi · Top: ${top.symbol} ${directie} (${top.confidence}%)`,
+          data: { route: "/semnale" },
+        },
+        en: {
+          title: "New HPS signals 📊",
+          body: `${fresh.length} ${fresh.length === 1 ? "setup" : "setups"} today · Top: ${top.symbol} ${directie} (${top.confidence}%)`,
+          data: { route: "/semnale" },
+        },
       });
     }
   } catch (err) {

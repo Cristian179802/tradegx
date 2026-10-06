@@ -5,6 +5,7 @@ import * as Device from "expo-device";
 import Constants from "expo-constants";
 import { api } from "./api";
 import { tr } from "./i18n";
+import { useRootNavigationState, useRouter } from "expo-router";
 
 // ── Notificări ───────────────────────────────────────────────────────────────
 //
@@ -117,4 +118,30 @@ export function useInregistrareNotificari(autentificat: boolean) {
   React.useEffect(() => {
     if (!autentificat) facut.current = false;
   }, [autentificat]);
+}
+
+// ── Atingerea unei notificări deschide ecranul ei ────────────────────────────
+//
+// Serverul pune în `data.route` ruta ecranului la care se referă notificarea.
+// Doar rutele de pe lista de mai jos se deschid: o rută necunoscută (de la o
+// versiune mai veche a serverului, de pildă) ar fi dus la ecranul „negăsit",
+// mai rău decât să rămână omul unde a deschis aplicația.
+
+const RUTE_DIN_NOTIFICARI = new Set(["/semnale", "/alerte"]);
+
+export function useDeschideDinNotificare(activ: boolean) {
+  const raspuns = Notifications.useLastNotificationResponse();
+  const router = useRouter();
+  // Navigatorul trebuie montat înainte de prima navigare.
+  const navigatorGata = Boolean(useRootNavigationState()?.key);
+
+  React.useEffect(() => {
+    if (!activ || !navigatorGata || !raspuns) return;
+    if (raspuns.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) return;
+    const ruta = raspuns.notification.request.content.data?.route;
+    // Consumat o singură dată: altfel, la următoarea montare (după o
+    // reautentificare) aplicația ar sări din nou la același ecran.
+    Notifications.clearLastNotificationResponse();
+    if (typeof ruta === "string" && RUTE_DIN_NOTIFICARI.has(ruta)) router.push(ruta as never);
+  }, [activ, navigatorGata, raspuns, router]);
 }

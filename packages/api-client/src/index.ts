@@ -93,8 +93,10 @@ export function createApiClient(config: ApiClientConfig = {}) {
     },
 
     signals: {
-      today: () => request("/api/signals"),
-      generate: () => request("/api/signals", { method: "POST" }),
+      // `lang` — aplicația o trimite explicit; site-ul nu, serverul o ia din cookie.
+      today: (lang?: "ro" | "en") => request(`/api/signals${lang ? `?lang=${lang}` : ""}`),
+      generate: (lang?: "ro" | "en") =>
+        request(`/api/signals${lang ? `?lang=${lang}` : ""}`, { method: "POST" }),
     },
 
     analytics: {

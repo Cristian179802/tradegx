@@ -84,7 +84,7 @@ export async function POST(
   });
 
   await notifyTelegram(userId, `📡 ${title}`, message);
-  void sendPushToUser(userId, { title: `📡 ${title}`, body: message, data: { route: "/(tabs)/alerts" } });
+  void sendPushToUser(userId, { title: `📡 ${title}`, body: message, data: { route: "/alerte" } });
   await sendWebPushToUser(userId, { title: `📡 ${title}`, body: message, url: "/signals", tag: "tv-signal" });
 
   return NextResponse.json({ ok: true });

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { todayKey } from "@/lib/ai-signals";
+import { textSemnal, todayKey } from "@/lib/ai-signals";
 import { SignalsClient } from "./signals-client";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("pageTitles");
@@ -15,6 +15,8 @@ export default async function SignalsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
+  // Textele semnalului, în limba paginii (generate în ambele limbi deodată).
+  const limba = (await getLocale()) === "en" ? "en" : "ro";
   const signals = await prisma.aiSignal.findMany({
     where: { date: todayKey() },
     orderBy: { confidence: "desc" },
@@ -35,9 +37,7 @@ export default async function SignalsPage() {
     setupType: s.setupType,
     bias: s.bias,
     session: s.session,
-    rationale: s.rationale,
-    confirmation: s.confirmation,
-    invalidation: s.invalidation,
+    ...textSemnal(s, limba),
     status: s.status,
     createdAt: s.createdAt.toISOString(),
   }));

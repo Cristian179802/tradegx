@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       void sendPushToUser(userId, {
         title: "📊 Raportul tău săptămânal e gata",
         body: title,
-        data: { route: "/(tabs)/alerts" },
+        data: { route: "/alerte" },
       });
 
       // Telegram (dacă are integrarea activă)

@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
       void sendPushToUser(item.userId, {
         title: `🎯 ${title}`,
         body: message,
-        data: { route: "/(tabs)/alerts" },
+        data: { route: "/alerte" },
       });
       await sendWebPushToUser(item.userId, { title: `🎯 ${title}`, body: message, url: "/watchlist", tag: `price-${item.symbol}` });
       fired++;

@@ -167,7 +167,7 @@ export async function checkTradingRuleViolations({
       void sendPushToUser(userId, {
         title: alert.title,
         body: alert.message,
-        data: { route: "/(tabs)/alerts" },
+        data: { route: "/alerte" },
       });
       // Web Push (browser/PWA, chiar cu browserul închis)
       await sendWebPushToUser(userId, { title: alert.title, body: alert.message, url: "/dashboard", tag: `rule-${alert.type}` });

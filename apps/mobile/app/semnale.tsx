@@ -13,7 +13,7 @@ import { Ecran } from "../src/ui/Ecran";
 import { Paywall } from "../src/ui/Paywall";
 import { BaraProgres, Gol, Insigna, Rand } from "../src/ui/parti";
 import { T, cifre } from "../src/theme";
-import { umple, tr } from "../src/lib/i18n";
+import { umple, tr, useLimba } from "../src/lib/i18n";
 
 // ── Semnale AI ───────────────────────────────────────────────────────────────
 //
@@ -59,7 +59,11 @@ interface Raspuns {
 }
 
 export default function Semnale() {
-  const c = useCerere<Raspuns>(() => api.signals.today() as Promise<Raspuns>);
+  // Analiza fiecărui semnal vine de la server în ambele limbi; cerem limba
+  // afișată acum pe telefon, și o cerem din nou dacă se schimbă.
+  const { limba } = useLimba();
+  const lang = limba === "EN" ? "en" : "ro";
+  const c = useCerere<Raspuns>(() => api.signals.today(lang) as Promise<Raspuns>, [lang]);
   const d = c.date;
 
   const [genereaza, setGenereaza] = React.useState(false);
@@ -70,7 +74,7 @@ export default function Semnale() {
     setGenereaza(true);
     setEroare(null);
     try {
-      await api.signals.generate();
+      await api.signals.generate(lang);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       c.reia();
     } catch (e) {

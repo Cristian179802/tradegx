@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { limbaUtilizatorului, type Limba } from "@/lib/limba-utilizator";
 
 // Trimitere push prin Expo Push API (https://docs.expo.dev/push-notifications).
 // Tokenurile Expo sunt stocate în PushToken la înregistrarea device-ului.
@@ -22,7 +23,10 @@ async function dispatch(tokens: string[], msg: PushMessage) {
     body: msg.body,
     data: msg.data ?? {},
     priority: "high",
-    channelId: "default",
+    // Canalul pe care îl creează aplicația (`apps/mobile/src/lib/notificari.ts`).
+    // Pe Android 8+, o notificare trimisă pe un canal care nu există pe telefon
+    // NU SE AFIȘEAZĂ deloc — iar aici era „default", pe care aplicația nu-l face.
+    channelId: "tradegx-alerte",
   }));
 
   // Expo acceptă maxim 100 mesaje per cerere
@@ -45,8 +49,15 @@ export async function sendPushToUser(userId: string, msg: PushMessage) {
   await dispatch(tokens.map((t) => t.token), msg);
 }
 
-// Push către toți userii cu device înregistrat — ex: semnale HPS globale.
-export async function sendPushToAll(msg: PushMessage) {
-  const tokens = await prisma.pushToken.findMany({ select: { token: true } });
-  await dispatch(tokens.map((t) => t.token), msg);
+// Push către toți userii cu device înregistrat, fiecare în limba lui — ex:
+// semnale HPS globale. Un singur text pentru toți ar fi ajuns în română și la
+// cine folosește aplicația în engleză.
+export async function sendPushToAll(mesaje: Record<Limba, PushMessage>) {
+  const tokens = await prisma.pushToken.findMany({
+    select: { token: true, user: { select: { language: true } } },
+  });
+  for (const limba of ["ro", "en"] as const) {
+    const aiLimbii = tokens.filter((t) => limbaUtilizatorului(t.user.language) === limba);
+    await dispatch(aiLimbii.map((t) => t.token), mesaje[limba]);
+  }
 }

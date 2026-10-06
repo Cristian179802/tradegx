@@ -829,6 +829,14 @@ model AiSignal {
   confirmation String  @db.Text // confirmarea de așteptat înainte de intrare
   invalidation String? @db.Text // ce invalidează setup-ul
 
+  // Aceleași trei texte, în engleză. Generate în ACELAȘI apel cu cele
+  // românești, ca un român și un englez să vadă același setup — două generări
+  // separate ar fi dat niveluri diferite. Goale la semnalele mai vechi; acolo
+  // se afișează româna (vezi `textSemnal` din ai-signals.ts).
+  rationaleEn    String? @db.Text
+  confirmationEn String? @db.Text
+  invalidationEn String? @db.Text
+
   status    SignalStatus @default(ACTIVE)
   createdAt DateTime     @default(now())
 

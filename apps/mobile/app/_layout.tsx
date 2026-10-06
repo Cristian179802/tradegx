@@ -9,6 +9,7 @@ import { BaraFile } from "../src/ui/BaraFile";
 import { T } from "../src/theme";
 import { useFonturi } from "../src/lib/fonturi";
 import { ProvizorLimba, ReconstruiesteLaLimba, useLimba } from "../src/lib/i18n";
+import { useDeschideDinNotificare } from "../src/lib/notificari";
 
 // ── Rădăcina aplicației ──────────────────────────────────────────────────────
 //
@@ -50,6 +51,10 @@ function Poarta({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const public_ = PUBLICE.includes(segmente[0] ?? "");
+
+  // Atingerea unei notificări deschide ecranul ei — doar după ce știm cine e
+  // conectat, altfel poarta l-ar trimite imediat înapoi la login.
+  useDeschideDinNotificare(Boolean(utilizator) && pornit && fonturiGata && limbaGata && !public_);
 
   React.useEffect(() => {
     if (!pornit) return; // încă citim din secure-store
